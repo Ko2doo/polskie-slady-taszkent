@@ -1,0 +1,13 @@
+# Node.js modules
+node_modules/
+
+# Build output
+public/
+dist/
+build/
+
+# Files to ignore
+package-lock.json
+
+# android folder
+android/

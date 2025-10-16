@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Polskie Slady Taszkent</string>
+    <string name="title_activity_main">Polskie Slady Taszkent</string>
+    <string name="package_name">com.github.polskiesladytaszkent</string>
+    <string name="custom_url_scheme">com.github.polskiesladytaszkent</string>
+</resources>
