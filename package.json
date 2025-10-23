@@ -4,10 +4,17 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --port 5050",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview --port 6060"
   },
+  "keywords": [
+    "Hybrid Web App",
+    "SPA",
+    "Svelte.js",
+    "Capacitor.js"
+  ],
+  "author": "NИ",
   "devDependencies": {
     "@capacitor/cli": "^7.4.3",
     "@sveltejs/vite-plugin-svelte": "^6.2.1",
@@ -17,6 +24,10 @@
   "dependencies": {
     "@capacitor/android": "^7.4.3",
     "@capacitor/core": "^7.4.3",
-    "konsta": "^5.0.2"
+    "@tailwindcss/vite": "^4.1.16",
+    "i18next": "^25.6.0",
+    "i18next-browser-languagedetector": "^8.2.0",
+    "konsta": "^5.0.2",
+    "tailwindcss": "^4.1.16"
   }
 }

@@ -59,7 +59,7 @@ indent_size = 2
 indent_style = space
 trim_trailing_whitespace = true
 
-[{**build**,**vendor**}]
+[{**build**,**vendor**, **android**, **dist**, **node_modules**}]
 indent_size = unset
 indent_style = unset
 charset = unset

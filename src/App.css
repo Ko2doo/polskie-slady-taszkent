@@ -1,0 +1,6 @@
+/* Libraries import */
+@import 'tailwindcss';
+@import 'konsta/svelte/theme.css';
+
+/* My rules */
+@import './styles/typography.css';
