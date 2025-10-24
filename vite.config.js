@@ -2,6 +2,8 @@ import { defineConfig } from 'vite';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
 import tailwindcss from '@tailwindcss/vite';
 
+import path from 'node:path';
+
 // https://vite.dev/config/
 export default defineConfig({
   base: '', // or './'
@@ -28,6 +30,12 @@ export default defineConfig({
       watch: {
         clearScreen: false,
       },
+    },
+  },
+
+  resolve: {
+    alias: {
+      '@': path.resolve(process.cwd(), 'src'),
     },
   },
 });

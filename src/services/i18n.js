@@ -4,10 +4,10 @@
 
 import i18next from 'i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
-import { createI18nStore } from './i18nextSvelte/i18nextSvelte';
+import { createI18nStore } from '@/i18nextSvelte/i18nextSvelte';
 
 // Locales import
-import res from '../locales/resources';
+import res from '@/locales/resources';
 
 // Check this https://vite.dev/guide/env-and-mode.html
 let devState = import.meta.env.DEV;
