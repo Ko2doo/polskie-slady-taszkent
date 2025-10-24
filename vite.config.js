@@ -4,8 +4,8 @@ import tailwindcss from '@tailwindcss/vite';
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: './',
-  plugins: [tailwindcss(), svelte()],
+  base: '', // or './'
+  plugins: [svelte(), tailwindcss()],
   server: {
     watch: {
       usePolling: true,

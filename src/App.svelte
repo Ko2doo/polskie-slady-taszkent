@@ -13,6 +13,8 @@
   <Page>
     <Navbar title={$i18n.t("ui:app:name")} />
 
+    <div class="w-20 h-20 bg-red-500 text-white p-4">Tailwind Test</div>
+
     {#if $isError}
       <Block strong>Failed to load translation</Block>
     {:else}
