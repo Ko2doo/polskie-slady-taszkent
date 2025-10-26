@@ -1,3 +1,17 @@
 {
-  "recommendations": ["svelte.svelte-vscode"]
+  "recommendations": [
+    "svelte.svelte-vscode",
+    "redhat.java",
+    "vscjava.vscode-gradle",
+    "Atishay-Jain.All-Autocomplete",
+    "formulahendry.auto-close-tag",
+    "formulahendry.auto-complete-tag",
+    "EditorConfig.EditorConfig",
+    "dbaeumer.vscode-eslint",
+    "mkxml.vscode-filesize",
+    "wix.vscode-import-cost",
+    "ionutvmi.path-autocomplete",
+    "esbenp.prettier-vscode",
+    "rvest.vs-code-prettier-eslint"
+  ]
 }

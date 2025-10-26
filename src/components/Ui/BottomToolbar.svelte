@@ -7,6 +7,7 @@
   import { route } from "@mateothegreat/svelte5-router";
 
   // Router link params
+  // Check https://github.com/mateothegreat/svelte5-router/blob/main/docs/actions.md#route
   const routeParam = {
     // default: { class: ["text-gray-600"] },
     active: {

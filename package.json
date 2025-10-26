@@ -8,6 +8,10 @@
     "build": "vite build",
     "preview": "vite preview --port 6060"
   },
+  "engines": {
+    "node": ">=20",
+    "npm": ">=10"
+  },
   "keywords": [
     "Hybrid Web App",
     "SPA",

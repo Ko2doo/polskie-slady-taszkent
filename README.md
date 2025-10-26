@@ -4,22 +4,13 @@ This template should help get you started developing with Svelte in Vite.
 
 ## Recommended IDE Setup
 
-[VS Code](https://code.visualstudio.com/) + [Svelte](https://marketplace.visualstudio.com/items?itemName=svelte.svelte-vscode).
+[VS Code](https://code.visualstudio.com/) + [Svelte](https://marketplace.visualstudio.com/items?itemName=svelte.svelte-vscode) + [Gradle for Java](https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-gradle) + [Language Support for Java by Red Hat](https://marketplace.visualstudio.com/items?itemName=redhat.java).
 
-## Need an official Svelte framework?
+Other extention from comfortable work, check extension page: VS Code>extension>recommended
 
-Check out [SvelteKit](https://github.com/sveltejs/kit#readme), which is also powered by Vite. Deploy anywhere with its serverless-first approach and adapt to various platforms, with out of the box support for TypeScript, SCSS, and Less, and easily-added support for mdsvex, GraphQL, PostCSS, Tailwind CSS, and more.
+## Recommended runtime Setup
 
-## Technical considerations
-
-**Why use this over SvelteKit?**
-
-- It brings its own routing solution which might not be preferable for some users.
-- It is first and foremost a framework that just happens to use Vite under the hood, not a Vite app.
-
-This template contains as little as possible to get started with Vite + Svelte, while taking into account the developer experience with regards to HMR and intellisense. It demonstrates capabilities on par with the other `create-vite` templates and is a good starting point for beginners dipping their toes into a Vite + Svelte project.
-
-Should you later need the extended capabilities and extensibility provided by SvelteKit, the template has been structured similarly to SvelteKit so that it is easy to migrate.
+_Node.js v20 or later_ [Recommended use NVM](https://github.com/nvm-sh/nvm?tab=readme-ov-file#about) and minimal version Java runtime _java-21-openjdk_
 
 **Why include `.vscode/extensions.json`?**
 
@@ -42,5 +33,5 @@ import { writable } from "svelte/store";
 export default writable(0);
 ```
 
-Inspecting android amulator:
+Inspecting android emulator:
 chrome://inspect/#devices
