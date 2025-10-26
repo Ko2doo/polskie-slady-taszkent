@@ -1,4 +1,8 @@
 <script>
+  /**
+   * Language switcher component
+   */
+
   import { writable } from "svelte/store";
   import { Popover, List, ListButton, Button } from "konsta/svelte";
 

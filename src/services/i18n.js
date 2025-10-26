@@ -1,5 +1,17 @@
 /**
- * Initial i18n
+ * Initial configuration with i18next
+ *
+ * i18next documentation: https://www.i18next.com/overview/api
+ *
+ * How to use?
+ * Your ComponentName.svelte named import this file:
+ *  import { i18nStores } from "@/services/i18n";
+ *
+ * And create destructuring assignment variable:
+ *  const { i18n } = i18nStores;
+ *
+ * And use with $ (svelte runes):
+ * <p> { $i18n.t("ui:app:name") } </p>
  */
 
 import i18next from 'i18next';
@@ -12,7 +24,7 @@ import res from '@/locales/resources';
 // Check this https://vite.dev/guide/env-and-mode.html
 let devState = import.meta.env.DEV;
 
-// config
+// configuration
 i18next.use(LanguageDetector).init({
   debug: devState ? true : false,
   detection: {
@@ -28,5 +40,5 @@ i18next.use(LanguageDetector).init({
   },
 });
 
-// initialization
+// initialization store
 export const i18nStores = createI18nStore(i18next);
