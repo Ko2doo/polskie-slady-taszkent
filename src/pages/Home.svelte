@@ -1,5 +1,10 @@
 <script>
   import { Block } from "konsta/svelte";
+
+  import { i18nStores } from "@/services/i18n";
+  import LangSwitcher from "@/components/Ui/LangSwitcher.svelte";
+
+  const { i18n, isError } = i18nStores;
 </script>
 
 <Block>
@@ -27,4 +32,12 @@
     soluta iste nostrum cumque optio voluptatibus facere? At aut modi doloremque, omnis laudantium cum? Molestias,
     perferendis.
   </p>
+
+  {#if $isError}
+    <Block strong>Failed to load translation</Block>
+  {:else}
+    <Block strong>{$i18n.t("ui:dialogue:hello")}</Block>
+  {/if}
+
+  <LangSwitcher />
 </Block>
