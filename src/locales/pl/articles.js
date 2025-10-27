@@ -33,4 +33,14 @@ export default {
     description:
       'Na początku współczesnej ulicy Mustakillik stoi pięnkny budynek, w którym po II wojnie światowej mieściła się siedziba Związku Pisarzy Uzbekistanu. W tym czasie Anna Drżewicka "Ałmatyńska" (1883-1973) była jedną z najstarszych pisarek tego regionu i współzałożycielką swiązku. <br><br> "Ałmatyńska" to jej pseudonim. Wybrała go, ponieważ urodziła się w 1883 r. w mieście Ałmata. Jej ojciec, Waldemar Drżewicki, był polskim patriotą, który został ukarany za udział w powstaniu styczniowym w 1863 r. dożywotnim zesłaniem na terytorium Turkiestanu. Na początku XX wieku autorka napisała wiele poetyckich i prozaicznych dzieł, ale najbardziej znana była jej powieść w trzech tomach pt. "Ucisk" o wydarzeniach, które miały miejsce w tym szasie w Turkiestanie. Anna "Ałmatyńska" Drżewicka zmarła w sierpniu 1973 r. w Taszkencie.',
   },
+  l06: {
+    title: 'Stanisław Nikolai',
+    description:
+      'W latach siedemdziesiątych XIX wieku, za udział w powstaniu styczniowym w 1863 roku, rząd carski zesłał polskiego szlachcica Stanisława Nikolai do Tomska, skąd później przeniósł się do Taszkentu. Ten energiczny młody człowiek uporczywie próbował znaleźć tutaj interesującą pracę. Był zaangażowany w handel, przez pewien czas eksploatował prywatną kopalnię złota Aurachmat w górach Chimgan. S. Nikolai był entuzjastą, nowej sztuki - forografii. <br><br> W 1873 roku otworzył w Taszkencie pierwsze studio fotograficzne w Turkiestanie przy ulicy Petersburskiej 10 (obecnie ulica Matbuotczilar). Zdjęcia wykopane przez niego były bardzo popularne w przedrewolucyjnym Taszkencie. Od nich zaczęła się historia uzbeckiej szutki fotograficznej. Wielu uzbeckich mistrzów fotografii było jego uczniami.',
+  },
+  l07: {
+    title: 'Taszkenckie kuranty',
+    description:
+      'Zegar w taszkenckich Kurantach został zainstalowany w 1947 roku jako dar uczestnika II wojny światowej, mieszkańca Taszkentu, Isziji Abramowicza Eisensteina. Mechanizm tego zegara przywiózł sierżant Eisenstein w 1945 r. z Prus Wschodnich, dawnych Niemiec (obecnie Polska), z miasta Allenstein, dzisiaj Olsztyn. Ocalały w czasie II wojny światowej stary zegar z ratusza tego miasta. Eisenstein zabrał jako trofeum. Po naprawie zegara i wybudowaniu specjalnej wieży, zegar wraz kurantami zaczął działać w 1947 roku. Za to Iszija Abramowicz Eisenstein otrzymał tytuł Honorowego Obywatela Taszkentu. Kuranty miały być pomnikiem zwycięstwa nad faszyzmem. Do dsiś, co 15 minut, swym głosem przypominają nam o strasznych wydarzeniach z połowy XX wieku.',
+  },
 };
