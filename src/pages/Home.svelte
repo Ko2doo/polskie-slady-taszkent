@@ -2,9 +2,41 @@
   import { Block } from "konsta/svelte";
 
   import { i18nStores } from "@/services/i18n";
+  const { i18n, isError } = i18nStores;
+
   import LangSwitcher from "@/components/Ui/LangSwitcher.svelte";
 
-  const { i18n, isError } = i18nStores;
+  import { resolvePageKeyFromRouteResult } from "@/utils/router";
+  import { setNavbar } from "@/store/ui/navbar";
+
+  // router props
+  let { route } = $props();
+
+  // Inspector check console in browser
+  // $inspect(route);
+
+  $effect(() => {
+    const result = route?.result;
+
+    // get "pageKey" from route path
+    //    "/"      -> "home"
+    //    "/about" -> "about"
+    //    "/handbook" -> "handbook"
+    const pageKey = resolvePageKeyFromRouteResult(result);
+
+    /* prettier-ignore */
+    const translatedTitle = pageKey
+      ? $i18n.t(`ui:navbar:${pageKey}:title`)
+      : "";
+
+    // Tell the global navbar:
+    // - which title to show
+    // - whether to show search
+    // - whether to show favrites
+    setNavbar({
+      title: translatedTitle || pageKey,
+    });
+  });
 </script>
 
 <Block>
