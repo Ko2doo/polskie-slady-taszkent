@@ -18,10 +18,16 @@ export default {
       title: 'Settings',
     },
   },
+  errors: {
+    noArticleId: 'No article ID in the route.',
+    articleNotFound: 'Article not found!',
+  },
+  buttons: {
+    back: 'Back',
+    readMore: 'Read more..',
+    langSwitcher: 'Language',
+  },
   dialogue: {
     hello: 'Hello, World!',
-  },
-  langSwitcher: {
-    label: 'Languge',
   },
 };

@@ -36,7 +36,7 @@
 </script>
 
 <Button rounded class="popover-button" onclick={() => popoverClickHandler(".popover-button")}>
-  {$i18n.t("ui:langSwitcher:label")}
+  {$i18n.t("ui:buttons:langSwitcher")}
 </Button>
 
 <Popover opened={popoverState} target={popoverTargetEl} onBackdropClick={backdropClickHandler}>

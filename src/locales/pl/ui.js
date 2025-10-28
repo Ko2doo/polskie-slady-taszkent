@@ -21,7 +21,13 @@ export default {
       title: 'Ustawienia',
     },
   },
-  langSwitcher: {
-    label: 'Język',
+  errors: {
+    noArticleId: 'Brak ID artykułu w trasie.',
+    articleNotFound: 'Artykuł nie został znaleziony!',
+  },
+  buttons: {
+    back: 'Powrót',
+    readMore: 'Przeczytaj więcej..',
+    langSwitcher: 'Język',
   },
 };

@@ -5,6 +5,7 @@
 import Home from '@/pages/Home.svelte';
 import Handbook from '@/pages/Handbook.svelte';
 import About from '@/pages/About.svelte';
+import PopupArticle from '@/components/Ui/PopupArticle.svelte';
 
 // Router params (paths, components & etc.)
 export const routes = [
@@ -19,5 +20,9 @@ export const routes = [
   {
     path: '/about',
     component: About,
+  },
+  {
+    path: /^\/articles\/(.+)$/,
+    component: PopupArticle,
   },
 ];

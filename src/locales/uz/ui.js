@@ -18,10 +18,16 @@ export default {
       title: 'Sozlamalar',
     },
   },
+  errors: {
+    noArticleId: 'Marshrutta maqola ID si yo`q.',
+    articleNotFound: 'Maqola topilmadi!',
+  },
+  buttons: {
+    back: 'Orqaga',
+    readMore: 'Ko`proq o`qish..',
+    langSwitcher: 'Til',
+  },
   dialogue: {
     hello: 'Salom, Dunyo!',
-  },
-  langSwitcher: {
-    label: 'Til',
   },
 };

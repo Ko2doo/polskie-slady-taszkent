@@ -1,11 +1,15 @@
 <script>
-  import { Block } from "konsta/svelte";
+  import { Card, Button } from "konsta/svelte";
+  import { goto } from "@mateothegreat/svelte5-router";
 
   import { i18nStores } from "@/services/i18n";
   const { i18n } = i18nStores;
 
   import { resolvePageKeyFromRouteResult } from "@/utils/routerUtils";
   import { setNavbar } from "@/store/ui/navbar";
+
+  // Cards meta
+  import { articlesMeta } from "@/data/articles";
 
   // router props
   let { route } = $props();
@@ -35,31 +39,37 @@
       title: translatedTitle || pageKey,
     });
   });
+
+  function openArticle(id) {
+    goto(`/articles/${id}`);
+  }
 </script>
 
-<Block>
-  <h1>Handbook</h1>
-  <p>
-    Lorem ipsum dolor sit amet consectetur adipisicing elit. Soluta inventore facilis quo magni molestiae incidunt
-    tempore ipsam expedita. Quibusdam temporibus, commodi nostrum reprehenderit quasi vel iusto adipisci exercitationem
-    tempore architecto consectetur saepe harum aspernatur pariatur fuga officiis aperiam ullam! Molestias quidem
-    distinctio repudiandae animi! Omnis minus saepe, quis nostrum ratione vero ea dolore odio, eaque maxime laborum
-    inventore voluptate earum nobis? Laudantium doloremque accusantium eligendi alias, officiis natus consequatur sunt
-    hic corporis magni minus nihil ratione temporibus numquam quis non dolorem at delectus assumenda tempora nostrum
-    dolore quas beatae dolorum. Officiis tempora sapiente id quia quae? Sunt laudantium quasi totam nostrum voluptate
-    nihil, perferendis praesentium, minima placeat qui repellat accusantium, harum rerum deserunt impedit? Numquam,
-    nihil! Necessitatibus quisquam, non nesciunt quod explicabo illum aperiam quis possimus vero porro sint numquam,
-    sequi perspiciatis recusandae nostrum quidem debitis culpa error repellat aut ab? Ex vero eaque, odio obcaecati
-    suscipit quidem saepe repellendus earum. Quas vero consectetur nesciunt cumque quaerat magni ratione perferendis,
-    labore veritatis ducimus! Tenetur vel blanditiis autem magni, ratione id, adipisci aliquam fuga quia amet tempore
-    nihil a temporibus doloribus magnam? Eos non, expedita possimus ab ullam laborum fugit numquam. Ut placeat
-    reiciendis maiores autem adipisci, eligendi eos quo, debitis ex explicabo sit doloremque harum? Quod esse, vitae
-    veniam maxime consectetur, eveniet quisquam quibusdam dolores ipsam laborum hic ea ad laboriosam totam officiis et a
-    consequatur quia dignissimos odit dolore ullam. Sit laudantium doloribus ea exercitationem quisquam tempore vel
-    velit, optio itaque odit error praesentium, commodi excepturi voluptates cupiditate, deserunt voluptate dolorem
-    quidem minima. Dolorum unde minima suscipit impedit illo minus modi eius excepturi alias molestiae illum, rem soluta
-    nostrum saepe aperiam quasi, dolore tempora fugiat sapiente qui nobis? Rerum omnis ratione laboriosam sapiente
-    soluta iste nostrum cumque optio voluptatibus facere? At aut modi doloremque, omnis laudantium cum? Molestias,
-    perferendis.
-  </p>
-</Block>
+<section class="grid grid-cols-1 md:grid-cols-3 sm:grid-cols-2">
+  {#each articlesMeta as article (article.id)}
+    <Card>
+      {#snippet header()}
+        <div
+          class="ios:-mx-4 ios:-mt-4 h-48 flex items-end bg-cover bg-center material:rounded-xl"
+          style="background-image: url(https://cdn.framework7.io/placeholder/people-1000x600-6.jpg)"
+        >
+          <h1 class="pl-4 pr-4 pt-1 pb-1 w-full text-gray-100 ios:font-bold material:text-[22px] backdrop-blur-xs">
+            {$i18n.t(`articles:${article.id}:title`)}
+          </h1>
+        </div>
+      {/snippet}
+
+      <p class="line-clamp-3">
+        {@html $i18n.t(`articles:${article.id}:description`)}
+      </p>
+
+      {#snippet footer()}
+        <div class="flex justify-start space-x-2 rtl:space-x-reverse">
+          <Button rounded inline outline onclick={() => openArticle(article.id)}
+            >{$i18n.t("ui:buttons:readMore")}</Button
+          >
+        </div>
+      {/snippet}
+    </Card>
+  {/each}
+</section>

@@ -18,10 +18,16 @@ export default {
       title: 'Настройки',
     },
   },
+  errors: {
+    noArticleId: 'Нет ID статьи в маршруте.',
+    articleNotFound: 'Статья не найдена!',
+  },
+  buttons: {
+    back: 'Назад',
+    readMore: 'Читать далее..',
+    langSwitcher: 'Язык',
+  },
   dialogue: {
     hello: 'Привет, Мир!',
-  },
-  langSwitcher: {
-    label: 'Язык',
   },
 };
