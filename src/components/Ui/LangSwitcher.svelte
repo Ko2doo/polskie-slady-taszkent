@@ -3,7 +3,6 @@
    * Language switcher component
    */
 
-  import { writable } from "svelte/store";
   import { Popover, List, ListButton, Button } from "konsta/svelte";
 
   import { i18nStores } from "@/services/i18n";
@@ -11,15 +10,15 @@
 
   const { i18n } = i18nStores;
 
-  let popoverState = writable(false);
+  let popoverState = false;
   let popoverTargetEl = null;
 
   const popoverClickHandler = (targetEl) => {
     popoverTargetEl = targetEl;
-    popoverState.set(true);
+    popoverState = true;
   };
 
-  const backdropClickHandler = () => popoverState.set(false);
+  const backdropClickHandler = () => (popoverState = false);
 
   // Keyed rendering
   const locales = Object.entries(translations);
@@ -40,7 +39,7 @@
   {$i18n.t("ui:langSwitcher:label")}
 </Button>
 
-<Popover opened={$popoverState} target={popoverTargetEl} onBackdropClick={backdropClickHandler}>
+<Popover opened={popoverState} target={popoverTargetEl} onBackdropClick={backdropClickHandler}>
   <List strong inset>
     {#each locales as [code, label]}
       <ListButton colors={{ bgIos: "active:bg-neutral-600/10" }} value={code} onclick={i18nClickHandler}>
