@@ -15,8 +15,7 @@
   let { route } = $props();
   // $inspect("PopupArticle props >>>", route.result);
 
-  let params = route?.result?.path.params;
-  const articleId = params;
+  let articleId = route?.result?.path.params;
 
   const meta = $derived(articlesMeta.find((a) => a.id === articleId));
 
