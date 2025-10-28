@@ -43,4 +43,34 @@ export default {
     description:
       'Zegar w taszkenckich Kurantach został zainstalowany w 1947 roku jako dar uczestnika II wojny światowej, mieszkańca Taszkentu, Isziji Abramowicza Eisensteina. Mechanizm tego zegara przywiózł sierżant Eisenstein w 1945 r. z Prus Wschodnich, dawnych Niemiec (obecnie Polska), z miasta Allenstein, dzisiaj Olsztyn. Ocalały w czasie II wojny światowej stary zegar z ratusza tego miasta. Eisenstein zabrał jako trofeum. Po naprawie zegara i wybudowaniu specjalnej wieży, zegar wraz kurantami zaczął działać w 1947 roku. Za to Iszija Abramowicz Eisenstein otrzymał tytuł Honorowego Obywatela Taszkentu. Kuranty miały być pomnikiem zwycięstwa nad faszyzmem. Do dsiś, co 15 minut, swym głosem przypominają nam o strasznych wydarzeniach z połowy XX wieku.',
   },
+  l08: {
+    title: 'Walenty Jasieniecki-Wojno (Święty Łukasz)',
+    description:
+      'Walenty Jasieniecki-Wojno (1877-1961) pochodził z polskiego rodu szlacheckiego Wojno-Jasienieckich, który był znany już w XVI wieku. Jego przedstawiciele służyli na dworach polskich i litewskich władców. <br><br> W. Jasieniecki-Wojno, jako chirurg, przeprowadził się z rodziną do Taszkentu w 1916 roku i kierował szpitalem miejskim. Kiedy jego żona zmarła na gruźlicę w 1919 r., a on został z czwórką małych dzieci, przyjał prawosławie i został mnichem. Przyjął imię Łukasz i został mianowany biskupem Taszkentu i Turkiestanu. W czasie operacji pacjentów nakładał fartuch lekarski na szaty duchownego, ponadto w sali wisiały ikony, a to nie podobało się władzom bolszewickim. Biskup Łukasz przeżyl cztery aresztowania i zesłania. Napisał około 69 książek z działu medycyny. Za publikacje: Zarys chirurgii przypadków ropnych, Opóźnione resekcje zainfekowanych ran postrzałowych stawów otrzymał Nagrodę Stalinowską. Większą szęść pieniędzy z nagrody przekał na pomoc dzieciom, które straciły rodziców w czasie wojny. <br><br> W Taszkencie pracował w nieistniejącej dziś cerkwi świętego Sergiusza z Radoneża. Natomiast do dziś zachorował się budynek szpitala miejskiego, w którym przyjmował pacjentów (ul. Azimova 74, obok Szpitala im. Fedorowicza) oraz budynek Wydziału Medycznego Uniwersytetu Turkiestanu, wtedy TaszMI (obecnie Akademia Medyczna w Uzbekistanie), w któeym biskup-doktor uczył studentów anatomii topograficznej. Walenty Jasieniecki-Wojno zmarł na Krymie 11 czerwca 1961 r. Został oficjalnie ogłoszony świętym kościoła prawosławnego.',
+  },
+  l09: {
+    title: 'Mścisław Fedorowicz',
+    description:
+      'Pierwsza klinika fizjoterapii w Uzbekistanie została otwarta w 1923 riku przez polskiego lekarza Mścisława Fedorowicza (1882-1954). Podczas i wojny światowej trafił do Taszkentu, a rodzina nic nie wiedziała o jego losie. <br><br> W Taszkencie założył szpital (nazwany jego imieniem), cieszący się dużym uznaniem, podobnie jak sam Mścisław Fedorowicz. Jeszcze za czasów władzy sowieckiej pojawiła się nazwa Szpital im. Fedorowicza. Los sprawił, że po rozpadzie ZSRR jeden z krewnych Mścisława - Aleksander Fedorowicz został delegowany, jako dyplomata do Ambasady RP w Taszkencie. Był niezwykle poruszony faktem że jego przodek jest uważany za jednego z głównych współtwórców słyżby zdrovia w Uzbekistanie. Niestety, Aleksander Fedorowicz zginął podczas katastrofy smoleńskiej w 2010 roku. Dwaj Polacy: Mścisław Fedorowicz i Aleksander Fedorowicz nie zostali zapomniani w Uzbekistanie, chorzy nadal korzystają z usług szpitala.',
+  },
+  l10: {
+    title: 'Wasyl Janczewiecki',
+    description:
+      'W Taszkencie przy ul. Asakińskiej 13 zachował się dom, w którym podczas drugiej wojny światowej i w czasie ewakuacji, mieszkał słynny pisarz i historyk polskiego pochodzenia Wasyl Janczewiecki (Jan) (1975-1954). <br><br> Za wybitną powieść pt. "Czyngis-chan", poświęconą średniowiecznej historii Uzbekistanu, otrzymał w 1942 r. najwyższą wówczas nagrodę literacką w ZSRR, Nagrodę Stalina. Wasyl Janczewiecki mieszkał i pracował w Uzbekistabie przez długi czas przed rewolucją.',
+  },
+  l11: {
+    title: 'Walerian Dunin-Borkowski',
+    description:
+      'Plac Amira Timura był centralnym miejscem przedrewolucyjnego Taszkentu. Przez lata odbywały się tutaj regularne turkiestańskie wystawy. <br><br> Ostatnia taka wystawa odbyła się w 1909 roku. jej głównym organizatorem był Ppolak, dyrektor Taszkenckiej Szkoły Handlowej Walerian Dunin-Borkowski (1871-1942). Dzięki jego energii w wystawie wzięły udział setki przedsiębiorców nie tylko z całego imperium rosyjskiego, ale także z wielu innych krajów. Przez pierwsze 10 dni odwiedziło ją ponad 100 tysięcy osób. W Taszkencie zachował się dawny budynek Taszkenckiej Szkoły Handlowej założonej przez Waleriana Dunina-Borkowskiego na początku XX wieku. Siedziba szkoły została zbudowana w charakterystycznym dla Turkiestanu stylu z beżowo-żóltej cegły. Znajduje się podliżu placu Hamid Alimdżana.',
+  },
+  l12: {
+    title: 'Pomnik armii generała Władysława Andersa',
+    description:
+      'W 1992 r. w Uzbekistanie postawiono 18 pomników poświęconych żołnierzom i oficerom Armii generała  Władysława Andersa oraz polskim cywilom. Jeden z takich pomników znajduje się obok polskiego kościoła w Taszkencie. <br><br> Generał Anders jest polskiem bohaterem II wojny światowej. Dowodził polską armią utworzaną przez niego na terytorium byłego Związku Radzieckiego, złożoną z polskich zołnierzy i oficerów, którzy byli tam przetrzymywani. Oprócz jeńców wojennych pomógł uwolnić tysiące cywilnich Polaków z łagrów i zesłania, w tym kobiety i dzieci. W bitwach z faszystami we Włoszech, Armia Andersa okryła się nieśmiertelną chwałą.',
+  },
+  l13: {
+    title: 'Kościoł PW. Najświęnszego serca Pana Jezusa.',
+    description:
+      'Budowę kościoła katalickiego w Taszkencie rozpoczęto w 1912 r. z inicjatywy księdza Justyna Bonawentury Pranaitisa, według projektu słynnego polskiego architekta Ludwika Panczakiewicza. Do 1915 r. kościoł był budowany przez członków wspólnoty katolickiej w Taszkencie, a potem dobrowolnie przez katolickich jeńców wojennych z armii austro-węgierskiej, wśród których byli wysoko wykwalifikowani inżynierowie, rzeźbiarze i kamieniarze. W 1917 roku świątynia była prawie gotowa, ale bolszewicy doszli do władzy w Taszkencie, co spowodowało zawieszenie prac budowlanych. W latach 1925-1976, w niedokończonej świątyni, znajdowały się różne magazyny. W czasie kiedy świątynia była wykorzystywana do innych celów, wszystkie znajdujące się w niej rzeźby zostały skradzione albo zniszczone. W 1976 r. władze rozpoczęły remont budynku, przekazanego Ministerstwu Kultury Uzbeckiej SRR, a w 1981 r. ogłosły go historycznym zabytkiem architektury. Po rozpadzie ZSRR, decyzją rządu Uzbekistanu w 1992 r., kościół został zwrócony parafii katolickiej w Taszkencie. Obecnie zrekonstruowany jest uzywany zgodnie z jego przeznaczeniem.',
+  },
 };
