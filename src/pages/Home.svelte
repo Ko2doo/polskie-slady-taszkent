@@ -6,7 +6,7 @@
 
   import LangSwitcher from "@/components/Ui/LangSwitcher.svelte";
 
-  import { resolvePageKeyFromRouteResult } from "@/utils/router";
+  import { resolvePageKeyFromRouteResult } from "@/utils/routerUtils";
   import { setNavbar } from "@/store/ui/navbar";
 
   // router props

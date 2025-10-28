@@ -4,7 +4,7 @@
   import { i18nStores } from "@/services/i18n";
   const { i18n } = i18nStores;
 
-  import { resolvePageKeyFromRouteResult } from "@/utils/router";
+  import { resolvePageKeyFromRouteResult } from "@/utils/routerUtils";
   import { setNavbar } from "@/store/ui/navbar";
 
   // router props
