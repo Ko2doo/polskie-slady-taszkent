@@ -3,7 +3,6 @@
    * A component with a dynamic router based on the article ID that opens a new screen with an expanded popup.
    */
   import { Popup, Page, Navbar, Block, Link } from "konsta/svelte";
-
   import { goto } from "@mateothegreat/svelte5-router";
 
   import { i18nStores } from "@/services/i18n";
@@ -11,12 +10,10 @@
 
   import { articlesMeta } from "@/data/articles";
 
-  // let { params } = $props();
   let { route } = $props();
   // $inspect("PopupArticle props >>>", route.result);
 
   let articleId = route?.result?.path.params;
-
   const meta = $derived(articlesMeta.find((a) => a.id === articleId));
 
   function closePopup() {

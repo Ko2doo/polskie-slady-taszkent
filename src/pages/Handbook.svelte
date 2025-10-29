@@ -65,9 +65,9 @@
 
       {#snippet footer()}
         <div class="flex justify-start space-x-2 rtl:space-x-reverse">
-          <Button rounded inline outline onclick={() => openArticle(article.id)}
-            >{$i18n.t("ui:buttons:readMore")}</Button
-          >
+          <Button rounded inline outline onclick={() => openArticle(article.id)}>
+            {$i18n.t("ui:buttons:readMore")}
+          </Button>
         </div>
       {/snippet}
     </Card>
