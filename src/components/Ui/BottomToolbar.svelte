@@ -6,6 +6,9 @@
   import { Page, Toolbar, ToolbarPane, Link } from "konsta/svelte";
   import { route } from "@mateothegreat/svelte5-router";
 
+  import { i18nStores } from "@/services/i18n";
+  const { i18n } = i18nStores;
+
   // Router link params
   // Check https://github.com/mateothegreat/svelte5-router/blob/main/docs/actions.md#route
   const routeParam = {
@@ -17,31 +20,31 @@
   };
 
   // Navigation collection
-  const links = [
+  const linksParams = [
     {
+      id: "home",
       href: "/",
-      label: "Home",
     },
     {
+      id: "handbook",
       href: "/handbook",
-      label: "Handbook",
     },
     {
+      id: "about",
       href: "/about",
-      label: "About",
     },
   ];
 </script>
 
 <Toolbar top={false}>
   <ToolbarPane class="p-1">
-    {#each links as link}
+    {#each linksParams as link (link.id)}
       <a
         href={link.href}
         class="active:opacity-50 k-link inline-flex gap-1 justify-center items-center cursor-pointer select-none px-4 truncate w-full h-full duration-300 transition-colors relative rounded-full"
         use:route={routeParam}
       >
-        {link.label}
+        {$i18n.t(`ui:navbar:${link.id}:title`)}
       </a>
     {/each}
   </ToolbarPane>
