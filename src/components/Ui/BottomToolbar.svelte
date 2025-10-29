@@ -3,7 +3,7 @@
    * This is a routing navigation component
    */
 
-  import { Page, Toolbar, ToolbarPane, Link } from "konsta/svelte";
+  import { Page, Toolbar, ToolbarPane } from "konsta/svelte";
   import { route } from "@mateothegreat/svelte5-router";
 
   import { i18nStores } from "@/services/i18n";
@@ -14,7 +14,7 @@
   const routeParam = {
     // default: { class: ["text-gray-600"] },
     active: {
-      class: ["toolbar-active-link", "text-blue-600", "font-bold"],
+      class: ["toolbar-active-link", "overflow-visible", "text-blue-600", "font-bold"],
       absolute: true,
     },
   };
@@ -41,7 +41,7 @@
     {#each linksParams as link (link.id)}
       <a
         href={link.href}
-        class="active:opacity-50 k-link inline-flex gap-1 justify-center items-center cursor-pointer select-none px-4 truncate w-full h-full duration-300 transition-colors relative rounded-full"
+        class="active:opacity-50 k-link inline-flex justify-center items-center cursor-pointer select-none px-4 truncate w-full h-full duration-300 transition-colors relative rounded-full"
         use:route={routeParam}
       >
         {$i18n.t(`ui:navbar:${link.id}:title`)}
