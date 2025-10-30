@@ -33,8 +33,10 @@ export function resolvePageKeyFromRouteResult(result) {
   switch (rawPath) {
     case '/':
       return 'home';
+
     case '/handbook':
       return 'handbook';
+
     case '/about':
       return 'about';
 

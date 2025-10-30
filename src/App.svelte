@@ -6,11 +6,26 @@
   import { routes } from "@/Routes";
 
   // Components
-  import BottomToolbar from "@/components/Ui/BottomToolbar.svelte";
+  import BottomTabbarNav from "@/components/Ui/BottomTabbarNav.svelte";
   import { navbarState } from "@/store/ui/navbar";
 
-  // pull fields from the store so it's easier to use them in the template
-  $: ({ title, showSearch, showFavorites } = $navbarState);
+  // Local reactive state from Navbar:
+  let title = $state("");
+  let showSearch = $state(false);
+  let showFavorites = $state(false);
+
+  // Subscribe in navbarState store
+  $effect(() => {
+    const unsubscribe = navbarState.subscribe(($nb) => {
+      // Every time someone calls setNavbar(...),
+      // this callback receives the new state
+
+      title = $nb?.title ?? "";
+      (showSearch = $nb?.showSearch ?? false), (showFavorites = $nb?.showFavorites ?? false);
+    });
+
+    return () => unsubscribe();
+  });
 </script>
 
 <App theme="ios" safeAreas>
@@ -23,6 +38,6 @@
     </main>
 
     <!-- Fixed bottom navigation -->
-    <BottomToolbar />
+    <BottomTabbarNav />
   </Page>
 </App>

@@ -2,9 +2,11 @@
   import { Card, Button } from "konsta/svelte";
   import { goto } from "@mateothegreat/svelte5-router";
 
+  // i18Next
   import { i18nStores } from "@/services/i18n";
   const { i18n } = i18nStores;
 
+  // Utils and store
   import { resolvePageKeyFromRouteResult } from "@/utils/routerUtils";
   import { setNavbar } from "@/store/ui/navbar";
 
@@ -14,9 +16,7 @@
   // router props
   let { route } = $props();
 
-  // Inspector check console in browser
-  // $inspect(route);
-
+  // Get route props, and render navbar title with i18n
   $effect(() => {
     const result = route?.result;
 
@@ -39,6 +39,9 @@
       title: translatedTitle || pageKey,
     });
   });
+
+  // Inspector check console in browser
+  // $inspect(route);
 
   function openArticle(id) {
     goto(`/articles/${id}`);
