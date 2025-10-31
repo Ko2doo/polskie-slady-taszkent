@@ -8,8 +8,7 @@
 
   // Icons
   import HandbookIcon from "../Lib/Icons/HandbookIcon.svelte";
-  import DocumentIcon from "../Lib/Icons/DocumentIcon.svelte";
-  // import MapIcon from "../Lib/Icons/MapIcon.svelte";
+  import AboutUsIcon from "../Lib/Icons/AboutUsIcon.svelte";
 
   // i18next
   import { i18nStores } from "@/services/i18n";
@@ -35,18 +34,14 @@
   // icons
   const iconCollection = {
     handbook: HandbookIcon,
-    about: DocumentIcon,
+    about: AboutUsIcon,
   };
 
   // Navigation collection
   const linksParams = [
     {
-      id: "home",
-      href: "/",
-    },
-    {
       id: "handbook",
-      href: "/handbook",
+      href: "/",
     },
     {
       id: "about",

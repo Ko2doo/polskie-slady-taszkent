@@ -32,9 +32,6 @@ export function resolvePageKeyFromRouteResult(result) {
 
   switch (rawPath) {
     case '/':
-      return 'home';
-
-    case '/handbook':
       return 'handbook';
 
     case '/about':
@@ -42,6 +39,6 @@ export function resolvePageKeyFromRouteResult(result) {
 
     default:
       // fallback
-      return 'home';
+      return 'handbook';
   }
 }

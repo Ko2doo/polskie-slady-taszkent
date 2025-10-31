@@ -17,7 +17,7 @@
   const meta = $derived(articlesMeta.find((a) => a.id === articleId));
 
   function closePopup() {
-    goto("/handbook");
+    goto("/");
   }
 </script>
 

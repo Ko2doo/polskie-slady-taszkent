@@ -1,6 +1,9 @@
 <script>
   import { Block } from "konsta/svelte";
 
+  // Components
+  import LangSwitcher from "@/components/Ui/LangSwitcher.svelte";
+
   import { i18nStores } from "@/services/i18n";
   const { i18n } = i18nStores;
 
@@ -62,4 +65,6 @@
     soluta iste nostrum cumque optio voluptatibus facere? At aut modi doloremque, omnis laudantium cum? Molestias,
     perferendis.
   </p>
+
+  <LangSwitcher />
 </Block>

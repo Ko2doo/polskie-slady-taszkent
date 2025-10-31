@@ -2,7 +2,6 @@
  * Routes
  */
 
-import Home from '@/pages/Home.svelte';
 import Handbook from '@/pages/Handbook.svelte';
 import About from '@/pages/About.svelte';
 import PopupArticle from '@/components/Ui/PopupArticle.svelte';
@@ -11,10 +10,6 @@ import PopupArticle from '@/components/Ui/PopupArticle.svelte';
 export const routes = [
   {
     path: '/',
-    component: Home,
-  },
-  {
-    path: '/handbook',
     component: Handbook,
   },
   {
