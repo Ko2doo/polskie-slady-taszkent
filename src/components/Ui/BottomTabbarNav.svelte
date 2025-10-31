@@ -1,7 +1,6 @@
 <script>
   /**
-   * This is a bottom navigation (Tabbar)
-   * Used global store currentRouteStore
+   * This is custom bottom navigation (Tabbar)
    */
 
   import { Icon } from "konsta/svelte";
@@ -20,7 +19,15 @@
   // Check https://github.com/mateothegreat/svelte5-router/blob/main/docs/actions.md#route
   const routeParam = {
     active: {
-      class: ["bg-black/10", "rounded-[inherit]", "overflow-visible", "dark:bg-white/15", "text-blue-600", "font-bold"],
+      class: [
+        "bg-black/10",
+        "rounded-[inherit]",
+        "overflow-visible",
+        "dark:bg-white/15",
+        "text-blue-600",
+        "dark:text-blue-600",
+        "font-bold",
+      ],
       absolute: true,
     },
   };
@@ -64,7 +71,7 @@
             <Icon class="mb-1">
               <!-- Check this: https://svelte.dev/docs/svelte/compiler-warnings#svelte_component_deprecated -->
               {@const IconComponent = iconCollection[link.id]}
-              <IconComponent className="w-7 h-7" />
+              <IconComponent className="w-7 h-7" strokeColor="currentColor" />
             </Icon>
           {/if}
 
