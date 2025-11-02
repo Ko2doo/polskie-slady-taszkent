@@ -31,21 +31,17 @@
     },
   };
 
-  // icons
-  const iconCollection = {
-    handbook: HandbookIcon,
-    about: AboutUsIcon,
-  };
-
   // Navigation collection
   const linksParams = [
     {
       id: "handbook",
       href: "/",
+      icon: HandbookIcon,
     },
     {
       id: "about",
       href: "/about",
+      icon: AboutUsIcon,
     },
   ];
 </script>
@@ -62,13 +58,11 @@
           class="active:opacity-50 k-link inline-flex flex-col justify-center items-center cursor-pointer select-none px-4 text-xs truncate w-full h-full duration-300 transition-colors rounded-full"
         >
           <!-- Render icons (if it exists iconCollection) -->
-          {#if iconCollection[link.id]}
-            <Icon class="mb-1">
-              <!-- Check this: https://svelte.dev/docs/svelte/compiler-warnings#svelte_component_deprecated -->
-              {@const IconComponent = iconCollection[link.id]}
-              <IconComponent className="w-7 h-7" strokeColor="currentColor" />
-            </Icon>
-          {/if}
+          <Icon class="mb-1">
+            <!-- Check this: https://svelte.dev/docs/svelte/compiler-warnings#svelte_component_deprecated -->
+            {@const IconComponent = link.icon}
+            <IconComponent className="w-7 h-7" strokeColor="currentColor" />
+          </Icon>
 
           <!-- Render locales for id -->
           {$i18n.t(`ui:navbar:${link.id}:title`)}

@@ -2,6 +2,8 @@
   import { Card, Button } from "konsta/svelte";
   import { goto } from "@mateothegreat/svelte5-router";
 
+  import FiltersPopup from "@/components/Ui/FiltersPopup.svelte";
+
   // i18Next
   import { i18nStores } from "@/services/i18n";
   const { i18n } = i18nStores;
@@ -43,12 +45,24 @@
   // Inspector check console in browser
   // $inspect(route);
 
+  let currentLayoutClasses = $state("grid grid-cols-2 lg:grid-cols-4 md:grid-cols-3");
+
+  function handleLayoutChange(payload) {
+    // payload = { mode: "layoutGrid" | "layoutRows", classes: "..." }
+    currentLayoutClasses = payload.classes;
+  }
+
   function openArticle(id) {
     goto(`/articles/${id}`);
   }
 </script>
 
-<section class="grid grid-cols-1 md:grid-cols-3 sm:grid-cols-2">
+<header class="flex flex-nowrap gap-4 p-4">
+  <!-- Handbook Filters -->
+  <FiltersPopup onChange={handleLayoutChange} />
+</header>
+
+<section class={currentLayoutClasses}>
   {#each articlesMeta as article (article.id)}
     <Card>
       {#snippet header()}

@@ -27,6 +27,11 @@ export default {
     readMore: 'Читать далее..',
     langSwitcher: 'Язык',
   },
+  popover: {
+    layoutTitle: 'Стиль отображения',
+    layoutGrid: 'Плиткой',
+    layoutRows: 'Списком',
+  },
   dialogue: {
     hello: 'Привет, Мир!',
   },
