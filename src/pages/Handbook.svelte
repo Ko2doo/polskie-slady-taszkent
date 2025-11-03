@@ -64,25 +64,20 @@
 
 <section class={currentLayoutClasses}>
   {#each articlesMeta as article (article.id)}
-    <Card>
+    <Card class="flex flex-col justify-between">
       {#snippet header()}
-        <div
-          class="ios:-mx-4 ios:-mt-4 h-48 flex items-end bg-cover bg-center material:rounded-xl"
-          style="background-image: url(https://cdn.framework7.io/placeholder/people-1000x600-6.jpg)"
-        >
-          <h1 class="pl-4 pr-4 pt-1 pb-1 w-full text-gray-100 ios:font-bold material:text-[22px] backdrop-blur-xs">
-            {$i18n.t(`articles:${article.id}:title`)}
-          </h1>
-        </div>
+        <h1 class="w-full text-gray-900 dark:text-gray-900 text-base font-medium sm:font-bold sm:text-xl">
+          {$i18n.t(`articles:${article.id}:title`)}
+        </h1>
       {/snippet}
 
-      <p class="line-clamp-3">
+      <p class="line-clamp-3 text-sm sm:text-base">
         {@html $i18n.t(`articles:${article.id}:description`)}
       </p>
 
       {#snippet footer()}
-        <div class="flex justify-start space-x-2 rtl:space-x-reverse">
-          <Button rounded inline outline onclick={() => openArticle(article.id)}>
+        <div class="flex justify-between space-x-2 rtl:space-x-reverse">
+          <Button rounded inline outline class="text-sm" onclick={() => openArticle(article.id)}>
             {$i18n.t("ui:buttons:readMore")}
           </Button>
         </div>
