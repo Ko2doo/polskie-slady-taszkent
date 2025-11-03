@@ -27,6 +27,11 @@ export default {
     readMore: 'Ko`proq o`qish..',
     langSwitcher: 'Til',
   },
+  popover: {
+    layoutTitle: 'Ko`inish uslubi',
+    layoutGrid: 'Plitkalar',
+    layoutRows: 'Ro`yxat',
+  },
   dialogue: {
     hello: 'Salom, Dunyo!',
   },

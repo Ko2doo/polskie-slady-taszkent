@@ -27,6 +27,11 @@ export default {
     readMore: 'Read more..',
     langSwitcher: 'Language',
   },
+  popover: {
+    layoutTitle: 'Display style',
+    layoutGrid: 'Grid',
+    layoutRows: 'List',
+  },
   dialogue: {
     hello: 'Hello, World!',
   },

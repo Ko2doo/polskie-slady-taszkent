@@ -30,4 +30,9 @@ export default {
     readMore: 'Przeczytaj więcej..',
     langSwitcher: 'Język',
   },
+  popover: {
+    layoutTitle: 'Styl wyświetlania',
+    layoutGrid: 'Kafelki',
+    layoutRows: 'Lista',
+  },
 };
