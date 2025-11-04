@@ -31,6 +31,7 @@ export default {
   errors: {
     noArticleId: 'No article ID in the route.',
     articleNotFound: 'Article not found!',
+    notFound: 'Nothing found',
   },
   buttons: {
     back: 'Back',

@@ -18,13 +18,23 @@
     <Navbar title={$navbarState.title ?? ""}>
       {#snippet left()}
         {#if $navbarState.showSidePanel}
-          <Link iconOnly onClick={() => openPanel()}>Panel</Link>
+          <Link iconOnly onClick={() => openPanel()}>
+            {@const Icons = $navbarState.icons}
+            <Icons {...$navbarState?.icons ?? {}} />
+          </Link>
         {/if}
       {/snippet}
 
       {#snippet right()}
         {#if $navbarState.showFavorites}
           Favorites
+        {/if}
+      {/snippet}
+
+      {#snippet subnavbar()}
+        {#if $navbarState.subnav?.component}
+          {@const Subnav = $navbarState.subnav?.component}
+          <Subnav {...$navbarState.subnav?.props ?? {}} />
         {/if}
       {/snippet}
     </Navbar>

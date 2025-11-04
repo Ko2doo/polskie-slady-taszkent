@@ -34,6 +34,7 @@ export default {
   errors: {
     noArticleId: 'Brak ID artykułu w trasie.',
     articleNotFound: 'Artykuł nie został znaleziony!',
+    notFound: 'Nic nie znaleziono',
   },
   buttons: {
     back: 'Powrót',

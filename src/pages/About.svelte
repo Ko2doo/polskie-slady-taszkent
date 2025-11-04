@@ -20,7 +20,6 @@
     const result = route?.result;
 
     // get "pageKey" from route path
-    //    "/"      -> "home"
     //    "/about" -> "about"
     //    "/handbook" -> "handbook"
     const pageKey = resolvePageKeyFromRouteResult(result);
@@ -30,10 +29,6 @@
       ? $i18n.t(`ui:navbar:${pageKey}:title`)
       : "";
 
-    // Tell the global navbar:
-    // - which title to show
-    // - whether to show search
-    // - whether to show favrites
     const dispose = withNavbar({
       title: title || pageKey,
       showSidePanel: false,
@@ -41,10 +36,6 @@
     });
 
     return dispose;
-
-    // setNavbar({
-    //   title: translatedTitle || pageKey,
-    // });
   });
 </script>
 

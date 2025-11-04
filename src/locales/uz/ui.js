@@ -31,6 +31,7 @@ export default {
   errors: {
     noArticleId: 'Marshrutta maqola ID si yo`q.',
     articleNotFound: 'Maqola topilmadi!',
+    notFound: 'Hech narsa topilmadi',
   },
   buttons: {
     back: 'Orqaga',

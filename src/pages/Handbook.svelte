@@ -1,8 +1,13 @@
 <script>
-  import { Card, Button } from "konsta/svelte";
-  import { goto } from "@mateothegreat/svelte5-router";
+  import { Card, Button, BlockTitle } from "konsta/svelte";
+  import { goto, normalize } from "@mateothegreat/svelte5-router";
 
   import LayoutSwitcher from "@/components/Ui/Filters/LayoutSwitcher.svelte";
+  import SearchBar from "@/components/Ui/SearchBar.svelte";
+
+  // Icons
+  import FilterIcon from "@/components/Lib/Icons/FilterIcon.svelte";
+  import ShieldWarningIcon from "@/components/Lib/Icons/ShieldWarningIcon.svelte";
 
   // i18Next
   import { i18nStores } from "@/services/i18n";
@@ -19,6 +24,22 @@
   // router props
   let { route } = $props();
 
+  // States
+  let query = $state("");
+  let filteredItems = $state(articlesMeta);
+
+  let currentLayoutClasses = $state("grid grid-cols-2 lg:grid-cols-4 md:grid-cols-3");
+
+  // Emiter handler
+  function handleResults(list) {
+    filteredItems = list;
+  }
+
+  function handleLayoutChange(payload) {
+    // payload = { mode: "layoutGrid" | "layoutRows", classes: "..." }
+    currentLayoutClasses = payload.classes;
+  }
+
   // Get route props, and render navbar title with i18n
   $effect(() => {
     const result = route?.result;
@@ -33,14 +54,21 @@
       ? $i18n.t(`ui:navbar:${pageKey}:title`)
       : "";
 
-    // Tell the global navbar:
-    // - which title to show
-    // - whether to show search
-    // - whether to show favrites
     const disposeNavbar = withNavbar({
       title: title || pageKey,
+      icons: FilterIcon,
       showSidePanel: true,
       showFavorites: false,
+      subnav: {
+        component: SearchBar,
+        props: {
+          items: articlesMeta,
+          nameSpace: "articles",
+          fields: ["title", "description"],
+          onResults: handleResults,
+          onQueryChange: (v) => (query = v),
+        },
+      },
     });
 
     const disposePanel = withPanel({
@@ -62,42 +90,41 @@
   // Inspector check console in browser
   // $inspect(route);
 
-  let currentLayoutClasses = $state("grid grid-cols-2 lg:grid-cols-4 md:grid-cols-3");
-
-  function handleLayoutChange(payload) {
-    // payload = { mode: "layoutGrid" | "layoutRows", classes: "..." }
-    currentLayoutClasses = payload.classes;
-  }
-
   function openArticle(id) {
     goto(`/articles/${id}`);
   }
 </script>
 
-<header class="flex flex-nowrap gap-4 p-4">
-  <!-- Serching -->
-</header>
+{#if query.trim() && filteredItems.length === 0}
+  <section class="grid grid-1 justify-center">
+    <BlockTitle large class="flex-col">
+      <ShieldWarningIcon className="w-20 h-20 mb-2 text-red-500" />
 
-<section class={currentLayoutClasses}>
-  {#each articlesMeta as article (article.id)}
-    <Card class="flex flex-col justify-between">
-      {#snippet header()}
-        <h1 class="w-full text-gray-900 dark:text-gray-900 text-base font-medium sm:font-bold sm:text-xl">
-          {$i18n.t(`articles:${article.id}:title`)}
-        </h1>
-      {/snippet}
+      {$i18n.t("ui:errors:notFound")}
+    </BlockTitle>
+  </section>
+{:else}
+  <section class={currentLayoutClasses}>
+    {#each filteredItems as article (article.id)}
+      <Card class="flex flex-col justify-between">
+        {#snippet header()}
+          <h1 class="w-full text-gray-900 dark:text-gray-900 text-base font-medium sm:font-bold sm:text-xl">
+            {$i18n.t(`articles:${article.id}:title`)}
+          </h1>
+        {/snippet}
 
-      <p class="line-clamp-3 text-sm sm:text-base">
-        {@html $i18n.t(`articles:${article.id}:description`)}
-      </p>
+        <p class="line-clamp-3 text-sm sm:text-base">
+          {@html $i18n.t(`articles:${article.id}:description`)}
+        </p>
 
-      {#snippet footer()}
-        <div class="flex justify-between space-x-2 rtl:space-x-reverse">
-          <Button rounded inline outline class="text-sm" onClick={() => openArticle(article.id)}>
-            {$i18n.t("ui:buttons:readMore")}
-          </Button>
-        </div>
-      {/snippet}
-    </Card>
-  {/each}
-</section>
+        {#snippet footer()}
+          <div class="flex justify-between space-x-2 rtl:space-x-reverse">
+            <Button rounded inline outline class="text-sm" onClick={() => openArticle(article.id)}>
+              {$i18n.t("ui:buttons:readMore")}
+            </Button>
+          </div>
+        {/snippet}
+      </Card>
+    {/each}
+  </section>
+{/if}

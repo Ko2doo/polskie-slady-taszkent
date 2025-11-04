@@ -6,7 +6,7 @@
   import { onMount } from "svelte";
 
   // KonstaUI import
-  import { List, ListButton, Button, Icon } from "konsta/svelte";
+  import { List, ListButton, Icon, BlockTitle } from "konsta/svelte";
 
   // icons import
   import LayoutGridIcon from "@/components/Lib/Icons/LayoutGridIcon.svelte";
@@ -21,9 +21,9 @@
 
   // ui tailwind classes
   const baseBtnClasses =
-    "flex justify-between items-center h-13 text-[17px] k-list-button relative px-4 gap-1 w-full duration-300 active:duration-0 focus:outline-none touch-ripple-primary overflow-hidden select-none ios";
+    "flex justify-between items-center cursor-pointer h-13 text-[17px] k-list-button relative px-4 gap-1 w-full duration-300 active:duration-0 focus:outline-none touch-ripple-primary overflow-hidden select-none ios";
 
-  const activeBtnClasses = "bg-primary/10 text-primary font-bold";
+  const activeBtnClasses = "rounded-full bg-primary/10 text-primary font-bold";
   const inactiveBtnClasses = "text-gray-600 active-primary/15";
 
   // Utils: the final className constructor
@@ -120,11 +120,9 @@
   // $inspect({ layoutMode, layoutState });
 </script>
 
-<p class="pl-5 pr-5 mt-6 text-right text-xl text-gray-900 dark:text-gray-900">
-  {$i18n.t("ui:sidePanel:handbook:filters:layoutTitle")}
-</p>
+<BlockTitle>{$i18n.t("ui:sidePanel:handbook:filters:layoutTitle")}</BlockTitle>
 
-<List strong inset>
+<List inset>
   {#each listCollection as list (list.id)}
     <ListButton
       linkProps={{

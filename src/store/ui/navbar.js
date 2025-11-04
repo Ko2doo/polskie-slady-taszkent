@@ -23,8 +23,10 @@ import { writable } from 'svelte/store';
 
 const defaults = /** @type {NavbarState} */ ({
   title: '',
+  icons: null,
   showSidePanel: false,
   showFavorites: false,
+  subnav: null,
 });
 
 /** @type {import('svelte/store').Writable<NavbarState>} */

@@ -28,9 +28,14 @@ export default {
       title: 'Настройки',
     },
   },
+  searchbar: {
+    cancel: 'Отмена',
+    placeholder: 'Поиск',
+  },
   errors: {
     noArticleId: 'Нет ID статьи в маршруте.',
     articleNotFound: 'Статья не найдена!',
+    notFound: 'Ничего не найдено',
   },
   buttons: {
     back: 'Назад',
