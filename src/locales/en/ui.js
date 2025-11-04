@@ -4,6 +4,16 @@ export default {
   app: {
     name: 'Polish Traces in Tashkent',
   },
+  sidePanel: {
+    handbook: {
+      title: 'Filters',
+      filters: {
+        layoutTitle: 'Display style',
+        layoutGrid: 'Grid',
+        layoutRows: 'List',
+      },
+    },
+  },
   navbar: {
     home: {
       title: 'Home',
@@ -26,11 +36,6 @@ export default {
     back: 'Back',
     readMore: 'Read more..',
     langSwitcher: 'Language',
-  },
-  popover: {
-    layoutTitle: 'Display style',
-    layoutGrid: 'Grid',
-    layoutRows: 'List',
   },
   dialogue: {
     hello: 'Hello, World!',

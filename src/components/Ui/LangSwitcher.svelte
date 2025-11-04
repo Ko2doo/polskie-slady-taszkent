@@ -35,14 +35,14 @@
   };
 </script>
 
-<Button rounded class="popover-button" onclick={() => popoverClickHandler(".popover-button")}>
+<Button rounded class="popover-button" onClick={() => popoverClickHandler(".popover-button")}>
   {$i18n.t("ui:buttons:langSwitcher")}
 </Button>
 
 <Popover opened={popoverState} target={popoverTargetEl} onBackdropClick={backdropClickHandler}>
   <List strong inset>
     {#each locales as [code, label]}
-      <ListButton colors={{ bgIos: "active:bg-neutral-600/10" }} value={code} onclick={i18nClickHandler}>
+      <ListButton colors={{ bgIos: "active:bg-neutral-600/10" }} value={code} onClick={i18nClickHandler}>
         {label}
       </ListButton>
     {/each}

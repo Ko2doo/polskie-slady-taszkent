@@ -2,7 +2,7 @@
   import { Card, Button } from "konsta/svelte";
   import { goto } from "@mateothegreat/svelte5-router";
 
-  import FiltersPopup from "@/components/Ui/FiltersPopup.svelte";
+  import LayoutSwitcher from "@/components/Ui/Filters/LayoutSwitcher.svelte";
 
   // i18Next
   import { i18nStores } from "@/services/i18n";
@@ -10,7 +10,8 @@
 
   // Utils and store
   import { resolvePageKeyFromRouteResult } from "@/utils/routerUtils";
-  import { setNavbar } from "@/store/ui/navbar";
+  import { withNavbar } from "@/store/ui/navbar";
+  import { withPanel, openPanel, patchPanel } from "@/store/ui/panel";
 
   // Cards meta
   import { articlesMeta } from "@/data/articles";
@@ -23,13 +24,12 @@
     const result = route?.result;
 
     // get "pageKey" from route path
-    //    "/"      -> "home"
     //    "/about" -> "about"
     //    "/handbook" -> "handbook"
     const pageKey = resolvePageKeyFromRouteResult(result);
 
     /* prettier-ignore */
-    const translatedTitle = pageKey
+    const title = pageKey
       ? $i18n.t(`ui:navbar:${pageKey}:title`)
       : "";
 
@@ -37,9 +37,26 @@
     // - which title to show
     // - whether to show search
     // - whether to show favrites
-    setNavbar({
-      title: translatedTitle || pageKey,
+    const disposeNavbar = withNavbar({
+      title: title || pageKey,
+      showSidePanel: true,
+      showFavorites: false,
     });
+
+    const disposePanel = withPanel({
+      title: $i18n.t("ui:sidePanel:handbook:title"),
+      content: {
+        component: LayoutSwitcher,
+        props: {
+          onChange: handleLayoutChange,
+        },
+      },
+    });
+
+    return () => {
+      disposeNavbar();
+      disposePanel();
+    };
   });
 
   // Inspector check console in browser
@@ -58,8 +75,7 @@
 </script>
 
 <header class="flex flex-nowrap gap-4 p-4">
-  <!-- Handbook Filters -->
-  <FiltersPopup onChange={handleLayoutChange} />
+  <!-- Serching -->
 </header>
 
 <section class={currentLayoutClasses}>
@@ -77,7 +93,7 @@
 
       {#snippet footer()}
         <div class="flex justify-between space-x-2 rtl:space-x-reverse">
-          <Button rounded inline outline class="text-sm" onclick={() => openArticle(article.id)}>
+          <Button rounded inline outline class="text-sm" onClick={() => openArticle(article.id)}>
             {$i18n.t("ui:buttons:readMore")}
           </Button>
         </div>

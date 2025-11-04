@@ -29,7 +29,7 @@
         {$i18n.t("ui:errors:noArticleId")}
       </p>
 
-      <Link onclick={closePopup} class="mt-[22px] text-primary underline">
+      <Link onClick={closePopup} class="mt-[22px] text-primary underline">
         {$i18n.t("ui:buttons:back")}
       </Link>
     </Block>
@@ -42,7 +42,7 @@
         {$i18n.t("ui:errors:articleNotFound")} ({articleId}).
       </p>
 
-      <Link onclick={closePopup} class="mt-[22px] text-primary underline">
+      <Link onClick={closePopup} class="mt-[22px] text-primary underline">
         {$i18n.t("ui:buttons:back")}
       </Link>
     </Block>
@@ -52,7 +52,7 @@
     <Page>
       <Navbar>
         {#snippet right()}
-          <Link iconOnly onclick={closePopup}>
+          <Link iconOnly onClick={closePopup}>
             <svg
               fill="currentcolor"
               xmlns="http://www.w3.org/2000/svg"

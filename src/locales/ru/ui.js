@@ -4,6 +4,16 @@ export default {
   app: {
     name: 'Польские Следы в Ташкенте',
   },
+  sidePanel: {
+    handbook: {
+      title: 'Фильтры',
+      filters: {
+        layoutTitle: 'Стиль отображения',
+        layoutGrid: 'Плиткой',
+        layoutRows: 'Списком',
+      },
+    },
+  },
   navbar: {
     home: {
       title: 'Главная',
@@ -26,11 +36,6 @@ export default {
     back: 'Назад',
     readMore: 'Читать далее..',
     langSwitcher: 'Язык',
-  },
-  popover: {
-    layoutTitle: 'Стиль отображения',
-    layoutGrid: 'Плиткой',
-    layoutRows: 'Списком',
   },
   dialogue: {
     hello: 'Привет, Мир!',

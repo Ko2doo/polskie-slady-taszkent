@@ -17,7 +17,7 @@
   const { i18n } = i18nStores;
 
   // Props
-  let { onChange = null, onDone = null } = $props();
+  let { onChange = null } = $props();
 
   // ui tailwind classes
   const baseBtnClasses =
@@ -72,6 +72,7 @@
     }
   }
 
+  // emit "change" event
   function emitChange() {
     if (typeof onChange === "function") {
       onChange({
@@ -109,20 +110,18 @@
 
     // Double-click protection
     if (switcherId === layoutMode) {
-      if (typeof onDone === "function") onDone();
       return;
     }
 
     // Update state
     applyLayout(switcherId);
-    if (typeof onDone === "function") onDone();
   };
 
   // $inspect({ layoutMode, layoutState });
 </script>
 
 <p class="pl-5 pr-5 mt-6 text-right text-xl text-gray-900 dark:text-gray-900">
-  {$i18n.t("ui:popover:layoutTitle")}
+  {$i18n.t("ui:sidePanel:handbook:filters:layoutTitle")}
 </p>
 
 <List strong inset>
@@ -139,7 +138,7 @@
         <IconComponent />
       </Icon>
 
-      <span> {$i18n.t(`ui:popover:${list.id}`)} </span>
+      <span> {$i18n.t(`ui:sidePanel:handbook:filters:${list.id}`)} </span>
     </ListButton>
   {/each}
 </List>

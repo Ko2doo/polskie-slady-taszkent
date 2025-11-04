@@ -4,6 +4,16 @@ export default {
   app: {
     name: 'Toshkentdagi Polsha izlari',
   },
+  sidePanel: {
+    handbook: {
+      title: 'Filtrlar',
+      filters: {
+        layoutTitle: 'Ko`inish uslubi',
+        layoutGrid: 'Plitkalar',
+        layoutRows: 'Ro`yxat',
+      },
+    },
+  },
   navbar: {
     home: {
       title: 'Bosh sahifa',
@@ -26,11 +36,6 @@ export default {
     back: 'Orqaga',
     readMore: 'Ko`proq o`qish..',
     langSwitcher: 'Til',
-  },
-  popover: {
-    layoutTitle: 'Ko`inish uslubi',
-    layoutGrid: 'Plitkalar',
-    layoutRows: 'Ro`yxat',
   },
   dialogue: {
     hello: 'Salom, Dunyo!',

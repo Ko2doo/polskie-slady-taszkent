@@ -4,6 +4,16 @@ export default {
   app: {
     name: 'Polskie Ślady w Taszkiencie',
   },
+  sidePanel: {
+    handbook: {
+      title: 'Filtry',
+      filters: {
+        layoutTitle: 'Styl wyświetlania',
+        layoutGrid: 'Kafelki',
+        layoutRows: 'Lista',
+      },
+    },
+  },
   dialogue: {
     hello: 'Halo, Świat!',
   },
@@ -29,10 +39,5 @@ export default {
     back: 'Powrót',
     readMore: 'Przeczytaj więcej..',
     langSwitcher: 'Język',
-  },
-  popover: {
-    layoutTitle: 'Styl wyświetlania',
-    layoutGrid: 'Kafelki',
-    layoutRows: 'Lista',
   },
 };

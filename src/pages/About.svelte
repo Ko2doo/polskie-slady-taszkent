@@ -8,7 +8,7 @@
   const { i18n } = i18nStores;
 
   import { resolvePageKeyFromRouteResult } from "@/utils/routerUtils";
-  import { setNavbar } from "@/store/ui/navbar";
+  import { withNavbar } from "@/store/ui/navbar";
 
   // router props
   let { route } = $props();
@@ -26,7 +26,7 @@
     const pageKey = resolvePageKeyFromRouteResult(result);
 
     /* prettier-ignore */
-    const translatedTitle = pageKey
+    const title = pageKey
       ? $i18n.t(`ui:navbar:${pageKey}:title`)
       : "";
 
@@ -34,9 +34,17 @@
     // - which title to show
     // - whether to show search
     // - whether to show favrites
-    setNavbar({
-      title: translatedTitle || pageKey,
+    const dispose = withNavbar({
+      title: title || pageKey,
+      showSidePanel: false,
+      showFavorites: false,
     });
+
+    return dispose;
+
+    // setNavbar({
+    //   title: translatedTitle || pageKey,
+    // });
   });
 </script>
 
