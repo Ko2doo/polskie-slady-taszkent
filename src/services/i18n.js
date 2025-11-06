@@ -16,7 +16,7 @@
 
 import i18next from 'i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
-import { createI18nStore } from './i18nextSvelte/i18nextSvelte';
+import { createI18nStore } from '@/store/i18nextSvelte/i18nextSvelte';
 
 // Locales import
 import res from '@/locales/resources';
