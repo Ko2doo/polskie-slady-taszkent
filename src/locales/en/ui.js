@@ -11,6 +11,12 @@ export default {
         layoutTitle: 'Display style',
         layoutGrid: 'Grid',
         layoutRows: 'List',
+        categoryTitle: 'Categories',
+        category: {
+          all: 'All',
+          places: 'Places',
+          heroes: 'Heroes',
+        },
       },
     },
   },

@@ -11,6 +11,12 @@ export default {
         layoutTitle: 'Стиль отображения',
         layoutGrid: 'Плиткой',
         layoutRows: 'Списком',
+        categoryTitle: 'Категории',
+        category: {
+          all: 'Все',
+          places: 'Места',
+          heroes: 'Герои',
+        },
       },
     },
   },

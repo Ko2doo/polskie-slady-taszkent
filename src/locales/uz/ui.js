@@ -11,6 +11,12 @@ export default {
         layoutTitle: 'Ko`inish uslubi',
         layoutGrid: 'Plitkalar',
         layoutRows: 'Ro`yxat',
+        categoryTitle: 'Kategoriyalar',
+        category: {
+          all: 'Barchasi',
+          places: 'Joylar',
+          heroes: 'Qahramonlar',
+        },
       },
     },
   },

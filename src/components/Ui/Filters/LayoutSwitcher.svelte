@@ -16,6 +16,9 @@
   import { i18nStores } from "@/services/i18n";
   const { i18n } = i18nStores;
 
+  // Utils
+  import { setLocalStorage, getLocalStorage } from "@/utils/localeStorageUtils";
+
   // Props
   let { onChange = null } = $props();
 
@@ -53,24 +56,6 @@
   // State
   let layoutMode = $state("layoutGrid"); // by default
   let layoutState = $state(GRID_STYLE);
-
-  // Local Storage helpers
-  function setLocalStorage(key, value) {
-    try {
-      window.localStorage.setItem(key, value);
-    } catch (error) {
-      console.warn("localStorage set failed", error);
-    }
-  }
-
-  function getLocalStorage(key) {
-    try {
-      return window.localStorage.getItem(key);
-    } catch (error) {
-      console.warn("localStorage get failed", error);
-      return null;
-    }
-  }
 
   // emit "change" event
   function emitChange() {

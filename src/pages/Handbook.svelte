@@ -1,8 +1,10 @@
 <script>
-  import { Card, Button, BlockTitle } from "konsta/svelte";
+  import { Card, Link, Button, BlockTitle } from "konsta/svelte";
   import { goto, normalize } from "@mateothegreat/svelte5-router";
 
+  // Filters and searching
   import LayoutSwitcher from "@/components/Ui/Filters/LayoutSwitcher.svelte";
+  import SortingByCategories from "@/components/Ui/Filters/SortingByCategories.svelte";
   import SearchBar from "@/components/Ui/SearchBar.svelte";
 
   // Icons
@@ -13,34 +15,72 @@
   import { i18nStores } from "@/services/i18n";
   const { i18n } = i18nStores;
 
-  // Utils and store
+  // Navbar/Panel stores and helpers
   import { resolvePageKeyFromRouteResult } from "@/utils/routerUtils";
-  import { withNavbar } from "@/store/ui/navbar";
+  import { patchNavbar, withNavbar } from "@/store/ui/navbar";
   import { withPanel, openPanel, patchPanel } from "@/store/ui/panel";
 
-  // Cards meta
+  // Content meta
   import { articlesMeta } from "@/data/articles";
 
-  // router props
+  // Lifecycles
+  import { onMount, onDestroy } from "svelte";
+
+  // Route prop (Svelte 5)
   let { route } = $props();
 
-  // States
-  let query = $state("");
-  let filteredItems = $state(articlesMeta);
+  // Page-local state
+  let query = $state(""); // search query (for UI state only)
+  let searchResults = $state(articlesMeta); // output from SearchBar
+  let selectedCat = $state("all"); // category filter (single string)
+  let itemsView = $state(articlesMeta); // final list: search + category
 
   let currentLayoutClasses = $state("grid grid-cols-2 lg:grid-cols-4 md:grid-cols-3");
 
-  // Emiter handler
-  function handleResults(list) {
-    filteredItems = list;
+  // Receive search results from SearchBar
+  function handleSearchResults(list) {
+    searchResults = list;
   }
 
+  // Receive selected category id from SortingByCategories
+  function handleCatUpdate(id) {
+    selectedCat = typeof id === "string" && id ? id : "all";
+  }
+
+  // Receive grid class switch from LayoutSwitcher
   function handleLayoutChange(payload) {
     // payload = { mode: "layoutGrid" | "layoutRows", classes: "..." }
     currentLayoutClasses = payload.classes;
   }
 
-  // Get route props, and render navbar title with i18n
+  // Setup Navbar and Panel profiles once on mount; cleaned on destroy
+  onMount(() => {
+    const disposeNavbar = withNavbar({
+      title: "",
+      leftSnippet: PanelOpenedButton, // left slot: open side panel button
+      rightSnippet: null, // right slot: (unused for now)c
+      subnavSnippet: Subnavigation, // subnavbar: search bar
+    });
+
+    const disposePanel = withPanel({
+      title: "",
+      contentSnippet: PanelContent, // panel body content (filters)
+      side: "left", // open from the left
+    });
+
+    onDestroy(() => {
+      disposeNavbar();
+      disposePanel();
+    });
+  });
+
+  // Combine search and category filters into the final view list
+  $effect(() => {
+    const base = searchResults; // start with search output
+    itemsView = selectedCat === "all" ? base : base.filter((it) => it?.category === selectedCat);
+  });
+
+  // Update page/side-panel titles when route or language change
   $effect(() => {
     const result = route?.result;
 
@@ -50,41 +90,13 @@
     const pageKey = resolvePageKeyFromRouteResult(result);
 
     /* prettier-ignore */
-    const title = pageKey
+    const navTitle = pageKey
       ? $i18n.t(`ui:navbar:${pageKey}:title`)
       : "";
+    const panelTitle = $i18n.t("ui:sidePanel:handbook:title");
 
-    const disposeNavbar = withNavbar({
-      title: title || pageKey,
-      icons: FilterIcon,
-      showSidePanel: true,
-      showFavorites: false,
-      subnav: {
-        component: SearchBar,
-        props: {
-          items: articlesMeta,
-          nameSpace: "articles",
-          fields: ["title", "description"],
-          onResults: handleResults,
-          onQueryChange: (v) => (query = v),
-        },
-      },
-    });
-
-    const disposePanel = withPanel({
-      title: $i18n.t("ui:sidePanel:handbook:title"),
-      content: {
-        component: LayoutSwitcher,
-        props: {
-          onChange: handleLayoutChange,
-        },
-      },
-    });
-
-    return () => {
-      disposeNavbar();
-      disposePanel();
-    };
+    patchNavbar({ title: navTitle || pageKey });
+    patchPanel({ title: panelTitle });
   });
 
   // Inspector check console in browser
@@ -95,7 +107,29 @@
   }
 </script>
 
-{#if query.trim() && filteredItems.length === 0}
+<!-- Snippets -->
+{#snippet PanelOpenedButton()}
+  <Link iconOnly onClick={() => openPanel()}>
+    <FilterIcon />
+  </Link>
+{/snippet}
+
+{#snippet Subnavigation()}
+  <SearchBar
+    items={articlesMeta}
+    nameSpace="articles"
+    fields={["title", "description"]}
+    onResults={handleSearchResults}
+    onQueryChange={(v) => (query = v)}
+  />
+{/snippet}
+
+{#snippet PanelContent()}
+  <LayoutSwitcher onChange={handleLayoutChange} />
+  <SortingByCategories items={articlesMeta} onSelectedChange={handleCatUpdate} />
+{/snippet}
+
+{#if query.trim() && itemsView.length === 0}
   <section class="grid grid-1 justify-center">
     <BlockTitle large class="flex-col">
       <ShieldWarningIcon className="w-20 h-20 mb-2 text-red-500" />
@@ -105,7 +139,7 @@
   </section>
 {:else}
   <section class={currentLayoutClasses}>
-    {#each filteredItems as article (article.id)}
+    {#each itemsView as article (article.id)}
       <Card class="flex flex-col justify-between">
         {#snippet header()}
           <h1 class="w-full text-gray-900 dark:text-gray-900 text-base font-medium sm:font-bold sm:text-xl">

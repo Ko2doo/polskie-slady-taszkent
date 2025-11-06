@@ -11,6 +11,12 @@ export default {
         layoutTitle: 'Styl wyświetlania',
         layoutGrid: 'Kafelki',
         layoutRows: 'Lista',
+        categoryTitle: 'Kategorie',
+        category: {
+          all: 'Wszystkie',
+          places: 'Miejsca',
+          heroes: 'Bohaterowie',
+        },
       },
     },
   },

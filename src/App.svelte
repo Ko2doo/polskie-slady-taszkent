@@ -16,25 +16,24 @@
 <App theme="ios" safeAreas>
   <Page class="flex flex-col min-h-[100dvh] !p-0">
     <Navbar title={$navbarState.title ?? ""}>
+      <!-- Left content -->
       {#snippet left()}
-        {#if $navbarState.showSidePanel}
-          <Link iconOnly onClick={() => openPanel()}>
-            {@const Icons = $navbarState.icons}
-            <Icons {...$navbarState?.icons ?? {}} />
-          </Link>
+        {#if $navbarState.leftSnippet}
+          {@render $navbarState.leftSnippet()}
         {/if}
       {/snippet}
 
+      <!-- Right content -->
       {#snippet right()}
-        {#if $navbarState.showFavorites}
-          Favorites
+        {#if $navbarState.rightSnippet}
+          {@render $navbarState.rightSnippet()}
         {/if}
       {/snippet}
 
+      <!-- Subnav -->
       {#snippet subnavbar()}
-        {#if $navbarState.subnav?.component}
-          {@const Subnav = $navbarState.subnav?.component}
-          <Subnav {...$navbarState.subnav?.props ?? {}} />
+        {#if $navbarState.subnavSnippet}
+          {@render $navbarState.subnavSnippet()}
         {/if}
       {/snippet}
     </Navbar>
@@ -71,9 +70,8 @@
       </Navbar>
 
       <!-- Dynamical content -->
-      {#if $panelState.content?.component}
-        {@const PanelContent = $panelState.content.component}
-        <PanelContent {...$panelState.content?.props ?? {}} />
+      {#if $panelState.contentSnippet}
+        {@render $panelState.contentSnippet()}
       {/if}
     </Panel>
 
