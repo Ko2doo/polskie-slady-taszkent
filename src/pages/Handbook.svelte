@@ -8,8 +8,8 @@
   import SearchBar from "@/components/Ui/SearchBar.svelte";
 
   // Icons
-  import FilterIcon from "@/components/Lib/Icons/FilterIcon.svelte";
-  import ShieldWarningIcon from "@/components/Lib/Icons/ShieldWarningIcon.svelte";
+  import FilterIcon from "@/lib/icons/FilterIcon.svelte";
+  import ShieldWarningIcon from "@/lib/icons/ShieldWarningIcon.svelte";
 
   // i18Next
   import { i18nStores } from "@/services/i18n";

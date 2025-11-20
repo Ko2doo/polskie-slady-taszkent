@@ -3,4 +3,4 @@
 @import 'konsta/svelte/theme.css';
 
 /* My rules */
-@import './styles/typography.css';
+@import './assets/styles/typography.css';

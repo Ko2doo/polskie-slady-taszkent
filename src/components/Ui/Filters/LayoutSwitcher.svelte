@@ -9,8 +9,8 @@
   import { List, ListButton, Icon, BlockTitle } from "konsta/svelte";
 
   // icons import
-  import LayoutGridIcon from "@/components/Lib/Icons/LayoutGridIcon.svelte";
-  import LayoutRowsIcon from "@/components/Lib/Icons/LayoutRowsIcon.svelte";
+  import LayoutGridIcon from "@/lib/icons/LayoutGridIcon.svelte";
+  import LayoutRowsIcon from "@/lib/icons/LayoutRowsIcon.svelte";
 
   // i18Next
   import { i18nStores } from "@/services/i18n";

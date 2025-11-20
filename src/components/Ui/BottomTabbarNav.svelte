@@ -7,8 +7,8 @@
   import { route as linkAction } from "@mateothegreat/svelte5-router";
 
   // Icons
-  import HandbookIcon from "../Lib/Icons/HandbookIcon.svelte";
-  import AboutUsIcon from "../Lib/Icons/AboutUsIcon.svelte";
+  import HandbookIcon from "@/lib/icons/HandbookIcon.svelte";
+  import AboutUsIcon from "@/lib/icons/AboutUsIcon.svelte";
 
   // i18next
   import { i18nStores } from "@/services/i18n";
