@@ -2,5 +2,8 @@
 @import 'tailwindcss';
 @import 'konsta/svelte/theme.css';
 
+/* Leaflet Map */
+@import 'leaflet/dist/leaflet.css';
+
 /* My rules */
 @import './assets/styles/typography.css';

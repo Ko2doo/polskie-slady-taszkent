@@ -9,6 +9,7 @@
   // Icons
   import HandbookIcon from "@/lib/icons/HandbookIcon.svelte";
   import AboutUsIcon from "@/lib/icons/AboutUsIcon.svelte";
+  import PaperMapIcon from "@/lib/icons/PaperMapIcon.svelte";
 
   // i18next
   import { i18nStores } from "@/services/i18n";
@@ -37,6 +38,11 @@
       id: "handbook",
       href: "/",
       icon: HandbookIcon,
+    },
+    {
+      id: "map",
+      href: "/map",
+      icon: PaperMapIcon,
     },
     {
       id: "about",

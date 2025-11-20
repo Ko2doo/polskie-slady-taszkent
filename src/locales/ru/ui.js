@@ -27,6 +27,9 @@ export default {
     handbook: {
       title: 'Справочник',
     },
+    map: {
+      title: 'Карта',
+    },
     about: {
       title: 'О нас',
     },
