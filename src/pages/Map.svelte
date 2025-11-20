@@ -1,5 +1,6 @@
 <script>
   import { onMount } from "svelte";
+  import { Capacitor } from "@capacitor/core";
 
   // i18n imports
   import { i18nStores } from "@/services/i18n";
@@ -12,8 +13,6 @@
   // GeoJson with bordered city
   import tashkentGeoData from "@/data/Tashkent_251120.geo.json";
 
-  let { initialZoom = 12, minZoom = 11.2, maxZoom = 20 } = $props();
-
   let mapContainer = $state(null);
   let map = $state(null); // map state
 
@@ -23,9 +22,9 @@
     // Map initialization params
     const leafletMap = L.map(mapContainer, {
       center: [41.3, 69.28],
-      zoom: initialZoom,
-      minZoom,
-      maxZoom,
+      zoom: 12,
+      minZoom: 11.2,
+      maxZoom: 20,
       worldCopyJump: false,
     });
 
@@ -46,9 +45,11 @@
     leafletMap.fitBounds(cityBounds);
     leafletMap.setMaxBounds(cityBounds.pad(0.02));
 
+    const pmtilesUrl = Capacitor.convertFileSrc("/map/Tashkent_251120.pmtiles");
+
     // Base vector layer with Tashkent.pmtiles
     const baseLayer = leafletLayer({
-      url: "/map/Tashkent_251120.pmtiles",
+      url: pmtilesUrl,
 
       // theme and lang
       flavor: "light",

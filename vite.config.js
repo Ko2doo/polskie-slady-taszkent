@@ -21,7 +21,7 @@ export default defineConfig({
   },
   build: {
     minify: false,
-    copyPublicDir: false,
+    copyPublicDir: true,
     outDir: 'dist',
     emptyOutDir: true,
     cssCodeSplit: true,
