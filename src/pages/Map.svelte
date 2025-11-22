@@ -16,6 +16,8 @@
   let mapContainer = $state(null);
   let map = $state(null); // map state
 
+  const PMFILES_PATH = "/map/Tashkent_251120.pmtiles";
+
   onMount(() => {
     if (!mapContainer) return;
 
@@ -32,11 +34,12 @@
     const boundaryLayer = L.geoJSON(tashkentGeoData, {
       style: {
         color: "#ff3b30",
-        weight: 3,
+        weight: 4,
         opacity: 0.9,
         fill: false,
       },
     });
+
     const cityBounds = boundaryLayer.getBounds(); // LatLngBounds из GeoJSON
 
     // painting administrative borders
@@ -45,11 +48,14 @@
     leafletMap.fitBounds(cityBounds);
     leafletMap.setMaxBounds(cityBounds.pad(0.02));
 
-    const pmtilesUrl = Capacitor.convertFileSrc("/map/Tashkent_251120.pmtiles");
+    // Correctly path with PMTiles
+    let pmtilesURL = Capacitor.convertFileSrc(PMFILES_PATH);
+
+    console.log("Loading PMTiles:", pmtilesURL);
 
     // Base vector layer with Tashkent.pmtiles
     const baseLayer = leafletLayer({
-      url: pmtilesUrl,
+      url: pmtilesURL,
 
       // theme and lang
       flavor: "light",
