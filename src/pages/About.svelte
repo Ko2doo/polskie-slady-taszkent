@@ -4,14 +4,11 @@
   // Components
   import LangSwitcher from "@/components/Ui/LangSwitcher.svelte";
 
-  import { i18nStores } from "@/services/i18n";
-  const { i18n } = i18nStores;
-
   import { resolvePageKeyFromRouteResult } from "@/utils/routerUtils";
   import { withNavbar } from "@/store/ui/navbar";
 
   // router props
-  let { route } = $props();
+  let { route, i18n } = $props();
 
   // Inspector check console in browser
   // $inspect(route);
@@ -65,5 +62,5 @@
     perferendis.
   </p>
 
-  <LangSwitcher />
+  <LangSwitcher {i18n} />
 </Block>

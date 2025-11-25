@@ -12,19 +12,15 @@
   import LayoutGridIcon from "@/lib/icons/LayoutGridIcon.svelte";
   import LayoutRowsIcon from "@/lib/icons/LayoutRowsIcon.svelte";
 
-  // i18Next
-  import { i18nStores } from "@/services/i18n";
-  const { i18n } = i18nStores;
-
   // Utils
   import { setLocalStorage, getLocalStorage } from "@/utils/localeStorageUtils";
 
   // Props
-  let { onChange = null } = $props();
+  let { i18n, onChange = null } = $props();
 
   // ui tailwind classes
   const baseBtnClasses =
-    "flex justify-between items-center cursor-pointer h-13 text-[17px] k-list-button relative px-4 gap-1 w-full duration-300 active:duration-0 focus:outline-none touch-ripple-primary overflow-hidden select-none ios";
+    "flex items-center cursor-pointer h-13 text-[17px] k-list-button relative px-4 gap-1 w-full duration-300 active:duration-0 focus:outline-none touch-ripple-primary overflow-hidden select-none ios";
 
   const activeBtnClasses = "rounded-full bg-primary/10 text-primary font-bold";
   const inactiveBtnClasses = "text-gray-600 active-primary/15";
@@ -116,9 +112,9 @@
       }}
       onclick={(e) => layoutSwitcherHandler(e)}
     >
-      <Icon>
+      <Icon class="me-4">
         {@const IconComponent = list.icon}
-        <IconComponent />
+        <IconComponent className="w-5 h-5" />
       </Icon>
 
       <span> {$i18n.t(`ui:sidePanel:handbook:filters:${list.id}`)} </span>

@@ -11,9 +11,7 @@
   import AboutUsIcon from "@/lib/icons/AboutUsIcon.svelte";
   import PaperMapIcon from "@/lib/icons/PaperMapIcon.svelte";
 
-  // i18next
-  import { i18nStores } from "@/services/i18n";
-  const { i18n } = i18nStores;
+  let { i18n } = $props();
 
   // Router link params
   // Check https://github.com/mateothegreat/svelte5-router/blob/main/docs/actions.md#route

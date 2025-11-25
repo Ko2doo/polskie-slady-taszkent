@@ -2,16 +2,14 @@
   import { onMount } from "svelte";
   import { Capacitor } from "@capacitor/core";
 
-  // i18n imports
-  import { i18nStores } from "@/services/i18n";
-  const { i18n } = i18nStores;
-
   // Map imports
   import * as L from "leaflet";
   import { leafletLayer } from "protomaps-leaflet";
 
   // GeoJson with bordered city
   import tashkentGeoData from "@/data/Tashkent_251120.geo.json";
+
+  let { i18n } = $props();
 
   let mapContainer = $state(null);
   let map = $state(null); // map state

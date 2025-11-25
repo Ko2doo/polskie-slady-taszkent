@@ -1,10 +1,6 @@
 <script>
   import { Searchbar } from "konsta/svelte";
 
-  // i18Next
-  import { i18nStores } from "@/services/i18n";
-  const { i18n } = i18nStores;
-
   /**
    * Props
    * - items: the raw dataset to search over (array of objects; each item must have an `id`)
@@ -15,6 +11,7 @@
    * - onResults: optional callback invoked with the computed result list
    */
   let {
+    i18n,
     items = [],
     nameSpace = "articles",
     fields = ["title", "description"],

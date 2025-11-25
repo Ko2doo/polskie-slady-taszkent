@@ -11,10 +11,6 @@
   import FilterIcon from "@/lib/icons/FilterIcon.svelte";
   import ShieldWarningIcon from "@/lib/icons/ShieldWarningIcon.svelte";
 
-  // i18Next
-  import { i18nStores } from "@/services/i18n";
-  const { i18n } = i18nStores;
-
   // Navbar/Panel stores and helpers
   import { resolvePageKeyFromRouteResult } from "@/utils/routerUtils";
   import { patchNavbar, withNavbar } from "@/store/ui/navbar";
@@ -27,7 +23,7 @@
   import { onMount, onDestroy } from "svelte";
 
   // Route prop (Svelte 5)
-  let { route } = $props();
+  let { route, i18n } = $props();
 
   // Page-local state
   let query = $state(""); // search query (for UI state only)
@@ -116,6 +112,7 @@
 
 {#snippet Subnavigation()}
   <SearchBar
+    {i18n}
     items={articlesMeta}
     nameSpace="articles"
     fields={["title", "description"]}
@@ -125,8 +122,8 @@
 {/snippet}
 
 {#snippet PanelContent()}
-  <LayoutSwitcher onChange={handleLayoutChange} />
-  <SortingByCategories items={articlesMeta} onSelectedChange={handleCatUpdate} />
+  <LayoutSwitcher {i18n} onChange={handleLayoutChange} />
+  <SortingByCategories {i18n} items={articlesMeta} onSelectedChange={handleCatUpdate} />
 {/snippet}
 
 {#if query.trim() && itemsView.length === 0}

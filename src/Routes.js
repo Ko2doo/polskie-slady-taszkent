@@ -1,5 +1,7 @@
 /**
  * Routes
+ *
+ * See this https://github.com/mateothegreat/svelte5-router/blob/main/docs/getting-started.md
  */
 
 import Handbook from '@/pages/Handbook.svelte';

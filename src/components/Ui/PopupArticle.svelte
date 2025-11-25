@@ -5,12 +5,9 @@
   import { Popup, Page, Navbar, Block, Link } from "konsta/svelte";
   import { goto } from "@mateothegreat/svelte5-router";
 
-  import { i18nStores } from "@/services/i18n";
-  const { i18n } = i18nStores;
-
   import { articlesMeta } from "@/data/articles";
 
-  let { route } = $props();
+  let { route, i18n } = $props();
   // $inspect("PopupArticle props >>>", route.result);
 
   let articleId = route?.result?.path.params;

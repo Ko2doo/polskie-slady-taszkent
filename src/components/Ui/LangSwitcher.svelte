@@ -5,13 +5,12 @@
 
   import { Popover, List, ListButton, Button } from "konsta/svelte";
 
-  import { i18nStores } from "@/services/i18n";
   import { translations } from "@/locales/collections";
 
-  const { i18n } = i18nStores;
+  let { i18n } = $props();
 
-  let popoverState = false;
-  let popoverTargetEl = null;
+  let popoverState = $state(false);
+  let popoverTargetEl = $state(null);
 
   const popoverClickHandler = (targetEl) => {
     popoverTargetEl = targetEl;

@@ -1,6 +1,10 @@
 <script>
   import { App, Page, Navbar, Panel, Link, Block } from "konsta/svelte";
 
+  // i18Next
+  import { i18nStores } from "@/services/i18n";
+  const { i18n } = i18nStores;
+
   // router
   import { Router } from "@mateothegreat/svelte5-router";
   import { routes } from "@/Routes";
@@ -40,7 +44,7 @@
 
     <!-- Centered content -->
     <main class="flex-1 overflow-y-auto pb-[56px]">
-      <Router {routes} />
+      <Router {routes} {i18n} />
     </main>
 
     <!-- Panel -->
@@ -76,6 +80,6 @@
     </Panel>
 
     <!-- Fixed bottom navigation -->
-    <BottomTabbarNav />
+    <BottomTabbarNav {i18n} />
   </Page>
 </App>

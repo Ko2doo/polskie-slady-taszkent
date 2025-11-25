@@ -2,15 +2,12 @@
   import { List, ListItem, BlockTitle, Radio } from "konsta/svelte";
   import { onMount } from "svelte";
 
-  // i18n
-  import { i18nStores } from "@/services/i18n";
-  const { i18n } = i18nStores;
-
   // Safe localStorage helpers (string in / string out)
   import { setLocalStorage, getLocalStorage } from "@/utils/localeStorageUtils";
 
   // Props (Svelte 5)
   let {
+    i18n,
     items = [], // source list to derive available categories
     categoryKey = "category", // key holding category id inside items
     i18nPrefix = "ui:sidePanel:handbook:filters:category", // i18n key prefix
