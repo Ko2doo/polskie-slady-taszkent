@@ -1,0 +1,126 @@
+{
+  "version": 8,
+  "center": [69.28, 41.3],
+  "zoom": 12,
+  "glyphs": "/fonts/map/{fontstack}/{range}.pbf",
+  "sources": {
+    "tashkent": {
+      "type": "vector",
+      "url": "pmtiles://tashkent-local"
+    }
+  },
+  "layers": [
+    {
+      "id": "earth",
+      "type": "fill",
+      "source": "tashkent",
+      "source-layer": "earth",
+      "paint": {
+        "fill-color": "#f4f5aa"
+      }
+    },
+    {
+      "id": "landcover",
+      "type": "fill",
+      "source": "tashkent",
+      "source-layer": "landcover",
+      "paint": {
+        "fill-color": "#b5eba0"
+      }
+    },
+    {
+      "id": "landuse",
+      "type": "fill",
+      "source": "tashkent",
+      "source-layer": "landuse",
+      "paint": {
+        "fill-color": "#9bc989"
+      }
+    },
+    {
+      "id": "water",
+      "type": "line",
+      "source": "tashkent",
+      "source-layer": "water",
+      "paint": {
+        "line-color": "#6ec2ff",
+        "line-width": 3
+      }
+    },
+    {
+      "id": "roads",
+      "type": "line",
+      "source": "tashkent",
+      "source-layer": "roads",
+      "paint": {
+        "line-color": "#dadada",
+        "line-width": 4
+      }
+    },
+    {
+      "id": "buildings",
+      "type": "fill",
+      "source": "tashkent",
+      "source-layer": "buildings",
+      "minzoom": 14,
+      "paint": {
+        "fill-color": "#d0d0d0"
+      }
+    },
+    {
+      "id": "road-labels",
+      "type": "symbol",
+      "source": "tashkent",
+      "source-layer": "roads",
+      "minzoom": 13,
+      "layout": {
+        "symbol-placement": "line",
+        "text-field": ["get", "name"],
+        "text-font": ["Roboto Regular"],
+        "text-size": 11
+      },
+      "paint": {
+        "text-color": "#555555",
+        "text-halo-color": "#ffffff",
+        "text-halo-width": 1
+      }
+    },
+    {
+      "id": "place-labels",
+      "type": "symbol",
+      "source": "tashkent",
+      "source-layer": "places",
+      "minzoom": 10,
+      "layout": {
+        "text-field": ["get", "name"],
+        "text-font": ["Roboto Regular"],
+        "text-size": 13,
+        "text-anchor": "center"
+      },
+      "paint": {
+        "text-color": "#333333",
+        "text-halo-color": "#ffffff",
+        "text-halo-width": 1
+      }
+    },
+    {
+      "id": "poi-labels",
+      "type": "symbol",
+      "source": "tashkent",
+      "source-layer": "pois",
+      "minzoom": 14,
+      "layout": {
+        "text-field": ["get", "name"],
+        "text-font": ["Roboto Regular"],
+        "text-size": 12,
+        "text-offset": [0, 0.8],
+        "text-anchor": "top"
+      },
+      "paint": {
+        "text-color": "#444444",
+        "text-halo-color": "#ffffff",
+        "text-halo-width": 1
+      }
+    }
+  ]
+}

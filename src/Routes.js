@@ -4,9 +4,9 @@
  * See this https://github.com/mateothegreat/svelte5-router/blob/main/docs/getting-started.md
  */
 
-import Handbook from '@/pages/Handbook.svelte';
-import Map from '@/pages/Map.svelte';
-import About from '@/pages/About.svelte';
+import Handbook from '@/views/Handbook.svelte';
+import Map from '@/views/Map.svelte';
+import About from '@/views/About.svelte';
 import PopupArticle from '@/components/Ui/PopupArticle.svelte';
 
 // Router params (paths, components & etc.)
