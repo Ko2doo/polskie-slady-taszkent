@@ -34,9 +34,7 @@
     "i18next": "^25.6.0",
     "i18next-browser-languagedetector": "^8.2.0",
     "konsta": "^5.0.4",
-    "leaflet": "^1.9.4",
     "maplibre-gl": "^5.13.0",
-    "pmtiles": "^4.3.0",
-    "protomaps-leaflet": "^5.1.0"
+    "pmtiles": "^4.3.0"
   }
 }
