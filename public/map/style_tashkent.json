@@ -16,7 +16,7 @@
       "source": "tashkent",
       "source-layer": "earth",
       "paint": {
-        "fill-color": "#f4f5aa"
+        "fill-color": "#d9caa4"
       }
     },
     {
@@ -25,7 +25,7 @@
       "source": "tashkent",
       "source-layer": "landcover",
       "paint": {
-        "fill-color": "#b5eba0"
+        "fill-color": "#c1df90"
       }
     },
     {
@@ -34,7 +34,7 @@
       "source": "tashkent",
       "source-layer": "landuse",
       "paint": {
-        "fill-color": "#9bc989"
+        "fill-color": "#e7ddc5"
       }
     },
     {
@@ -53,7 +53,7 @@
       "source": "tashkent",
       "source-layer": "roads",
       "paint": {
-        "line-color": "#dadada",
+        "line-color": "#fffefe",
         "line-width": 4
       }
     },
