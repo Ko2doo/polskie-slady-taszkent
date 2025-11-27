@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite --port 5050",
     "build": "vite build",
-    "preview": "vite preview --port 6060"
+    "preview": "vite preview --port 6060",
+    "map:download-sprites": "node scripts/downloadProtomapsSprites.mjs",
+    "map:generate-styles": "node scripts/generateMaplibreBaseStyle.mjs"
   },
   "engines": {
     "node": ">=20",

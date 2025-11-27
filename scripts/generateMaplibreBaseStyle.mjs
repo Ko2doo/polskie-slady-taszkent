@@ -33,6 +33,7 @@ const OUTPUT_DIR = 'public/map/styles';
 //   ["light", "dark"] x ["uz", "ru", "pl"]
 const DEFAULT_THEMES = ['light', 'dark'];
 const DEFAULT_LANGS = ['uz', 'ru', 'pl'];
+const DEFAULT_FONTNAME = 'Roboto Regular';
 
 // NOTE:
 // We don't point directly to a physical PMTiles file here.
@@ -45,7 +46,54 @@ const PMTILES_URL = 'pmtiles://tashkent-local';
 // Remote assets for fonts and sprites.
 // You can later replace these with local/offline paths if needed.
 const GLYPHS_URL = '/fonts/map/{fontstack}/{range}.pbf';
-const SPRITE_BASE_URL = 'https://protomaps.github.io/basemaps-assets/sprites/v4';
+const SPRITE_BASE_URL = '/map/sprites';
+
+/**
+ * Force a single fontstack for all text layers in a MapLibre style object.
+ *
+ * - Walks through style.layers
+ * - If a layer has layout["text-font"], it will be replaced with [fontstackName]
+ * - Mutates and returns the same style object (convenient in build pipeline)
+ *
+ * @param {object} style        MapLibre style JSON object
+ * @param {string} fontstackName  Fontstack name, e.g. "Roboto Regular"
+ * @returns {object} the same style object for chaining
+ */
+function applyFontEverywhere(style, fontstackName) {
+  if (!style || !Array.isArray(style.layers)) return style;
+
+  const rewriteExpr = (node) => {
+    if (Array.isArray(node)) {
+      return node.map(rewriteExpr);
+    }
+    if (node && typeof node === 'object') {
+      const out = {};
+      for (const [key, value] of Object.entries(node)) {
+        if (key === 'text-font') {
+          out[key] = ['literal', [fontstackName]];
+        } else {
+          out[key] = rewriteExpr(value);
+        }
+      }
+      return out;
+    }
+    return node;
+  };
+
+  for (const layer of style.layers) {
+    if (!layer || !layer.layout) continue;
+
+    if (layer.layout['text-font']) {
+      layer.layout['text-font'] = [fontstackName];
+    }
+
+    if (layer.layout['text-field']) {
+      layer.layout['text-field'] = rewriteExpr(layer.layout['text-field']);
+    }
+  }
+
+  return style;
+}
 
 // ----- CLI ARGUMENTS (comma-separated support) ---------------------------
 
@@ -139,7 +187,7 @@ function resolveFlavor(theme) {
 function buildStyle(theme, lang) {
   const flavor = resolveFlavor(theme);
 
-  return {
+  const style = {
     version: 8,
 
     center: [69.28, 41.3],
@@ -162,6 +210,8 @@ function buildStyle(theme, lang) {
     // Full basemap layer stack (land, water, roads, buildings, POIs, labels, ...).
     layers: layers('protomaps', flavor, { lang }),
   };
+
+  return applyFontEverywhere(style, DEFAULT_FONTNAME);
 }
 
 // ----- FILE GENERATION ----------------------------------------------------

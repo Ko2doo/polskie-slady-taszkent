@@ -34,6 +34,9 @@ export function resolvePageKeyFromRouteResult(result) {
     case '/':
       return 'handbook';
 
+    case '/map':
+      return 'map';
+
     case '/about':
       return 'about';
 

@@ -15,6 +15,7 @@
 
   $effect(() => {
     const result = route?.result;
+    // console.log(result);
 
     // get "pageKey" from route path
     //    "/about" -> "about"
