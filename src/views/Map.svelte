@@ -146,7 +146,7 @@
 
     // Structure:
     // public/map/sprites/light/light.{json,png}
-    style.sprite = `${origin}/map/sprites/light/light@2x`;
+    style.sprite = `${origin}/map/sprites/light/light`;
 
     // local glyphs Roboto
     style.glyphs = `${origin}/fonts/map/{fontstack}/{range}.pbf`;
