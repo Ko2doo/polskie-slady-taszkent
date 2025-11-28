@@ -35,11 +35,18 @@
   import { PMTiles, Protocol } from "pmtiles";
   import { InMemoryPMTilesSource } from "@/utils/inMemoryPmtilesSource";
 
+  // Style generation services
+  import { buildBaseMapStyle } from "@/services/mapStyle";
+
+  // Router
+  import { goto } from "@mateothegreat/svelte5-router";
+
   // Sources
-  const PMTILES_PATH = "/map/Tashkent_251120.pmtiles";
+  const PMTILES_PATH = "/map/tashkent_20251124.pmtiles";
   const PMTILES_KEY = "tashkent-local"; // public/map/style_tashkent.json pmtiles://tashkent-local
-  const BASE_STYLE = "/map/styles/style.light.ru.json";
-  const GEOJSON = "/map/Tashkent.geojson";
+  const CITY_BOUNDARIES = "/map/tashkent_boundaries.geojson";
+
+  import { articlesMeta } from "@/data/articles";
 
   let { route, i18n } = $props();
 
@@ -47,137 +54,207 @@
   let map;
   let protocol;
 
-  // onMount(async () => {
-  //   // 1. writting full .pmtiles file
-  //   const response = await fetch(PMTILES_PATH);
-
-  //   if (!response.ok) {
-  //     console.error("Failed to fetch PMTiles:", response.status, response.statusText);
-  //     return;
-  //   }
-
-  //   const buffer = await response.arrayBuffer();
-
-  //   // 2. Create in-memory source PMTiles
-  //   const src = new InMemoryPMTilesSource(PMTILES_KEY, buffer);
-  //   const pmtiles = new PMTiles(src);
-
-  //   // 3 Registration protocol and PMTiles instance
-  //   protocol = new Protocol();
-  //   maplibreGL.addProtocol("pmtiles", protocol.tile);
-  //   protocol.add(pmtiles);
-
-  //   // 4. Create map
-  //   map = new maplibreGL.Map({
-  //     container: mapContainer,
-  //     style: {
-  //       version: 8,
-  //       sources: {},
-  //       layers: [],
-  //     },
-
-  //     minZoom: 10,
-  //     maxZoom: 18,
-  //   });
-
-  //   map.setStyle(BASE_STYLE, {
-  //     transformStyle: (style) => {
-  //       const origin = window.location.origin;
-
-  //       // полные URL до локальных спрайтов и глифов
-  //       style.sprite = `${origin}/map/sprites/light/light`;
-  //       style.glyphs = `${origin}/fonts/map/{fontstack}/{range}.pbf`;
-
-  //       return style;
-  //     },
-
-  //     diff: false,
-  //   });
-
-  //   // Add GeoJson boundaries
-  //   map.on("load", () => {
-  //     map.addSource("geojson-source", {
-  //       type: "geojson",
-  //       data: GEOJSON,
-  //     });
-
-  //     map.addLayer({
-  //       id: "geojson-layer",
-  //       type: "line",
-  //       source: "geojson-source",
-  //       paint: {
-  //         "line-color": "#f56f32",
-  //         "line-width": 6,
-  //       },
-  //     });
-  //   });
-  // });
+  function openArticle(id) {
+    goto(`/articles/${id}`);
+  }
 
   onMount(async () => {
-    // 1. parralel loading PMTiles and style.json
-    const [pmtilesResponse, styleResponse] = await Promise.all([fetch(PMTILES_PATH), fetch(BASE_STYLE)]);
+    // 1. Loading full PMTiles-file
+    const response = await fetch(PMTILES_PATH);
 
-    if (!pmtilesResponse.ok) {
-      console.error("Failed to fetch PMTiles:", pmtilesResponse.status, pmtilesResponse.statusText);
+    if (!response.ok) {
+      console.error("Failed to fetch PMTiles:", response.status, response.statusText);
       return;
     }
 
-    if (!styleResponse.ok) {
-      console.error("Failed to fetch base style:", styleResponse.status, styleResponse.statusText);
-      return;
-    }
-
-    // 2. Reading data PMTiles in memory
-    const buffer = await pmtilesResponse.arrayBuffer();
+    // 2. Create in-memory data PMTiles
+    const buffer = await response.arrayBuffer();
     const src = new InMemoryPMTilesSource(PMTILES_KEY, buffer);
     const pmtiles = new PMTiles(src);
 
+    // 3. Protocol pmtiles:// registration
     protocol = new Protocol();
     maplibreGL.addProtocol("pmtiles", protocol.tile);
     protocol.add(pmtiles);
 
-    // 3. Reading style.json with object and patching sprite/glyphs
-    const rawStyle = await styleResponse.json();
-
-    // Clone
-    const style = structuredClone ? structuredClone(rawStyle) : JSON.parse(JSON.stringify(rawStyle));
-
+    // 4. Building runtime-style with @protomaps/basemaps
     const origin = window.location.origin;
 
-    // Structure:
-    // public/map/sprites/light/light.{json,png}
-    style.sprite = `${origin}/map/sprites/light/light`;
+    const style = buildBaseMapStyle({
+      origin,
+      pmtilesKey: PMTILES_KEY,
+      theme: "light",
+      lang: `${$i18n.language}`,
+      fontstack: "Roboto Regular",
+    });
 
-    // local glyphs Roboto
-    style.glyphs = `${origin}/fonts/map/{fontstack}/{range}.pbf`;
-
-    // 4. Create map
+    // 5. Create map
     map = new maplibreGL.Map({
       container: mapContainer,
       style,
-      center: [69.25, 41.3],
+      center: [69.29, 41.3],
       zoom: 11,
       minZoom: 10,
-      maxZoom: 18,
+      maxZoom: 17,
     });
 
     // 5. Add GeoJSON after map loading
     map.on("load", () => {
-      map.addSource("geojson-source", {
+      map.addSource("city-boundaries", {
         type: "geojson",
-        data: GEOJSON,
+        data: CITY_BOUNDARIES,
       });
 
       // Add city boundary
       map.addLayer({
         id: "city-boundary",
         type: "line",
-        source: "geojson-source",
+        source: "city-boundaries",
         paint: {
           "line-color": "#f56f32",
           "line-width": 6,
         },
       });
+
+      // Add points
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+
+      img.onload = () => {
+        if (!map.hasImage("article-point")) {
+          map.addImage("article-point", img);
+        }
+
+        const features = articlesMeta
+          .map((article) => {
+            const coords = article.coords;
+
+            if (!coords || coords.length !== 2) return null;
+
+            const title = $i18n.t(`articles:${article.id}:title`);
+
+            return {
+              type: "Feature",
+              geometry: {
+                type: "Point",
+                coordinates: coords,
+              },
+              properties: {
+                id: article.id,
+                title: title,
+              },
+            };
+          })
+          .filter(Boolean);
+
+        const sourceData = {
+          type: "FeatureCollection",
+          features,
+        };
+
+        // Points
+        map.addSource("articles-points-source", {
+          type: "geojson",
+          data: sourceData,
+        });
+
+        // Layer with icons
+        map.addLayer({
+          id: "articles-points-layer",
+          type: "symbol",
+          source: "articles-points-source",
+          layout: {
+            "icon-image": "article-point",
+            "icon-size": 0.42,
+            "icon-allow-overlap": true,
+          },
+        });
+
+        // Layers with title
+        map.addLayer({
+          id: "articles-labels-layer",
+          type: "symbol",
+          source: "articles-points-source",
+          minzoom: 13.5,
+          layout: {
+            "text-field": ["get", "title"],
+            "text-size": 12,
+            "text-offset": [0, 1.2],
+            "text-anchor": "top",
+            "text-allow-overlap": false,
+            "icon-optional": true,
+          },
+          paint: {
+            "text-color": "#111111",
+            "text-halo-color": "#ffffff",
+            "text-halo-width": 1.5,
+          },
+        });
+
+        // Popup with click points
+        map.on("click", "articles-points-layer", (e) => {
+          const feature = e.features && e.features[0];
+          if (!feature) return;
+
+          const coords = feature.geometry.coordinates;
+          const { id, title } = feature.properties;
+
+          // Popup init
+          const popup = new maplibreGL.Popup({
+            closeButton: false, // disable default button
+            closeOnClick: true,
+          }).setLngLat(coords);
+
+          // Custom popup params
+          const container = document.createElement("div");
+          container.className = "map-popup";
+
+          // Popup inner content
+          container.innerHTML = `
+            <div class="flex justify-end mb-1">
+              <button
+                type="button"
+                class="map-popup-close cursor-pointer w-7 h-7 flex items-center justify-center rounded-full bg-white/80 text-xs font-bold shadow"
+                aria-label="Close"
+              >&times;</button>
+            </div>
+            <div class="text-sm">
+              <p class="w-full text-gray-900 dark:text-gray-900 text-base font-medium sm:font-bold">${title}</p><br/>
+              <a class="w-full text-blue-500 dark:text-blue-500 text-base" href="/articles/${id}" data-article-id="${id}">
+                ${$i18n.t("ui:buttons:readMore")}
+              </a>
+            </div>
+          `;
+
+          // Close button
+          const closeBtn = container.querySelector(".map-popup-close");
+          if (closeBtn) {
+            closeBtn.addEventListener("click", () => {
+              popup.remove();
+            });
+          }
+
+          // Routing link
+          const link = container.querySelector("a");
+          if (link) {
+            link.addEventListener("click", (event) => {
+              event.preventDefault();
+              openArticle(id);
+              popup.remove();
+            });
+          }
+
+          // Create popup with map
+          popup.setDOMContent(container).addTo(map);
+        });
+      };
+
+      img.onerror = (e) => {
+        console.error("Failed to load icon image:", e);
+      };
+
+      // Add icon
+      img.src = "/map/icons/pointIcon.png";
     });
   });
 
@@ -210,4 +287,6 @@
   });
 </script>
 
-<section bind:this={mapContainer} class="w-full h-full"></section>
+<section class="w-full h-full">
+  <div bind:this={mapContainer} class="w-full h-full"></div>
+</section>

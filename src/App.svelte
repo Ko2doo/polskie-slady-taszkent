@@ -19,28 +19,44 @@
 
 <App theme="ios" safeAreas>
   <Page class="flex flex-col min-h-[100dvh] !p-0">
-    <Navbar title={$navbarState.title ?? ""}>
-      <!-- Left content -->
-      {#snippet left()}
-        {#if $navbarState.leftSnippet}
-          {@render $navbarState.leftSnippet()}
-        {/if}
-      {/snippet}
+    {#if $navbarState.subnavSnippet}
+      <Navbar title={$navbarState.title ?? ""}>
+        <!-- Left content -->
+        {#snippet left()}
+          {#if $navbarState.leftSnippet}
+            {@render $navbarState.leftSnippet()}
+          {/if}
+        {/snippet}
 
-      <!-- Right content -->
-      {#snippet right()}
-        {#if $navbarState.rightSnippet}
-          {@render $navbarState.rightSnippet()}
-        {/if}
-      {/snippet}
+        <!-- Right content -->
+        {#snippet right()}
+          {#if $navbarState.rightSnippet}
+            {@render $navbarState.rightSnippet()}
+          {/if}
+        {/snippet}
 
-      <!-- Subnav -->
-      {#snippet subnavbar()}
-        {#if $navbarState.subnavSnippet}
+        <!-- Subnav -->
+        {#snippet subnavbar()}
           {@render $navbarState.subnavSnippet()}
-        {/if}
-      {/snippet}
-    </Navbar>
+        {/snippet}
+      </Navbar>
+    {:else}
+      <Navbar title={$navbarState.title ?? ""}>
+        <!-- Left content -->
+        {#snippet left()}
+          {#if $navbarState.leftSnippet}
+            {@render $navbarState.leftSnippet()}
+          {/if}
+        {/snippet}
+
+        <!-- Right content -->
+        {#snippet right()}
+          {#if $navbarState.rightSnippet}
+            {@render $navbarState.rightSnippet()}
+          {/if}
+        {/snippet}
+      </Navbar>
+    {/if}
 
     <!-- Centered content -->
     <main class="flex-1 overflow-y-auto pb-[56px]">
