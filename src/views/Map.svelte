@@ -38,6 +38,9 @@
   // Style generation services
   import { buildBaseMapStyle } from "@/services/mapStyle";
 
+  // Points builder
+  import { MapPointsBuilder } from "@/services/mapPointsBuilder";
+
   // Router
   import { goto } from "@mateothegreat/svelte5-router";
 
@@ -47,16 +50,13 @@
   const CITY_BOUNDARIES = "/map/tashkent_boundaries.geojson";
 
   import { articlesMeta } from "@/data/articles";
+  import { render } from "svelte/server";
 
   let { route, i18n } = $props();
 
   let mapContainer;
   let map;
   let protocol;
-
-  function openArticle(id) {
-    goto(`/articles/${id}`);
-  }
 
   onMount(async () => {
     // 1. Loading full PMTiles-file
@@ -99,162 +99,80 @@
     });
 
     // 5. Add GeoJSON after map loading
-    map.on("load", () => {
-      map.addSource("city-boundaries", {
-        type: "geojson",
-        data: CITY_BOUNDARIES,
-      });
+    // Map pointer data
+    const builder = new MapPointsBuilder({
+      currentMap: map,
+      data: articlesMeta,
+      i18n: {
+        // title for point label
+        title: (item) => $i18n.t(`articles:${item.id}:title`),
+        popupLink: () => $i18n.t("ui:buttons:readMore"),
+      },
+      routeFunc: (id) => goto(`/articles/${id}`),
 
-      // Add city boundary
-      map.addLayer({
-        id: "city-boundary",
-        type: "line",
-        source: "city-boundaries",
-        paint: {
-          "line-color": "#f56f32",
-          "line-width": 6,
+      // Markers
+      markers: {
+        render: true,
+        icon: {
+          name: "article",
+          url: "/map/icons/pointIcon.png",
         },
-      });
-
-      // Add points
-      const img = new Image();
-      img.crossOrigin = "anonymous";
-
-      img.onload = () => {
-        if (!map.hasImage("article-point")) {
-          map.addImage("article-point", img);
-        }
-
-        const features = articlesMeta
-          .map((article) => {
-            const coords = article.coords;
-
-            if (!coords || coords.length !== 2) return null;
-
-            const title = $i18n.t(`articles:${article.id}:title`);
-
-            return {
-              type: "Feature",
-              geometry: {
-                type: "Point",
-                coordinates: coords,
-              },
-              properties: {
-                id: article.id,
-                title: title,
-              },
-            };
-          })
-          .filter(Boolean);
-
-        const sourceData = {
-          type: "FeatureCollection",
-          features,
-        };
-
-        // Points
-        map.addSource("articles-points-source", {
-          type: "geojson",
-          data: sourceData,
-        });
-
-        // Layer with icons
-        map.addLayer({
-          id: "articles-points-layer",
-          type: "symbol",
-          source: "articles-points-source",
-          layout: {
-            "icon-image": "article-point",
-            "icon-size": 0.42,
-            "icon-allow-overlap": true,
+        mapSource: [{ pointSourceName: "articles-points-source", type: "geojson" }],
+        mapLayer: [
+          {
+            id: "articles-points-layer",
+            type: "symbol",
+            source: "articles-points-source",
+            minzoom: 11.5,
+            layout: {
+              "icon-image": "article-point",
+              "icon-size": 0.42,
+              "icon-allow-overlap": true,
+            },
           },
-        });
-
-        // Layers with title
-        map.addLayer({
-          id: "articles-labels-layer",
-          type: "symbol",
-          source: "articles-points-source",
-          minzoom: 13.5,
-          layout: {
-            "text-field": ["get", "title"],
-            "text-size": 12,
-            "text-offset": [0, 1.2],
-            "text-anchor": "top",
-            "text-allow-overlap": false,
-            "icon-optional": true,
+          {
+            id: "articles-labels-layer",
+            type: "symbol",
+            source: "articles-points-source",
+            minzoom: 12.5,
+            layout: {
+              "text-field": ["get", "title"],
+              "text-size": 12,
+              "text-offset": [0, 1.2],
+              "text-anchor": "top",
+              "text-allow-overlap": false,
+              "icon-optional": true,
+            },
+            paint: {
+              "text-color": "#111111",
+              "text-halo-color": "#ffffff",
+              "text-halo-width": 1.5,
+            },
           },
-          paint: {
-            "text-color": "#111111",
-            "text-halo-color": "#ffffff",
-            "text-halo-width": 1.5,
+        ],
+        listener: {
+          iconLayerId: "articles-points-layer",
+        },
+      },
+
+      // City boundary
+      cityBoundaries: {
+        render: true,
+        mapSource: [{ boundaryName: "city-boundaries", type: "geojson", data: CITY_BOUNDARIES }],
+        mapLayer: [
+          {
+            id: "city-boundary",
+            source: "city-boundaries",
+            lineColor: "#f56f32",
+            lineWidth: 6,
           },
-        });
+        ],
+      },
+    });
 
-        // Popup with click points
-        map.on("click", "articles-points-layer", (e) => {
-          const feature = e.features && e.features[0];
-          if (!feature) return;
-
-          const coords = feature.geometry.coordinates;
-          const { id, title } = feature.properties;
-
-          // Popup init
-          const popup = new maplibreGL.Popup({
-            closeButton: false, // disable default button
-            closeOnClick: true,
-          }).setLngLat(coords);
-
-          // Custom popup params
-          const container = document.createElement("div");
-          container.className = "map-popup";
-
-          // Popup inner content
-          container.innerHTML = `
-            <div class="flex justify-end mb-1">
-              <button
-                type="button"
-                class="map-popup-close cursor-pointer w-7 h-7 flex items-center justify-center rounded-full bg-white/80 text-xs font-bold shadow"
-                aria-label="Close"
-              >&times;</button>
-            </div>
-            <div class="text-sm">
-              <p class="w-full text-gray-900 dark:text-gray-900 text-base font-medium sm:font-bold">${title}</p><br/>
-              <a class="w-full text-blue-500 dark:text-blue-500 text-base" href="/articles/${id}" data-article-id="${id}">
-                ${$i18n.t("ui:buttons:readMore")}
-              </a>
-            </div>
-          `;
-
-          // Close button
-          const closeBtn = container.querySelector(".map-popup-close");
-          if (closeBtn) {
-            closeBtn.addEventListener("click", () => {
-              popup.remove();
-            });
-          }
-
-          // Routing link
-          const link = container.querySelector("a");
-          if (link) {
-            link.addEventListener("click", (event) => {
-              event.preventDefault();
-              openArticle(id);
-              popup.remove();
-            });
-          }
-
-          // Create popup with map
-          popup.setDOMContent(container).addTo(map);
-        });
-      };
-
-      img.onerror = (e) => {
-        console.error("Failed to load icon image:", e);
-      };
-
-      // Add icon
-      img.src = "/map/icons/pointIcon.png";
+    map.on("load", () => {
+      builder.addCityBoundaryLayer();
+      builder.addMarkers();
     });
   });
 
