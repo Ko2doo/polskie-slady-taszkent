@@ -205,6 +205,9 @@
   });
 </script>
 
-<section class="w-full h-full">
-  <div bind:this={mapContainer} class="w-full h-full"></div>
+<section class="w-full h-full grid grid-cols-1 md:grid-cols-1 pl-4 pr-4 pb-4">
+  <div
+    bind:this={mapContainer}
+    class="w-full h-full rounded-3xl bg-ios-light-surface-1 dark:bg-ios-dark-surface-1"
+  ></div>
 </section>

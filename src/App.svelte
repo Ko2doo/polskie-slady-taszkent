@@ -8,6 +8,8 @@
   // router
   import { Router } from "@mateothegreat/svelte5-router";
   import { routes } from "@/Routes";
+  // from route-friendly back button logic hook
+  import { navigationHistoryPostHook } from "@/services/navigationHistory";
 
   // Components
   import BottomTabbarNav from "@/components/Ui/BottomTabbarNav.svelte";
@@ -59,8 +61,14 @@
     {/if}
 
     <!-- Centered content -->
-    <main class="flex-1 overflow-y-auto pb-[56px]">
-      <Router {routes} {i18n} />
+    <main class="flex-1 overflow-y-auto">
+      <Router
+        {routes}
+        hooks={{
+          post: navigationHistoryPostHook,
+        }}
+        {i18n}
+      />
     </main>
 
     <!-- Panel -->
