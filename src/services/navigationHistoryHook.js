@@ -1,7 +1,7 @@
 import { writable, get } from 'svelte/store';
 import { goto } from '@mateothegreat/svelte5-router';
 
-// Simple stack or pair; начнём с пары
+// Simple stack or pair;
 export const navigationHistory = writable({
   current: null,
   prev: null,
@@ -17,10 +17,11 @@ export const navigationHistoryPostHook = (route) => {
   /* prettier-ignore */
   const path =
     route?.path ||
-    route?.location?.pathname ||
+    route?.result?.path?.original ||
     (typeof window !== "undefined" ? window.location.pathname : null);
 
-  // console.log('[navPostHook] route.path =', route?.path, 'resolved path =', path);
+  // console.log(route?.result?.path?.original);
+  // console.log('[navPostHook] route.path =', route?.result?.path?.original, 'resolved path =', path);
 
   navigationHistory.update((state) => {
     if (!path) return state;

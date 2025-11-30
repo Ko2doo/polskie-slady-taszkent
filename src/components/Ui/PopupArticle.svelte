@@ -3,7 +3,7 @@
    * A component with a dynamic router based on the article ID that opens a new screen with an expanded popup.
    */
   import { Popup, Page, Navbar, NavbarBackLink, Block, Link } from "konsta/svelte";
-  import { routerBack } from "@/services/navigationHistory";
+  import { routerBack } from "@/services/navigationHistoryHook";
 
   import { articlesMeta } from "@/data/articles";
 

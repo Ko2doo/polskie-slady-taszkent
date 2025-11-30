@@ -9,7 +9,7 @@
   import { Router } from "@mateothegreat/svelte5-router";
   import { routes } from "@/Routes";
   // from route-friendly back button logic hook
-  import { navigationHistoryPostHook } from "@/services/navigationHistory";
+  import { navigationHistoryPostHook } from "@/services/navigationHistoryHook";
 
   // Components
   import BottomTabbarNav from "@/components/Ui/BottomTabbarNav.svelte";
