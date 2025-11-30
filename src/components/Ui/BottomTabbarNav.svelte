@@ -59,7 +59,7 @@
         <a
           href={link.href}
           use:linkAction={routeParam}
-          class="active:opacity-50 k-link inline-flex flex-col justify-center items-center cursor-pointer select-none px-4 text-xs truncate w-full h-full duration-300 transition-colors rounded-full"
+          class="active:opacity-50 k-link inline-flex flex-col justify-center items-center cursor-pointer select-none px-4 text-xs truncate w-full h-full duration-120 transition-colors rounded-full"
         >
           <!-- Render icons (if it exists iconCollection) -->
           <Icon class="mb-1">
