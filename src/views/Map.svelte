@@ -123,10 +123,10 @@
             id: "articles-points-layer",
             type: "symbol",
             source: "articles-points-source",
-            minzoom: 11.5,
+            // minzoom: 11.5,
             layout: {
               "icon-image": "article-point",
-              "icon-size": 0.42,
+              "icon-size": 0.38,
               "icon-allow-overlap": true,
             },
           },
@@ -152,6 +152,7 @@
         ],
         listener: {
           iconLayerId: "articles-points-layer",
+          labelLayerId: "articles-labels-layer",
         },
       },
 

@@ -208,7 +208,7 @@ export class MapPointsBuilder {
       });
 
       // Popup on marker click
-      const clickLayerId = this._params.markers.listener.iconLayerId;
+      const clickLayerId = [this._params.markers.listener.iconLayerId, this._params.markers.listener.labelLayerId];
       if (!clickLayerId) {
         console.warn('[MapPointsBuilder] iconLayerId is not provided, click handler will not be attached');
       } else {
