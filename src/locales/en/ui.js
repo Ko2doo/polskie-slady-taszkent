@@ -27,12 +27,19 @@ export default {
     handbook: {
       title: 'Handbook',
     },
+    map: {
+      title: 'Map',
+    },
     about: {
       title: 'About us',
     },
     settings: {
       title: 'Settings',
     },
+  },
+  searchbar: {
+    cancel: 'Cancel',
+    placeholder: 'Search',
   },
   errors: {
     noArticleId: 'No article ID in the route.',

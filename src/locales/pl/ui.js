@@ -30,12 +30,19 @@ export default {
     handbook: {
       title: 'Informator',
     },
+    map: {
+      title: 'Mapa',
+    },
     about: {
       title: 'O nas',
     },
     settings: {
       title: 'Ustawienia',
     },
+  },
+  searchbar: {
+    cancel: 'Anuluj',
+    placeholder: 'Szukaj',
   },
   errors: {
     noArticleId: 'Brak ID artykułu w trasie.',

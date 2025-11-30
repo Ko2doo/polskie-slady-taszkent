@@ -6,5 +6,5 @@ export const translations = {
   // en: 'English',
   pl: 'Polski',
   ru: 'Русский',
-  uz: 'O`zbek tili',
+  uz: 'O‘zbek tili',
 };

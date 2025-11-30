@@ -8,9 +8,9 @@ export default {
     handbook: {
       title: 'Filtrlar',
       filters: {
-        layoutTitle: 'Ko`inish uslubi',
+        layoutTitle: 'Ko‘inish uslubi',
         layoutGrid: 'Plitkalar',
-        layoutRows: 'Ro`yxat',
+        layoutRows: 'Ro‘yxat',
         categoryTitle: 'Kategoriyalar',
         category: {
           all: 'Barchasi',
@@ -25,7 +25,10 @@ export default {
       title: 'Bosh sahifa',
     },
     handbook: {
-      title: 'Ma`lumotnoma',
+      title: 'Ma‘lumotnoma',
+    },
+    map: {
+      title: 'Xarita',
     },
     about: {
       title: 'Biz haqimizda',
@@ -34,14 +37,18 @@ export default {
       title: 'Sozlamalar',
     },
   },
+  searchbar: {
+    cancel: 'Bekor qilish',
+    placeholder: 'Qidirish',
+  },
   errors: {
-    noArticleId: 'Marshrutta maqola ID si yo`q.',
+    noArticleId: 'Marshrutta maqola ID si yo‘q.',
     articleNotFound: 'Maqola topilmadi!',
     notFound: 'Hech narsa topilmadi',
   },
   buttons: {
     back: 'Orqaga',
-    readMore: 'Ko`proq o`qish..',
+    readMore: 'Ko‘proq o‘qish..',
     langSwitcher: 'Til',
   },
   dialogue: {
