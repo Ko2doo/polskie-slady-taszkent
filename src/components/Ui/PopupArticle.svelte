@@ -10,8 +10,10 @@
   let { route, i18n } = $props();
   // $inspect("PopupArticle props >>>", route.result);
 
+  // svelte-ignore state_referenced_locally
+  // check this: https://github.com/sveltejs/svelte/issues/12877
   let articleId = route?.result?.path.params;
-  const meta = $derived(articlesMeta.find((a) => a.id === articleId));
+  const meta = articlesMeta.find((a) => a.id === articleId);
 
   function handleBack() {
     routerBack("/");
