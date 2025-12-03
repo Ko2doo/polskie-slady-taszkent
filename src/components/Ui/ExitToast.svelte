@@ -69,7 +69,7 @@
 
 <Toast {opened} position="center" button={false} onclick={() => handleClick()}>
   <div class="flex items-center gap-2 shrink">
-    <span class="text-sm">{$i18n.t("ui:toasts:exitApp")}</span>
+    <span class="text-md">{$i18n.t("ui:toasts:exitApp")}</span>
 
     <span class="ml-auto text-xs opacity-80 tabular-nums">
       {Math.ceil(remainingMs / 1000)}s
