@@ -51,6 +51,9 @@ export default {
     readMore: 'Читать далее..',
     langSwitcher: 'Язык',
   },
+  toasts: {
+    exitApp: 'Нажмите назад ещё раз что-бы выйти',
+  },
   dialogue: {
     hello: 'Привет, Мир!',
   },

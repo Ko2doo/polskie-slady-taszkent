@@ -1,6 +1,13 @@
 <script>
   import { App, Page, Navbar, Panel, Link, Block } from "konsta/svelte";
 
+  // Svelte
+  import { onMount } from "svelte";
+
+  // Capacitor
+  import { initBackButtonHandler } from "@/capacitor/backButton";
+  import ExitToast from "@/components/Ui/ExitToast.svelte";
+
   // i18Next
   import { i18nStores } from "@/services/i18n";
   const { i18n } = i18nStores;
@@ -17,6 +24,10 @@
   // Store imports
   import { navbarState } from "@/store/ui/navbar";
   import { panelState, openPanel, closePanel } from "@/store/ui/panel";
+
+  onMount(() => {
+    initBackButtonHandler();
+  });
 </script>
 
 <App theme="ios" safeAreas>
@@ -69,6 +80,7 @@
         }}
         {i18n}
       />
+      <ExitToast {i18n} />
     </main>
 
     <!-- Panel -->

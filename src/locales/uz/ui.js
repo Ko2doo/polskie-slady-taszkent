@@ -51,6 +51,9 @@ export default {
     readMore: 'Ko‘proq o‘qish..',
     langSwitcher: 'Til',
   },
+  toasts: {
+    exitApp: 'Chiqish uchun yana bir marta Orqaga bosing',
+  },
   dialogue: {
     hello: 'Salom, Dunyo!',
   },

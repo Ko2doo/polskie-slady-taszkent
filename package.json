@@ -30,6 +30,7 @@
   },
   "dependencies": {
     "@capacitor/android": "^7.4.4",
+    "@capacitor/app": "^7.1.0",
     "@capacitor/core": "^7.4.4",
     "@mateothegreat/svelte5-router": "^2.16.19",
     "@protomaps/basemaps": "^5.7.0",

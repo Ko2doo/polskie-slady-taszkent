@@ -20,9 +20,6 @@ export default {
       },
     },
   },
-  dialogue: {
-    hello: 'Halo, Świat!',
-  },
   navbar: {
     home: {
       title: 'Strona główna',
@@ -53,5 +50,11 @@ export default {
     back: 'Powrót',
     readMore: 'Przeczytaj więcej..',
     langSwitcher: 'Język',
+  },
+  toasts: {
+    exitApp: 'Naciśnij „Wstecz” jeszcze raz, aby wyjść',
+  },
+  dialogue: {
+    hello: 'Halo, Świat!',
   },
 };
