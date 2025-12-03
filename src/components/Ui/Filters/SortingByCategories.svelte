@@ -2,8 +2,8 @@
   import { List, ListItem, BlockTitle, Radio } from "konsta/svelte";
   import { onMount } from "svelte";
 
-  // Safe localStorage helpers (string in / string out)
-  import { setLocalStorage, getLocalStorage } from "@/utils/localeStorageUtils";
+  // Safe Capacitor storage helpers (string in / string out)
+  import { setStorage, getStorage } from "@/capacitor/utils/appStorage";
 
   // Props (Svelte 5)
   let {
@@ -11,12 +11,13 @@
     items = [], // source list to derive available categories
     categoryKey = "category", // key holding category id inside items
     i18nPrefix = "ui:sidePanel:handbook:filters:category", // i18n key prefix
-    localStorageKey = "handbook.category", // localStorage key for the single selected category
+    storageKey = "handbook.category", // Capacitor storage key for the single selected category
     onSelectedChange = null, // callback: (id: string) => void
-    allId = "all", // special id meaning “show all categories”
+    // allId = "all", // special id meaning “show all categories”
   } = $props();
 
   // Local state
+  let allId = "all";
   let selectedId = $state(allId); // currently selected category id
   let categoryIds = $state([]); // available category ids (excluding "all")
   let lastEmitted = $state(""); // last value sent to parent (prevents duplicate emits)
@@ -43,16 +44,11 @@
     if (typeof onSelectedChange === "function") onSelectedChange(id);
   }
 
-  // Persist current selection to localStorage
+  // Persist current selection to Capacitor storage
   function saveIfChanged(id) {
     if (id === lastSaved) return;
-
-    try {
-      setLocalStorage(localStorageKey, id);
-      lastSaved = id;
-    } catch (error) {
-      console.error(error);
-    }
+    lastSaved = id;
+    setStorage(storageKey, id);
   }
 
   // Single entry point to apply a selection
@@ -70,13 +66,13 @@
   }
 
   // Initialize selection from localStorage (once on mount)
-  onMount(() => {
+  onMount(async () => {
     try {
-      const raw = getLocalStorage(localStorageKey);
+      const raw = await getStorage(storageKey);
       const stored = typeof raw === "string" && raw ? raw : allId;
 
       applySelection(stored);
-      saveIfChanged(stored);
+      // saveIfChanged(stored);
     } catch (error) {
       console.error(error);
     }

@@ -13,7 +13,7 @@
   import LayoutRowsIcon from "@/lib/icons/LayoutRowsIcon.svelte";
 
   // Utils
-  import { setLocalStorage, getLocalStorage } from "@/utils/localeStorageUtils";
+  import { setStorage, getStorage } from "@/capacitor/utils/appStorage";
 
   // Props
   let { i18n, onChange = null } = $props();
@@ -46,7 +46,7 @@
   const GRID_STYLE = `${BASE_GRID_STYLE} grid-cols-2 lg:grid-cols-4 md:grid-cols-3`;
   const ROWS_STYLE = `${BASE_GRID_STYLE} grid-cols-1 md:grid-cols-1`;
 
-  // localStorage key name
+  // Capacitor Preferences key name
   const LS_KEY = "handbook.layoutMode";
 
   // State
@@ -66,20 +66,22 @@
   // applyLayout(mode)
   // Normalized value
   // updates two reactive state
-  // writting to localStorage
+  // writing layout mode to persistent storage (Capacitor Preferences)
   function applyLayout(mode) {
     const normalized = mode === "layoutRows" || mode === "layoutGrid" ? mode : "layoutGrid";
+
+    if (normalized === layoutMode && layoutState) return;
 
     layoutMode = normalized;
     layoutState = normalized === "layoutRows" ? ROWS_STYLE : GRID_STYLE;
 
-    setLocalStorage(LS_KEY, normalized);
+    setStorage(LS_KEY, normalized);
     emitChange();
   }
 
   // Initialization for mount component
-  onMount(() => {
-    const stored = getLocalStorage(LS_KEY);
+  onMount(async () => {
+    const stored = await getStorage(LS_KEY);
     applyLayout(stored);
   });
 
@@ -110,7 +112,7 @@
         class: getBtnClasses(list.id),
         "data-switcher-id": list.id,
       }}
-      onclick={(e) => layoutSwitcherHandler(e)}
+      onclick={layoutSwitcherHandler}
     >
       <Icon class="me-4">
         {@const IconComponent = list.icon}
