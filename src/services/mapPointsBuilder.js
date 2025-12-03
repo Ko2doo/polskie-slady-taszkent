@@ -44,6 +44,7 @@ export class MapPointsBuilder {
       i18n: {
         title: i18n.title,
         popupLink: i18n.popupLink,
+        popupGetOtherMaps: i18n.popupGetOtherMaps,
       },
       routeFunc,
       currentMap,
@@ -231,6 +232,11 @@ export class MapPointsBuilder {
 
           const popupLinkFn = this._params.i18n.popupLink;
           const popupLinkText = typeof popupLinkFn === 'function' ? popupLinkFn() : '';
+          const popupGetOtherMaps =
+            typeof this._params.i18n.popupGetOtherMaps === 'function' ? this._params.i18n.popupGetOtherMaps() : '';
+
+          const [lon, lat] = coords;
+          const coordsTransform = [lat, lon];
 
           // Popup inner content
           container.innerHTML = `
@@ -241,10 +247,13 @@ export class MapPointsBuilder {
                 aria-label="Close"
               >&times;</button>
             </div>
-            <div class="text-sm">
-              <p class="w-full text-gray-900 dark:text-gray-900 text-base font-medium sm:font-bold">${title}</p><br/>
-              <a class="w-full text-blue-500 dark:text-blue-500 text-base" href="/articles/${id}" data-article-id="${id}">
+            <div class="flex flex-col text-sm">
+              <p class="w-full text-gray-900 dark:text-gray-900 text-base font-medium sm:font-bold">${title}</p>
+              <a class="w-full text-blue-500 dark:text-blue-500 text-base mt-4" href="/articles/${id}" data-article-id="${id}">
                 ${popupLinkText}
+              </a>
+              <a class="w-full text-blue-500 dark:text-blue-500 text-base mt-1" target="_blank" href="https://www.google.com/maps/place/${coordsTransform}">
+                ${popupGetOtherMaps}
               </a>
             </div>
           `;

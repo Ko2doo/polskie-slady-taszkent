@@ -50,6 +50,8 @@ export default {
     back: 'Назад',
     readMore: 'Читать далее..',
     langSwitcher: 'Язык',
+    toMaps: 'Показать на карте',
+    popupGetOtherMaps: 'Открыть в Google Maps',
   },
   toasts: {
     exitApp: 'Нажмите назад ещё раз что-бы выйти',

@@ -50,6 +50,8 @@ export default {
     back: 'Powrót',
     readMore: 'Przeczytaj więcej..',
     langSwitcher: 'Język',
+    toMaps: 'Pokaż na mapie',
+    popupGetOtherMaps: 'Otwórz w Mapach Google',
   },
   toasts: {
     exitApp: 'Naciśnij „Wstecz” jeszcze raz, aby wyjść',

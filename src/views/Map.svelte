@@ -50,13 +50,35 @@
   const CITY_BOUNDARIES = "/map/tashkent_boundaries.geojson";
 
   import { articlesMeta } from "@/data/articles";
-  import { render } from "svelte/server";
 
   let { route, i18n } = $props();
 
   let mapContainer;
   let map;
   let protocol;
+
+  // Coordinates
+  let targetCoords = $state(null);
+
+  // svelte-ignore state_referenced_locally
+  // check this: https://github.com/sveltejs/svelte/issues/12877
+  function resolveTargetCoordsFromRoute(value) {
+    const qs = value?.result?.querystring?.params;
+    if (!qs) return null;
+
+    const lon = parseFloat(qs.lon);
+    const lat = parseFloat(qs.lat);
+
+    if (Number.isNaN(lon) || Number.isNaN(lat)) return null;
+
+    return [lon, lat];
+  }
+
+  // svelte-ignore state_referenced_locally
+  targetCoords = resolveTargetCoordsFromRoute(route);
+
+  // $inspect(route?.result?.querystring?.params);
+  // $inspect(targetCoords);
 
   onMount(async () => {
     // 1. Loading full PMTiles-file
@@ -107,6 +129,7 @@
         // title for point label
         title: (item) => $i18n.t(`articles:${item.id}:title`),
         popupLink: () => $i18n.t("ui:buttons:readMore"),
+        popupGetOtherMaps: () => $i18n.t("ui:buttons:popupGetOtherMaps"),
       },
       routeFunc: (id) => goto(`/articles/${id}`),
 
@@ -174,6 +197,13 @@
     map.on("load", () => {
       builder.addCityBoundaryLayer();
       builder.addMarkers();
+
+      if (targetCoords) {
+        map.flyTo({
+          center: targetCoords,
+          zoom: 16,
+        });
+      }
     });
   });
 

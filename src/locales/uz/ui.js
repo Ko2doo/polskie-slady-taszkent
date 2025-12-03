@@ -50,6 +50,8 @@ export default {
     back: 'Orqaga',
     readMore: 'Ko‘proq o‘qish..',
     langSwitcher: 'Til',
+    toMaps: 'Xaritada ko‘rsatish',
+    popupGetOtherMaps: 'Google Xaritalarda ochish',
   },
   toasts: {
     exitApp: 'Chiqish uchun yana bir marta Orqaga bosing',

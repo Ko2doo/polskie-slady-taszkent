@@ -2,10 +2,15 @@
   /**
    * A component with a dynamic router based on the article ID that opens a new screen with an expanded popup.
    */
-  import { Popup, Page, Navbar, NavbarBackLink, Block, Link } from "konsta/svelte";
+  import { Popup, Page, Navbar, NavbarBackLink, Block, Link, Button } from "konsta/svelte";
   import { routerBack } from "@/services/navigationHistoryHook";
 
   import { articlesMeta } from "@/data/articles";
+
+  // Router
+  import { goto } from "@mateothegreat/svelte5-router";
+
+  import ArrowRightIcon from "@/lib/icons/ArrowRightIcon.svelte";
 
   let { route, i18n } = $props();
   // $inspect("PopupArticle props >>>", route.result);
@@ -14,6 +19,16 @@
   // check this: https://github.com/sveltejs/svelte/issues/12877
   let articleId = route?.result?.path.params;
   const meta = articlesMeta.find((a) => a.id === articleId);
+
+  function getToMap(coords) {
+    const [lat, lon] = coords;
+    const search = new URLSearchParams({
+      lon: String(lon),
+      lat: String(lat),
+    });
+
+    goto(`/map?${search.toString()}`);
+  }
 
   function handleBack() {
     routerBack("/");
@@ -63,6 +78,18 @@
         <p class="text-neutral-800">
           {@html $i18n.t(`articles:${meta.id}:description`)}
         </p>
+
+        <Button
+          small
+          rounded
+          outline
+          class="mt-4 ml-auto w-auto justify-between text-md"
+          onClick={() => getToMap(meta.coords)}
+        >
+          <span> {$i18n.t("ui:buttons:toMaps")} </span>
+
+          <ArrowRightIcon className="w-5 h-5" />
+        </Button>
       </Block>
     </Page>
   </Popup>
