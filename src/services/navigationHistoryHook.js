@@ -2,22 +2,40 @@
 // Centralized navigation history for @mateothegreat/svelte5-router.
 //
 // Goals:
-// - Keep a REAL stack of visited routes (['/', '/map', '/about', ...])
+// - Keep a REAL stack of visited routes (['/', '/map', '/about', ...]).
 // - Provide a routerBack() that behaves like native Android back:
-//     * From /about -> /map -> /
+//     * /about -> /map -> /
 // - Avoid "ping-pong" between two routes ("/map" <-> "/about")
-//   that happens if you only store {prev, current}.
-// - Work nicely with Capacitor hardware back button and Tabbar UI.
+//   that happens if you only store { prev, current }.
+// - Work nicely with:
+//     * Capacitor hardware back button (backButton.js)
+//     * Tabbar UI (bottom navigation).
 //
 // How it works:
 // - navigationHistoryPostHook() is registered as a global POST hook
 //   in the router config. It runs AFTER every navigation.
-// - It inspects the resolved path and updates the stack:
-//     * FORWARD navigation: push new path
+// - It derives a normalized path string from the router result.
+// - It updates navigationHistory with a proper stack based on the path:
 //     * BACK navigation (triggered by routerBack): pop one item
-// - routerBack() only calls goto() and sets pendingPopTarget,
-//   the actual stack mutation happens inside navigationHistoryPostHook()
-//   once the router confirms the navigation.
+//     * FORWARD navigation: push new path
+//     * Special case for "/": reset the stack to ['/']
+//     * Duplicate path: skip (do not change state)
+// - routerBack() does NOT mutate the stack directly.
+//   Instead it:
+//     * computes the "previous" path from the stack
+//     * sets pendingPopTarget to that path
+//     * calls goto(target)
+//
+//   Then, when the router finishes navigating to target,
+//   navigationHistoryPostHook() sees that path === pendingPopTarget
+//   and applies the "back" logic (pop stack).
+//
+// This module is tightly coupled with backButton.js:
+// - backButton.js uses navigationHistory.stack length ("depth") and
+//   navigationHistory.current to decide whether to:
+//     * go back in history
+//     * go "home" ("/")
+//     * or trigger the "double-back to exit" behavior on "/".
 // -------------------------------------------------------------
 
 import { writable, get } from 'svelte/store';
@@ -26,7 +44,7 @@ import { goto } from '@mateothegreat/svelte5-router';
 // Svelte store with navigation history.
 // - stack: array of visited paths in order
 // - current: current path (last item in stack)
-// - prev: previous path (second to last item in stack)
+// - prev: previous path (second-to-last item in stack)
 export const navigationHistory = writable({
   stack: [],
   current: null,
@@ -46,9 +64,10 @@ let pendingPopTarget = null;
  *  - derives a normalized path string from the route object
  *  - updates the navigationHistory store with a proper stack
  *  - distinguishes between:
- *      * forward navigation
  *      * back navigation (initiated by routerBack)
+ *      * forward navigation (tabs, links, goto, etc.)
  *      * duplicate path (skip)
+ *      * special handling for the root path "/"
  */
 export const navigationHistoryPostHook = (route) => {
   // Fallback to window.location.pathname to avoid relying
@@ -59,10 +78,6 @@ export const navigationHistoryPostHook = (route) => {
     route?.result?.path?.original ||
     (typeof window !== "undefined" ? window.location.pathname : null);
 
-  // console.log('--------------------------------------------');
-  // console.log('[navPostHook] raw route =', route);
-  // console.log('[navPostHook] resolved path =', path);
-
   // If we somehow can't resolve a path, we do nothing
   // and just allow routing to continue.
   if (!path) return true;
@@ -72,10 +87,6 @@ export const navigationHistoryPostHook = (route) => {
     const stack = state.stack ?? [];
     const last = stack[stack.length - 1] ?? null;
 
-    // console.log('[navPostHook] BEFORE update state =', state);
-    // console.log('[navPostHook] pendingPopTarget =', pendingPopTarget);
-    // console.log('[navPostHook] last in stack =', last);
-
     // =========================================================
     // BACK navigation (routerBack)
     // ---------------------------------------------------------
@@ -83,24 +94,19 @@ export const navigationHistoryPostHook = (route) => {
     // we know this navigation was triggered by routerBack().
     // In that case we "pop" one item from the stack and recalculate
     // current/prev based on the new, shorter stack.
-    // =========================================================c
+    // =========================================================
     if (pendingPopTarget && path === pendingPopTarget) {
       const newStack = stack.slice(0, -1);
       const current = path;
       const prev = newStack.length >= 2 ? newStack[newStack.length - 2] : null;
 
       const nextState = {
-        // If stack becomes empty (edge case), we still ensure there is at least
-        // one element: the current path.
+        // If the stack becomes empty (edge case), we still ensure
+        // there is at least one element: the current path.
         stack: newStack.length ? newStack : [current],
         current,
         prev,
       };
-
-      // console.log('[navPostHook:back] match pendingPopTarget =', pendingPopTarget);
-      // console.log('[navPostHook:back] oldStack =', stack);
-      // console.log('[navPostHook:back] newStack =', nextState.stack);
-      // console.log('[navPostHook:back] next state =', nextState);
 
       // Reset the flag so the next navigation is treated as normal.
       pendingPopTarget = null;
@@ -110,17 +116,29 @@ export const navigationHistoryPostHook = (route) => {
     // =========================================================
     // SKIP: router resolved the same path twice in a row.
     // ---------------------------------------------------------
-    // This protects us from "double updates" when router fires
+    // This protects us from "double updates" when the router fires
     // multiple hooks for the same URL. We just keep the previous state.
     // =========================================================
     if (last === path) {
-      // console.log('[navPostHook:skip] same path =', path);
-      // console.log('[navPostHook:skip] state unchanged =', state);
-
       pendingPopTarget = null;
       return state;
     }
 
+    // =========================================================
+    // SPECIAL CASE: root path "/"
+    // ---------------------------------------------------------
+    // Any forward navigation to "/" (tab click, goto('/'), etc.)
+    // is treated as a "reset" of the history:
+    //
+    //   stack = ['/']
+    //   current = '/'
+    //   prev = null
+    //
+    // This guarantees that pressing Android back on "/"
+    // will NOT take the user back to a previous page (e.g. "/map"),
+    // and instead backButton.js can safely apply the
+    // "double-back to exit" behavior.
+    // =========================================================
     if (path === '/') {
       const current = path;
       const prev = null;
@@ -129,8 +147,6 @@ export const navigationHistoryPostHook = (route) => {
         current,
         prev,
       };
-
-      // console.log('[navPostHook:forward:root] reset stack to', nextState);
 
       pendingPopTarget = null;
       return nextState;
@@ -152,20 +168,12 @@ export const navigationHistoryPostHook = (route) => {
       prev,
     };
 
-    // console.log('[navPostHook:forward] push path =', path);
-    // console.log('[navPostHook:forward] oldStack =', stack);
-    // console.log('[navPostHook:forward] newStack =', newStack);
-    // console.log('[navPostHook:forward] next state =', nextState);
-
-    // Again, reset pendingPopTarget since this is a normal navigation.
+    // Reset pendingPopTarget since this is a normal forward navigation.
     pendingPopTarget = null;
     return nextState;
   });
 
-  // console.log('[navPostHook] AFTER update state =', get(navigationHistory));
-  // console.log('--------------------------------------------');
-
-  // must return true to allow route evaluation to continue
+  // Must return true to allow route evaluation to continue.
   return true;
 };
 
@@ -188,27 +196,16 @@ export function routerBack(fallback = '/') {
   const { stack, current } = get(navigationHistory);
   const history = stack ?? [];
 
-  // console.log('============================================');
-  // console.log('[routerBack] current =', current);
-  // console.log('[routerBack] stack =', history);
-  // console.log('[routerBack] fallback =', fallback);
-
   // There is a previous route in the stack -> go back to it.
   if (history.length > 1) {
     const target = history[history.length - 2]; // previous route
     pendingPopTarget = target;
 
-    // console.log('[routerBack] go BACK to target =', target);
-    // console.log('[routerBack] set pendingPopTarget =', pendingPopTarget);
-
     goto(target);
   } else {
     // No real history -> fallback to "/", like "go home".
-    // console.log('[routerBack] no history -> goto fallback =', fallback);
 
     pendingPopTarget = null;
     goto(fallback);
   }
-
-  // console.log('============================================');
 }

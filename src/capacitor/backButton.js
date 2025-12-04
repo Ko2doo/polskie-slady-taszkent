@@ -8,29 +8,34 @@
 //        * navigationHistory (Svelte store with { stack, current, prev })
 //        * navigationHistoryPostHook (global router post hook)
 //        * routerBack(fallback)
-//    - Keeps a REAL stack of visited routes: ['/', '/map', '/about', ...]
-//    - Distinguishes between "forward" navigation and "back" navigation.
-//    - routerBack() uses that stack to emulate native Android back
-//      (go to previous route instead of just storing {prev, current}).
+//    - Keeps a REAL stack of visited routes: ['/', '/map', '/about', ...].
+//    - Distinguishes between forward and back navigation.
+//    - Resets the stack to ['/'] on any forward navigation to "/",
+//      so that pressing back on the home route never returns to
+//      a previous page (like "/map").
 //
 // 2) toastController.js
 //    - Exports:
-//        * exitToast (Svelte store: boolean)
-//        * toastController.showExitToast()
+//        * exitToast (Svelte store: { opened, durationMs, version })
+//        * toastController.showExitToast(durationMs?)
 //    - Controls the global "exit" toast, shown when user presses back
 //      on the root ("/") for the first time.
-//    - The UI for this toast is implemented in a dedicated Svelte component.
+//    - Duration (durationMs) is used to drive the countdown UI and
+//      should match the EXIT_WINDOW_MS here.
 //
 // 3) ExitToast.svelte (or similar)
 //    - Subscribes to exitToast store and renders a KonstaUI <Toast>.
-//    - Typical text: "Press back again to minimize the app" (or localized).
-//    - Placed once in the root layout (e.g. App.svelte) so it is always
-//      available when toastController.showExitToast() is called.
+//    - Shows a message like: "Press back again to minimize the app"
+//      plus a visual countdown.
+//    - Auto-hides after durationMs and restarts its timer if the user
+//      taps the toast (toastController.showExitToast(...) is called again).
 //
 // Together, these pieces implement a consistent Android-like back behavior:
-//   - Navigate back through screens using the router stack
-//   - Go to the home route ("/") when there is no more history
-//   - Require a double back press on the home route to minimize the app.
+//   - Navigate back through screens using the router stack.
+//   - Go to the home route ("/") when there is no more history.
+//   - Require a double back press on the home route to minimize the app,
+//     where the second press must happen within a specific time window
+//     (EXIT_WINDOW_MS), aligned with the toast countdown.
 // -------------------------------------------------------------
 
 // Capacitor
@@ -43,11 +48,12 @@ import { navigationHistory, routerBack } from '@/services/navigationHistoryHook'
 import { goto } from '@mateothegreat/svelte5-router';
 import { toastController } from '@/services/toastController';
 
-// Exit window must match the toast countdown duration
+// Exit window must match the toast countdown duration.
+// Example: 3000ms = 3s visual countdown in ExitToast.svelte.
 const EXIT_WINDOW_MS = 3000;
 
 // Timestamp of the last "back" press on "/".
-// 0 means "no active exit window".
+// 0 means "no active exit window" (i.e. next back press will open the toast).
 let lastBackTime = 0;
 
 // Internal flag to avoid attaching multiple listeners.
@@ -66,9 +72,11 @@ let backHandlerAttached = false;
  * - If stack length is 1 and current !== '/':
  *     -> treat back as "go home" and navigate to '/'.
  * - If stack length is 1 and current === '/':
- *     -> require double back:
+ *     -> use a time-based double-back behavior:
  *          * first press  -> show exit Toast (toastController.showExitToast())
- *          * second press -> App.minimizeApp()
+ *                           and start an "exit window" timer (EXIT_WINDOW_MS)
+ *          * second press -> if within the exit window -> App.minimizeApp()
+ *                         -> if outside the window     -> treat as first press again
  */
 export function initBackButtonHandler() {
   // Guard: only run on native platforms (Android/iOS), not in a browser.
@@ -86,12 +94,15 @@ export function initBackButtonHandler() {
     const { stack, current } = get(navigationHistory);
     const depth = stack?.length ?? 0;
 
-    // 1) If there is navigation history (more than 1 entry in the stack),
-    //    we simply go "back" using routerBack().
+    // 1) There is navigation history (more than 1 entry in the stack):
+    //    -> go "back" using routerBack().
     //    routerBack() will:
     //      - compute the previous path from the stack
     //      - call goto() to navigate there
     //      - let navigationHistoryPostHook "pop" the stack
+    //
+    //    We also reset lastBackTime, because once we leave the root
+    //    route, the "exit window" no longer makes sense.
     if (depth > 1) {
       lastBackTime = 0;
       routerBack('/');
@@ -100,7 +111,7 @@ export function initBackButtonHandler() {
     }
 
     // 2) No history (stack length <= 1) and we are NOT on the home route:
-    //    treat this as "go home" and navigate to "/".
+    //    -> treat this as "go home" and navigate to "/".
     //    This is similar to many Android apps that bring you back to the
     //    main screen before exiting/minimizing.
     if (current !== '/') {
@@ -110,11 +121,23 @@ export function initBackButtonHandler() {
       return;
     }
 
-    // 3) We are on "/" and there is no more history:
-    //    This is where we implement the "double-back to exit/minimize" UX.
+    // 3) We are on "/" and there is no more history (depth <= 1):
+    //    This is where we implement the time-based "double-back to exit"
+    //    behavior, aligned with the toast countdown.
+    //
+    //    - First back (no active window OR window expired):
+    //        * record lastBackTime = now
+    //        * show toast for EXIT_WINDOW_MS (e.g. 3 seconds)
+    //
+    //    - Second back within EXIT_WINDOW_MS:
+    //        * minimize the app
+    //
+    //    - Second back after EXIT_WINDOW_MS:
+    //        * treated as a new "first back" -> show toast again.
     const now = Date.now();
     const diff = now - lastBackTime;
 
+    // No active window OR window expired -> first press.
     if (!lastBackTime || diff > EXIT_WINDOW_MS) {
       lastBackTime = now;
       toastController.showExitToast(EXIT_WINDOW_MS);
@@ -122,7 +145,7 @@ export function initBackButtonHandler() {
       return;
     }
 
-    // 4) Second back on "/" -> minimize app.
+    // Second press within the active exit window -> minimize app.
     lastBackTime = 0;
     App.minimizeApp();
   });
