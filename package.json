@@ -10,7 +10,7 @@
     "map:download-sprites": "node scripts/downloadProtomapsSprites.mjs"
   },
   "engines": {
-    "node": ">=20",
+    "node": ">=22",
     "npm": ">=10"
   },
   "keywords": [
@@ -21,23 +21,23 @@
   ],
   "author": "NИ",
   "devDependencies": {
-    "@capacitor/cli": "^7.4.4",
+    "@capacitor/cli": "^8.0.0",
     "@sveltejs/vite-plugin-svelte": "^6.2.1",
-    "@tailwindcss/vite": "^4.1.17",
-    "svelte": "^5.45.4",
-    "tailwindcss": "^4.1.17",
-    "vite": "^7.2.6"
+    "@tailwindcss/vite": "^4.1.18",
+    "svelte": "^5.46.1",
+    "tailwindcss": "^4.1.18",
+    "vite": "^7.3.0"
   },
   "dependencies": {
-    "@capacitor/android": "^7.4.4",
-    "@capacitor/app": "^7.1.0",
-    "@capacitor/core": "^7.4.4",
-    "@capacitor/preferences": "^7.0.2",
+    "@capacitor/android": "^8.0.0",
+    "@capacitor/app": "^8.0.0",
+    "@capacitor/core": "^8.0.0",
+    "@capacitor/preferences": "^8.0.0",
     "@mateothegreat/svelte5-router": "^2.16.19",
     "@protomaps/basemaps": "^5.7.0",
-    "i18next": "^25.6.0",
+    "i18next": "^25.7.3",
     "konsta": "^5.0.6",
-    "maplibre-gl": "^5.14.0",
-    "pmtiles": "^4.3.0"
+    "maplibre-gl": "^5.15.0",
+    "pmtiles": "^4.3.1"
   }
 }
