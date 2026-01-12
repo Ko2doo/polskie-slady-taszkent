@@ -45,6 +45,9 @@ import { createI18nStore } from '@/store/i18nextSvelte/i18nextSvelte';
 import res from '@/locales/resources';
 
 // Capacitor API`s
+import { Capacitor } from '@capacitor/core';
+import { App } from '@capacitor/app';
+import { Device } from '@capacitor/device';
 import { getStorage, setStorage } from '@/capacitor/utils/appStorage';
 
 // Check this https://vite.dev/guide/env-and-mode.html
@@ -53,13 +56,29 @@ let devState = import.meta.env.DEV;
 const LANGUAGE_KEY = 'locale';
 const FALLBACK_LANG = 'ru';
 
-// Read saved language from Capacitor Preferences (if any)
-let initialLng = FALLBACK_LANG;
+// System language detection
+async function detectInitialLang() {
+  const stored = await getStorage(LANGUAGE_KEY, null);
+  if (stored && res[stored]) return stored;
 
-if (typeof window !== 'undefined') {
-  const value = await getStorage(LANGUAGE_KEY, FALLBACK_LANG);
-  initialLng = value;
+  // System language
+  try {
+    const result = await Device.getLanguageCode();
+
+    if (result?.value) {
+      const lang = result.value.split('-')[0];
+
+      if (res[lang]) return lang;
+    }
+  } catch (error) {
+    console.warn('[i18n] Device language detection failed', error);
+  }
+
+  return FALLBACK_LANG;
 }
+
+// Initialization
+const initialLng = await detectInitialLang();
 
 // Init i18next (no LanguageDetector)
 await i18next.init({
@@ -72,7 +91,10 @@ await i18next.init({
   },
 });
 
-// Persist language on every change
+// Save locales with Preferences (from first start)
+await setStorage(LANGUAGE_KEY, i18next.language);
+
+// Persist language on every change with UI
 i18next.on('languageChanged', async (lng) => {
   try {
     await setStorage(LANGUAGE_KEY, lng);
@@ -80,6 +102,21 @@ i18next.on('languageChanged', async (lng) => {
     console.error('[i18n] Cannot save locale to storage', error);
   }
 });
+
+// System lang listener
+if (Capacitor.isNativePlatform()) {
+  App.addListener('resume', async () => {
+    const stored = await getStorage(LANGUAGE_KEY, null);
+
+    if (!stored) {
+      const lang = await detectInitialLang();
+      if (i18next.language !== lang) {
+        i18next.changeLanguage(lang);
+        await setStorage(LANGUAGE_KEY, lang);
+      }
+    }
+  });
+}
 
 // Svelte store wrapper
 export const i18nStores = createI18nStore(i18next);

@@ -16,7 +16,13 @@ export async function setStorage(key, value) {
 export async function getStorage(key, fallback = null) {
   try {
     const { value } = await Preferences.get({ key });
-    return value ?? fallback;
+    // return value ?? fallback;
+
+    if (value === null || value === undefined) {
+      return fallback;
+    }
+
+    return value;
   } catch (error) {
     console.error('Capacitor Preferences.get(...) failed:', error);
     return fallback;

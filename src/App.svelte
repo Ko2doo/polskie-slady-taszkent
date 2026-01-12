@@ -9,7 +9,7 @@
   import ExitToast from "@/components/Ui/ExitToast.svelte";
 
   // i18Next
-  import { i18nStores } from "@/services/i18n";
+  import { i18nStores } from "@/capacitor/services/i18n";
   const { i18n } = i18nStores;
 
   // router
