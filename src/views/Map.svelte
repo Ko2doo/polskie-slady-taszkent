@@ -29,6 +29,7 @@
   // Navbar stores and helpers
   import { resolvePageKeyFromRouteResult } from "@/utils/routerUtils";
   import { withNavbar } from "@/store/ui/navbar";
+  import { getStorage } from "@/capacitor/utils/appStorage";
 
   // Map libraries
   import maplibreGL from "maplibre-gl";
@@ -59,6 +60,7 @@
 
   // Coordinates
   let targetCoords = $state(null);
+  let uiThemeStyle = $state("light"); // by default
 
   // svelte-ignore state_referenced_locally
   // check this: https://github.com/sveltejs/svelte/issues/12877
@@ -102,10 +104,16 @@
     // 4. Building runtime-style with @protomaps/basemaps
     const origin = window.location.origin;
 
+    // Map style
+    const themeStyle = await getStorage("ui.theme");
+    if (themeStyle === "dark" || themeStyle === null) uiThemeStyle = "dark";
+
+    console.log(uiThemeStyle);
+
     const style = buildBaseMapStyle({
       origin,
       pmtilesKey: PMTILES_KEY,
-      theme: "light",
+      theme: uiThemeStyle,
       lang: `${$i18n.language}`,
       fontstack: "Roboto Regular",
     });
