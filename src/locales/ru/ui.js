@@ -59,4 +59,14 @@ export default {
   dialogue: {
     hello: 'Привет, Мир!',
   },
+  settings: {
+    translations: {
+      title: 'Переводы',
+    },
+    appearance: {
+      title: 'Внешний вид',
+      darkMode: 'Тёмная тема',
+      followSystem: 'Следовать системе',
+    },
+  },
 };

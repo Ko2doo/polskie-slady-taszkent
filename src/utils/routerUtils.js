@@ -40,6 +40,9 @@ export function resolvePageKeyFromRouteResult(result) {
     case '/about':
       return 'about';
 
+    case '/settings':
+      return 'settings';
+
     default:
       // fallback
       return 'handbook';

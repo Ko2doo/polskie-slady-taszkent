@@ -140,7 +140,7 @@
     {#each itemsView as article (article.id)}
       <Card class="flex flex-col justify-between">
         {#snippet header()}
-          <h1 class="w-full text-gray-900 dark:text-gray-900 text-base font-medium sm:font-bold sm:text-xl">
+          <h1 class="w-full text-gray-900 dark:text-stone-300 text-base font-medium sm:font-bold sm:text-xl">
             {$i18n.t(`articles:${article.id}:title`)}
           </h1>
         {/snippet}

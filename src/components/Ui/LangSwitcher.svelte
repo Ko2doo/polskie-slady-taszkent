@@ -11,6 +11,7 @@
 
   let popoverState = $state(false);
   let popoverTargetEl = $state(null);
+  let currentLocale = $state([]);
 
   const popoverClickHandler = (targetEl) => {
     popoverTargetEl = targetEl;
@@ -32,14 +33,23 @@
       backdropClickHandler();
     }
   };
+
+  $effect(() => {
+    locales.filter(([code, label]) => {
+      if (code === $i18n.language) {
+        // console.log(label);
+        currentLocale = label;
+      }
+    });
+  });
 </script>
 
-<Button rounded class="popover-button" onClick={() => popoverClickHandler(".popover-button")}>
-  {$i18n.t("ui:buttons:langSwitcher")}
+<Button raised tonal rounded large class="popover-button" onClick={() => popoverClickHandler(".popover-button")}>
+  {currentLocale}
 </Button>
 
 <Popover opened={popoverState} target={popoverTargetEl} onBackdropClick={backdropClickHandler}>
-  <List strong inset>
+  <List nested>
     {#each locales as [code, label]}
       <ListButton colors={{ bgIos: "active:bg-neutral-600/10" }} value={code} onClick={i18nClickHandler}>
         {label}

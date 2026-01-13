@@ -28,3 +28,11 @@ export async function getStorage(key, fallback = null) {
     return fallback;
   }
 }
+
+export async function removeStorageItem(key) {
+  try {
+    await Preferences.remove({ key });
+  } catch (error) {
+    console.error('Capacitor Preferences.remove(...) failed:', error);
+  }
+}

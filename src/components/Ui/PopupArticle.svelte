@@ -71,11 +71,11 @@
       </Navbar>
 
       <Block class="text-base leading-relaxed">
-        <h1 class="mb-4 text-bold text-2xl text-neutral-800">
+        <h1 class="mb-4 text-bold text-2xl text-neutral-800 dark:text-neutral-300">
           {$i18n.t(`articles:${meta.id}:title`)}
         </h1>
 
-        <p class="text-neutral-800">
+        <p class="text-neutral-800 dark:text-neutral-300">
           {@html $i18n.t(`articles:${meta.id}:description`)}
         </p>
 

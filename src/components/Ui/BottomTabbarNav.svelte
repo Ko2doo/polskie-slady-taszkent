@@ -10,6 +10,7 @@
   import HandbookIcon from "@/lib/icons/HandbookIcon.svelte";
   import AboutUsIcon from "@/lib/icons/AboutUsIcon.svelte";
   import PaperMapIcon from "@/lib/icons/PaperMapIcon.svelte";
+  import SettingsIcon from "@/lib/icons/SettingsIcon.svelte";
 
   let { i18n } = $props();
 
@@ -46,6 +47,11 @@
       id: "about",
       href: "/about",
       icon: AboutUsIcon,
+    },
+    {
+      id: "settings",
+      href: "/settings",
+      icon: SettingsIcon,
     },
   ];
 </script>

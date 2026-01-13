@@ -59,4 +59,14 @@ export default {
   dialogue: {
     hello: 'Hello, World!',
   },
+  settings: {
+    translations: {
+      title: 'Translations',
+    },
+    appearance: {
+      title: 'Appearance',
+      darkMode: 'Dark theme',
+      followSystem: 'Follow system',
+    },
+  },
 };

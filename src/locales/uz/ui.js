@@ -59,4 +59,14 @@ export default {
   dialogue: {
     hello: 'Salom, Dunyo!',
   },
+  settings: {
+    translations: {
+      title: 'Tarjimalar',
+    },
+    appearance: {
+      title: 'Ko‘rinish',
+      darkMode: 'Qorong‘i mavzu',
+      followSystem: 'Tizimga ergashish',
+    },
+  },
 };

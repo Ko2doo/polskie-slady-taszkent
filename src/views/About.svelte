@@ -1,9 +1,6 @@
 <script>
   import { Block } from "konsta/svelte";
 
-  // Components
-  import LangSwitcher from "@/components/Ui/LangSwitcher.svelte";
-
   import { resolvePageKeyFromRouteResult } from "@/utils/routerUtils";
   import { withNavbar } from "@/store/ui/navbar";
 
@@ -62,6 +59,4 @@
     soluta iste nostrum cumque optio voluptatibus facere? At aut modi doloremque, omnis laudantium cum? Molestias,
     perferendis.
   </p>
-
-  <LangSwitcher {i18n} />
 </Block>
