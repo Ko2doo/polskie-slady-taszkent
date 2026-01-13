@@ -151,7 +151,7 @@
 
         {#snippet footer()}
           <div class="flex justify-between space-x-2 rtl:space-x-reverse">
-            <Button rounded inline outline class="text-sm" onClick={() => openArticle(article.id)}>
+            <Button small raised rounded inline class="text-sm" onClick={() => openArticle(article.id)}>
               {$i18n.t("ui:buttons:readMore")}
             </Button>
           </div>

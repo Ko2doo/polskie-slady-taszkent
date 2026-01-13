@@ -67,7 +67,7 @@
   onDestroy(clearTimer);
 </script>
 
-<Toast {opened} position="center" button={false} onclick={() => handleClick()}>
+<Toast {opened} class="bottom-safe-24" position="center" button={false} onclick={() => handleClick()}>
   <div class="flex items-center gap-2 shrink">
     <span class="text-md">{$i18n.t("ui:toasts:exitApp")}</span>
 

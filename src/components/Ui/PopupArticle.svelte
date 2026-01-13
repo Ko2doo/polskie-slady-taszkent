@@ -81,8 +81,8 @@
 
         <Button
           small
+          raised
           rounded
-          outline
           class="mt-4 ml-auto w-auto justify-between text-md"
           onClick={() => getToMap(meta.coords)}
         >
