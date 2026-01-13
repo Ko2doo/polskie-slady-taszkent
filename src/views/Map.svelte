@@ -195,11 +195,13 @@
     });
 
     map.on("load", () => {
+      // set max bounds with map
       map.setMaxBounds([
         [69.1038931009432, 41.144224013212],
         [69.5436061519978, 41.4359965669526],
       ]);
 
+      // build markers and city boundary
       builder.addCityBoundaryLayer();
       builder.addMarkers();
 
