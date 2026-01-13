@@ -25,8 +25,13 @@
   import { navbarState } from "@/store/ui/navbar";
   import { panelState, openPanel, closePanel } from "@/store/ui/panel";
 
+  import { getThemeManager } from "@/lib/theme/themeManager";
+
   onMount(() => {
     initBackButtonHandler();
+
+    // Initialize theme as soon app mounts
+    getThemeManager().init();
   });
 </script>
 

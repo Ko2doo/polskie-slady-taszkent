@@ -1,16 +1,18 @@
 <script>
-  /*
-    DarkModeToggler
+  /**
+   * DarkModeToggler (Settings UI)
+   *
+   * UI-only component that controls global theme manager.
+   * - "Follow system" toggle switches between Auto and Manual modes.
+   * - "Dark theme" toggle is disabled in Auto mode.
+   * - All actual theme logic (DOM class + persistence + system listener)
+   *   is implemented in the singleton theme manager.
+   */
 
-    - Two-mode theme controller for Konsta UI.
-    - Auto mode: follows system color scheme via prefers-color-scheme (no persisted value).
-    - Manual mode: user-selected theme persisted via Capacitor Preferences (ui.theme = 'dark' | 'light').
-    - Theme is applied by toggling the 'dark' class on <html>, which Konsta uses to render dark styles.
-    - The "Dark theme" toggle is disabled while "Follow system" is enabled.
-  */
-
+  import { onMount, onDestroy } from "svelte";
   import { List, ListItem, Toggle } from "konsta/svelte";
-  import { getStorage, setStorage, removeStorageItem } from "@/capacitor/utils/appStorage";
+
+  import { getThemeManager } from "@/lib/theme/themeManager";
 
   let { i18n } = $props();
 
@@ -22,72 +24,19 @@
   let followSystem = $state(true);
   let isDark = $state(false);
 
-  function applyTheme(nextIsDark) {
-    isDark = nextIsDark;
-    rootElement.classList.toggle("dark", nextIsDark);
-  }
+  const theme = getThemeManager();
 
-  // Init
-  async function initTheme() {
-    const value = await getStorage(THEME_KEY);
-
-    if (value === "dark" || value === "light") {
-      // manual
-      followSystem = false;
-      applyTheme(value === "dark");
-      return;
-    }
-
-    // auto
-    followSystem = true;
-    applyTheme(mediaQuery.matches);
-  }
-
-  // Init once
-  let didInit = false;
+  // Subscribe once, keep toggles in sync with global theme state
   $effect(() => {
-    if (didInit) return;
-    didInit = true;
-    initTheme();
+    return theme.subscribe((s) => {
+      followSystem = s.followSystem;
+      isDark = s.isDark;
+    });
   });
 
-  // System theme listener (auto only)
-  $effect(() => {
-    const handler = (event) => {
-      if (!followSystem) return;
-      applyTheme(event.matches);
-    };
-
-    mediaQuery.addEventListener("change", handler);
-
-    return () => {
-      mediaQuery.removeEventListener("change", handler);
-    };
-  });
-
-  // Toggle: follow system
-  async function onFollowSystemChange(value) {
-    followSystem = value;
-
-    if (value) {
-      // Onn auto
-      await removeStorageItem(THEME_KEY);
-      applyTheme(mediaQuery.matches);
-      return;
-    }
-
-    // Off auto -> fixes current state
-    await setStorage(THEME_KEY, isDark ? "dark" : "light");
-    applyTheme(isDark);
-  }
-
-  // Toggle: dark mode (manual only)
-  async function onThemeToggle(value) {
-    if (followSystem) return;
-
-    applyTheme(value);
-    await setStorage(THEME_KEY, value ? "dark" : "light");
-  }
+  // Toggle handlers
+  const onFollowSystemChange = (e) => theme.setFollowSystem(e.target.checked);
+  const onDarkChange = (e) => theme.setDark(e.target.checked);
 </script>
 
 <List strong inset>
@@ -96,7 +45,7 @@
     title={$i18n.t("ui:settings:appearance:followSystem")}
   >
     {#snippet after()}
-      <Toggle checked={followSystem} onChange={(e) => onFollowSystemChange(e.target.checked)} />
+      <Toggle checked={followSystem} onChange={onFollowSystemChange} />
     {/snippet}
   </ListItem>
 
@@ -106,7 +55,7 @@
     disabled={followSystem}
   >
     {#snippet after()}
-      <Toggle checked={isDark} disabled={followSystem} onChange={(e) => onThemeToggle(e.target.checked)} />
+      <Toggle checked={isDark} disabled={followSystem} onChange={onDarkChange} />
     {/snippet}
   </ListItem>
 </List>
