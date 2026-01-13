@@ -16,10 +16,6 @@
 
   let { i18n } = $props();
 
-  const THEME_KEY = "ui.theme"; // 'dark' | 'light'
-  const rootElement = document.documentElement;
-  const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-
   // states
   let followSystem = $state(true);
   let isDark = $state(false);
