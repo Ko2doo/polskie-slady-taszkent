@@ -367,10 +367,10 @@
     const style = await buildStyleForTheme(uiThemeStyle);
     map.setStyle(style);
 
-    const onIlde = () => {
+    const onIdle = () => {
       if (myVersion !== styleVersion) return;
 
-      map.off("idle", onIlde);
+      map.off("idle", onIdle);
 
       builder.setStyleVersion(myVersion);
       reapplyOverlaysAfterStyleChange();
@@ -379,7 +379,7 @@
       if (endPoint) endMarker = addMarker(endPoint.lon, endPoint.lat, "end");
     };
 
-    map.on("idle", onIlde);
+    map.on("idle", onIdle);
   }
 
   /**
