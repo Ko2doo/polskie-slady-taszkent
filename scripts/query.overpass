@@ -1,0 +1,7 @@
+[out:json][timeout:180];
+(
+  way["highway"~"^(footway|path|pedestrian|steps|cycleway|living_street|residential|service|track|unclassified|tertiary|secondary|primary)$"](41.167,69.117,41.42,69.525);
+);
+out body;
+>;
+out skel qt;

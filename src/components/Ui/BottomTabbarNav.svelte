@@ -24,7 +24,7 @@
         "overflow-visible",
         "dark:bg-white/15",
         "text-blue-600",
-        "dark:text-blue-600",
+        "dark:text-blue-500",
         "font-bold",
       ],
       absolute: true,

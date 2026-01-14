@@ -243,7 +243,7 @@ export class MapPointsBuilder {
             <div class="flex justify-end mb-1">
               <button
                 type="button"
-                class="map-popup-close cursor-pointer w-7 h-7 flex items-center justify-center rounded-full bg-white/80 text-xs font-bold shadow"
+                class="map-popup-close cursor-pointer w-7 h-7 flex items-center justify-center rounded-full bg-white/80 dark:text-black text-xs font-bold shadow"
                 aria-label="Close"
               >&times;</button>
             </div>
@@ -288,5 +288,53 @@ export class MapPointsBuilder {
 
     // Add icon
     img.src = iconUrl;
+  }
+
+  /**
+   * Add navigation route layer
+   */
+  addNavigationRoute(routeGeoJSON) {
+    const map = this._params.currentMap;
+    if (!map) return;
+
+    // Remove existing route if any
+    if (map.getLayer('navigation-route')) {
+      map.removeLayer('navigation-route');
+    }
+    if (map.getSource('navigation-route')) {
+      map.removeSource('navigation-route');
+    }
+
+    // Add new route
+    map.addSource('navigation-route', {
+      type: 'geojson',
+      data: routeGeoJSON,
+    });
+
+    map.addLayer({
+      id: 'navigation-route',
+      type: 'line',
+      source: 'navigation-route',
+      paint: {
+        'line-color': '#007AFF', // iOS blue
+        'line-width': 4,
+        'line-opacity': 0.8,
+      },
+    });
+  }
+
+  /**
+   * Clear navigation route
+   */
+  clearNavigationRoute() {
+    const map = this._params.currentMap;
+    if (!map) return;
+
+    if (map.getLayer('navigation-route')) {
+      map.removeLayer('navigation-route');
+    }
+    if (map.getSource('navigation-route')) {
+      map.removeSource('navigation-route');
+    }
   }
 }

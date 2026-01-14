@@ -42,28 +42,278 @@
   // Points builder
   import { MapPointsBuilder } from "@/services/mapPointsBuilder";
 
+  // Navigation
+  import { initNavigation, findRoute, clearRouteCache } from "@/services/navigationLoader";
+
+  // Components
+  import NavigationControl from "@/components/Ui/NavigationControl.svelte";
+
   // Router
   import { goto } from "@mateothegreat/svelte5-router";
 
   // Sources
   const PMTILES_PATH = "/map/tashkent_20251124.pmtiles";
-  const PMTILES_KEY = "tashkent-local"; // public/map/style_tashkent.json pmtiles://tashkent-local
+  const PMTILES_KEY = "tashkent-local";
   const CITY_BOUNDARIES = "/map/tashkent_boundaries.geojson";
 
   import { articlesMeta } from "@/data/articles";
 
+  // Constants
+  const MARKER_CONFIG = {
+    start: {
+      emoji: "🟢",
+      className: "navigation-marker start-marker",
+      label: "Start",
+    },
+    end: {
+      emoji: "🔴",
+      className: "navigation-marker end-marker",
+      label: "End",
+    },
+  };
+
+  const MARKER_STYLE = {
+    fontSize: "24px",
+  };
+
+  // State
   let { route, i18n } = $props();
 
   let mapContainer;
   let map;
   let protocol;
+  let builder;
 
   // Coordinates
   let targetCoords = $state(null);
-  let uiThemeStyle = $state("light"); // by default
+  let uiThemeStyle = $state("light");
 
-  // svelte-ignore state_referenced_locally
-  // check this: https://github.com/sveltejs/svelte/issues/12877
+  // Navigation state
+  let navigationMode = $state(false);
+  let navigationReady = $state(false);
+  let navigationLoading = $state(false);
+  let startPoint = $state(null);
+  let endPoint = $state(null);
+  let currentRoute = $state(null);
+  let routeInfo = $state(null);
+
+  // Markers for navigation points
+  let startMarker = null;
+  let endMarker = null;
+
+  // Helper Functions
+
+  /**
+   * Create a navigation marker element
+   */
+  function createMarkerElement(type) {
+    const config = MARKER_CONFIG[type];
+    const el = document.createElement("div");
+
+    el.className = config.className;
+    el.innerHTML = config.emoji;
+    Object.assign(el.style, MARKER_STYLE);
+
+    return el;
+  }
+
+  /**
+   * Add marker to map
+   */
+  function addMarker(lon, lat, type) {
+    const el = createMarkerElement(type);
+    return new maplibreGL.Marker({ element: el }).setLngLat([lon, lat]).addTo(map);
+  }
+
+  /**
+   * Remove marker from map
+   */
+  function removeMarker(marker) {
+    if (marker) {
+      marker.remove();
+      return null;
+    }
+
+    return marker;
+  }
+
+  /**
+   * Set start point and marker
+   */
+  function setStartPoint(lon, lat) {
+    startPoint = { lon, lat };
+    startMarker = addMarker(lon, lat, "start");
+
+    console.log("[Map] Start point set:", startPoint);
+  }
+
+  /**
+   * Set end point and marker
+   */
+  function setEndPoint(lon, lat) {
+    endPoint = { lon, lat };
+    endMarker = addMarker(lon, lat, "end");
+
+    console.log("[Map] End point set:", endPoint);
+  }
+
+  /**
+   * Reset navigation and set new start point
+   */
+  function resetAndSetStart(lon, lat) {
+    clearNavigation();
+    setStartPoint(lon, lat);
+  }
+
+  // Navigation Functions
+
+  /**
+   * Handle map click in navigation mode
+   */
+  function handleMapClick(e) {
+    if (!navigationMode || !navigationReady) return;
+
+    const { lng, lat } = e.lngLat;
+
+    // State machine for navigation point selection
+    if (!startPoint) {
+      setStartPoint(lng, lat);
+    } else if (!endPoint) {
+      setEndPoint(lng, lat);
+      calculateRoute();
+    } else {
+      resetAndSetStart(lng, lat);
+    }
+  }
+
+  /**
+   * Toggle navigation mode
+   */
+  function toggleNavigationMode() {
+    navigationMode = !navigationMode;
+
+    if (navigationMode && !navigationReady && !navigationLoading) {
+      loadNavigation();
+    }
+
+    if (!navigationMode) {
+      clearNavigation();
+    }
+  }
+
+  /**
+   * Load navigation engine
+   */
+  async function loadNavigation() {
+    if (navigationReady) return;
+
+    navigationLoading = true;
+
+    try {
+      await initNavigation();
+      navigationReady = true;
+      console.log("[Map] Navigation ready");
+    } catch (error) {
+      console.error("[Map] Failed to load navigation:", error);
+      alert("Failed to load navigation. Please try again.");
+      navigationMode = false;
+    } finally {
+      navigationLoading = false;
+    }
+  }
+
+  /**
+   * Clear all navigation state
+   */
+  function clearNavigation() {
+    startPoint = null;
+    endPoint = null;
+    currentRoute = null;
+    routeInfo = null;
+
+    startMarker = removeMarker(startMarker);
+    endMarker = removeMarker(endMarker);
+
+    if (builder) {
+      builder.clearNavigationRoute();
+    }
+  }
+
+  /**
+   * Calculate and display route
+   */
+  async function calculateRoute() {
+    if (!startPoint || !endPoint) return;
+
+    console.log("[Map] Calculating route...");
+
+    // Show loading state
+    routeInfo = { loading: true };
+
+    // Small delay to let UI update
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    try {
+      const result = findRoute(startPoint.lon, startPoint.lat, endPoint.lon, endPoint.lat);
+
+      if (result.success) {
+        displayRoute(result);
+      } else {
+        handleRouteError(result);
+      }
+    } catch (error) {
+      console.error("[Map] Route calculation error:", error);
+      routeInfo = null;
+      alert("An error occurred while calculating the route.");
+    }
+  }
+
+  /**
+   * Display calculated route on map
+   */
+  function displayRoute(result) {
+    currentRoute = result.route;
+    routeInfo = {
+      distance: result.route.properties.distance,
+      nodes: result.route.properties.nodes,
+      computeTime: result.route.properties.computeTime,
+      iterations: result.route.properties.iterations,
+    };
+
+    builder.addNavigationRoute(currentRoute);
+    fitMapToRoute(currentRoute);
+
+    console.log("[Map] Route calculated:", routeInfo);
+  }
+
+  /**
+   * Handle route calculation error
+   */
+  function handleRouteError(result) {
+    routeInfo = null;
+    alert("Route not found: " + result.message);
+    console.error("[Map] Route calculation failed:", result.message);
+  }
+
+  /**
+   * Fit map bounds to show entire route
+   */
+  function fitMapToRoute(route) {
+    const coordinates = route.geometry.coordinates;
+    const bounds = coordinates.reduce(
+      (bounds, coord) => {
+        return bounds.extend(coord);
+      },
+      new maplibreGL.LngLatBounds(coordinates[0], coordinates[0]),
+    );
+
+    map.fitBounds(bounds, {
+      padding: { top: 100, bottom: 100, left: 100, right: 100 },
+    });
+  }
+
+  // Route Resolution
+
   function resolveTargetCoordsFromRoute(value) {
     const qs = value?.result?.querystring?.params;
     if (!qs) return null;
@@ -79,62 +329,57 @@
   // svelte-ignore state_referenced_locally
   targetCoords = resolveTargetCoordsFromRoute(route);
 
-  // $inspect(route?.result?.querystring?.params);
-  // $inspect(targetCoords);
+  // Map Initialization
 
-  onMount(async () => {
-    // 1. Loading full PMTiles-file
-    const response = await fetch(PMTILES_PATH);
-
-    if (!response.ok) {
-      console.error("Failed to fetch PMTiles:", response.status, response.statusText);
-      return;
+  /**
+   * Initialize map style
+   */
+  async function initializeMapStyle() {
+    const themeStyle = await getStorage("ui.theme");
+    if (themeStyle === "dark" || themeStyle === null) {
+      uiThemeStyle = "dark";
     }
 
-    // 2. Create in-memory data PMTiles
-    const buffer = await response.arrayBuffer();
-    const src = new InMemoryPMTilesSource(PMTILES_KEY, buffer);
-    const pmtiles = new PMTiles(src);
-
-    // 3. Protocol pmtiles:// registration
-    protocol = new Protocol();
-    maplibreGL.addProtocol("pmtiles", protocol.tile);
-    protocol.add(pmtiles);
-
-    // 4. Building runtime-style with @protomaps/basemaps
     const origin = window.location.origin;
 
-    // Map style
-    const themeStyle = await getStorage("ui.theme");
-    if (themeStyle === "dark" || themeStyle === null) uiThemeStyle = "dark";
-
-    console.log(uiThemeStyle);
-
-    const style = buildBaseMapStyle({
+    return buildBaseMapStyle({
       origin,
       pmtilesKey: PMTILES_KEY,
       theme: uiThemeStyle,
       lang: `${$i18n.language}`,
       fontstack: "Roboto Regular",
     });
+  }
 
-    // 5. Create map
-    map = new maplibreGL.Map({
-      container: mapContainer,
-      style,
-      center: [69.29, 41.3],
-      zoom: 11,
-      minZoom: 10,
-      maxZoom: 17,
-    });
+  /**
+   * Initialize PMTiles source
+   */
+  async function initializePMTiles() {
+    const response = await fetch(PMTILES_PATH);
 
-    // 5. Add GeoJSON after map loading
-    // Map pointer data
-    const builder = new MapPointsBuilder({
+    if (!response.ok) {
+      throw new Error(`Failed to fetch PMTiles: ${response.status} ${response.statusText}`);
+    }
+
+    const buffer = await response.arrayBuffer();
+    const src = new InMemoryPMTilesSource(PMTILES_KEY, buffer);
+    const pmtiles = new PMTiles(src);
+
+    protocol = new Protocol();
+    maplibreGL.addProtocol("pmtiles", protocol.tile);
+    protocol.add(pmtiles);
+
+    return pmtiles;
+  }
+
+  /**
+   * Configure map points builder
+   */
+  function createMapPointsBuilder() {
+    return new MapPointsBuilder({
       currentMap: map,
       data: articlesMeta,
       i18n: {
-        // title for point label
         title: (item) => $i18n.t(`articles:${item.id}:title`),
         popupLink: () => $i18n.t("ui:buttons:readMore"),
         popupGetOtherMaps: () => $i18n.t("ui:buttons:popupGetOtherMaps"),
@@ -154,7 +399,6 @@
             id: "articles-points-layer",
             type: "symbol",
             source: "articles-points-source",
-            // minzoom: 11.5,
             layout: {
               "icon-image": "article-point",
               "icon-size": 0.38,
@@ -201,44 +445,77 @@
         ],
       },
     });
+  }
 
-    map.on("load", () => {
-      // set max bounds with map
-      map.setMaxBounds([
-        [69.1038931009432, 41.144224013212],
-        [69.5436061519978, 41.4359965669526],
-      ]);
+  /**
+   * Setup map after load
+   */
+  function setupMapHandlers() {
+    // Max bounds
+    map.setMaxBounds([
+      [69.1038931009432, 41.144224013212],
+      [69.5436061519978, 41.4359965669526],
+    ]);
 
-      // build markers and city boundary
-      builder.addCityBoundaryLayer();
-      builder.addMarkers();
+    // city boundary + custom markers
+    builder.addCityBoundaryLayer();
+    builder.addMarkers();
 
-      if (targetCoords) {
-        map.flyTo({
-          center: targetCoords,
-          zoom: 16,
-        });
-      }
-    });
+    // Fly to coodrinates
+    if (targetCoords) {
+      map.flyTo({
+        center: targetCoords,
+        zoom: 16,
+      });
+    }
+
+    // Click handler from navigation
+    map.on("click", handleMapClick);
+  }
+
+  // Lifecycle
+
+  onMount(async () => {
+    try {
+      await initializePMTiles();
+      const style = await initializeMapStyle();
+
+      map = new maplibreGL.Map({
+        container: mapContainer,
+        style,
+        center: [69.29, 41.3],
+        zoom: 11,
+        minZoom: 10,
+        maxZoom: 17,
+      });
+
+      builder = createMapPointsBuilder();
+      map.on("load", setupMapHandlers);
+    } catch (error) {
+      console.error("[Map] Initialization failed:", error);
+      alert("Failed to initialize map. Please refresh the page.");
+    }
   });
 
   onDestroy(() => {
-    if (map) map.remove();
-    if (protocol) maplibreGL.removeProtocol("pmtiles");
+    if (map) {
+      map.remove();
+      map = null;
+    }
+
+    if (protocol) {
+      maplibreGL.removeProtocol("pmtiles");
+      protocol = null;
+    }
+
+    startMarker = removeMarker(startMarker);
+    endMarker = removeMarker(endMarker);
   });
 
   $effect(() => {
     const result = route?.result;
-
-    // get "pageKey" from route path
-    //    "/about" -> "about"
-    //    "/handbook" -> "handbook"
     const pageKey = resolvePageKeyFromRouteResult(result);
-
-    /* prettier-ignore */
-    const title = pageKey
-      ? $i18n.t(`ui:navbar:${pageKey}:title`)
-      : "";
+    const title = pageKey ? $i18n.t(`ui:navbar:${pageKey}:title`) : "";
 
     const dispose = withNavbar({
       title: title || pageKey,
@@ -251,9 +528,54 @@
   });
 </script>
 
-<section class="w-full h-full grid grid-cols-1 md:grid-cols-1 pl-4 pr-4 pb-4">
-  <div
-    bind:this={mapContainer}
-    class="w-full h-full rounded-3xl bg-ios-light-surface-1 dark:bg-ios-dark-surface-1"
-  ></div>
+<section class="map-section">
+  <div bind:this={mapContainer} class="map-container"></div>
+
+  <!-- Navigation Control Component -->
+  <div class="navigation-control-wrapper">
+    <NavigationControl
+      bind:navigationMode
+      {navigationReady}
+      {navigationLoading}
+      {routeInfo}
+      onToggle={toggleNavigationMode}
+      onClear={clearNavigation}
+    />
+  </div>
 </section>
+
+<style>
+  .map-section {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    grid-template-columns: 1fr;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    padding-bottom: 1rem;
+    position: relative;
+  }
+
+  .map-container {
+    width: 100%;
+    height: 100%;
+    border-radius: 1.5rem;
+    background-color: var(--ios-light-surface-1);
+  }
+
+  :global(.dark) .map-container {
+    background-color: var(--ios-dark-surface-1);
+  }
+
+  .navigation-control-wrapper {
+    position: absolute;
+    top: 0.6rem;
+    right: 1.6rem;
+    z-index: 10;
+  }
+
+  :global(.navigation-marker) {
+    cursor: pointer;
+    user-select: none;
+  }
+</style>

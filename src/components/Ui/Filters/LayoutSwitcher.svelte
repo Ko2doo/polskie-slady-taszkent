@@ -23,7 +23,7 @@
     "flex items-center cursor-pointer h-13 text-[17px] k-list-button relative px-4 gap-1 w-full duration-300 active:duration-0 focus:outline-none touch-ripple-primary overflow-hidden select-none ios";
 
   const activeBtnClasses = "rounded-full bg-primary/10 text-primary font-bold";
-  const inactiveBtnClasses = "text-gray-600 active-primary/15";
+  const inactiveBtnClasses = "text-black dark:text-white active-primary/15";
 
   // Utils: the final className constructor
   function getBtnClasses(listId) {
