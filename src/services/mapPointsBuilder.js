@@ -339,15 +339,18 @@ export class MapPointsBuilder {
    */
   addNavigationRoute(routeGeoJSON) {
     const map = this._params.currentMap;
-    if (!map) return;
+    if (!map) {
+      console.warn('[MapPointsBuilder] Map instance not available');
+      return;
+    }
+
+    if (!routeGeoJSON || !routeGeoJSON.geometry) {
+      console.error('[MapPointsBuilder] Invalid route GeoJSON provided');
+      return;
+    }
 
     // Remove existing route if any
-    if (map.getLayer('navigation-route')) {
-      map.removeLayer('navigation-route');
-    }
-    if (map.getSource('navigation-route')) {
-      map.removeSource('navigation-route');
-    }
+    this.clearNavigationRoute();
 
     // Add new route
     map.addSource('navigation-route', {
@@ -359,6 +362,10 @@ export class MapPointsBuilder {
       id: 'navigation-route',
       type: 'line',
       source: 'navigation-route',
+      layout: {
+        'line-join': 'round',
+        'line-cap': 'round',
+      },
       paint: {
         'line-color': '#007AFF', // iOS blue
         'line-width': 4,

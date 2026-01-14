@@ -78,6 +78,18 @@
     fontSize: "24px",
   };
 
+  const MAP_BOUNDS = [
+    [69.1038931009432, 41.144224013212],
+    [69.5436061519978, 41.4359965669526],
+  ];
+
+  const INITIAL_VIEW = {
+    center: [69.29, 41.3],
+    zoom: 11,
+    minZoom: 10,
+    maxZoom: 17,
+  };
+
   // State
   let { route, i18n } = $props();
 
@@ -353,33 +365,46 @@
     });
   }
 
+  /**
+   * Apply theme to map and restore overlays
+   * @param {string} theme - Theme name ('light' or 'dark')
+   * @returns {Promise<void>}
+   */
   async function applyThemeToMap(theme) {
-    if (!map) return;
+    if (!map) {
+      console.warn("[Map] Cannot apply theme: map not initialized");
+      return;
+    }
 
-    uiThemeStyle = theme;
+    try {
+      uiThemeStyle = theme;
 
-    startMarker = removeMarker(startMarker);
-    endMarker = removeMarker(endMarker);
+      startMarker = removeMarker(startMarker);
+      endMarker = removeMarker(endMarker);
 
-    styleVersion += 1;
-    const myVersion = styleVersion;
+      styleVersion += 1;
+      const myVersion = styleVersion;
 
-    const style = await buildStyleForTheme(uiThemeStyle);
-    map.setStyle(style);
+      const style = await buildStyleForTheme(uiThemeStyle);
+      map.setStyle(style);
 
-    const onIdle = () => {
-      if (myVersion !== styleVersion) return;
+      const onIdle = () => {
+        if (myVersion !== styleVersion) return;
 
-      map.off("idle", onIdle);
+        map.off("idle", onIdle);
 
-      builder.setStyleVersion(myVersion);
-      reapplyOverlaysAfterStyleChange();
+        builder.setStyleVersion(myVersion);
+        reapplyOverlaysAfterStyleChange();
 
-      if (startPoint) startMarker = addMarker(startPoint.lon, startPoint.lat, "start");
-      if (endPoint) endMarker = addMarker(endPoint.lon, endPoint.lat, "end");
-    };
+        if (startPoint) startMarker = addMarker(startPoint.lon, startPoint.lat, "start");
+        if (endPoint) endMarker = addMarker(endPoint.lon, endPoint.lat, "end");
+      };
 
-    map.on("idle", onIdle);
+      map.on("idle", onIdle);
+    } catch (error) {
+      console.error("[Map] Failed to apply theme:", error);
+      alert("[Map] Failed to apply theme:", error);
+    }
   }
 
   /**
@@ -481,15 +506,13 @@
   }
 
   /**
-   * Setup map after load
+   * Reapply all map overlays after style change
+   * (boundaries, markers, routes, event handlers)
    */
   function reapplyOverlaysAfterStyleChange() {
     if (!map || !builder) return;
 
-    map.setMaxBounds([
-      [69.1038931009432, 41.144224013212],
-      [69.5436061519978, 41.4359965669526],
-    ]);
+    map.setMaxBounds(MAP_BOUNDS);
 
     builder.addCityBoundaryLayer();
     builder.addMarkers();
@@ -525,10 +548,7 @@
       map = new maplibreGL.Map({
         container: mapContainer,
         style,
-        center: [69.29, 41.3],
-        zoom: 11,
-        minZoom: 10,
-        maxZoom: 17,
+        ...INITIAL_VIEW,
       });
 
       styleVersion += 1;
