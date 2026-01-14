@@ -91,9 +91,14 @@
 
   // Themes
   let uiThemeStyle = $state("light");
-  let styleVersion = 0;
   let unsubscribeTheme = null;
   const themeManager = getThemeManager();
+
+  let recreateTimer = null;
+  let pendingTheme = null;
+  let recreateRunning = false;
+
+  let mapGenerationToken = 0;
 
   // Navigation state
   let navigationMode = $state(false);
@@ -109,6 +114,127 @@
   let endMarker = null;
 
   // Helper Functions
+
+  function snapshotViewState() {
+    // если карты нет, или ещё не создана — возвращаем дефолт
+    if (!map) {
+      return {
+        center: [69.29, 41.3],
+        zoom: 11,
+        bearing: 0,
+        pitch: 0,
+      };
+    }
+
+    const c = map.getCenter();
+    return {
+      center: [c.lng, c.lat],
+      zoom: map.getZoom(),
+      bearing: map.getBearing(),
+      pitch: map.getPitch(),
+    };
+  }
+
+  function cleanupCurrentMap() {
+    // снять навигационные маркеры DOM
+    startMarker = removeMarker(startMarker);
+    endMarker = removeMarker(endMarker);
+
+    if (!map) return;
+
+    // снять наши обработчики (map.remove обычно сам чистит, но так безопаснее)
+    try {
+      map.off("click", handleMapClick);
+      map.off("load", setupMapHandlers);
+    } catch {}
+
+    map.remove();
+    map = null;
+
+    // builder завязан на currentMap — пересоздадим позже
+    builder = null;
+  }
+
+  async function createMapInstance(viewState, generation) {
+    const style = await initializeMapStyle();
+
+    const localMap = new maplibreGL.Map({
+      container: mapContainer,
+      style,
+      center: viewState.center,
+      zoom: viewState.zoom,
+      bearing: viewState.bearing,
+      pitch: viewState.pitch,
+      minZoom: 10,
+      maxZoom: 17,
+    });
+
+    // если за время создания уже пришёл новый generation — эту карту сразу убираем
+    if (generation !== mapGenerationToken) {
+      localMap.remove();
+      return;
+    }
+
+    map = localMap;
+    builder = createMapPointsBuilder();
+
+    // Важно: используем localMap и generation, чтобы не было “призраков”
+    localMap.once("load", () => {
+      if (generation !== mapGenerationToken) return; // устарело
+
+      setupMapHandlers();
+
+      // восстановление навигации/маркеров (если нужно)
+      if (currentRoute) builder?.addNavigationRoute(currentRoute);
+
+      if (startPoint) startMarker = addMarker(startPoint.lon, startPoint.lat, "start");
+      if (endPoint) endMarker = addMarker(endPoint.lon, endPoint.lat, "end");
+    });
+  }
+
+  function scheduleRecreate(nextTheme) {
+    // коалесинг: запоминаем только последнюю тему
+    pendingTheme = nextTheme;
+
+    // debounce: если пользователь щёлкает быстро — пересоздадим 1 раз
+    if (recreateTimer) clearTimeout(recreateTimer);
+    recreateTimer = setTimeout(() => {
+      recreateTimer = null;
+      runRecreateLoop();
+    }, 180); // можно 120–250мс
+  }
+
+  async function runRecreateLoop() {
+    if (recreateRunning) return;
+    recreateRunning = true;
+
+    try {
+      while (pendingTheme) {
+        const themeToApply = pendingTheme;
+        pendingTheme = null;
+
+        // если карта уже в нужной теме — пропускаем
+        if (themeToApply === uiThemeStyle && map) continue;
+
+        // фиксируем поколение: все предыдущие карты/колбэки считаем устаревшими
+        mapGenerationToken += 1;
+        const generation = mapGenerationToken;
+
+        const viewState = snapshotViewState();
+        cleanupCurrentMap();
+
+        // выставляем тему ДО построения стиля
+        uiThemeStyle = themeToApply;
+
+        // создаём новую карту
+        await createMapInstance(viewState, generation);
+
+        // если пока создавали — пришла новая тема, цикл повторится
+      }
+    } finally {
+      recreateRunning = false;
+    }
+  }
 
   /**
    * Create a navigation marker element
@@ -339,47 +465,21 @@
   // Map Initialization
 
   /**
-   * Build map style
+   * Initialize map style
    */
-  async function buildStyleForTheme(theme) {
+  function initializeMapStyle() {
     const origin = window.location.origin;
+
+    uiThemeStyle = themeManager.getState().isDark ? "dark" : "light";
+    console.log(uiThemeStyle);
 
     return buildBaseMapStyle({
       origin,
       pmtilesKey: PMTILES_KEY,
-      theme,
+      theme: uiThemeStyle,
       lang: `${$i18n.language}`,
       fontstack: "Roboto Regular",
     });
-  }
-
-  async function applyThemeToMap(theme) {
-    if (!map) return;
-
-    uiThemeStyle = theme;
-
-    startMarker = removeMarker(startMarker);
-    endMarker = removeMarker(endMarker);
-
-    styleVersion += 1;
-    const myVersion = styleVersion;
-
-    const style = await buildStyleForTheme(uiThemeStyle);
-    map.setStyle(style);
-
-    const onIlde = () => {
-      if (myVersion !== styleVersion) return;
-
-      map.off("idle", onIlde);
-
-      builder.setStyleVersion(myVersion);
-      reapplyOverlaysAfterStyleChange();
-
-      if (startPoint) startMarker = addMarker(startPoint.lon, startPoint.lat, "start");
-      if (endPoint) endMarker = addMarker(endPoint.lon, endPoint.lat, "end");
-    };
-
-    map.on("idle", onIlde);
   }
 
   /**
@@ -406,7 +506,7 @@
   /**
    * Configure map points builder
    */
-  function createMapPointsBuilder(version) {
+  function createMapPointsBuilder() {
     return new MapPointsBuilder({
       currentMap: map,
       data: articlesMeta,
@@ -416,8 +516,6 @@
         popupGetOtherMaps: () => $i18n.t("ui:buttons:popupGetOtherMaps"),
       },
       routeFunc: (id) => goto(`/articles/${id}`),
-
-      styleVersion: version,
 
       // Markers
       markers: {
@@ -483,26 +581,16 @@
   /**
    * Setup map after load
    */
-  function reapplyOverlaysAfterStyleChange() {
-    if (!map || !builder) return;
-
+  function setupMapHandlers() {
+    // Max bounds
     map.setMaxBounds([
       [69.1038931009432, 41.144224013212],
       [69.5436061519978, 41.4359965669526],
     ]);
 
+    // city boundary + custom markers
     builder.addCityBoundaryLayer();
     builder.addMarkers();
-
-    if (currentRoute) builder.addNavigationRoute(currentRoute);
-
-    // click handler можно не трогать, но если хочешь — оставь:
-    map.off("click", handleMapClick);
-    map.on("click", handleMapClick);
-  }
-
-  function setupMapHandlers() {
-    reapplyOverlaysAfterStyleChange();
 
     // Fly to coodrinates
     if (targetCoords) {
@@ -511,6 +599,9 @@
         zoom: 16,
       });
     }
+
+    // Click handler from navigation
+    map.on("click", handleMapClick);
   }
 
   // Lifecycle
@@ -518,9 +609,7 @@
   onMount(async () => {
     try {
       await initializePMTiles();
-
-      uiThemeStyle = themeManager.getState().isDark ? "dark" : "light";
-      const style = await buildStyleForTheme(uiThemeStyle);
+      const style = await initializeMapStyle();
 
       map = new maplibreGL.Map({
         container: mapContainer,
@@ -531,15 +620,14 @@
         maxZoom: 17,
       });
 
-      styleVersion += 1;
-      builder = createMapPointsBuilder(styleVersion);
+      builder = createMapPointsBuilder();
       map.on("load", setupMapHandlers);
 
       unsubscribeTheme = themeManager.subscribe(({ isDark }) => {
         const next = isDark ? "dark" : "light";
         if (next === uiThemeStyle) return;
 
-        applyThemeToMap(next);
+        scheduleRecreate(next);
       });
     } catch (error) {
       console.error("[Map] Initialization failed:", error);
@@ -561,10 +649,12 @@
     startMarker = removeMarker(startMarker);
     endMarker = removeMarker(endMarker);
 
+    if (recreateTimer) clearTimeout(recreateTimer);
+    recreateTimer = null;
+    pendingTheme = null;
+
     unsubscribeTheme?.();
     unsubscribeTheme = null;
-
-    builder?.dispose?.();
   });
 
   $effect(() => {

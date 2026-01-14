@@ -32,6 +32,7 @@ export class MapPointsBuilder {
     const {
       data = [],
       i18n = {},
+      styleVersion,
       routeFunc = () => {},
       currentMap,
       markers = {},
@@ -46,6 +47,7 @@ export class MapPointsBuilder {
         popupLink: i18n.popupLink,
         popupGetOtherMaps: i18n.popupGetOtherMaps,
       },
+      styleVersion,
       routeFunc,
       currentMap,
       markers: {
@@ -67,9 +69,28 @@ export class MapPointsBuilder {
         mapLayer: cityBoundaries.mapLayer ?? [],
       },
     };
+
+    this._onMarkerClick = null;
+    this._clickLayerId = null;
   }
 
   // Methods:
+
+  setStyleVersion(version) {
+    this._params.styleVersion = version;
+  }
+
+  dispose() {
+    const map = this._params.currentMap;
+    if (!map) return;
+
+    if (this._onMarkerClick && this._clickLayerId) {
+      map.off('click', this._clickLayerId, this._onMarkerClick);
+    }
+
+    this._onMarkerClick = null;
+    this._clickLayerId = null;
+  }
 
   // Transform [lat, lon] (from data) to [lon, lat] (GeoJSON)
   _coordsTransform(coord) {
@@ -173,9 +194,26 @@ export class MapPointsBuilder {
     const iconName = this._params.markers.icon.name;
     const iconUrl = this._params.markers.icon.url;
 
+    const myVersion = this._params.styleVersion;
+
     if (!iconUrl) {
       console.error('[MapPointsBuilder] iconUrl is required for markers');
       return;
+    }
+
+    const clickLayerId = [this._params.markers.listener.iconLayerId, this._params.markers.listener.labelLayerId].filter(
+      Boolean
+    );
+
+    if (!clickLayerId.length) {
+      console.warn('[MapPointsBuilder] click layer ids are missing');
+      return;
+    }
+
+    if (this._onMarkerClick && this._clickLayerId) {
+      map.off('click', this._clickLayerId, this._onMarkerClick);
+      this._onMarkerClick = null;
+      this._clickLayerId = null;
     }
 
     // create image element
@@ -183,6 +221,8 @@ export class MapPointsBuilder {
     img.crossOrigin = 'anonymous';
 
     img.onload = () => {
+      if (this._params.styleVersion !== myVersion) return;
+
       // Register icon once
       if (!map.hasImage(`${iconName}-point`)) map.addImage(`${iconName}-point`, img);
 
@@ -209,37 +249,38 @@ export class MapPointsBuilder {
       });
 
       // Popup on marker click
-      const clickLayerId = [this._params.markers.listener.iconLayerId, this._params.markers.listener.labelLayerId];
+
       if (!clickLayerId) {
         console.warn('[MapPointsBuilder] iconLayerId is not provided, click handler will not be attached');
-      } else {
-        map.on('click', clickLayerId, (e) => {
-          if (!e?.features?.length) return;
+        return;
+      }
 
-          const feature = e.features[0];
-          const coords = feature.geometry.coordinates;
-          const { id, title } = feature.properties;
+      this._onMarkerClick = (e) => {
+        if (!e?.features?.length) return;
 
-          // Popup initial
-          const popup = new maplibreGL.Popup({
-            closeButton: false, // we use custom close btn
-            closeOnClick: true,
-          }).setLngLat(coords);
+        const feature = e.features[0];
+        const coords = feature.geometry.coordinates;
+        const { id, title } = feature.properties;
 
-          // Create custom popup element
-          const container = document.createElement('div');
-          container.className = 'map-popup';
+        const popup = new maplibreGL.Popup({
+          closeButton: false, // we use custom close btn
+          closeOnClick: true,
+        }).setLngLat(coords);
 
-          const popupLinkFn = this._params.i18n.popupLink;
-          const popupLinkText = typeof popupLinkFn === 'function' ? popupLinkFn() : '';
-          const popupGetOtherMaps =
-            typeof this._params.i18n.popupGetOtherMaps === 'function' ? this._params.i18n.popupGetOtherMaps() : '';
+        // Create custom popup element
+        const container = document.createElement('div');
+        container.className = 'map-popup';
 
-          const [lon, lat] = coords;
-          const coordsTransform = [lat, lon];
+        const popupLinkFn = this._params.i18n.popupLink;
+        const popupLinkText = typeof popupLinkFn === 'function' ? popupLinkFn() : '';
+        const popupGetOtherMaps =
+          typeof this._params.i18n.popupGetOtherMaps === 'function' ? this._params.i18n.popupGetOtherMaps() : '';
 
-          // Popup inner content
-          container.innerHTML = `
+        const [lon, lat] = coords;
+        const coordsTransform = [lat, lon];
+
+        // Popup inner content
+        container.innerHTML = `
             <div class="flex justify-end mb-1">
               <button
                 type="button"
@@ -258,31 +299,34 @@ export class MapPointsBuilder {
             </div>
           `;
 
-          // Popup custom close btn handler
-          const closeBtn = container.querySelector('.map-popup-close');
-          if (closeBtn) {
-            closeBtn.addEventListener('click', () => {
-              popup.remove();
-            });
-          }
+        // Popup custom close btn handler
+        const closeBtn = container.querySelector('.map-popup-close');
+        if (closeBtn) {
+          closeBtn.addEventListener('click', () => {
+            popup.remove();
+          });
+        }
 
-          // SPA routing link
-          const link = container.querySelector('a');
-          if (link) {
-            link.addEventListener('click', (event) => {
-              event.preventDefault();
-              this._params.routeFunc(id);
-              popup.remove();
-            });
-          }
+        // SPA routing link
+        const link = container.querySelector('a');
+        if (link) {
+          link.addEventListener('click', (event) => {
+            event.preventDefault();
+            this._params.routeFunc(id);
+            popup.remove();
+          });
+        }
 
-          // Add popup with DOM and map
-          popup.setDOMContent(container).addTo(map);
-        });
-      }
+        // Add popup with DOM and map
+        popup.setDOMContent(container).addTo(map);
+      };
+
+      this._clickLayerId = clickLayerId;
+      map.on('click', this._clickLayerId, this._onMarkerClick);
     };
 
     img.onerror = (e) => {
+      if (this._params.styleVersion !== myVersion) return;
       console.error('Failed to load icon image:', e);
     };
 
