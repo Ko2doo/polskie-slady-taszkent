@@ -45,6 +45,13 @@ export default {
     noArticleId: 'Marshrutta maqola ID si yo‘q.',
     articleNotFound: 'Maqola topilmadi!',
     notFound: 'Hech narsa topilmadi',
+    toastBtn: 'Yopish',
+    navigationInitFailed: 'Navigatsiyani yuklab bo‘lmadi. Iltimos, yana urinib ko‘ring.',
+    navigationCalculateRouteFailed: 'Marshrutni hisoblash vaqtida xatolik yuz berdi.',
+    navigationRouteNotFound: 'Marshrut topilmadi',
+    mapThemeFailed: 'Mavzuni qo‘llab bo‘lmadi',
+    mapPMTilesFetch: 'PMTilesni yuklab bo‘lmadi',
+    mapInitFailed: 'Xaritani ishga tushirib bo‘lmadi. Iltimos, sahifani yangilang.',
   },
   buttons: {
     back: 'Orqaga',
@@ -58,6 +65,27 @@ export default {
   },
   dialogue: {
     hello: 'Salom, Dunyo!',
+  },
+  map: {
+    nav: {
+      loading: 'Yuklanmoqda...',
+      exit: 'Navigatsiyadan chiqish',
+      navigate: 'Navigatsiyani boshlash',
+    },
+    infoPanel: {
+      calc: 'Marshrut hisoblanmoqda...',
+      info: 'Marshrut ma’lumotlari',
+      time: 'ms',
+      distance: 'km',
+      walk: 'daq. piyoda',
+      waypoints: 'oraliq nuqtalar',
+      iterations: 'iteratsiyalar',
+      clear: 'Marshrutni tozalash',
+      setRoutePoints: 'Marshrut nuqtalarini o‘rnatish',
+      startProg: 'Boshlang‘ich nuqtani qo‘yish uchun <strong>xaritaga bosing</strong>',
+      endProg: 'Manzilni belgilash uchun <strong>yana bosing</strong>',
+      footerInfo: 'Marshrut avtomatik hisoblanadi',
+    },
   },
   settings: {
     translations: {

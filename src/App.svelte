@@ -26,6 +26,7 @@
   import { panelState, openPanel, closePanel } from "@/store/ui/panel";
 
   import { getThemeManager } from "@/lib/theme/themeManager";
+  import ErrorHandlerToast from "./components/Ui/ErrorHandlerToast.svelte";
 
   onMount(() => {
     initBackButtonHandler();
@@ -119,6 +120,9 @@
         {@render $panelState.contentSnippet()}
       {/if}
     </Panel>
+
+    <!-- Error toast init -->
+    <ErrorHandlerToast {i18n} />
 
     <!-- Fixed bottom navigation -->
     <BottomTabbarNav {i18n} />

@@ -45,6 +45,13 @@ export default {
     noArticleId: 'Brak ID artykułu w trasie.',
     articleNotFound: 'Artykuł nie został znaleziony!',
     notFound: 'Nic nie znaleziono',
+    toastBtn: 'Zamknij',
+    navigationInitFailed: 'Nie udało się wczytać nawigacji. Spróbuj ponownie.',
+    navigationCalculateRouteFailed: 'Wystąpił błąd podczas obliczania trasy.',
+    navigationRouteNotFound: 'Nie znaleziono trasy',
+    mapThemeFailed: 'Nie udało się zastosować motywu',
+    mapPMTilesFetch: 'Nie udało się pobrać PMTiles',
+    mapInitFailed: 'Nie udało się zainicjować mapy. Odśwież stronę.',
   },
   buttons: {
     back: 'Powrót',
@@ -58,6 +65,27 @@ export default {
   },
   dialogue: {
     hello: 'Halo, Świat!',
+  },
+  map: {
+    nav: {
+      loading: 'Ładowanie...',
+      exit: 'Zakończ nawigację',
+      navigate: 'Nawiguj',
+    },
+    infoPanel: {
+      calc: 'Obliczanie trasy...',
+      info: 'Informacje o trasie',
+      time: 'ms',
+      distance: 'km',
+      walk: 'min pieszo',
+      waypoints: 'punkty pośrednie',
+      iterations: 'iteracje',
+      clear: 'Wyczyść trasę',
+      setRoutePoints: 'Ustaw punkty trasy',
+      startProg: 'Stuknij w mapę, aby ustawić <strong>punkt startu</strong>',
+      endProg: 'Stuknij ponownie, aby <strong>ustawić cel</strong>',
+      footerInfo: 'Trasa zostanie obliczona automatycznie',
+    },
   },
   settings: {
     translations: {

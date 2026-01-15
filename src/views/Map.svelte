@@ -53,14 +53,17 @@
   // Router
   import { goto } from "@mateothegreat/svelte5-router";
 
-  // Sources
+  import { articlesMeta } from "@/data/articles";
+
+  // Error handler
+  import { errorToast } from "@/store/ui/errorToast";
+  import { ERROR_CODES } from "@/lib/errors/errorCodes";
+
+  // Constants
   const PMTILES_PATH = "/map/tashkent_20251124.pmtiles";
   const PMTILES_KEY = "tashkent-local";
   const CITY_BOUNDARIES = "/map/tashkent_boundaries.geojson";
 
-  import { articlesMeta } from "@/data/articles";
-
-  // Constants
   const MARKER_CONFIG = {
     start: {
       emoji: "🟢",
@@ -234,7 +237,12 @@
       console.log("[Map] Navigation ready");
     } catch (error) {
       console.error("[Map] Failed to load navigation:", error);
-      alert("Failed to load navigation. Please try again.");
+
+      errorToast.error($i18n.t("ui:errors:navigationInitFailed"), {
+        scope: "Map",
+        code: ERROR_CODES.NAV_INIT,
+      });
+
       navigationMode = false;
     } finally {
       navigationLoading = false;
@@ -283,7 +291,11 @@
     } catch (error) {
       console.error("[Map] Route calculation error:", error);
       routeInfo = null;
-      alert("An error occurred while calculating the route.");
+
+      errorToast.error($i18n.t("ui:errors:navigationCalculateRouteFailed"), {
+        scope: "Map",
+        code: ERROR_CODES.NAV_ROUTE_CALC,
+      });
     }
   }
 
@@ -310,7 +322,12 @@
    */
   function handleRouteError(result) {
     routeInfo = null;
-    alert("Route not found: " + result.message);
+
+    errorToast.error($i18n.t("ui:errors:navigationRouteNotFound"), {
+      scope: "Map",
+      code: ERROR_CODES.NAV_ROUTE_NOT_FOUND,
+    });
+
     console.error("[Map] Route calculation failed:", result.message);
   }
 
@@ -403,7 +420,11 @@
       map.on("idle", onIdle);
     } catch (error) {
       console.error("[Map] Failed to apply theme:", error);
-      alert("[Map] Failed to apply theme:", error);
+
+      errorToast.error($i18n.t("ui:errors:mapThemeFailed"), {
+        scope: "Map",
+        code: ERROR_CODES.MAP_THEME_FAILED,
+      });
     }
   }
 
@@ -414,7 +435,12 @@
     const response = await fetch(PMTILES_PATH);
 
     if (!response.ok) {
-      throw new Error(`Failed to fetch PMTiles: ${response.status} ${response.statusText}`);
+      console.error(`Failed to fetch PMTiles: ${response.status} ${response.statusText}`);
+
+      errorToast.error($i18n.t("ui:errors:mapPMTilesFetch"), {
+        scope: "Map",
+        code: ERROR_CODES.PMTILES_FETCH,
+      });
     }
 
     const buffer = await response.arrayBuffer();
@@ -563,7 +589,11 @@
       });
     } catch (error) {
       console.error("[Map] Initialization failed:", error);
-      alert("Failed to initialize map. Please refresh the page.");
+
+      errorToast.error($i18n.t("ui:errors:mapInitFailed"), {
+        scope: "Map",
+        code: ERROR_CODES.MAP_INIT_FAILED,
+      });
     }
   });
 
@@ -610,6 +640,7 @@
   <div class="navigation-control-wrapper">
     <NavigationControl
       bind:navigationMode
+      {i18n}
       {navigationReady}
       {navigationLoading}
       {routeInfo}

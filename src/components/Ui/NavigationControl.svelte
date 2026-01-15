@@ -20,7 +20,7 @@
   } = $props();
 </script>
 
-<div class="navigation-control">
+<aside class="navigation-control">
   <!-- Navigation toggle button -->
   <button
     onclick={onToggle}
@@ -40,7 +40,7 @@
             d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
           ></path>
         </svg>
-        Loading...
+        {$i18n.t("ui:map:nav:loading")}
       </span>
     {:else if navigationMode}
       <span class="flex items-center gap-2">
@@ -51,7 +51,7 @@
             clip-rule="evenodd"
           />
         </svg>
-        Exit Navigation
+        {$i18n.t("ui:map:nav:exit")}
       </span>
     {:else}
       <span class="flex items-center gap-2">
@@ -62,29 +62,33 @@
             clip-rule="evenodd"
           />
         </svg>
-        Navigate
+        {$i18n.t("ui:map:nav:navigate")}
       </span>
     {/if}
   </button>
 
   <!-- Navigation instructions / info panel -->
   {#if navigationMode && navigationReady}
-    <div class="nav-info-panel bg-white dark:bg-gray-800 rounded-lg shadow-lg">
+    <section class="nav-info-panel bg-white dark:bg-gray-800 rounded-lg shadow-lg">
       {#if routeInfo?.loading}
         <!-- Loading state -->
         <div class="space-y-2">
-          <p class="text-sm font-bold text-gray-900 dark:text-white">Calculating route...</p>
+          <p class="text-sm font-bold text-gray-900 dark:text-white">
+            {$i18n.t("ui:map:infoPanel:calc")}
+          </p>
           <div class="w-full h-1 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
             <div class="h-full bg-blue-500 animate-pulse w-full"></div>
           </div>
         </div>
       {:else if routeInfo && !routeInfo.loading}
         <!-- Route info display -->
-        <div class="space-y-3">
+        <article class="space-y-3">
           <div class="flex items-center justify-between">
-            <p class="text-sm font-bold text-gray-900 dark:text-white">Route Info</p>
+            <p class="text-sm font-bold text-gray-900 dark:text-white">
+              {$i18n.t("ui:map:infoPanel:info")}
+            </p>
             <span class="text-xs text-gray-500 dark:text-gray-400">
-              {routeInfo.computeTime}ms
+              {routeInfo.computeTime}{$i18n.t("ui:map:infoPanel:time")}
             </span>
           </div>
 
@@ -92,26 +96,28 @@
             <div class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
               <span class="text-lg">📏</span>
               <span>
-                <strong>{(routeInfo.distance / 1000).toFixed(2)}</strong> km
+                <strong>{(routeInfo.distance / 1000).toFixed(2)}</strong>
+                {$i18n.t("ui:map:infoPanel:distance")}
               </span>
             </div>
 
             <div class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
               <span class="text-lg">⏱️</span>
               <span>
-                ~<strong>{Math.round((routeInfo.distance / 1000 / 5) * 60)}</strong> min walking
+                ~<strong>{Math.round((routeInfo.distance / 1000 / 5) * 60)}</strong>
+                {$i18n.t("ui:map:infoPanel:walk")}
               </span>
             </div>
 
             <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
               <span>🔗</span>
-              <span>{routeInfo.nodes} waypoints</span>
+              <span>{routeInfo.nodes} {$i18n.t("ui:map:infoPanel:waypoints")}</span>
             </div>
 
             {#if routeInfo.iterations}
               <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
                 <span>🔄</span>
-                <span>{routeInfo.iterations.toLocaleString()} iterations</span>
+                <span>{routeInfo.iterations.toLocaleString()} {$i18n.t("ui:map:infoPanel:iterations")}</span>
               </div>
             {/if}
           </div>
@@ -127,34 +133,38 @@
                 clip-rule="evenodd"
               />
             </svg>
-            Clear Route
+            {$i18n.t("ui:map:infoPanel:clear")}
           </button>
-        </div>
+        </article>
       {:else}
         <!-- Instructions -->
-        <div class="space-y-3">
-          <p class="text-sm font-bold text-gray-900 dark:text-white">Set Route Points</p>
+        <article class="space-y-3">
+          <p class="text-sm font-bold text-gray-900 dark:text-white">
+            {$i18n.t("ui:map:infoPanel:setRoutePoints")}
+          </p>
 
           <div class="space-y-2">
             <div class="flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300">
               <span class="text-lg flex-shrink-0">🟢</span>
-              <span>Tap on the map to set <strong>start point</strong></span>
+              <span>{@html $i18n.t("ui:map:infoPanel:startProg")}</span>
             </div>
 
             <div class="flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300">
               <span class="text-lg flex-shrink-0">🔴</span>
-              <span>Tap again to set <strong>destination</strong></span>
+              <span>{@html $i18n.t("ui:map:infoPanel:endProg")}</span>
             </div>
           </div>
 
           <div class="pt-2 border-t border-gray-200 dark:border-gray-700">
-            <p class="text-xs text-gray-500 dark:text-gray-400">💡 The route will be calculated automatically</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400">
+              💡 {$i18n.t("ui:map:infoPanel:footerInfo")}
+            </p>
           </div>
-        </div>
+        </article>
       {/if}
-    </div>
+    </section>
   {/if}
-</div>
+</aside>
 
 <style>
   .navigation-control {

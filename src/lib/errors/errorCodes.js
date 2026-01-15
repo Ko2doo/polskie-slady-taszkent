@@ -1,0 +1,13 @@
+// Error codes collection
+
+export const ERROR_CODES = {
+  // Navigation
+  NAV_INIT: 'NAV_INIT',
+  NAV_ROUTE_CALC: 'NAV_ROUTE_CALC',
+  NAV_ROUTE_NOT_FOUND: 'NAV_ROUTE_NOT_FOUND',
+
+  // Map
+  MAP_THEME_FAILED: 'MAP_THEME_FAILED',
+  MAP_INIT_FAILED: 'MAP_INIT_FAILED',
+  PMTILES_FETCH: 'PMTILES_FETCH',
+};
