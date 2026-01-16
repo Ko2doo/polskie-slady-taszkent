@@ -13,7 +13,7 @@ import { PMTiles, Protocol } from 'pmtiles';
 import { InMemoryPMTilesSource } from '@/utils/inMemoryPmtilesSource';
 import { errorToast } from '@/store/ui/errorToast';
 import { ERROR_CODES } from '@/lib/errors/errorCodes';
-import { PMTILES_PATH, PMTILES_KEY, INITIAL_VIEW } from './MapConstants';
+import { PMTILES_PATH, PMTILES_KEY, INITIAL_VIEW, MAP_BOUNDS } from './MapConstants';
 
 /**
  * Initialize PMTiles source
@@ -87,6 +87,9 @@ export function initializeMap({ container, style }) {
  */
 export function setupMapHandlers({ map, builder, targetCoords }) {
   console.log('[MapLifecycle] Setting up map handlers...');
+
+  map.setMaxBounds(MAP_BOUNDS);
+  console.log('[MapLifecycle] MaxBounds set:', MAP_BOUNDS);
 
   // Add all overlays
   builder.addCityBoundaryLayer();
