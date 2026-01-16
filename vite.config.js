@@ -20,7 +20,7 @@ export default defineConfig({
     },
   },
   build: {
-    minify: false,
+    minify: true,
     copyPublicDir: true,
     outDir: 'dist',
     emptyOutDir: true,
