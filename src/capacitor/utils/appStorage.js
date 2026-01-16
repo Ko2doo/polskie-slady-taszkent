@@ -7,7 +7,12 @@ import { Preferences } from '@capacitor/preferences';
 
 export async function setStorage(key, value) {
   try {
-    await Preferences.set({ key, value: String(value) });
+    /*prettier-ignore*/
+    const serialized = typeof value === 'object'
+      ? JSON.stringify(value)
+      : String(value);
+
+    await Preferences.set({ key, value: serialized });
   } catch (error) {
     console.error('Capacitor Preferences.set(...) failed:', error);
   }
@@ -22,7 +27,11 @@ export async function getStorage(key, fallback = null) {
       return fallback;
     }
 
-    return value;
+    try {
+      return JSON.parse(value);
+    } catch {
+      return value;
+    }
   } catch (error) {
     console.error('Capacitor Preferences.get(...) failed:', error);
     return fallback;
