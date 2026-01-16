@@ -85,15 +85,39 @@
   /**
    * Unified map click handler
    * Routes clicks to appropriate navigation controller
+   * Only ONE mode can be active at a time
    */
-  // function handleUnifiedMapClick(e) {
-  //   // Priority: GPS navigation > Point-to-Point navigation
-  //   if (gpsNavigation?.gpsMode) {
-  //     gpsNavigation.handleMapClick(e);
-  //   } else if (navigation?.navigationMode) {
-  //     navigation.handleMapClick(e);
-  //   }
-  // }
+  function handleUnifiedMapClick(e) {
+    console.log("[Map] Unified click handler triggered");
+    console.log("[Map] GPS state:", {
+      exists: !!gpsNavigation,
+      mode: gpsNavigation?.gpsMode,
+      ready: gpsNavigation?.gpsReady,
+    });
+    console.log("[Map] Navigation state:", {
+      exists: !!navigation,
+      mode: navigation?.navigationMode,
+      ready: navigation?.navigationReady,
+    });
+
+    // Check GPS mode first (priority)
+    // GPS requires ready state because it needs permissions and tracker
+    if (gpsNavigation && gpsNavigation.gpsMode && gpsNavigation.gpsReady) {
+      gpsNavigation.handleMapClick(e);
+      return;
+    }
+
+    // Check Point-to-Point mode
+    // Point-to-Point doesn't need ready check - it initializes on first click
+    if (navigation && navigation.navigationMode) {
+      navigation.handleMapClick(e);
+      return;
+    }
+
+    console.log("[Map] No mode active, click ignored");
+
+    // No mode active - do nothing
+  }
 
   // ========================================
   // LIFECYCLE - MOUNT
@@ -167,7 +191,7 @@
         });
 
         // Attach unified click handler
-        // map.on("click", handleUnifiedMapClick());
+        map.on("click", handleUnifiedMapClick);
       });
 
       console.log("[Map] Initialization complete");
@@ -189,9 +213,9 @@
     console.log("[Map] Unmounting...");
 
     // Remove unified click handler
-    // if (map) {
-    //   map.off("click", handleUnifiedMapClick());
-    // }
+    if (map) {
+      map.off("click", handleUnifiedMapClick);
+    }
 
     cleanupMap({
       map,

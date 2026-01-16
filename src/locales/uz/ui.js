@@ -49,7 +49,9 @@ export default {
     gpsInitFailed: 'GPS ishga tushirilmadi',
     gpsError: 'GPS xatosi',
     gpsPositionNotAvailable: 'GPS joylashuvi mavjud emas',
-    gpsPermissionDenied: 'GPS ruxsati berilmagan',
+    gpsPermissionDenied: 'GPS ruxsati berilmagan. Ilova sozlamalarida ruxsat bering.',
+    gpsOutOfBounds: 'Siz xarita hududidan tashqaridasiz. Oflayn navigatsiya mavjud emas.',
+    gpsOutOfBoundsNavigation: 'Navigatsiya imkonsiz - siz xarita hududidan tashqaridasiz',
     navigationInitFailed: 'Navigatsiya ishga tushirilmadi',
     navigationCalculateRouteFailed: "Yo'nalish hisoblanmadi",
     navigationRouteNotFound: "Yo'nalish topilmadi",
@@ -63,6 +65,10 @@ export default {
     langSwitcher: 'Til',
     toMaps: 'Xaritada ko‘rsatish',
     popupGetOtherMaps: 'Google Xaritalarda ochish',
+    openSettings: 'Sozlamalarni ochish',
+  },
+  hints: {
+    enableGPSManually: 'Qurilma sozlamalari > Ilovalar > Polskie Slady > Ruxsatlar > Joylashuv',
   },
   toasts: {
     exitApp: 'Chiqish uchun yana bir marta Orqaga bosing',
@@ -83,6 +89,7 @@ export default {
       routing: "Joriy joydan yo'nalish",
       arrived: 'Siz yetib keldingiz!',
       newRoute: "Yangi yo'nalish",
+      backInBounds: '✅ Siz yana xarita hududidasiz. Navigatsiya mavjud.',
     },
     infoPanel: {
       setRoutePoints: "Yo'nalish nuqtalarini belgilang",

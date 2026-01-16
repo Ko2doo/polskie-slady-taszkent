@@ -8,6 +8,7 @@
  * - User location marker on map
  * - Automatic route recalculation when off-route
  * - Route progress tracking
+ * - Map bounds checking
  */
 
 import maplibreGL from 'maplibre-gl';
@@ -40,6 +41,7 @@ export function createGPSNavigationController({ map, builder, i18n }) {
   let currentRoute = $state(null);
   let routeInfo = $state(null);
   let isArrived = $state(false);
+  let isOutOfBounds = $state(false); // Track if user is outside map bounds
 
   // GPS tracker
   let gpsTracker = null;
@@ -68,11 +70,63 @@ export function createGPSNavigationController({ map, builder, i18n }) {
         onError: handleGPSError,
       });
 
-      // Request permissions and start tracking
+      // Check permissions first
+      let hasPermission = await gpsTracker.checkPermissions();
+
+      if (!hasPermission) {
+        // Request permissions
+        hasPermission = await gpsTracker.requestPermissions();
+
+        if (!hasPermission) {
+          // Permission denied - show message with settings link
+          errorToast.error(i18n.t('ui:errors:gpsPermissionDenied'), {
+            scope: 'GPSNavigation',
+            code: 'PERMISSION_DENIED',
+            duration: 8000, // Show longer
+            action: {
+              text: i18n.t('ui:buttons:openSettings'),
+              onClick: async () => {
+                // Open app settings (Capacitor 5+)
+                try {
+                  const { Capacitor } = await import('@capacitor/core');
+                  if (Capacitor.isNativePlatform()) {
+                    // For Android: open app settings
+                    const { App } = await import('@capacitor/app');
+                    // Note: App.openSettings() might not exist in all versions
+                    // Alternative: guide user manually
+                    errorToast.info(i18n.t('ui:hints:enableGPSManually'));
+                  }
+                } catch (error) {
+                  console.error('[GPSNavigation] Cannot open settings:', error);
+                  errorToast.info(i18n.t('ui:hints:enableGPSManually'));
+                }
+              },
+            },
+          });
+
+          throw new Error('GPS permission denied');
+        }
+      }
+
+      // Start tracking
       const started = await gpsTracker.start();
 
       if (!started) {
         throw new Error('Failed to start GPS tracking');
+      }
+
+      // Get initial position to check bounds
+      const initialPosition = await gpsTracker.getCurrentPosition();
+
+      if (initialPosition && !initialPosition.isWithinBounds) {
+        // User is outside map bounds
+        isOutOfBounds = true;
+
+        errorToast.warn(i18n.t('ui:errors:gpsOutOfBounds'), {
+          scope: 'GPSNavigation',
+          code: 'OUT_OF_BOUNDS',
+          duration: 6000,
+        });
       }
 
       gpsReady = true;
@@ -82,10 +136,12 @@ export function createGPSNavigationController({ map, builder, i18n }) {
     } catch (error) {
       console.error('[GPSNavigation] Failed to initialize GPS:', error);
 
-      errorToast.error(i18n.t('ui:errors:gpsInitFailed'), {
-        scope: 'GPSNavigation',
-        code: ERROR_CODES.NAV_INIT,
-      });
+      if (error.message !== 'GPS permission denied') {
+        errorToast.error(i18n.t('ui:errors:gpsInitFailed'), {
+          scope: 'GPSNavigation',
+          code: ERROR_CODES.NAV_INIT,
+        });
+      }
 
       gpsMode = false;
       return false;
@@ -144,6 +200,38 @@ export function createGPSNavigationController({ map, builder, i18n }) {
    */
   function handlePositionUpdate(position) {
     console.log('[GPSNavigation] Position update:', position);
+
+    // Check if position is within map bounds
+    if (!position.isWithinBounds) {
+      if (!isOutOfBounds) {
+        // First time out of bounds
+        isOutOfBounds = true;
+
+        errorToast.warn(i18n.t('ui:errors:gpsOutOfBounds'), {
+          scope: 'GPSNavigation',
+          code: 'OUT_OF_BOUNDS',
+          duration: 6000,
+        });
+
+        // Clear route if exists
+        if (currentRoute) {
+          clearGPSNavigation();
+        }
+      }
+
+      // Update marker position even if out of bounds
+      updateUserMarker(position);
+      return;
+    }
+
+    // User is back within bounds
+    if (isOutOfBounds) {
+      isOutOfBounds = false;
+
+      errorToast.info(i18n.t('ui:map:gps:backInBounds'), {
+        scope: 'GPSNavigation',
+      });
+    }
 
     // Update user marker
     updateUserMarker(position);
@@ -321,6 +409,15 @@ export function createGPSNavigationController({ map, builder, i18n }) {
   function handleMapClick(e) {
     if (!gpsMode || !gpsReady) return;
 
+    // Check if user is out of bounds
+    if (isOutOfBounds) {
+      errorToast.warn(i18n.t('ui:errors:gpsOutOfBoundsNavigation'), {
+        scope: 'GPSNavigation',
+        code: 'OUT_OF_BOUNDS_NAVIGATION',
+      });
+      return;
+    }
+
     const { lng, lat } = e.lngLat;
 
     // Set destination
@@ -417,6 +514,9 @@ export function createGPSNavigationController({ map, builder, i18n }) {
     },
     get isArrived() {
       return isArrived;
+    },
+    get isOutOfBounds() {
+      return isOutOfBounds;
     },
 
     // Actions

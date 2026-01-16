@@ -153,18 +153,3 @@ export const ROUTE_FIT_PADDING = {
   left: 100,
   right: 100,
 };
-
-// ========================================
-// GPS CONFIGURATION
-// ========================================
-
-/**
- * User location marker configuration
- * Styles are defined in Map.svelte <style> block
- */
-export const GPS_CONFIG = {
-  markerColor: '#4285F4', // Google blue
-  enableHighAccuracy: true,
-  timeout: 10000, // 10 seconds
-  maximumAge: 0, // Don't use cached position
-};

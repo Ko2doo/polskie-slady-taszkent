@@ -48,6 +48,30 @@ const WATCH_OPTIONS = {
 // Distance threshold to consider user "off route" (in meters)
 const OFF_ROUTE_THRESHOLD = 50; // 50 meters
 
+// Map bounds for Tashkent (to check if user is within map area)
+const MAP_BOUNDS = {
+  minLon: 69.1038931009432,
+  minLat: 41.144224013212,
+  maxLon: 69.5436061519978,
+  maxLat: 41.4359965669526,
+};
+
+/**
+ * Check if coordinates are within map bounds
+ * @param {number} lat - Latitude
+ * @param {number} lon - Longitude
+ * @returns {boolean} - true if within bounds
+ */
+/*prettier-ignore*/
+function isWithinMapBounds(lat, lon) {
+  return (
+    lon >= MAP_BOUNDS.minLon &&
+    lon <= MAP_BOUNDS.maxLon &&
+    lat >= MAP_BOUNDS.minLat &&
+    lat <= MAP_BOUNDS.maxLat
+  );
+}
+
 /**
  * Calculate Haversine distance between two coordinates
  * @param {number} lat1 - Latitude of point 1
@@ -167,13 +191,7 @@ export function createGPSTracker({ onPositionUpdate = null, onError = null } = {
 
       const position = await Geolocation.getCurrentPosition(GPS_OPTIONS);
 
-      console.log('[GPSTracker] Current position:', {
-        lat: position.coords.latitude,
-        lon: position.coords.longitude,
-        accuracy: position.coords.accuracy,
-      });
-
-      return {
+      const positionData = {
         lat: position.coords.latitude,
         lon: position.coords.longitude,
         accuracy: position.coords.accuracy,
@@ -181,7 +199,17 @@ export function createGPSTracker({ onPositionUpdate = null, onError = null } = {
         heading: position.coords.heading,
         speed: position.coords.speed,
         timestamp: position.timestamp,
+        isWithinBounds: isWithinMapBounds(position.coords.latitude, position.coords.longitude),
       };
+
+      console.log('[GPSTracker] Current position:', {
+        lat: positionData.lat,
+        lon: positionData.lon,
+        accuracy: positionData.accuracy,
+        withinBounds: positionData.isWithinBounds,
+      });
+
+      return positionData;
     } catch (error) {
       console.error('[GPSTracker] Failed to get current position:', error);
 
@@ -261,6 +289,7 @@ export function createGPSTracker({ onPositionUpdate = null, onError = null } = {
             heading: position.coords.heading,
             speed: position.coords.speed,
             timestamp: position.timestamp,
+            isWithinBounds: isWithinMapBounds(position.coords.latitude, position.coords.longitude),
           };
 
           lastPosition = positionData;
@@ -269,6 +298,7 @@ export function createGPSTracker({ onPositionUpdate = null, onError = null } = {
             lat: positionData.lat,
             lon: positionData.lon,
             accuracy: positionData.accuracy,
+            withinBounds: positionData.isWithinBounds,
           });
 
           if (onPositionUpdate) {

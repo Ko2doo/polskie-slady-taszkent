@@ -49,7 +49,9 @@ export default {
     gpsInitFailed: 'Не удалось инициализировать GPS',
     gpsError: 'Ошибка GPS',
     gpsPositionNotAvailable: 'GPS позиция недоступна',
-    gpsPermissionDenied: 'Доступ к GPS запрещён',
+    gpsPermissionDenied: 'Доступ к GPS запрещён. Разрешите доступ в настройках приложения.',
+    gpsOutOfBounds: 'Вы находитесь за пределами карты. Оффлайн навигация недоступна.',
+    gpsOutOfBoundsNavigation: 'Навигация невозможна - вы за пределами карты',
     navigationInitFailed: 'Не удалось инициализировать навигацию',
     navigationCalculateRouteFailed: 'Не удалось рассчитать маршрут',
     navigationRouteNotFound: 'Маршрут не найден',
@@ -63,6 +65,10 @@ export default {
     langSwitcher: 'Язык',
     toMaps: 'Показать на карте',
     popupGetOtherMaps: 'Открыть в Google Maps',
+    openSettings: 'Открыть настройки',
+  },
+  hints: {
+    enableGPSManually: 'Откройте настройки устройства > Приложения > Polskie Slady > Разрешения > Местоположение',
   },
   toasts: {
     exitApp: 'Нажмите назад ещё раз что-бы выйти',
@@ -83,6 +89,7 @@ export default {
       routing: 'Маршрут от текущего местоположения',
       arrived: 'Вы прибыли!',
       newRoute: 'Новый маршрут',
+      backInBounds: '✅ Вы снова в зоне карты. Навигация доступна.',
     },
     infoPanel: {
       setRoutePoints: 'Установите точки маршрута',

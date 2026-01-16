@@ -49,7 +49,9 @@ export default {
     gpsInitFailed: 'Failed to initialize GPS',
     gpsError: 'GPS error',
     gpsPositionNotAvailable: 'GPS position not available',
-    gpsPermissionDenied: 'GPS permission denied',
+    gpsPermissionDenied: 'GPS permission denied. Please allow access in app settings.',
+    gpsOutOfBounds: 'You are outside the map area. Offline navigation unavailable.',
+    gpsOutOfBoundsNavigation: 'Navigation impossible - you are outside the map',
     navigationInitFailed: 'Failed to initialize navigation',
     navigationCalculateRouteFailed: 'Failed to calculate route',
     navigationRouteNotFound: 'Route not found',
@@ -63,6 +65,10 @@ export default {
     langSwitcher: 'Language',
     toMaps: 'Show on map',
     popupGetOtherMaps: 'Open in Google Maps',
+    openSettings: 'Open settings',
+  },
+  hints: {
+    enableGPSManually: 'Open device settings > Apps > Polskie Slady > Permissions > Location',
   },
   toasts: {
     exitApp: 'Press Back again to exit',
@@ -83,6 +89,7 @@ export default {
       routing: 'Route from current location',
       arrived: 'You have arrived!',
       newRoute: 'New route',
+      backInBounds: "✅ You're back in map area. Navigation available.",
     },
     infoPanel: {
       setRoutePoints: 'Set route points',

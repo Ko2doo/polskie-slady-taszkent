@@ -49,7 +49,9 @@ export default {
     gpsInitFailed: 'Nie udało się zainicjować GPS',
     gpsError: 'Błąd GPS',
     gpsPositionNotAvailable: 'Pozycja GPS niedostępna',
-    gpsPermissionDenied: 'Odmowa dostępu do GPS',
+    gpsPermissionDenied: 'Odmowa dostępu do GPS. Zezwól na dostęp w ustawieniach aplikacji.',
+    gpsOutOfBounds: 'Jesteś poza obszarem mapy. Nawigacja offline niedostępna.',
+    gpsOutOfBoundsNavigation: 'Nawigacja niemożliwa - jesteś poza obszarem mapy',
     navigationInitFailed: 'Nie udało się zainicjować nawigacji',
     navigationCalculateRouteFailed: 'Nie udało się obliczyć trasy',
     navigationRouteNotFound: 'Nie znaleziono trasy',
@@ -63,6 +65,10 @@ export default {
     langSwitcher: 'Język',
     toMaps: 'Pokaż na mapie',
     popupGetOtherMaps: 'Otwórz w Mapach Google',
+    openSettings: 'Otwórz ustawienia',
+  },
+  hints: {
+    enableGPSManually: 'Otwórz ustawienia urządzenia > Aplikacje > Polskie Slady > Uprawnienia > Lokalizacja',
   },
   toasts: {
     exitApp: 'Naciśnij „Wstecz” jeszcze raz, aby wyjść',
@@ -83,6 +89,7 @@ export default {
       routing: 'Trasa z bieżącej lokalizacji',
       arrived: 'Dotarłeś!',
       newRoute: 'Nowa trasa',
+      backInBounds: '✅ Wróciłeś do obszaru mapy. Nawigacja dostępna.',
     },
     infoPanel: {
       setRoutePoints: 'Ustaw punkty trasy',

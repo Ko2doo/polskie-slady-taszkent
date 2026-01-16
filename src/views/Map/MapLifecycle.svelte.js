@@ -82,16 +82,18 @@ export function initializeMap({ container, style }) {
  * @param {MapPointsBuilder} params.builder - Builder instance
  * @param {Object} params.navigation - Navigation controller
  * @param {Array|null} params.targetCoords - Optional coordinates to fly to
+ *
+ * NOTE: Navigation click handlers are managed in Map.svelte via handleUnifiedMapClick
  */
-export function setupMapHandlers({ map, builder, navigation, targetCoords }) {
+export function setupMapHandlers({ map, builder, targetCoords }) {
   console.log('[MapLifecycle] Setting up map handlers...');
 
   // Add all overlays
   builder.addCityBoundaryLayer();
   builder.addMarkers();
 
-  // Attach navigation click handler
-  map.on('click', navigation.handleMapClick);
+  // DON'T attach navigation click handler here - it's handled in Map.svelte
+  // via handleUnifiedMapClick which routes to correct navigation controller
 
   // Fly to target coordinates if provided
   if (targetCoords) {
