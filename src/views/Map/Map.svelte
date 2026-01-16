@@ -8,13 +8,16 @@
    * - Displays article locations as clickable markers
    * - City boundary visualization
    * - Light/Dark theme support
-   * - Offline navigation with A* pathfinding
+   * Supports two navigation modes:
+   * 1. Point-to-point (A>B) - Manual selection (existing functionality)
+   * 2. GPS Navigation - From current location (new feature)
    * - Deep linking support (?lon=X&lat=Y)
    *
    * Architecture:
    * - MapConstants.js - Configuration constants
    * - MapBuilder.svelte.js - MapPointsBuilder configuration
-   * - MapNavigation.svelte.js - Navigation logic
+   * - MapNavigation.svelte.js - Point-to-point (A>B) navigation logic
+   * - MapNavigationGPS.svelte.js - GPS navigation logic
    * - MapTheme.svelte.js - Theme management
    * - MapLifecycle.svelte.js - Initialization and cleanup
    */
@@ -39,6 +42,7 @@
   // Map modules
   import { createMapPointsBuilder } from "./MapBuilder.svelte.js";
   import { createNavigationController } from "./MapNavigation.svelte.js";
+  import { createGPSNavigationController } from "./MapNavigationGPS.svelte.js";
   import { createThemeController } from "./MapTheme.svelte.js";
   import {
     initializePMTiles,
@@ -62,7 +66,8 @@
   let map = null;
   let protocol = null;
   let builder = null;
-  let navigation = $state(null);
+  let navigation = $state(null); // Point-to-point navigation
+  let gpsNavigation = $state(null); // GPS navigation
   let theme = null;
 
   // Target coordinates from URL params (?lon=X&lat=Y)
@@ -76,6 +81,19 @@
   $effect(() => {
     targetCoords = resolveTargetCoords(route);
   });
+
+  /**
+   * Unified map click handler
+   * Routes clicks to appropriate navigation controller
+   */
+  // function handleUnifiedMapClick(e) {
+  //   // Priority: GPS navigation > Point-to-Point navigation
+  //   if (gpsNavigation?.gpsMode) {
+  //     gpsNavigation.handleMapClick(e);
+  //   } else if (navigation?.navigationMode) {
+  //     navigation.handleMapClick(e);
+  //   }
+  // }
 
   // ========================================
   // LIFECYCLE - MOUNT
@@ -116,14 +134,21 @@
         styleVersion: theme.styleVersion,
       });
 
-      // 6. Create navigation controller
+      // 6. Create Point-to-Point navigation controller
       navigation = createNavigationController({
         map,
         builder,
         i18n: $i18n,
       });
 
-      // 7. Update theme controller with instances
+      // 7. Create GPS navigation controller
+      gpsNavigation = createGPSNavigationController({
+        map,
+        builder,
+        i18n: $i18n,
+      });
+
+      // 8. Update theme controller with instances
       theme = createThemeController({
         map,
         builder,
@@ -132,7 +157,7 @@
       });
       theme.init();
 
-      // 8. Setup map handlers when map loads
+      // 9. Setup map handlers when map loads
       map.on("load", () => {
         setupMapHandlers({
           map,
@@ -140,6 +165,9 @@
           navigation,
           targetCoords,
         });
+
+        // Attach unified click handler
+        // map.on("click", handleUnifiedMapClick());
       });
 
       console.log("[Map] Initialization complete");
@@ -160,6 +188,11 @@
   onDestroy(() => {
     console.log("[Map] Unmounting...");
 
+    // Remove unified click handler
+    // if (map) {
+    //   map.off("click", handleUnifiedMapClick());
+    // }
+
     cleanupMap({
       map,
       protocol,
@@ -168,11 +201,17 @@
       theme,
     });
 
+    // Cleanup GPS navigation
+    if (gpsNavigation) {
+      gpsNavigation.dispose();
+    }
+
     // Nullify references
     map = null;
     protocol = null;
     builder = null;
     navigation = null;
+    gpsNavigation = null;
     theme = null;
   });
 
@@ -201,16 +240,23 @@
   <div bind:this={mapContainer} class="map-container"></div>
 
   <!-- Navigation control overlay -->
-  {#if navigation}
+  {#if navigation && gpsNavigation}
     <div class="navigation-control-wrapper">
       <NavigationControl
-        bind:navigationMode={navigation.navigationMode}
         {i18n}
+        bind:navigationMode={navigation.navigationMode}
         navigationReady={navigation.navigationReady}
         navigationLoading={navigation.navigationLoading}
         routeInfo={navigation.routeInfo}
         onToggle={navigation.toggleNavigationMode}
         onClear={navigation.clearNavigation}
+        bind:gpsMode={gpsNavigation.gpsMode}
+        gpsReady={gpsNavigation.gpsReady}
+        gpsLoading={gpsNavigation.gpsLoading}
+        gpsRouteInfo={gpsNavigation.routeInfo}
+        isArrived={gpsNavigation.isArrived}
+        onGPSToggle={gpsNavigation.toggleGPSMode}
+        onGPSClear={gpsNavigation.clearGPSNavigation}
       />
     </div>
   {/if}
@@ -249,5 +295,49 @@
   :global(.navigation-marker) {
     cursor: pointer;
     user-select: none;
+  }
+
+  /* User Location Marker Styles */
+  :global(.user-location-marker) {
+    width: 40px;
+    height: 40px;
+    position: relative;
+  }
+
+  :global(.user-dot) {
+    width: 16px;
+    height: 16px;
+    background: #4285f4;
+    border: 3px solid white;
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  }
+
+  :global(.pulse-ring) {
+    width: 40px;
+    height: 40px;
+    border: 2px solid #4285f4;
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation: pulse 2s ease-out infinite;
+    opacity: 0.6;
+  }
+
+  @keyframes pulse {
+    0% {
+      transform: translate(-50%, -50%) scale(0.5);
+      opacity: 1;
+    }
+    100% {
+      transform: translate(-50%, -50%) scale(1.2);
+      opacity: 0;
+    }
   }
 </style>
