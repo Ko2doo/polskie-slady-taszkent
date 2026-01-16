@@ -70,49 +70,12 @@ export function createGPSNavigationController({ map, builder, i18n }) {
         onError: handleGPSError,
       });
 
-      // Check permissions first
-      let hasPermission = await gpsTracker.checkPermissions();
-
-      if (!hasPermission) {
-        // Request permissions
-        hasPermission = await gpsTracker.requestPermissions();
-
-        if (!hasPermission) {
-          // Permission denied - show message with settings link
-          errorToast.error(i18n.t('ui:errors:gpsPermissionDenied'), {
-            scope: 'GPSNavigation',
-            code: 'PERMISSION_DENIED',
-            duration: 8000, // Show longer
-            action: {
-              text: i18n.t('ui:buttons:openSettings'),
-              onClick: async () => {
-                // Open app settings (Capacitor 5+)
-                try {
-                  const { Capacitor } = await import('@capacitor/core');
-                  if (Capacitor.isNativePlatform()) {
-                    // For Android: open app settings
-                    const { App } = await import('@capacitor/app');
-                    // Note: App.openSettings() might not exist in all versions
-                    // Alternative: guide user manually
-                    errorToast.info(i18n.t('ui:hints:enableGPSManually'));
-                  }
-                } catch (error) {
-                  console.error('[GPSNavigation] Cannot open settings:', error);
-                  errorToast.info(i18n.t('ui:hints:enableGPSManually'));
-                }
-              },
-            },
-          });
-
-          throw new Error('GPS permission denied');
-        }
-      }
-
       // Start tracking
       const started = await gpsTracker.start();
-
       if (!started) {
-        throw new Error('Failed to start GPS tracking');
+        // throw new Error('Failed to start GPS tracking');
+        gpsMode = false;
+        return false;
       }
 
       // Get initial position to check bounds
@@ -262,6 +225,46 @@ export function createGPSNavigationController({ map, builder, i18n }) {
    */
   function handleGPSError(error) {
     console.error('[GPSNavigation] GPS error:', error);
+
+    // Permission denied -> show action "Open settings"
+    if (error.code === 'PERMISSION_DENIED') {
+      errorToast.error(i18n.t('ui:errors:gpsPermissionDenied'), {
+        scope: 'GPSNavigation',
+        code: error.code,
+        duration: 8000,
+        action: {
+          text: i18n.t('ui:buttons:openSettings'),
+
+          onClick: async () => {
+            try {
+              const { Capacitor } = await import('@capacitor/core');
+
+              if (!Capacitor.isNativePlatform()) {
+                // В браузере "настройки приложения" не откроешь
+                errorToast.info(i18n.t('ui:hints:enableGPSManually'));
+                return;
+              }
+
+              // Если в твоей версии App.openSettings реально есть — вызывай.
+              // Если нет — graceful fallback.
+              const { App } = await import('@capacitor/app');
+
+              if (typeof App.openSettings === 'function') {
+                await App.openSettings();
+                return;
+              }
+
+              errorToast.info(i18n.t('ui:hints:enableGPSManually'));
+            } catch (e) {
+              console.error('[GPSNavigation] Cannot open settings:', e);
+              errorToast.info(i18n.t('ui:hints:enableGPSManually'));
+            }
+          },
+        },
+      });
+
+      return;
+    }
 
     errorToast.error(i18n.t('ui:errors:gpsError'), {
       scope: 'GPSNavigation',
