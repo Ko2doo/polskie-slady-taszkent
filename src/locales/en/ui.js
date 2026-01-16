@@ -90,9 +90,11 @@ export default {
   settings: {
     translations: {
       title: 'Translations',
+      hint: 'Select your preferred language. This setting will be saved.',
     },
     appearance: {
       title: 'Appearance',
+      hint: "Customize the app's look. Auto mode follows your system theme.",
       darkMode: 'Dark theme',
       followSystem: 'Follow system',
     },

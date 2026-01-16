@@ -90,9 +90,11 @@ export default {
   settings: {
     translations: {
       title: 'Tarjimalar',
+      hint: 'Afzal ko‘rgan tilingizni tanlang. Bu sozlama saqlanadi.',
     },
     appearance: {
       title: 'Ko‘rinish',
+      hint: "Ilova ko'\rinishini sozlang. Avtomatik rejim tizim mavzusiga amal qiladi.",
       darkMode: 'Qorong‘i mavzu',
       followSystem: 'Tizimga ergashish',
     },

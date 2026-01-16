@@ -1,122 +1,120 @@
 /**
- * Initial configuration with i18next
+ * i18next Configuration - Manual Language Selection
  *
- * i18next documentation:               https://www.i18next.com/overview/api
- * Capacitor Preferences documentation: https://capacitorjs.com/docs/apis/preferences#set
+ * Features:
+ * - Detects system language on first launch (as initial value)
+ * - Stores user language preference in Capacitor Preferences
+ * - User can manually change language in settings
+ * - Language persists across app restarts
  *
- * How to use?
- * Your ComponentName.svelte named import this file:
- *  import { i18nStores } from "@/services/i18n";
+ * Usage:
+ * import { i18nStores } from '@/services/i18n';
+ * const { i18n } = i18nStores;
  *
- * And create destructuring assignment variable:
- *  const { i18n } = i18nStores;
+ * // In template:
+ * <p>{$i18n.t('ui:app:name')}</p>
  *
- * And use with $ (svelte runes):
- * <p> { $i18n.t("ui:app:name") } </p>
+ * // Change language:
+ * $i18n.changeLanguage('en');
+ *
+ * Documentation:
+ * - i18next: https://www.i18next.com/overview/api
+ * - Capacitor Preferences: https://capacitorjs.com/docs/apis/preferences
  */
 
-// Old configuration with localStorage
-// import LanguageDetector from 'i18next-browser-languagedetector';
-
-// // configuration
-// i18next.use(LanguageDetector).init({
-//   debug: devState ? true : false,
-//   detection: {
-//     order: ['querystring', 'localStorage', 'navigator'],
-//     caches: ['localStorage'],
-//     lookupQuerystring: 'lng',
-//     lookupLocalStorage: 'locale',
-//   },
-//   fallbackLng: 'ru',
-//   resources: res,
-//   interpolation: {
-//     escapeValue: false,
-//   },
-// });
-
-// // initialization store
-// export const i18nStores = createI18nStore(i18next);
-
-// New configuration, used Preferences (Capacitor plugin).
 import i18next from 'i18next';
 import { createI18nStore } from '@/store/i18nextSvelte/i18nextSvelte';
 
-// Locales import
+// Locales
 import res from '@/locales/resources';
 
-// Capacitor API`s
-import { Capacitor } from '@capacitor/core';
-import { App } from '@capacitor/app';
+// Capacitor APIs
 import { Device } from '@capacitor/device';
 import { getStorage, setStorage } from '@/capacitor/utils/appStorage';
 
-// Check this https://vite.dev/guide/env-and-mode.html
-let devState = import.meta.env.DEV;
-
+// Configuration
+const IS_DEV = import.meta.env.DEV;
 const LANGUAGE_KEY = 'locale';
 const FALLBACK_LANG = 'ru';
 
-// System language detection
-async function detectInitialLang() {
+/**
+ * Detect initial language on first app launch
+ * Priority: stored preference > system language > fallback
+ *
+ * @returns {Promise<string>} - Language code (e.g., 'en', 'ru', 'uz')
+ */
+async function detectInitialLanguage() {
+  // 1. Check if user has saved preference
   const stored = await getStorage(LANGUAGE_KEY, null);
-  if (stored && res[stored]) return stored;
 
-  // System language
+  if (stored && res[stored]) {
+    console.log('[i18n] Using stored language:', stored);
+    return stored;
+  }
+
+  // 2. Try system language (only on first launch)
   try {
     const result = await Device.getLanguageCode();
 
     if (result?.value) {
+      // Extract language code from locale (e.g., 'en-US' -> 'en')
       const lang = result.value.split('-')[0];
 
-      if (res[lang]) return lang;
+      // Check if language exists in resources
+      if (res[lang]) {
+        console.log('[i18n] Using system language:', lang);
+        return lang;
+      }
+
+      console.log(`[i18n] System language "${lang}" not available in resources`);
     }
   } catch (error) {
-    console.warn('[i18n] Device language detection failed', error);
+    console.warn('[i18n] Failed to detect system language:', error);
   }
 
+  // 3. Use fallback
+  console.log('[i18n] Using fallback language:', FALLBACK_LANG);
   return FALLBACK_LANG;
 }
 
-// Initialization
-const initialLng = await detectInitialLang();
+/**
+ * Initialize i18next
+ */
+async function initializeI18n() {
+  console.log('[i18n] Initializing...');
 
-// Init i18next (no LanguageDetector)
-await i18next.init({
-  debug: devState,
-  lng: initialLng,
-  fallbackLng: FALLBACK_LANG,
-  resources: res,
-  interpolation: {
-    escapeValue: false,
-  },
-});
+  // Detect initial language
+  const initialLng = await detectInitialLanguage();
 
-// Save locales with Preferences (from first start)
-await setStorage(LANGUAGE_KEY, i18next.language);
+  // Initialize i18next
+  await i18next.init({
+    debug: IS_DEV,
+    lng: initialLng,
+    fallbackLng: FALLBACK_LANG,
+    resources: res,
+    interpolation: {
+      escapeValue: false,
+    },
+  });
 
-// Persist language on every change with UI
+  console.log('[i18n] Initialized with language:', initialLng);
+}
+
+// Initialize
+await initializeI18n();
+
+/**
+ * Handle language changes from UI
+ * Automatically saves to storage when user changes language
+ */
 i18next.on('languageChanged', async (lng) => {
   try {
     await setStorage(LANGUAGE_KEY, lng);
+    console.log('[i18n] Language changed and saved:', lng);
   } catch (error) {
-    console.error('[i18n] Cannot save locale to storage', error);
+    console.error('[i18n] Failed to save language:', error);
   }
 });
-
-// System lang listener
-if (Capacitor.isNativePlatform()) {
-  App.addListener('resume', async () => {
-    const stored = await getStorage(LANGUAGE_KEY, null);
-
-    if (!stored) {
-      const lang = await detectInitialLang();
-      if (i18next.language !== lang) {
-        i18next.changeLanguage(lang);
-        await setStorage(LANGUAGE_KEY, lang);
-      }
-    }
-  });
-}
 
 // Svelte store wrapper
 export const i18nStores = createI18nStore(i18next);

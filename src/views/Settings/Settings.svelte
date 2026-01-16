@@ -41,6 +41,7 @@
 
 <section class="flex flex-col">
   <Block strong inset>
+    <!-- Language section -->
     <BlockTitle large class="text-stone-500 justify-baseline">
       <TranslateIcon className="w-10 h-10" strokeColor="currentColor" />
 
@@ -53,6 +54,17 @@
       </div>
     </BlockTitle>
 
+    <!-- Language Hint -->
+    <div class="mt-4 px-4 pb-4">
+      <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+        {$i18n.t("ui:settings:translations:hint")}
+      </p>
+    </div>
+
+    <!-- Divider -->
+    <div class="border-t border-gray-200 dark:border-gray-700 my-2"></div>
+
+    <!-- Appearance Section -->
     <BlockTitle large class="text-stone-500 justify-baseline">
       <PaletteIcon className="w-10 h-10" strokeColor="currentColor" />
 
@@ -60,6 +72,14 @@
         {$i18n.t("ui:settings:appearance:title")}
       </span>
     </BlockTitle>
+
+    <!-- Appearance Hint (optional) -->
+    <div class="mt-4 px-4 pt-2">
+      <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+        {$i18n.t("ui:settings:appearance:hint")}
+      </p>
+    </div>
+
     <DarkModeToggler {i18n} />
   </Block>
 </section>
