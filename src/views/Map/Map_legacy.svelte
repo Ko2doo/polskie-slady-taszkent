@@ -65,16 +65,83 @@
   const CITY_BOUNDARIES = "/map/tashkent_boundaries.geojson";
 
   const MARKER_CONFIG = {
-    start: {
-      emoji: "🟢",
-      className: "navigation-marker start-marker",
-      label: "Start",
+    // Custom markers from MapPointsBuilder
+    customMarkers: {
+      render: true,
+      icon: {
+        name: "article",
+        url: "/map/icons/pointIcon.png",
+      },
+      mapSource: [{ pointSourceName: "articles-points-source", type: "geojson" }],
+      mapLayer: [
+        {
+          id: "articles-points-layer",
+          type: "symbol",
+          source: "articles-points-source",
+          layout: {
+            "icon-image": "article-point",
+            "icon-size": 0.38,
+            "icon-allow-overlap": true,
+          },
+        },
+        {
+          id: "articles-labels-layer",
+          type: "symbol",
+          source: "articles-points-source",
+          minzoom: 12.5,
+          layout: {
+            "text-field": ["get", "title"],
+            "text-size": 12,
+            "text-offset": [0, 1.2],
+            "text-anchor": "top",
+            "text-allow-overlap": false,
+            "icon-optional": true,
+          },
+          paint: {
+            "text-color": "#111111",
+            "text-halo-color": "#ffffff",
+            "text-halo-width": 1.5,
+          },
+        },
+      ],
+      listener: {
+        iconLayerId: "articles-points-layer",
+        labelLayerId: "articles-labels-layer",
+      },
     },
-    end: {
-      emoji: "🔴",
-      className: "navigation-marker end-marker",
-      label: "End",
+
+    // Offline navigation markers
+    navigation: {
+      start: {
+        emoji: "🟢",
+        className: "navigation-marker start-marker",
+        label: "Start",
+      },
+      end: {
+        emoji: "🔴",
+        className: "navigation-marker end-marker",
+        label: "End",
+      },
     },
+  };
+
+  const BOUNDARY_CONFIG = {
+    render: true,
+    mapSource: [
+      {
+        boundaryName: "city-boundaries",
+        type: "geojson",
+        data: CITY_BOUNDARIES,
+      },
+    ],
+    mapLayer: [
+      {
+        id: "city-boundary",
+        source: "city-boundaries",
+        lineColor: "#f56f32",
+        lineWidth: 6,
+      },
+    ],
   };
 
   const MARKER_STYLE = {
@@ -129,7 +196,7 @@
    * Create a navigation marker element
    */
   function createMarkerElement(type) {
-    const config = MARKER_CONFIG[type];
+    const config = MARKER_CONFIG.navigation[type];
     const el = document.createElement("div");
 
     el.className = config.className;
@@ -455,80 +522,42 @@
   }
 
   /**
-   * Configure map points builder
+   * Create and configure MapPointsBuilder instance
+   *
+   * This function initializes the map points builder with all necessary
+   * configuration for displaying article markers, labels, city boundaries,
+   * and handling user interactions.
+   *
+   * @param {number} version - Current style version (increments on theme changes)
+   * @returns {MapPointsBuilder} - Configured builder instance
    */
   function createMapPointsBuilder(version) {
-    return new MapPointsBuilder({
-      currentMap: map,
-      data: articlesMeta,
-      i18n: {
-        title: (item) => $i18n.t(`articles:${item.id}:title`),
-        popupLink: () => $i18n.t("ui:buttons:readMore"),
-        popupGetOtherMaps: () => $i18n.t("ui:buttons:popupGetOtherMaps"),
-      },
-      routeFunc: (id) => goto(`/articles/${id}`),
+    return (
+      MapPointsBuilder.create()
+        // Core configuration
+        .withMap(map)
+        .withData(articlesMeta)
+        .withStyleVersion(version)
 
-      styleVersion: version,
+        // i18n translations for UI elements
+        .withI18n({
+          title: (item) => $i18n.t(`articles:${item.id}:title`),
+          popupLink: () => $i18n.t("ui:buttons:readMore"),
+          popupGetOtherMaps: () => $i18n.t("ui:buttons:popupGetOtherMaps"),
+        })
 
-      // Markers
-      markers: {
-        render: true,
-        icon: {
-          name: "article",
-          url: "/map/icons/pointIcon.png",
-        },
-        mapSource: [{ pointSourceName: "articles-points-source", type: "geojson" }],
-        mapLayer: [
-          {
-            id: "articles-points-layer",
-            type: "symbol",
-            source: "articles-points-source",
-            layout: {
-              "icon-image": "article-point",
-              "icon-size": 0.38,
-              "icon-allow-overlap": true,
-            },
-          },
-          {
-            id: "articles-labels-layer",
-            type: "symbol",
-            source: "articles-points-source",
-            minzoom: 12.5,
-            layout: {
-              "text-field": ["get", "title"],
-              "text-size": 12,
-              "text-offset": [0, 1.2],
-              "text-anchor": "top",
-              "text-allow-overlap": false,
-              "icon-optional": true,
-            },
-            paint: {
-              "text-color": "#111111",
-              "text-halo-color": "#ffffff",
-              "text-halo-width": 1.5,
-            },
-          },
-        ],
-        listener: {
-          iconLayerId: "articles-points-layer",
-          labelLayerId: "articles-labels-layer",
-        },
-      },
+        // SPA routing integration
+        .withRouter((id) => goto(`/articles/${id}`))
 
-      // City boundary
-      cityBoundaries: {
-        render: true,
-        mapSource: [{ boundaryName: "city-boundaries", type: "geojson", data: CITY_BOUNDARIES }],
-        mapLayer: [
-          {
-            id: "city-boundary",
-            source: "city-boundaries",
-            lineColor: "#f56f32",
-            lineWidth: 6,
-          },
-        ],
-      },
-    });
+        // Markers configuration (custom icon and labels)
+        .withMarkers(MARKER_CONFIG.customMarkers)
+
+        // City boundary configuration
+        .withCityBoundaries(BOUNDARY_CONFIG)
+
+        // Finalize and validate configuration
+        .build()
+    );
   }
 
   /**
@@ -614,7 +643,10 @@
     unsubscribeTheme?.();
     unsubscribeTheme = null;
 
-    builder?.dispose?.();
+    if (builder) {
+      builder.dispose();
+      builder = null;
+    }
   });
 
   $effect(() => {

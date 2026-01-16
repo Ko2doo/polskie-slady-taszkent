@@ -4,120 +4,555 @@
  * Purpose:
  *   Encapsulates all logic for rendering point-based data (markers) and optional
  *   city boundaries on a MapLibre map. It:
- *     - builds a GeoJSON FeatureCollection from your domain data (`features`)
- *     - adds one or more sources for points and boundaries
- *     - creates symbol layers for icons and labels
- *     - attaches click handlers and renders a custom HTML popup
- *     - integrates with your SPA routing via a callback (`routeFunc`)
+ *     - Builds a GeoJSON FeatureCollection from domain data (features)
+ *     - Adds sources for points and boundaries
+ *     - Creates symbol layers for icons and labels
+ *     - Attaches click handlers and renders custom HTML popups
+ *     - Integrates with SPA routing via callback (routeFunc)
+ *     - Manages navigation routes (add/clear)
  *
  * Requirements:
- *   - `currentMap` must be an initialized MapLibre map instance.
- *   - `features` is an array of objects where each item contains:
- *       - `id`  – unique identifier for the feature
- *       - `coords` – [lat, lon] in WGS84; the class will convert it to [lon, lat] for GeoJSON
- *   - i18n is passed as functions:
- *       - `i18n.title(item)`     -> string shown as marker/label title
- *       - `i18n.popupLink()`     -> string shown as popup link text
+ *   - `currentMap` must be an initialized MapLibre map instance
+ *   - `data` is an array of objects where each item contains:
+ *       - `id`     - unique identifier for the feature
+ *       - `coords` - [lat, lon] in WGS84 (will be converted to [lon, lat] for GeoJSON)
+ *   - `i18n` provides translation functions:
+ *       - `i18n.title(item)`        -> string shown as marker/label title
+ *       - `i18n.popupLink()`        -> string shown as popup link text
+ *       - `i18n.popupGetOtherMaps()` -> string for external maps link
  *
- * Typical usage (inside a Map.svelte on load)
+ * Typical usage (inside a Map.svelte component):
  *
+ *   const builder = MapPointsBuilder.create()
+ *     .withMap(map)
+ *     .withData(articlesMeta)
+ *     .withI18n({
+ *       title: (item) => i18n.t(`articles:${item.id}:title`),
+ *       popupLink: () => i18n.t('ui:buttons:readMore'),
+ *       popupGetOtherMaps: () => i18n.t('ui:buttons:popupGetOtherMaps'),
+ *     })
+ *     .withRouter((id) => goto(`/articles/${id}`))
+ *     .withMarkers({
+ *       icon: { name: 'article', url: '/map/icons/pointIcon.png' },
+ *       // ... other marker config
+ *     })
+ *     .withCityBoundaries({
+ *       render: true,
+ *       // ... boundary config
+ *     })
+ *     .build();
+ *
+ *   // Then call:
+ *   builder.addCityBoundaryLayer();
+ *   builder.addMarkers();
+ *
+ * @class MapPointsBuilder
  */
 
 import maplibreGL from 'maplibre-gl';
 
 export class MapPointsBuilder {
-  constructor(params = {}) {
-    /* prettier-ignore */
-    // defaults values
-    const {
-      data = [],
-      i18n = {},
-      styleVersion,
-      routeFunc = () => {},
-      currentMap,
-      markers = {},
-      cityBoundaries = {},
-    } = params;
-
-    // private params inner class
-    this._params = {
-      data,
+  /**
+   * Private constructor - use MapPointsBuilder.create() instead
+   * @private
+   */
+  constructor() {
+    // Configuration state
+    this._config = {
+      data: [],
       i18n: {
-        title: i18n.title,
-        popupLink: i18n.popupLink,
-        popupGetOtherMaps: i18n.popupGetOtherMaps,
+        title: null,
+        popupLink: null,
+        popupGetOtherMaps: null,
       },
-      styleVersion,
-      routeFunc,
-      currentMap,
+      styleVersion: 0,
+      routeFunc: () => {},
+      currentMap: null,
       markers: {
-        render: markers.render !== false, // true with default
+        render: false,
         icon: {
-          name: markers.icon.name ?? 'default',
-          url: markers.icon.url ?? '',
+          name: 'default',
+          url: '',
         },
-        mapSource: markers.mapSource ?? [],
-        mapLayer: markers.mapLayer ?? [],
+        mapSource: [],
+        mapLayer: [],
         listener: {
-          iconLayerId: markers.listener.iconLayerId,
-          labelLayerId: markers.listener.labelLayerId,
+          iconLayerId: null,
+          labelLayerId: null,
         },
       },
       cityBoundaries: {
-        render: cityBoundaries.render === true,
-        mapSource: cityBoundaries.mapSource ?? [],
-        mapLayer: cityBoundaries.mapLayer ?? [],
+        render: false,
+        mapSource: [],
+        mapLayer: [],
       },
     };
 
+    // Internal state
     this._onMarkerClick = null;
     this._clickLayerId = null;
+    this._iconImage = null;
+    this._isBuilt = false;
   }
 
-  // Methods:
+  // ========================================
+  // BUILDER PATTERN METHODS
+  // ========================================
 
+  /**
+   * Create a new builder instance
+   * @returns {MapPointsBuilder}
+   */
+  static create() {
+    return new MapPointsBuilder();
+  }
+
+  /**
+   * Set the data array (features to display)
+   * @param {Array} data - Array of feature objects with {id, coords, ...}
+   * @returns {MapPointsBuilder}
+   */
+  withData(data) {
+    this._config.data = Array.isArray(data) ? data : [];
+    return this;
+  }
+
+  /**
+   * Set the i18n translation functions
+   * @param {Object} i18n - Object with translation functions
+   * @param {Function} i18n.title - Function to get feature title
+   * @param {Function} i18n.popupLink - Function to get popup link text
+   * @param {Function} i18n.popupGetOtherMaps - Function to get external map link text
+   * @returns {MapPointsBuilder}
+   */
+  withI18n(i18n) {
+    if (i18n && typeof i18n === 'object') {
+      this._config.i18n = { ...this._config.i18n, ...i18n };
+    }
+    return this;
+  }
+
+  /**
+   * Set the MapLibre map instance
+   * @param {maplibreGL.Map} map - Initialized MapLibre map
+   * @returns {MapPointsBuilder}
+   */
+  withMap(map) {
+    this._config.currentMap = map;
+    return this;
+  }
+
+  /**
+   * Set the router function for SPA navigation
+   * @param {Function} routeFunc - Function called with article ID on marker click
+   * @returns {MapPointsBuilder}
+   */
+  withRouter(routeFunc) {
+    if (typeof routeFunc === 'function') {
+      this._config.routeFunc = routeFunc;
+    }
+    return this;
+  }
+
+  /**
+   * Set the style version (for theme changes)
+   * @param {number} version - Current style version
+   * @returns {MapPointsBuilder}
+   */
+  withStyleVersion(version) {
+    this._config.styleVersion = version;
+    return this;
+  }
+
+  /**
+   * Configure markers
+   * @param {Object} config - Marker configuration
+   * @returns {MapPointsBuilder}
+   */
+  withMarkers(config) {
+    if (config && typeof config === 'object') {
+      this._config.markers = { ...this._config.markers, ...config };
+    }
+    return this;
+  }
+
+  /**
+   * Configure city boundaries
+   * @param {Object} config - Boundary configuration
+   * @returns {MapPointsBuilder}
+   */
+  withCityBoundaries(config) {
+    if (config && typeof config === 'object') {
+      this._config.cityBoundaries = { ...this._config.cityBoundaries, ...config };
+    }
+    return this;
+  }
+
+  /**
+   * Finalize and validate configuration
+   * @returns {MapPointsBuilder}
+   * @throws {Error} If required configuration is missing
+   */
+  build() {
+    if (!this._config.currentMap) {
+      throw new Error('[MapPointsBuilder] Map instance is required. Use withMap() method.');
+    }
+
+    this._isBuilt = true;
+    return this;
+  }
+
+  // ========================================
+  // PUBLIC API METHODS
+  // ========================================
+
+  /**
+   * Update style version (called on theme changes)
+   * @param {number} version - New style version
+   */
   setStyleVersion(version) {
-    this._params.styleVersion = version;
+    this._config.styleVersion = version;
   }
 
+  /**
+   * Clean up all resources and event listeners
+   */
   dispose() {
-    const map = this._params.currentMap;
+    const map = this._config.currentMap;
     if (!map) return;
 
+    // Remove click listeners
     if (this._onMarkerClick && this._clickLayerId) {
-      map.off('click', this._clickLayerId, this._onMarkerClick);
+      if (Array.isArray(this._clickLayerId)) {
+        this._clickLayerId.forEach((layerId) => {
+          map.off('click', layerId, this._onMarkerClick);
+        });
+      } else {
+        map.off('click', this._clickLayerId, this._onMarkerClick);
+      }
+    }
+
+    // Clean up image references to prevent memory leaks
+    if (this._iconImage) {
+      this._iconImage.onload = null;
+      this._iconImage.onerror = null;
+      this._iconImage.src = '';
+      this._iconImage = null;
     }
 
     this._onMarkerClick = null;
     this._clickLayerId = null;
+
+    console.log('[MapPointsBuilder] Disposed');
   }
 
-  // Transform [lat, lon] (from data) to [lon, lat] (GeoJSON)
-  _coordsTransform(coord) {
-    const [lat, lon] = coord;
-    const coordsTransform = [lon, lat];
+  /**
+   * Add city boundary layer to the map
+   */
+  addCityBoundaryLayer() {
+    if (!this._config.cityBoundaries.render) return;
 
-    // types check
+    const map = this._config.currentMap;
+    if (!map) {
+      console.warn('[MapPointsBuilder] Cannot add boundaries: map not available');
+      return;
+    }
+
+    const sources = this._config.cityBoundaries.mapSource;
+    const layers = this._config.cityBoundaries.mapLayer;
+
+    // Add sources
+    sources.forEach((source) => {
+      if (!source?.boundaryName) {
+        console.warn('[MapPointsBuilder] Boundary source missing name, skipping');
+        return;
+      }
+
+      if (map.getSource(source.boundaryName)) {
+        console.log(`[MapPointsBuilder] Source "${source.boundaryName}" already exists, skipping`);
+        return;
+      }
+
+      map.addSource(source.boundaryName, {
+        type: source.type,
+        data: source.data,
+      });
+    });
+
+    // Add layers
+    layers.forEach((layer) => {
+      if (!layer?.id) {
+        console.warn('[MapPointsBuilder] Boundary layer missing id, skipping');
+        return;
+      }
+
+      if (map.getLayer(layer.id)) {
+        console.log(`[MapPointsBuilder] Layer "${layer.id}" already exists, skipping`);
+        return;
+      }
+
+      map.addLayer({
+        id: layer.id,
+        type: 'line',
+        source: layer.source,
+        paint: {
+          'line-color': layer.lineColor,
+          'line-width': layer.lineWidth,
+        },
+      });
+    });
+
+    console.log('[MapPointsBuilder] City boundaries added');
+  }
+
+  /**
+   * Add markers (icons, labels) and popup interactions to the map
+   */
+  addMarkers() {
+    if (!this._config.markers.render) return;
+
+    const map = this._config.currentMap;
+    if (!map) {
+      console.warn('[MapPointsBuilder] Cannot add markers: map not available');
+      return;
+    }
+
+    const iconName = this._config.markers.icon.name;
+    const iconUrl = this._config.markers.icon.url;
+
+    if (!iconUrl) {
+      console.error('[MapPointsBuilder] Icon URL is required for markers');
+      return;
+    }
+
+    const clickLayerIds = [
+      this._config.markers.listener.iconLayerId,
+      this._config.markers.listener.labelLayerId,
+    ].filter(Boolean);
+
+    if (clickLayerIds.length === 0) {
+      console.warn('[MapPointsBuilder] No click layer IDs configured, popup will not work');
+    }
+
+    // Clean up previous listener if it exists
+    if (this._onMarkerClick && this._clickLayerId) {
+      if (Array.isArray(this._clickLayerId)) {
+        this._clickLayerId.forEach((layerId) => {
+          map.off('click', layerId, this._onMarkerClick);
+        });
+      }
+      this._onMarkerClick = null;
+      this._clickLayerId = null;
+    }
+
+    const myVersion = this._config.styleVersion;
+
+    // Load icon image
+    this._iconImage = new Image();
+    this._iconImage.crossOrigin = 'anonymous';
+
+    this._iconImage.onload = () => {
+      // Check if style version changed (theme switched during loading)
+      if (this._config.styleVersion !== myVersion) {
+        console.log('[MapPointsBuilder] Style version changed, aborting marker setup');
+        return;
+      }
+
+      // Register icon image
+      const imageId = `${iconName}-point`;
+      if (!map.hasImage(imageId)) {
+        map.addImage(imageId, this._iconImage);
+        console.log(`[MapPointsBuilder] Icon "${imageId}" registered`);
+      }
+
+      // Build GeoJSON from data
+      const sourceData = this._buildDataFeatureCollection();
+
+      // Add sources
+      this._config.markers.mapSource.forEach((source) => {
+        if (!source?.pointSourceName) {
+          console.warn('[MapPointsBuilder] Marker source missing name, skipping');
+          return;
+        }
+
+        if (map.getSource(source.pointSourceName)) {
+          console.log(`[MapPointsBuilder] Source "${source.pointSourceName}" already exists, skipping`);
+          return;
+        }
+
+        map.addSource(source.pointSourceName, {
+          type: source.type,
+          data: sourceData,
+        });
+      });
+
+      // Add layers
+      this._config.markers.mapLayer.forEach((layer) => {
+        if (!layer?.id) {
+          console.warn('[MapPointsBuilder] Marker layer missing id, skipping');
+          return;
+        }
+
+        if (map.getLayer(layer.id)) {
+          console.log(`[MapPointsBuilder] Layer "${layer.id}" already exists, skipping`);
+          return;
+        }
+
+        map.addLayer({ ...layer });
+      });
+
+      // Attach click handler for popups
+      if (clickLayerIds.length > 0) {
+        this._onMarkerClick = (e) => this._handleMarkerClick(e);
+        this._clickLayerId = clickLayerIds;
+
+        clickLayerIds.forEach((layerId) => {
+          map.on('click', layerId, this._onMarkerClick);
+        });
+
+        console.log('[MapPointsBuilder] Click handlers attached');
+      }
+
+      console.log('[MapPointsBuilder] Markers added successfully');
+    };
+
+    this._iconImage.onerror = (error) => {
+      if (this._config.styleVersion !== myVersion) return;
+
+      console.error('[MapPointsBuilder] Failed to load icon image:', error);
+    };
+
+    // Trigger image loading
+    this._iconImage.src = iconUrl;
+  }
+
+  /**
+   * Add navigation route to the map
+   * @param {Object} routeGeoJSON - GeoJSON feature with LineString geometry
+   */
+  addNavigationRoute(routeGeoJSON) {
+    const map = this._config.currentMap;
+    if (!map) {
+      console.warn('[MapPointsBuilder] Cannot add route: map not available');
+      return;
+    }
+
+    // Validate GeoJSON
+    if (!routeGeoJSON || !routeGeoJSON.geometry) {
+      console.error('[MapPointsBuilder] Invalid route GeoJSON: missing geometry');
+      return;
+    }
+
+    const { type, coordinates } = routeGeoJSON.geometry;
+
+    if (type !== 'LineString') {
+      console.error(`[MapPointsBuilder] Invalid geometry type: expected "LineString", got "${type}"`);
+      return;
+    }
+
+    if (!Array.isArray(coordinates) || coordinates.length < 2) {
+      console.error('[MapPointsBuilder] Invalid LineString: must have at least 2 coordinates');
+      return;
+    }
+
+    // Remove existing route
+    this.clearNavigationRoute();
+
+    // Add new route
+    map.addSource('navigation-route', {
+      type: 'geojson',
+      data: routeGeoJSON,
+    });
+
+    map.addLayer({
+      id: 'navigation-route',
+      type: 'line',
+      source: 'navigation-route',
+      layout: {
+        'line-join': 'round',
+        'line-cap': 'round',
+      },
+      paint: {
+        'line-color': '#007AFF', // iOS blue
+        'line-width': 4,
+        'line-opacity': 0.8,
+      },
+    });
+
+    console.log('[MapPointsBuilder] Navigation route added');
+  }
+
+  /**
+   * Clear navigation route from the map
+   */
+  clearNavigationRoute() {
+    const map = this._config.currentMap;
+    if (!map) return;
+
+    // Check if map is still valid (not removed)
+    // MapLibre doesn't expose a direct "isRemoved" property,
+    // so we use try-catch to handle the case when map is already destroyed
+    try {
+      if (map.getLayer('navigation-route')) {
+        map.removeLayer('navigation-route');
+      }
+
+      if (map.getSource('navigation-route')) {
+        map.removeSource('navigation-route');
+      }
+
+      console.log('[MapPointsBuilder] Navigation route cleared');
+    } catch (error) {
+      // Map is already removed/destroyed, which is fine during cleanup
+      console.log('[MapPointsBuilder] Map already removed, skipping route cleanup');
+    }
+  }
+
+  // ========================================
+  // PRIVATE HELPER METHODS
+  // ========================================
+
+  /**
+   * Transform coordinates from [lat, lon] to [lon, lat] for GeoJSON
+   * @private
+   * @param {Array} coords - [lat, lon] array
+   * @returns {Array|null} - [lon, lat] array or null if invalid
+   */
+  _transformCoords(coords) {
+    if (!Array.isArray(coords) || coords.length !== 2) {
+      return null;
+    }
+
+    const [lat, lon] = coords;
+
     if (typeof lon !== 'number' || typeof lat !== 'number' || Number.isNaN(lon) || Number.isNaN(lat)) {
       return null;
     }
 
-    return coordsTransform;
+    return [lon, lat];
   }
 
   /**
-   *  Build GeoJson FeatureCollection for data markers
+   * Build GeoJSON FeatureCollection from data
+   * @private
+   * @returns {Object} - GeoJSON FeatureCollection
    */
   _buildDataFeatureCollection() {
-    const features = this._params.data
+    const features = this._config.data
       .map((item) => {
         const coords = item.coords;
-        if (!coords || coords.length !== 2) return null;
+        if (!coords || coords.length !== 2) {
+          console.warn(`[MapPointsBuilder] Invalid coords for item "${item.id}"`);
+          return null;
+        }
 
-        const coordinates = this._coordsTransform(coords);
-        if (!coordinates) return null;
+        const coordinates = this._transformCoords(coords);
+        if (!coordinates) {
+          console.warn(`[MapPointsBuilder] Failed to transform coords for item "${item.id}"`);
+          return null;
+        }
 
-        const titleFn = this._params.i18n.title;
+        const titleFn = this._config.i18n.title;
         const title = typeof titleFn === 'function' ? titleFn(item) : '';
 
         return {
@@ -141,251 +576,110 @@ export class MapPointsBuilder {
   }
 
   /**
-   * City boundaries (GeoJson outline)
+   * HTML escape helper to prevent XSS
+   * @private
+   * @param {string} text - Text to escape
+   * @returns {string} - Escaped HTML
    */
-  addCityBoundaryLayer() {
-    if (!this._params.cityBoundaries.render) return;
+  _escapeHtml(text) {
+    if (!text) return '';
 
-    const map = this._params.currentMap;
-    if (!map) return;
-
-    const src = this._params.cityBoundaries.mapSource;
-    const layers = this._params.cityBoundaries.mapLayer;
-
-    src.forEach((source) => {
-      if (!source?.boundaryName) return;
-      if (map.getSource(source.boundaryName)) return;
-
-      map.addSource(source.boundaryName, {
-        type: source.type,
-        data: source.data,
-      });
-    });
-
-    layers.forEach((layer) => {
-      if (!layer?.id) return;
-      if (map.getLayer(layer.id)) return;
-
-      map.addLayer({
-        id: layer.id,
-        type: 'line',
-        source: layer.source,
-        paint: {
-          'line-color': layer.lineColor,
-          'line-width': layer.lineWidth,
-        },
-      });
-    });
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
   }
 
   /**
-   * Markers: icon, points, labels, popup behaviour
+   * Create popup HTML content
+   * @private
+   * @param {string} title - Feature title
+   * @param {string} id - Feature ID
+   * @param {Array} coords - [lon, lat] coordinates
+   * @returns {string} - HTML string
    */
-  addMarkers() {
-    if (!this._params.markers.render) return;
+  _createPopupHTML(title, id, coords) {
+    const popupLinkFn = this._config.i18n.popupLink;
+    const popupGetOtherMapsFn = this._config.i18n.popupGetOtherMaps;
 
-    const map = this._params.currentMap;
-    if (!map) return;
+    const popupLinkText = typeof popupLinkFn === 'function' ? popupLinkFn() : 'Read more';
+    const popupGetOtherMaps = typeof popupGetOtherMapsFn === 'function' ? popupGetOtherMapsFn() : 'Open in Google Maps';
 
-    const src = this._params.markers.mapSource;
-    const layers = this._params.markers.mapLayer;
+    const [lon, lat] = coords;
+    const googleMapsCoords = [lat, lon]; // Google Maps uses lat,lon
 
-    // icons
-    const iconName = this._params.markers.icon.name;
-    const iconUrl = this._params.markers.icon.url;
-
-    const myVersion = this._params.styleVersion;
-
-    if (!iconUrl) {
-      console.error('[MapPointsBuilder] iconUrl is required for markers');
-      return;
-    }
-
-    const clickLayerId = [this._params.markers.listener.iconLayerId, this._params.markers.listener.labelLayerId].filter(
-      Boolean
-    );
-
-    if (!clickLayerId.length) {
-      console.warn('[MapPointsBuilder] click layer ids are missing');
-      return;
-    }
-
-    if (this._onMarkerClick && this._clickLayerId) {
-      map.off('click', this._clickLayerId, this._onMarkerClick);
-      this._onMarkerClick = null;
-      this._clickLayerId = null;
-    }
-
-    // create image element
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-
-    img.onload = () => {
-      if (this._params.styleVersion !== myVersion) return;
-
-      // Register icon once
-      if (!map.hasImage(`${iconName}-point`)) map.addImage(`${iconName}-point`, img);
-
-      // Build points
-      const sourceData = this._buildDataFeatureCollection();
-
-      // Source with data points
-      src.forEach((source) => {
-        if (!source?.pointSourceName) return;
-        if (map.getSource(source.pointSourceName)) return;
-
-        map.addSource(source.pointSourceName, {
-          type: source.type,
-          data: sourceData,
-        });
-      });
-
-      // Layers
-      layers.forEach((layer) => {
-        if (!layer?.id) return;
-        if (map.getLayer(layer.id)) return;
-
-        map.addLayer({ ...layer });
-      });
-
-      // Popup on marker click
-
-      if (!clickLayerId) {
-        console.warn('[MapPointsBuilder] iconLayerId is not provided, click handler will not be attached');
-        return;
-      }
-
-      this._onMarkerClick = (e) => {
-        if (!e?.features?.length) return;
-
-        const feature = e.features[0];
-        const coords = feature.geometry.coordinates;
-        const { id, title } = feature.properties;
-
-        const popup = new maplibreGL.Popup({
-          closeButton: false, // we use custom close btn
-          closeOnClick: true,
-        }).setLngLat(coords);
-
-        // Create custom popup element
-        const container = document.createElement('div');
-        container.className = 'map-popup';
-
-        const popupLinkFn = this._params.i18n.popupLink;
-        const popupLinkText = typeof popupLinkFn === 'function' ? popupLinkFn() : '';
-        const popupGetOtherMaps =
-          typeof this._params.i18n.popupGetOtherMaps === 'function' ? this._params.i18n.popupGetOtherMaps() : '';
-
-        const [lon, lat] = coords;
-        const coordsTransform = [lat, lon];
-
-        // Popup inner content
-        container.innerHTML = `
-            <div class="flex justify-end mb-1">
-              <button
-                type="button"
-                class="map-popup-close cursor-pointer w-7 h-7 flex items-center justify-center rounded-full bg-white/80 dark:text-black text-xs font-bold shadow"
-                aria-label="Close"
-              >&times;</button>
-            </div>
-            <div class="flex flex-col text-sm">
-              <p class="w-full text-gray-900 dark:text-gray-900 text-base font-medium sm:font-bold">${title}</p>
-              <a class="w-full text-blue-500 dark:text-blue-500 text-base mt-4" href="/articles/${id}" data-article-id="${id}">
-                ${popupLinkText}
-              </a>
-              <a class="w-full text-blue-500 dark:text-blue-500 text-base mt-1" target="_blank" href="https://www.google.com/maps/place/${coordsTransform}">
-                ${popupGetOtherMaps}
-              </a>
-            </div>
-          `;
-
-        // Popup custom close btn handler
-        const closeBtn = container.querySelector('.map-popup-close');
-        if (closeBtn) {
-          closeBtn.addEventListener('click', () => {
-            popup.remove();
-          });
-        }
-
-        // SPA routing link
-        const link = container.querySelector('a');
-        if (link) {
-          link.addEventListener('click', (event) => {
-            event.preventDefault();
-            this._params.routeFunc(id);
-            popup.remove();
-          });
-        }
-
-        // Add popup with DOM and map
-        popup.setDOMContent(container).addTo(map);
-      };
-
-      this._clickLayerId = clickLayerId;
-      map.on('click', this._clickLayerId, this._onMarkerClick);
-    };
-
-    img.onerror = (e) => {
-      if (this._params.styleVersion !== myVersion) return;
-      console.error('Failed to load icon image:', e);
-    };
-
-    // Add icon
-    img.src = iconUrl;
+    return `
+      <div class="flex justify-end mb-1">
+        <button
+          type="button"
+          class="map-popup-close cursor-pointer w-7 h-7 flex items-center justify-center rounded-full bg-white/80 dark:text-black text-xs font-bold shadow"
+          aria-label="Close"
+        >&times;</button>
+      </div>
+      <div class="flex flex-col text-sm">
+        <p class="w-full text-gray-900 dark:text-gray-900 text-base font-medium sm:font-bold">
+          ${this._escapeHtml(title)}
+        </p>
+        <a 
+          class="w-full text-blue-500 dark:text-blue-500 text-base mt-4" 
+          href="/articles/${this._escapeHtml(id)}" 
+          data-article-id="${this._escapeHtml(id)}"
+        >
+          ${this._escapeHtml(popupLinkText)}
+        </a>
+        <a 
+          class="w-full text-blue-500 dark:text-blue-500 text-base mt-1" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          href="https://www.google.com/maps/place/${googleMapsCoords.join(',')}"
+        >
+          ${this._escapeHtml(popupGetOtherMaps)}
+        </a>
+      </div>
+    `;
   }
 
   /**
-   * Add navigation route layer
+   * Handle marker click event
+   * @private
+   * @param {Object} e - MapLibre click event
    */
-  addNavigationRoute(routeGeoJSON) {
-    const map = this._params.currentMap;
-    if (!map) {
-      console.warn('[MapPointsBuilder] Map instance not available');
-      return;
+  _handleMarkerClick(e) {
+    if (!e?.features?.length) return;
+
+    const feature = e.features[0];
+    const coords = feature.geometry.coordinates;
+    const { id, title } = feature.properties;
+
+    // Create popup
+    const popup = new maplibreGL.Popup({
+      closeButton: false,
+      closeOnClick: true,
+    }).setLngLat(coords);
+
+    // Create popup container
+    const container = document.createElement('div');
+    container.className = 'map-popup';
+    container.innerHTML = this._createPopupHTML(title, id, coords);
+
+    // Attach close button handler
+    const closeBtn = container.querySelector('.map-popup-close');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => {
+        popup.remove();
+      });
     }
 
-    if (!routeGeoJSON || !routeGeoJSON.geometry) {
-      console.error('[MapPointsBuilder] Invalid route GeoJSON provided');
-      return;
+    // Attach article link handler (SPA routing)
+    const articleLink = container.querySelector('a[data-article-id]');
+    if (articleLink) {
+      articleLink.addEventListener('click', (event) => {
+        event.preventDefault();
+        this._config.routeFunc(id);
+        popup.remove();
+      });
     }
 
-    // Remove existing route if any
-    this.clearNavigationRoute();
-
-    // Add new route
-    map.addSource('navigation-route', {
-      type: 'geojson',
-      data: routeGeoJSON,
-    });
-
-    map.addLayer({
-      id: 'navigation-route',
-      type: 'line',
-      source: 'navigation-route',
-      layout: {
-        'line-join': 'round',
-        'line-cap': 'round',
-      },
-      paint: {
-        'line-color': '#007AFF', // iOS blue
-        'line-width': 4,
-        'line-opacity': 0.8,
-      },
-    });
-  }
-
-  /**
-   * Clear navigation route
-   */
-  clearNavigationRoute() {
-    const map = this._params.currentMap;
-    if (!map) return;
-
-    if (map.getLayer('navigation-route')) {
-      map.removeLayer('navigation-route');
-    }
-    if (map.getSource('navigation-route')) {
-      map.removeSource('navigation-route');
-    }
+    // Show popup
+    popup.setDOMContent(container).addTo(this._config.currentMap);
   }
 }
