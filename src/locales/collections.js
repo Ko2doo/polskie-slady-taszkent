@@ -3,7 +3,7 @@
 
 export const translations = {
   // codeName: localeName
-  // en: 'English',
+  en: 'English',
   pl: 'Polski',
   ru: 'Русский',
   uz: 'O‘zbek tili',
