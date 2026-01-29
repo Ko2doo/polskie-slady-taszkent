@@ -24,22 +24,22 @@
     "@capacitor/cli": "^8.0.2",
     "@sveltejs/vite-plugin-svelte": "^6.2.4",
     "@tailwindcss/vite": "^4.1.18",
-    "svelte": "^5.46.4",
+    "svelte": "^5.49.0",
     "tailwindcss": "^4.1.18",
     "vite": "^7.3.1"
   },
   "dependencies": {
-    "@capacitor/android": "^8.0.0",
+    "@capacitor/android": "^8.0.2",
     "@capacitor/app": "^8.0.0",
-    "@capacitor/core": "^8.0.0",
+    "@capacitor/core": "^8.0.2",
     "@capacitor/device": "^8.0.0",
     "@capacitor/geolocation": "^8.0.0",
     "@capacitor/preferences": "^8.0.0",
     "@mateothegreat/svelte5-router": "^2.16.19",
     "@protomaps/basemaps": "^5.7.0",
-    "i18next": "^25.7.4",
+    "i18next": "^25.8.0",
     "konsta": "^5.0.6",
-    "maplibre-gl": "^5.15.0",
+    "maplibre-gl": "^5.17.0",
     "pmtiles": "^4.3.2"
   }
 }
