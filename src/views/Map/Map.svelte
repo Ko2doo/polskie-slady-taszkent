@@ -212,11 +212,12 @@
     }
   });
 
+  // Navbar
   onMount(() => {
     const disposeNavbar = withNavbar({
       title: "",
       leftSnippet: null, // right slot: (unused for now)
-      rightSnippet: NavigationSheetBtn, // left slot: open navigation sheet button
+      rightSnippet: NavigationSheetBtn, // left slot: open navigation modal button
       subnavSnippet: null, // subnavbar: null
     });
 
@@ -272,6 +273,7 @@
   });
 </script>
 
+<!-- Navigation modal sheet button trigger -->
 {#snippet NavigationSheetBtn()}
   <Link iconOnly onClick={sheetToggler.toggle}>
     <RoutingNavigationIcon />
@@ -283,27 +285,6 @@
   <div bind:this={mapContainer} class="map-container"></div>
 
   <!-- Navigation control overlay -->
-  <!-- {#if navigation && gpsNavigation}
-    <div class="navigation-control-wrapper">
-      <NavigationControl
-        {i18n}
-        bind:navigationMode={navigation.navigationMode}
-        navigationReady={navigation.navigationReady}
-        navigationLoading={navigation.navigationLoading}
-        routeInfo={navigation.routeInfo}
-        onToggle={navigation.toggleNavigationMode}
-        onClear={navigation.clearNavigation}
-        bind:gpsMode={gpsNavigation.gpsMode}
-        gpsReady={gpsNavigation.gpsReady}
-        gpsLoading={gpsNavigation.gpsLoading}
-        gpsRouteInfo={gpsNavigation.routeInfo}
-        isArrived={gpsNavigation.isArrived}
-        onGPSToggle={gpsNavigation.toggleGPSMode}
-        onGPSClear={gpsNavigation.clearGPSNavigation}
-      />
-    </div>
-  {/if} -->
-
   {#if navigation && gpsNavigation}
     <NavigationSheet
       {i18n}
@@ -347,13 +328,6 @@
 
     width: 100%;
     height: 100%;
-  }
-
-  .navigation-control-wrapper {
-    position: absolute;
-    top: 4rem;
-    right: 0.4rem;
-    z-index: 40;
   }
 
   :global(.navigation-marker) {
