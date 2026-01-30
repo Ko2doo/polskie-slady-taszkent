@@ -19,7 +19,6 @@ import { ERROR_CODES } from '@/lib/errors/errorCodes';
 import { ROUTE_FIT_PADDING } from './MapConstants';
 
 // Configuration
-const RECALC_DISTANCE_THRESHOLD = 50; // Recalculate if > 50m off route
 const RECALC_THROTTLE_MS = 10000; // Don't recalculate more often than 10s
 const ARRIVAL_DISTANCE_THRESHOLD = 20; // Consider arrived if < 20m from destination
 
@@ -47,6 +46,18 @@ export function createGPSNavigationController({ map, builder, i18n }) {
   let gpsTracker = null;
   let userMarker = null;
   let lastRecalcTime = 0;
+  let pendingRouteBuild = $state(false);
+  let didShowWaitingToast = false;
+
+  function showWaitingForFixOnce() {
+    if (didShowWaitingToast) return;
+    didShowWaitingToast = true;
+
+    errorToast.info(i18n.t('ui:errors:gpsWaitingForSignal'), {
+      scope: 'GPSNavigation',
+      code: 'GPS_WAITING_FOR_FIX',
+    });
+  }
 
   // ========================================
   // GPS INITIALIZATION
@@ -197,6 +208,14 @@ export function createGPSNavigationController({ map, builder, i18n }) {
     // Update user marker
     updateUserMarker(position);
 
+    // wait for fix mode
+    if (pendingRouteBuild && destinationPoint && !currentRoute) {
+      pendingRouteBuild = false;
+      calculateRouteFromGPS();
+
+      return;
+    }
+
     // Check if arrived
     if (destinationPoint && !isArrived) {
       const distanceToDestination = calculateDistance(
@@ -268,10 +287,11 @@ export function createGPSNavigationController({ map, builder, i18n }) {
     }
 
     if (error.code === 'GPS_TIMEOUT') {
-      errorToast.info(i18n.t('ui:errors:gpsWaitingForSignal'), {
-        scope: 'GPSNavigation',
-        code: 'GPS_TIMEOUT',
-      });
+      // errorToast.info(i18n.t('ui:errors:gpsWaitingForSignal'), {
+      //   scope: 'GPSNavigation',
+      //   code: 'GPS_TIMEOUT',
+      // });
+      showWaitingForFixOnce();
       return;
     }
 
@@ -291,26 +311,15 @@ export function createGPSNavigationController({ map, builder, i18n }) {
   async function calculateRouteFromGPS() {
     if (!gpsTracker || !destinationPoint) return;
 
-    let currentPosition = gpsTracker.lastPosition;
+    const currentPosition = gpsTracker.lastPosition;
 
     if (!currentPosition) {
-      console.warn('[GPSNavigation] lastPosition is null, requesting one-shot current position...');
-
-      const oneShot = await gpsTracker.getCurrentPosition();
-
-      if (!oneShot) {
-        errorToast.info(i18n.t('ui:errors:gpsWaitingForSignal'), {
-          scope: 'GPSNavigation',
-          code: 'GPS_TIMEOUT',
-        });
-
-        return;
-      }
-
-      // Use one-shot as current position for this route calculation
-      currentPosition = oneShot;
+      pendingRouteBuild = true;
+      showWaitingForFixOnce();
+      return;
     }
 
+    // bounds check
     if (!currentPosition.isWithinBounds) {
       isOutOfBounds = true;
 
@@ -465,6 +474,10 @@ export function createGPSNavigationController({ map, builder, i18n }) {
     destinationPoint = { lon: lng, lat };
     isArrived = false;
 
+    // Wait for fix mode
+    pendingRouteBuild = true;
+    didShowWaitingToast = false;
+
     console.log('[GPSNavigation] Destination set:', destinationPoint);
 
     // Calculate route from current GPS position
@@ -504,6 +517,9 @@ export function createGPSNavigationController({ map, builder, i18n }) {
     routeInfo = null;
     isArrived = false;
     lastRecalcTime = 0;
+
+    pendingRouteBuild = false;
+    didShowWaitingToast = false;
 
     removeUserMarker();
 
