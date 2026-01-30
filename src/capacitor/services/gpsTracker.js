@@ -35,13 +35,13 @@ import { Capacitor } from '@capacitor/core';
 // Configuration
 const GPS_OPTIONS = {
   enableHighAccuracy: true, // Use GPS instead of network location
-  timeout: 10000, // 10 seconds timeout
+  timeout: 20000, // 10 seconds timeout
   maximumAge: 0, // Don't use cached position
 };
 
 const WATCH_OPTIONS = {
   enableHighAccuracy: true,
-  timeout: 5000,
+  timeout: 20000,
   maximumAge: 0,
 };
 
@@ -213,6 +213,11 @@ export function createGPSTracker({ onPositionUpdate = null, onError = null } = {
     } catch (error) {
       console.error('[GPSTracker] Failed to get current position:', error);
 
+      if (error.code === 'OS-PLUG-GLOC-0010') {
+        onError({ code: 'GPS_TIMEOUT', message: 'Waiting for GPS signal...', error: error });
+        return null;
+      }
+
       if (onError) {
         onError({
           code: error.code || 'POSITION_UNAVAILABLE',
@@ -268,6 +273,12 @@ export function createGPSTracker({ onPositionUpdate = null, onError = null } = {
       watchId = await Geolocation.watchPosition(WATCH_OPTIONS, (position, err) => {
         if (err) {
           console.error('[GPSTracker] Watch position error:', err);
+
+          if (err.code === 'OS-PLUG-GLOC-0010') {
+            // не фатально, просто ждём дальше
+            onError({ code: 'GPS_TIMEOUT', message: 'Waiting for GPS signal...', error: err });
+            return;
+          }
 
           if (onError) {
             onError({

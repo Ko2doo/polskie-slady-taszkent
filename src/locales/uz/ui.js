@@ -49,6 +49,7 @@ export default {
     gpsInitFailed: 'GPS ishga tushirilmadi',
     gpsError: 'GPS xatosi',
     gpsPositionNotAvailable: 'GPS joylashuvi mavjud emas',
+    gpsWaitingForSignal: 'GPS signali kutilmoqda…',
     gpsPermissionDenied: 'GPS ruxsati berilmagan. Ilova sozlamalarida ruxsat bering.',
     gpsOutOfBounds: 'Siz xarita hududidan tashqaridasiz. Oflayn navigatsiya mavjud emas.',
     gpsOutOfBoundsNavigation: 'Navigatsiya imkonsiz - siz xarita hududidan tashqaridasiz',

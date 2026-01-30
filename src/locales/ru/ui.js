@@ -49,6 +49,7 @@ export default {
     gpsInitFailed: 'Не удалось инициализировать GPS',
     gpsError: 'Ошибка GPS',
     gpsPositionNotAvailable: 'GPS позиция недоступна',
+    gpsWaitingForSignal: 'Ждём сигнала GPS...',
     gpsPermissionDenied: 'Доступ к GPS запрещён. Разрешите доступ в настройках приложения.',
     gpsOutOfBounds: 'Вы находитесь за пределами карты. Оффлайн навигация недоступна.',
     gpsOutOfBoundsNavigation: 'Навигация невозможна - вы за пределами карты',

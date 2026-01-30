@@ -49,6 +49,7 @@ export default {
     gpsInitFailed: 'Failed to initialize GPS',
     gpsError: 'GPS error',
     gpsPositionNotAvailable: 'GPS position not available',
+    gpsWaitingForSignal: 'Waiting for GPS signal…',
     gpsPermissionDenied: 'GPS permission denied. Please allow access in app settings.',
     gpsOutOfBounds: 'You are outside the map area. Offline navigation unavailable.',
     gpsOutOfBoundsNavigation: 'Navigation impossible - you are outside the map',

@@ -267,6 +267,14 @@ export function createGPSNavigationController({ map, builder, i18n }) {
       return;
     }
 
+    if (error.code === 'GPS_TIMEOUT') {
+      errorToast.info(i18n.t('ui:errors:gpsWaitingForSignal'), {
+        scope: 'GPSNavigation',
+        code: 'GPS_TIMEOUT',
+      });
+      return;
+    }
+
     errorToast.error(i18n.t('ui:errors:gpsError'), {
       scope: 'GPSNavigation',
       code: error.code || 'GPS_ERROR',
@@ -283,10 +291,39 @@ export function createGPSNavigationController({ map, builder, i18n }) {
   async function calculateRouteFromGPS() {
     if (!gpsTracker || !destinationPoint) return;
 
-    const currentPosition = gpsTracker.lastPosition;
+    let currentPosition = gpsTracker.lastPosition;
 
     if (!currentPosition) {
-      errorToast.warn(i18n.t('ui:errors:gpsPositionNotAvailable'));
+      console.warn('[GPSNavigation] lastPosition is null, requesting one-shot current position...');
+
+      const oneShot = await gpsTracker.getCurrentPosition();
+
+      if (!oneShot) {
+        errorToast.info(i18n.t('ui:errors:gpsWaitingForSignal'), {
+          scope: 'GPSNavigation',
+          code: 'GPS_TIMEOUT',
+        });
+
+        return;
+      }
+
+      // Use one-shot as current position for this route calculation
+      currentPosition = oneShot;
+    }
+
+    if (!currentPosition.isWithinBounds) {
+      isOutOfBounds = true;
+
+      errorToast.warn(i18n.t('ui:errors:gpsOutOfBounds'), {
+        scope: 'GPSNavigation',
+        code: 'OUT_OF_BOUNDS',
+      });
+
+      // clear route if any (you already do this on live updates)
+      if (currentRoute) {
+        clearGPSNavigation();
+      }
+
       return;
     }
 
