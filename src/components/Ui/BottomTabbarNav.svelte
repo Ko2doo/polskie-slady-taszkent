@@ -71,7 +71,7 @@
           <Icon class="mb-1">
             <!-- Check this: https://svelte.dev/docs/svelte/compiler-warnings#svelte_component_deprecated -->
             {@const IconComponent = link.icon}
-            <IconComponent className="w-7 h-7" strokeColor="currentColor" />
+            <IconComponent className="size-7" strokeColor="currentColor" />
           </Icon>
 
           <!-- Render locales for id -->

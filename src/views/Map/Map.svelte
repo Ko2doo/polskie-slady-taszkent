@@ -23,11 +23,13 @@
    */
 
   import { onMount, onDestroy } from "svelte";
+  import { Link } from "konsta/svelte";
+  import RoutingNavigationIcon from "@/lib/icons/RoutingNavigationIcon.svelte";
   import { goto } from "@mateothegreat/svelte5-router";
 
   // Navbar
   import { resolvePageKeyFromRouteResult } from "@/utils/routerUtils";
-  import { withNavbar } from "@/store/ui/navbar";
+  import { patchNavbar, withNavbar } from "@/store/ui/navbar";
 
   // Data
   import { articlesMeta } from "@/data/articles";
@@ -37,7 +39,9 @@
   import { ERROR_CODES } from "@/lib/errors/errorCodes";
 
   // Components
-  import NavigationControl from "@/components/Ui/NavigationControl.svelte";
+  // import NavigationControl from "@/components/Ui/NavigationControl.svelte";
+  import NavigationSheet from "@/components/Ui/NavigationSheet.svelte";
+  import { createToggle } from "@/lib/state/createToggler.svelte";
 
   // Map modules
   import { createMapPointsBuilder } from "./MapBuilder.svelte.js";
@@ -118,6 +122,9 @@
 
     // No mode active - do nothing
   }
+
+  // sheet toggler
+  const sheetToggler = createToggle();
 
   // ========================================
   // LIFECYCLE - MOUNT
@@ -205,6 +212,19 @@
     }
   });
 
+  onMount(() => {
+    const disposeNavbar = withNavbar({
+      title: "",
+      leftSnippet: null, // right slot: (unused for now)
+      rightSnippet: NavigationSheetBtn, // left slot: open navigation sheet button
+      subnavSnippet: null, // subnavbar: null
+    });
+
+    onDestroy(() => {
+      disposeNavbar();
+    });
+  });
+
   // ========================================
   // LIFECYCLE - UNMOUNT
   // ========================================
@@ -248,23 +268,22 @@
     const pageKey = resolvePageKeyFromRouteResult(result);
     const title = pageKey ? $i18n.t(`ui:navbar:${pageKey}:title`) : "";
 
-    const dispose = withNavbar({
-      title: title || pageKey,
-      leftSnippet: null,
-      rightSnippet: null,
-      subnavSnippet: null,
-    });
-
-    return dispose;
+    patchNavbar({ title: title || pageKey });
   });
 </script>
+
+{#snippet NavigationSheetBtn()}
+  <Link iconOnly onClick={sheetToggler.toggle}>
+    <RoutingNavigationIcon />
+  </Link>
+{/snippet}
 
 <section class="map-section">
   <!-- Map container -->
   <div bind:this={mapContainer} class="map-container"></div>
 
   <!-- Navigation control overlay -->
-  {#if navigation && gpsNavigation}
+  <!-- {#if navigation && gpsNavigation}
     <div class="navigation-control-wrapper">
       <NavigationControl
         {i18n}
@@ -283,6 +302,26 @@
         onGPSClear={gpsNavigation.clearGPSNavigation}
       />
     </div>
+  {/if} -->
+
+  {#if navigation && gpsNavigation}
+    <NavigationSheet
+      {i18n}
+      {sheetToggler}
+      bind:navigationMode={navigation.navigationMode}
+      navigationReady={navigation.navigationReady}
+      navigationLoading={navigation.navigationLoading}
+      routeInfo={navigation.routeInfo}
+      onToggle={navigation.toggleNavigationMode}
+      onClear={navigation.clearNavigation}
+      bind:gpsMode={gpsNavigation.gpsMode}
+      gpsReady={gpsNavigation.gpsReady}
+      gpsLoading={gpsNavigation.gpsLoading}
+      gpsRouteInfo={gpsNavigation.routeInfo}
+      isArrived={gpsNavigation.isArrived}
+      onGPSToggle={gpsNavigation.toggleGPSMode}
+      onGPSClear={gpsNavigation.clearGPSNavigation}
+    />
   {/if}
 </section>
 
@@ -290,30 +329,31 @@
   .map-section {
     width: 100%;
     height: 100%;
+
     display: grid;
     grid-template-columns: 1fr;
+
     padding-left: 1rem;
     padding-right: 1rem;
     padding-bottom: 1rem;
-    position: relative;
   }
 
   .map-container {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+
     width: 100%;
     height: 100%;
-    border-radius: 1.5rem;
-    background-color: var(--ios-light-surface-1);
-  }
-
-  :global(.dark) .map-container {
-    background-color: var(--ios-dark-surface-1);
   }
 
   .navigation-control-wrapper {
     position: absolute;
-    top: 0.6rem;
-    right: 1.6rem;
-    z-index: 10;
+    top: 4rem;
+    right: 0.4rem;
+    z-index: 40;
   }
 
   :global(.navigation-marker) {

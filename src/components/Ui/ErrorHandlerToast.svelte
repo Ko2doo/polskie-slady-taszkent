@@ -18,7 +18,7 @@
   {/snippet}
 
   <div class="shrink flex items-start">
-    <DangerTriangleIcon className="flex flex-[0_0_auto] w-10 h-10 text-red-500" />
+    <DangerTriangleIcon className="flex flex-[0_0_auto] size-10 text-red-500" />
 
     <div class="min-w-0 pl-2">
       <p>{$errorToast.content}</p>

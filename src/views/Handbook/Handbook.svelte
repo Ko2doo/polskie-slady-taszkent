@@ -130,7 +130,7 @@
 {#if query.trim() && itemsView.length === 0}
   <section class="grid grid-1 justify-center">
     <BlockTitle large class="flex-col">
-      <ShieldWarningIcon className="w-20 h-20 mb-2 text-red-500" />
+      <ShieldWarningIcon className="size-20 mb-2 text-red-500" />
 
       {$i18n.t("ui:errors:notFound")}
     </BlockTitle>

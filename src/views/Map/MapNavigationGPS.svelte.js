@@ -88,7 +88,6 @@ export function createGPSNavigationController({ map, builder, i18n }) {
         errorToast.warn(i18n.t('ui:errors:gpsOutOfBounds'), {
           scope: 'GPSNavigation',
           code: 'OUT_OF_BOUNDS',
-          duration: 6000,
         });
       }
 
@@ -173,7 +172,6 @@ export function createGPSNavigationController({ map, builder, i18n }) {
         errorToast.warn(i18n.t('ui:errors:gpsOutOfBounds'), {
           scope: 'GPSNavigation',
           code: 'OUT_OF_BOUNDS',
-          duration: 6000,
         });
 
         // Clear route if exists
@@ -205,7 +203,7 @@ export function createGPSNavigationController({ map, builder, i18n }) {
         position.lat,
         position.lon,
         destinationPoint.lat,
-        destinationPoint.lon
+        destinationPoint.lon,
       );
 
       if (distanceToDestination < ARRIVAL_DISTANCE_THRESHOLD) {
@@ -228,39 +226,42 @@ export function createGPSNavigationController({ map, builder, i18n }) {
 
     // Permission denied -> show action "Open settings"
     if (error.code === 'PERMISSION_DENIED') {
+      // errorToast.error(i18n.t('ui:errors:gpsPermissionDenied'), {
+      //   scope: 'GPSNavigation',
+      //   code: error.code,
+      //   duration: 8000,
+      //   action: {
+      //     text: i18n.t('ui:buttons:openSettings'),
+
+      //     onClick: async () => {
+      //       try {
+      //         const { Capacitor } = await import('@capacitor/core');
+
+      //         if (!Capacitor.isNativePlatform()) {
+      //           // В браузере "настройки приложения" не откроешь
+      //           errorToast.info(i18n.t('ui:hints:enableGPSManually'));
+      //           return;
+      //         }
+
+      //         const { App } = await import('@capacitor/app');
+
+      //         if (typeof App.openSettings === 'function') {
+      //           await App.openSettings();
+      //           return;
+      //         }
+
+      //         errorToast.info(i18n.t('ui:hints:enableGPSManually'));
+      //       } catch (e) {
+      //         console.error('[GPSNavigation] Cannot open settings:', e);
+      //         errorToast.info(i18n.t('ui:hints:enableGPSManually'));
+      //       }
+      //     },
+      //   },
+      // });
+
       errorToast.error(i18n.t('ui:errors:gpsPermissionDenied'), {
         scope: 'GPSNavigation',
         code: error.code,
-        duration: 8000,
-        action: {
-          text: i18n.t('ui:buttons:openSettings'),
-
-          onClick: async () => {
-            try {
-              const { Capacitor } = await import('@capacitor/core');
-
-              if (!Capacitor.isNativePlatform()) {
-                // В браузере "настройки приложения" не откроешь
-                errorToast.info(i18n.t('ui:hints:enableGPSManually'));
-                return;
-              }
-
-              // Если в твоей версии App.openSettings реально есть — вызывай.
-              // Если нет — graceful fallback.
-              const { App } = await import('@capacitor/app');
-
-              if (typeof App.openSettings === 'function') {
-                await App.openSettings();
-                return;
-              }
-
-              errorToast.info(i18n.t('ui:hints:enableGPSManually'));
-            } catch (e) {
-              console.error('[GPSNavigation] Cannot open settings:', e);
-              errorToast.info(i18n.t('ui:hints:enableGPSManually'));
-            }
-          },
-        },
       });
 
       return;
@@ -375,7 +376,7 @@ export function createGPSNavigationController({ map, builder, i18n }) {
     const coordinates = route.geometry.coordinates;
     const bounds = coordinates.reduce(
       (bounds, coord) => bounds.extend(coord),
-      new maplibreGL.LngLatBounds(coordinates[0], coordinates[0])
+      new maplibreGL.LngLatBounds(coordinates[0], coordinates[0]),
     );
 
     map.fitBounds(bounds, { padding: ROUTE_FIT_PADDING });

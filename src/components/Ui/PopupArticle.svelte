@@ -88,7 +88,7 @@
         >
           <span> {$i18n.t("ui:buttons:toMaps")} </span>
 
-          <ArrowRightIcon className="w-5 h-5" />
+          <ArrowRightIcon className="size-5" />
         </Button>
       </Block>
     </Page>
