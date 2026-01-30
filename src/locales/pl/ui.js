@@ -76,11 +76,18 @@ export default {
   dialogue: {
     hello: 'Halo, Świat!',
   },
+  modalSheet: {
+    nav: {
+      title: 'Wybierz tryb nawigacji',
+      subtitle: 'Zamknięcie tego okna nie zakończy nawigacji.',
+    },
+  },
   map: {
     nav: {
-      pointToPoint: 'Trasa A→B',
+      pointToPoint: 'Trasa A>B',
       navigate: 'Nawigacja',
       loading: 'Ładowanie...',
+      cancel: 'Anuluj',
       exit: 'Wyjście',
     },
     gps: {
@@ -97,6 +104,7 @@ export default {
       endProg: 'Drugie dotknięcie - cel',
       info: 'Informacje o trasie',
       calc: 'Obliczanie trasy...',
+      routeCalculated: 'Czas obliczania trasy:',
       distance: 'km',
       walk: 'min pieszo',
       waypoints: 'punktów',

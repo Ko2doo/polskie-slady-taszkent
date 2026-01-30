@@ -67,8 +67,19 @@ export function initializeMap({ container, style }) {
   const map = new maplibreGL.Map({
     container,
     style,
+    attributionControl: false,
     ...INITIAL_VIEW,
   });
+
+  // Custom attribution
+  map.addControl(
+    new maplibreGL.AttributionControl({
+      compact: true,
+      customAttribution:
+        '<a href="https://protomaps.com">Protomaps</a> © <a href="https://www.openstreetmap.org">OpenStreetMap</a>',
+    }),
+    'top-left',
+  );
 
   console.log('[MapLifecycle] MapLibre instance created');
   return map;

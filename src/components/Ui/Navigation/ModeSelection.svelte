@@ -1,0 +1,24 @@
+<script>
+  import { Button } from "konsta/svelte";
+  import GPSIcon from "@/lib/icons/GPSIcon.svelte";
+  import RoutingNavigationIcon from "@/lib/icons/RoutingNavigationIcon.svelte";
+
+  let { i18n, isAnyModeActive, onToggle, navigationLoading, onGPSToggle, gpsLoading } = $props();
+</script>
+
+<article class="flex flex-row gap-2">
+  <!-- Point-to-Point Navigation -->
+  <Button inline roundedIos onClick={onToggle} disabled={navigationLoading}>
+    <RoutingNavigationIcon className="size-8 mr-2" />
+    <span>{$i18n.t("ui:map:nav:pointToPoint")}</span>
+  </Button>
+
+  <!-- GPS Navigation -->
+  <Button inline roundedIos onClick={onGPSToggle} disabled={gpsLoading}>
+    <GPSIcon className="size-8 mr-2" />
+
+    <span>
+      {gpsLoading ? $i18n.t("ui:map:nav:loading") : $i18n.t("ui:map:gps:navigate")}
+    </span>
+  </Button>
+</article>

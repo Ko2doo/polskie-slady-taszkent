@@ -103,8 +103,8 @@ export function buildBaseMapStyle({
       protomaps: {
         type: 'vector',
         url: pmtilesUrl,
-        attribution:
-          '<a href="https://protomaps.com">Protomaps</a> © <a href="https://www.openstreetmap.org">OpenStreetMap</a>',
+        // attributionControl: false,
+        // attribution: '<a href="https://protomaps.com">Protomaps</a> © <a href="https://www.openstreetmap.org">OpenStreetMap</a>',
       },
     },
 

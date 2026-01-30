@@ -76,11 +76,18 @@ export default {
   dialogue: {
     hello: 'Hello, World!',
   },
+  modalSheet: {
+    nav: {
+      title: 'Choose a navigation mode',
+      subtitle: 'Closing this window will not end navigation.',
+    },
+  },
   map: {
     nav: {
-      pointToPoint: 'Route A→B',
+      pointToPoint: 'Route A>B',
       navigate: 'Navigate',
       loading: 'Loading...',
+      cancel: 'Cancel',
       exit: 'Exit',
     },
     gps: {
@@ -97,6 +104,7 @@ export default {
       endProg: 'Second tap - destination',
       info: 'Route information',
       calc: 'Calculating route...',
+      routeCalculated: 'Route calculated in:',
       distance: 'km',
       walk: 'min walk',
       waypoints: 'waypoints',

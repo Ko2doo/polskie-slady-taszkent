@@ -76,11 +76,18 @@ export default {
   dialogue: {
     hello: 'Salom, Dunyo!',
   },
+  modalSheet: {
+    nav: {
+      title: 'Navigatsiya rejimini tanlang',
+      subtitle: 'Ushbu oynani yopsangiz ham navigatsiya tugamaydi.',
+    },
+  },
   map: {
     nav: {
-      pointToPoint: "Yo'nalish A→B",
+      pointToPoint: "Yo'nalish A>B",
       navigate: 'Navigatsiya',
       loading: 'Yuklanmoqda...',
+      cancel: 'Bekor qilish',
       exit: 'Chiqish',
     },
     gps: {
@@ -97,6 +104,7 @@ export default {
       endProg: 'Ikkinchi bosish - manzil',
       info: "Yo'nalish haqida ma'lumot",
       calc: "Yo'nalish hisoblanmoqda...",
+      routeCalculated: 'Marshrut hisoblash vaqti:',
       distance: 'km',
       walk: 'daqiqa piyoda',
       waypoints: 'nuqtalar',

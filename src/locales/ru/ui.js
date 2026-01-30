@@ -76,11 +76,18 @@ export default {
   dialogue: {
     hello: 'Привет, Мир!',
   },
+  modalSheet: {
+    nav: {
+      title: 'Выберите режим навигации',
+      subtitle: 'При закрытии этого окна навигация не завершится.',
+    },
+  },
   map: {
     nav: {
-      pointToPoint: 'Маршрут А→Б',
+      pointToPoint: 'Маршрут А>Б',
       navigate: 'Навигация',
       loading: 'Загрузка...',
+      cancel: 'Отмена',
       exit: 'Выйти',
     },
     gps: {
@@ -97,6 +104,7 @@ export default {
       endProg: 'Второй клик - конечная точка',
       info: 'Информация о маршруте',
       calc: 'Расчёт маршрута...',
+      routeCalculated: 'Маршрут рассчитан за:',
       distance: 'км',
       walk: 'мин пешком',
       waypoints: 'точек',

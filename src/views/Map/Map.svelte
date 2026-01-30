@@ -40,7 +40,7 @@
 
   // Components
   // import NavigationControl from "@/components/Ui/NavigationControl.svelte";
-  import NavigationSheet from "@/components/Ui/NavigationSheet.svelte";
+  import NavigationSheet from "@/components/Ui/Navigation/NavigationSheet.svelte";
   import { createToggle } from "@/lib/state/createToggler.svelte";
 
   // Map modules
@@ -307,6 +307,12 @@
 </section>
 
 <style>
+  /* Custom position on map libre attribution */
+  :global(.maplibregl-ctrl-top-left) {
+    top: 62px;
+    z-index: 10;
+  }
+
   .map-section {
     width: 100%;
     height: 100%;
