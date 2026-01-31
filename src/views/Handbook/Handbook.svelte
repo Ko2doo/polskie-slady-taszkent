@@ -22,6 +22,9 @@
   // Lifecycles
   import { onMount, onDestroy } from "svelte";
 
+  // Layout global store
+  import { layoutView } from "@/store/ui/layoutView";
+
   // Route prop (Svelte 5)
   let { route, i18n } = $props();
 
@@ -31,7 +34,8 @@
   let selectedCat = $state("all"); // category filter (single string)
   let itemsView = $state(articlesMeta); // final list: search + category
 
-  let currentLayoutClasses = $state("grid grid-cols-2 lg:grid-cols-4 md:grid-cols-3");
+  // Layout state
+  let layout = $state(null);
 
   // Receive search results from SearchBar
   function handleSearchResults(list) {
@@ -41,12 +45,6 @@
   // Receive selected category id from SortingByCategories
   function handleCatUpdate(id) {
     selectedCat = typeof id === "string" && id ? id : "all";
-  }
-
-  // Receive grid class switch from LayoutSwitcher
-  function handleLayoutChange(payload) {
-    // payload = { mode: "layoutGrid" | "layoutRows", classes: "..." }
-    currentLayoutClasses = payload.classes;
   }
 
   // Setup Navbar and Panel profiles once on mount; cleaned on destroy
@@ -68,6 +66,10 @@
       disposeNavbar();
       disposePanel();
     });
+  });
+
+  $effect(() => {
+    return layoutView.subscribe((v) => (layout = v));
   });
 
   // Combine search and category filters into the final view list
@@ -123,7 +125,7 @@
 {/snippet}
 
 {#snippet PanelContent()}
-  <LayoutSwitcher {i18n} onChange={handleLayoutChange} />
+  <LayoutSwitcher {i18n} />
   <SortingByCategories {i18n} items={articlesMeta} onSelectedChange={handleCatUpdate} />
 {/snippet}
 
@@ -136,7 +138,7 @@
     </BlockTitle>
   </section>
 {:else}
-  <section class={currentLayoutClasses}>
+  <section class={layout ? layout.classes : "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4"}>
     {#each itemsView as article (article.id)}
       <Card class="flex flex-col justify-between">
         {#snippet header()}

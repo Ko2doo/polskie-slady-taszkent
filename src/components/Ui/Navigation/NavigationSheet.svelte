@@ -38,21 +38,21 @@
     <div class="flex flex-col">
       <!-- Route info title -->
       {#if activeRouteInfo && !activeRouteInfo.loading}
-        <span class="text-md font-bold text-white dark:text-dark">
+        <span class="text-xl font-bold text-stone-600 dark:text-stone-300">
           {activeMode === "gps" ? $i18n.t("ui:map:gps:routing") : $i18n.t("ui:map:infoPanel:info")}
         </span>
         <!-- Route instruction title -->
       {:else if isAnyModeActive && !isArrived}
-        <span class="text-md font-bold text-white dark:text-dark">
+        <span class="text-xl font-bold text-stone-600 dark:text-stone-300">
           {activeMode === "gps" ? $i18n.t("ui:map:gps:instruction") : $i18n.t("ui:map:infoPanel:setRoutePoints")}
         </span>
 
         <!-- modal sheet title & subtitle (default state) -->
       {:else}
-        <span class="text-md font-bold text-white dark:text-dark">
+        <span class="text-xl font-bold text-stone-600 dark:text-stone-300">
           {$i18n.t("ui:modalSheet:nav:title")}
         </span>
-        <span class="text-xs font-normal text-gray-200 dark:text-gray-400">
+        <span class="text-sm font-normal text-stone-500 dark:text-stone-400">
           {$i18n.t("ui:modalSheet:nav:subtitle")}
         </span>
       {/if}
@@ -66,6 +66,7 @@
             clear
             inline
             colors={{ textIos: "text-red-500" }}
+            class="text-md"
             onClick={activeMode === "manual" ? onToggle : onGPSToggle}
           >
             {$i18n.t("ui:map:nav:cancel")}
@@ -95,7 +96,7 @@
         {:else if activeRouteInfo?.loading}
           <!-- Progressbar -->
           <div class="space-y-2">
-            <p class="text-sm font-bold text-gray-900 dark:text-white">
+            <p class="text-md font-bold text-gray-900 dark:text-white">
               {$i18n.t("ui:map:infoPanel:calc")}
             </p>
             <Progressbar progress={activeRouteInfo} />

@@ -12,12 +12,12 @@
         clip-rule="evenodd"
       />
     </svg>
-    <p class="text-sm font-bold">
+    <p class="text-lg font-bold">
       {$i18n.t("ui:map:gps:arrived")}
     </p>
   </div>
 
-  <Button inline small raised rounded onClick={activeMode === "manual" ? onClear : onGPSClear}>
+  <Button inline small raised rounded class="text-md" onClick={activeMode === "manual" ? onClear : onGPSClear}>
     {$i18n.t("ui:map:gps:newRoute")}
   </Button>
 </article>

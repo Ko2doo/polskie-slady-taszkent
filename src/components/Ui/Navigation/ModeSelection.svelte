@@ -8,13 +8,13 @@
 
 <article class="flex flex-row gap-2">
   <!-- Point-to-Point Navigation -->
-  <Button inline roundedIos onClick={onToggle} disabled={navigationLoading}>
+  <Button inline roundedIos class="text-[16px]" onClick={onToggle} disabled={navigationLoading}>
     <RoutingNavigationIcon className="size-8 mr-2" />
     <span>{$i18n.t("ui:map:nav:pointToPoint")}</span>
   </Button>
 
   <!-- GPS Navigation -->
-  <Button inline roundedIos onClick={onGPSToggle} disabled={gpsLoading}>
+  <Button inline roundedIos class="text-[16px]" onClick={onGPSToggle} disabled={gpsLoading}>
     <GPSIcon className="size-8 mr-2" />
 
     <span>

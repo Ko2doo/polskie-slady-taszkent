@@ -3,20 +3,23 @@
    * Layout Switcher subcomponent
    */
 
-  import { onMount } from "svelte";
-
   // KonstaUI import
   import { List, ListButton, Icon, BlockTitle } from "konsta/svelte";
+  import { layoutView } from "@/store/ui/layoutView";
 
   // icons import
   import LayoutGridIcon from "@/lib/icons/LayoutGridIcon.svelte";
   import LayoutRowsIcon from "@/lib/icons/LayoutRowsIcon.svelte";
 
-  // Utils
-  import { setStorage, getStorage } from "@/capacitor/utils/appStorage";
-
   // Props
-  let { i18n, onChange = null } = $props();
+  let { i18n } = $props();
+
+  // Layout state (from global store)
+  let layout = $state(null);
+
+  $effect(() => {
+    return layoutView.subscribe((v) => (layout = v));
+  });
 
   // ui tailwind classes
   const baseBtnClasses =
@@ -26,10 +29,14 @@
   const inactiveBtnClasses = "text-black dark:text-white active-primary/15";
 
   // Utils: the final className constructor
-  function getBtnClasses(listId) {
-    return listId === layoutMode ? `${baseBtnClasses} ${activeBtnClasses}` : `${baseBtnClasses} ${inactiveBtnClasses}`;
+  /* prettier-ignore */
+  function getBtnClasses(id) {
+    return layout?.mode === id
+      ? `${baseBtnClasses} ${activeBtnClasses}`
+      : `${baseBtnClasses} ${inactiveBtnClasses}`
   }
 
+  // Layout options
   const listCollection = [
     {
       id: "layoutGrid",
@@ -41,85 +48,30 @@
     },
   ];
 
-  // Layout switcher logic
-  const BASE_GRID_STYLE = "grid";
-  const GRID_STYLE = `${BASE_GRID_STYLE} grid-cols-2 lg:grid-cols-4 md:grid-cols-3`;
-  const ROWS_STYLE = `${BASE_GRID_STYLE} grid-cols-1 md:grid-cols-1`;
-
-  // Capacitor Preferences key name
-  const LS_KEY = "handbook.layoutMode";
-
-  // State
-  let layoutMode = $state("layoutGrid"); // by default
-  let layoutState = $state(GRID_STYLE);
-
-  // emit "change" event
-  function emitChange() {
-    if (typeof onChange === "function") {
-      onChange({
-        mode: layoutMode, // 'layoutGrid' | 'layoutRows'
-        classes: layoutState,
-      });
-    }
+  // Layout switcher
+  function switchLayout(id) {
+    if (!layout || layout.mode === id) return;
+    layoutView.set(id);
   }
-
-  // applyLayout(mode)
-  // Normalized value
-  // updates two reactive state
-  // writing layout mode to persistent storage (Capacitor Preferences)
-  function applyLayout(mode) {
-    const normalized = mode === "layoutRows" || mode === "layoutGrid" ? mode : "layoutGrid";
-
-    if (normalized === layoutMode && layoutState) return;
-
-    layoutMode = normalized;
-    layoutState = normalized === "layoutRows" ? ROWS_STYLE : GRID_STYLE;
-
-    setStorage(LS_KEY, normalized);
-    emitChange();
-  }
-
-  // Initialization for mount component
-  onMount(async () => {
-    const stored = await getStorage(LS_KEY);
-    applyLayout(stored);
-  });
-
-  // Click handler
-  const layoutSwitcherHandler = (event) => {
-    // const eventTarget = event.target;
-    const switcherId = event.currentTarget?.dataset?.switcherId;
-    if (!switcherId) return;
-
-    // Double-click protection
-    if (switcherId === layoutMode) {
-      return;
-    }
-
-    // Update state
-    applyLayout(switcherId);
-  };
-
-  // $inspect({ layoutMode, layoutState });
 </script>
 
 <BlockTitle>{$i18n.t("ui:sidePanel:handbook:filters:layoutTitle")}</BlockTitle>
 
 <List inset>
-  {#each listCollection as list (list.id)}
+  {#each listCollection as item (item.id)}
     <ListButton
       linkProps={{
-        class: getBtnClasses(list.id),
-        "data-switcher-id": list.id,
+        class: getBtnClasses(item.id),
+        "data-switcher-id": item.id,
       }}
-      onclick={layoutSwitcherHandler}
+      onclick={() => switchLayout(item.id)}
     >
       <Icon class="me-4">
-        {@const IconComponent = list.icon}
+        {@const IconComponent = item.icon}
         <IconComponent className="w-5 h-5" />
       </Icon>
 
-      <span> {$i18n.t(`ui:sidePanel:handbook:filters:${list.id}`)} </span>
+      <span> {$i18n.t(`ui:sidePanel:handbook:filters:${item.id}`)} </span>
     </ListButton>
   {/each}
 </List>
