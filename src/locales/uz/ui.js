@@ -88,6 +88,13 @@ export default {
       yes: 'Ha',
       no: 'Yo‘q',
     },
+    map: {
+      newRoute: {
+        title: 'Yangi marshrut tuzilsinmi?',
+        yes: 'Ha',
+        no: 'Yo‘q',
+      },
+    },
   },
   map: {
     nav: {

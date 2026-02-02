@@ -37,6 +37,8 @@ export function createNavigationController({ map, builder, i18n }) {
   let startMarker = null;
   let endMarker = null;
 
+  let dialogState = $state(false);
+
   // ========================================
   // MARKER MANAGEMENT
   // ========================================
@@ -247,10 +249,23 @@ export function createNavigationController({ map, builder, i18n }) {
     const coordinates = route.geometry.coordinates;
     const bounds = coordinates.reduce(
       (bounds, coord) => bounds.extend(coord),
-      new maplibreGL.LngLatBounds(coordinates[0], coordinates[0])
+      new maplibreGL.LngLatBounds(coordinates[0], coordinates[0]),
     );
 
     map.fitBounds(bounds, { padding: ROUTE_FIT_PADDING });
+  }
+
+  function openDialog() {
+    dialogState = true;
+  }
+
+  function closeDialog() {
+    dialogState = false;
+  }
+
+  function confirmNewDestination() {
+    closeDialog();
+    clearNavigation();
   }
 
   // ========================================
@@ -272,9 +287,7 @@ export function createNavigationController({ map, builder, i18n }) {
       setEndPoint(lng, lat);
       calculateRoute();
     } else {
-      // Reset and start new route
-      clearNavigation();
-      setStartPoint(lng, lat);
+      openDialog();
     }
   }
 
@@ -333,10 +346,16 @@ export function createNavigationController({ map, builder, i18n }) {
     get currentRoute() {
       return currentRoute;
     },
+    get dialogState() {
+      return dialogState;
+    },
 
     // Actions
     toggleNavigationMode,
     clearNavigation,
+    openDialog,
+    closeDialog,
+    confirmNewDestination,
     handleMapClick,
     restoreMarkers,
     dispose,

@@ -88,6 +88,13 @@ export default {
       yes: 'Tak',
       no: 'Nie',
     },
+    map: {
+      newRoute: {
+        title: 'Wyznaczyć nową trasę?',
+        yes: 'Tak',
+        no: 'Nie',
+      },
+    },
   },
   map: {
     nav: {

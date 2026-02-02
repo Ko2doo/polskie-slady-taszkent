@@ -23,7 +23,7 @@
    */
 
   import { onMount, onDestroy } from "svelte";
-  import { Link } from "konsta/svelte";
+  import { Dialog, DialogButton, Link } from "konsta/svelte";
   import RoutingNavigationIcon from "@/lib/icons/RoutingNavigationIcon.svelte";
   import { goto } from "@mateothegreat/svelte5-router";
 
@@ -86,6 +86,9 @@
     targetCoords = resolveTargetCoords(route);
   });
 
+  // sheet toggler
+  const sheetToggler = createToggle();
+
   /**
    * Unified map click handler
    * Routes clicks to appropriate navigation controller
@@ -122,9 +125,6 @@
 
     // No mode active - do nothing
   }
-
-  // sheet toggler
-  const sheetToggler = createToggle();
 
   // ========================================
   // LIFECYCLE - MOUNT
@@ -303,6 +303,26 @@
       onGPSToggle={gpsNavigation.toggleGPSMode}
       onGPSClear={gpsNavigation.clearGPSNavigation}
     />
+
+    <Dialog opened={navigation ? navigation.dialogState : gpsNavigation.dialogState}>
+      {#snippet title()}
+        {$i18n.t("ui:dialog:map:newRoute:title")}
+      {/snippet}
+
+      {#snippet buttons()}
+        <DialogButton onClick={() => navigation.closeDialog()}>
+          {$i18n.t("ui:dialog:map:newRoute:no")}
+        </DialogButton>
+
+        <DialogButton
+          onClick={() => {
+            navigation ? navigation.confirmNewDestination() : gpsNavigation.confirmNewDestination();
+          }}
+        >
+          {$i18n.t("ui:dialog:map:newRoute:yes")}
+        </DialogButton>
+      {/snippet}
+    </Dialog>
   {/if}
 </section>
 

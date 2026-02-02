@@ -88,6 +88,13 @@ export default {
       yes: 'Да',
       no: 'Нет',
     },
+    map: {
+      newRoute: {
+        title: 'Построить новый маршрут?',
+        yes: 'Да',
+        no: 'Нет',
+      },
+    },
   },
   map: {
     nav: {

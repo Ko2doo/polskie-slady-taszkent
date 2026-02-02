@@ -49,6 +49,9 @@ export function createGPSNavigationController({ map, builder, i18n }) {
   let pendingRouteBuild = $state(false);
   let didShowWaitingToast = false;
 
+  let dialogState = $state(false);
+  let isFirstPosition = true;
+
   function showWaitingForFixOnce() {
     if (didShowWaitingToast) return;
     didShowWaitingToast = true;
@@ -99,6 +102,12 @@ export function createGPSNavigationController({ map, builder, i18n }) {
         errorToast.warn(i18n.t('ui:errors:gpsOutOfBounds'), {
           scope: 'GPSNavigation',
           code: 'OUT_OF_BOUNDS',
+        });
+      } else if (initialPosition) {
+        map.flyTo({
+          center: [initialPosition.lon, initialPosition.lat],
+          zoom: 15,
+          duration: 1000,
         });
       }
 
@@ -189,6 +198,15 @@ export function createGPSNavigationController({ map, builder, i18n }) {
         if (currentRoute) {
           clearGPSNavigation();
         }
+      }
+
+      if (isFirstPosition && position.isWithinBounds) {
+        isFirstPosition = false;
+        map.flyTo({
+          center: [position.lon, position.lat],
+          zoom: 16,
+          duration: 1000,
+        });
       }
 
       // Update marker position even if out of bounds
@@ -449,6 +467,22 @@ export function createGPSNavigationController({ map, builder, i18n }) {
     // User can manually stop GPS mode
   }
 
+  function openDialog() {
+    dialogState = true;
+  }
+
+  function closeDialog() {
+    dialogState = false;
+  }
+
+  /**
+   * Confirm new destination (from dialog)
+   */
+  function confirmNewDestination() {
+    closeDialog();
+    clearGPSNavigation();
+  }
+
   // ========================================
   // MAP INTERACTION
   // ========================================
@@ -469,6 +503,11 @@ export function createGPSNavigationController({ map, builder, i18n }) {
     }
 
     const { lng, lat } = e.lngLat;
+
+    if (destinationPoint && currentRoute && !isArrived) {
+      openDialog();
+      return;
+    }
 
     // Set destination
     destinationPoint = { lon: lng, lat };
@@ -520,6 +559,10 @@ export function createGPSNavigationController({ map, builder, i18n }) {
 
     pendingRouteBuild = false;
     didShowWaitingToast = false;
+
+    dialogState = false;
+
+    isFirstPosition = true;
 
     removeUserMarker();
 
@@ -575,11 +618,17 @@ export function createGPSNavigationController({ map, builder, i18n }) {
     get isOutOfBounds() {
       return isOutOfBounds;
     },
+    get dialogState() {
+      return dialogState;
+    },
 
     // Actions
     toggleGPSMode,
     clearGPSNavigation,
     handleMapClick,
+    openDialog,
+    closeDialog,
+    confirmNewDestination,
     dispose,
   };
 }
