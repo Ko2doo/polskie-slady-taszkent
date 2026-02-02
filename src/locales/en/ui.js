@@ -80,7 +80,13 @@ export default {
   modalSheet: {
     nav: {
       title: 'Choose a navigation mode',
-      subtitle: 'Closing this window will not end navigation.',
+    },
+  },
+  dialog: {
+    nav: {
+      title: 'End navigation?',
+      yes: 'Yes',
+      no: 'No',
     },
   },
   map: {

@@ -1,6 +1,6 @@
 <script>
   import { Button } from "konsta/svelte";
-  let { i18n, activeMode, onClear, onGPSClear } = $props();
+  let { i18n } = $props();
 </script>
 
 <article class="space-y-2">
@@ -16,8 +16,4 @@
       {$i18n.t("ui:map:gps:arrived")}
     </p>
   </div>
-
-  <Button inline small raised rounded class="text-md" onClick={activeMode === "manual" ? onClear : onGPSClear}>
-    {$i18n.t("ui:map:gps:newRoute")}
-  </Button>
 </article>

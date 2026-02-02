@@ -1,5 +1,6 @@
 <script>
-  import { Sheet, Toolbar, ToolbarPane, Block, Link, Button, Progressbar } from "konsta/svelte";
+  import { Sheet, Toolbar, ToolbarPane, Block, Link, Button, Dialog, DialogButton, Progressbar } from "konsta/svelte";
+  import { createToggle } from "@/lib/state/createToggler.svelte";
 
   // Icons
   import Close from "@/lib/icons/Close.svelte";
@@ -31,6 +32,8 @@
   const isAnyModeActive = $derived(navigationMode || gpsMode);
   const activeMode = $derived(navigationMode ? "manual" : gpsMode ? "gps" : null);
   const activeRouteInfo = $derived(navigationMode ? routeInfo : gpsRouteInfo);
+
+  const dialogToggler = createToggle();
 </script>
 
 <Sheet class="pb-safe" opened={sheetToggler.value} backdrop={false}>
@@ -47,36 +50,35 @@
           {activeMode === "gps" ? $i18n.t("ui:map:gps:instruction") : $i18n.t("ui:map:infoPanel:setRoutePoints")}
         </span>
 
-        <!-- modal sheet title & subtitle (default state) -->
+        <!-- modal sheet title (default state) -->
       {:else}
         <span class="text-xl font-bold text-stone-600 dark:text-stone-300">
           {$i18n.t("ui:modalSheet:nav:title")}
         </span>
-        <span class="text-sm font-normal text-stone-500 dark:text-stone-400">
-          {$i18n.t("ui:modalSheet:nav:subtitle")}
-        </span>
       {/if}
     </div>
 
+    <!-- Universal close button -->
     <div class="flex flex-row gap-2">
-      <!-- Cancel navigation mode button -->
-      {#if isAnyModeActive}
-        <ToolbarPane>
-          <Button
-            clear
-            inline
-            colors={{ textIos: "text-red-500" }}
-            class="text-md"
-            onClick={activeMode === "manual" ? onToggle : onGPSToggle}
-          >
-            {$i18n.t("ui:map:nav:cancel")}
-          </Button>
-        </ToolbarPane>
-      {/if}
-
-      <!-- Close modal sheet button -->
       <ToolbarPane>
-        <Link iconOnly class="p-2" onClick={sheetToggler.close}><Close className="size-5" /></Link>
+        <!-- End navigation -->
+        {#if activeRouteInfo && !activeRouteInfo.loading}
+          <Link iconOnly class="p-2" onClick={dialogToggler.open}>
+            <Close className="size-5" />
+          </Link>
+
+          <!-- Cancel -->
+        {:else if isAnyModeActive && !isArrived}
+          <Link iconOnly class="p-2" onClick={activeMode === "manual" ? onToggle : onGPSToggle}>
+            <Close className="size-5" />
+          </Link>
+
+          <!-- Default close button (close sheet window) -->
+        {:else}
+          <Link iconOnly class="p-2" onClick={sheetToggler.close}>
+            <Close className="size-5" />
+          </Link>
+        {/if}
       </ToolbarPane>
     </div>
   </Toolbar>
@@ -92,7 +94,7 @@
       <section class="nav-info-panel">
         {#if isArrived}
           <!-- Arrival Message -->
-          <NavigationArrivalMsg {i18n} {activeMode} {onClear} {onGPSClear} />
+          <NavigationArrivalMsg {i18n} />
         {:else if activeRouteInfo?.loading}
           <!-- Progressbar -->
           <div class="space-y-2">
@@ -103,7 +105,7 @@
           </div>
         {:else if activeRouteInfo && !activeRouteInfo.loading}
           <!-- Route Info -->
-          <RouteInfo {i18n} {activeMode} {activeRouteInfo} {onClear} {onGPSClear} />
+          <RouteInfo {i18n} {activeRouteInfo} />
         {:else}
           <!-- Instructions -->
           <NavigationInstruction {i18n} {activeMode} />
@@ -112,3 +114,26 @@
     {/if}
   </Block>
 </Sheet>
+
+<!-- Dialog component -->
+<Dialog opened={dialogToggler.value}>
+  {#snippet title()}
+    {$i18n.t("ui:dialog:nav:title")}
+  {/snippet}
+
+  {#snippet buttons()}
+    <DialogButton onClick={dialogToggler.close}>
+      {$i18n.t("ui:dialog:nav:no")}
+    </DialogButton>
+
+    <DialogButton
+      onClick={() => {
+        dialogToggler.set(false);
+        activeMode === "manual" ? onClear() : onGPSClear();
+        activeMode === "manual" ? onToggle() : onGPSToggle();
+      }}
+    >
+      {$i18n.t("ui:dialog:nav:yes")}
+    </DialogButton>
+  {/snippet}
+</Dialog>

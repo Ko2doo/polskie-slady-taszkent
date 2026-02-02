@@ -80,7 +80,13 @@ export default {
   modalSheet: {
     nav: {
       title: 'Navigatsiya rejimini tanlang',
-      subtitle: 'Ushbu oynani yopsangiz ham navigatsiya tugamaydi.',
+    },
+  },
+  dialog: {
+    nav: {
+      title: 'Navigatsiyani tugatilsinmi?',
+      yes: 'Ha',
+      no: 'Yo‘q',
     },
   },
   map: {

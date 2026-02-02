@@ -1,7 +1,7 @@
 <script>
   import { Button } from "konsta/svelte";
 
-  let { i18n, activeMode, activeRouteInfo, onClear, onGPSClear } = $props();
+  let { i18n, activeRouteInfo } = $props();
 </script>
 
 <article class="space-y-2">
@@ -31,16 +31,4 @@
       </span>
     </div>
   </div>
-
-  <Button
-    inline
-    small
-    raised
-    rounded
-    class="text-lg text-neutral-100"
-    colors={{ fillBgIos: "bg-red-500 active:bg-ios-primary-shade" }}
-    onClick={activeMode === "manual" ? onClear : onGPSClear}
-  >
-    {$i18n.t("ui:map:infoPanel:clear")}
-  </Button>
 </article>

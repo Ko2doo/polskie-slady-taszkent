@@ -80,7 +80,13 @@ export default {
   modalSheet: {
     nav: {
       title: 'Wybierz tryb nawigacji',
-      subtitle: 'Zamknięcie tego okna nie zakończy nawigacji.',
+    },
+  },
+  dialog: {
+    nav: {
+      title: 'Zakończyć nawigację?',
+      yes: 'Tak',
+      no: 'Nie',
     },
   },
   map: {
