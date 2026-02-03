@@ -13,7 +13,7 @@
 <Toast opened={$errorToast.opened} class="bottom-safe-24" position="center">
   {#snippet button()}
     <Button clear inline small rounded onClick={onButton}>
-      {$i18n.t("ui:errors:toastBtn")}
+      {$i18n.t("errors:toastBtn")}
     </Button>
   {/snippet}
 

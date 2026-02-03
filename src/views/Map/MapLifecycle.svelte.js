@@ -44,7 +44,7 @@ export async function initializePMTiles(i18n) {
   } catch (error) {
     console.error('[MapLifecycle] Failed to load PMTiles:', error);
 
-    errorToast.error(i18n.t('ui:errors:mapPMTilesFetch'), {
+    errorToast.error(i18n.t('errors:mapPMTilesFetch'), {
       scope: 'MapLifecycle',
       code: ERROR_CODES.PMTILES_FETCH,
     });

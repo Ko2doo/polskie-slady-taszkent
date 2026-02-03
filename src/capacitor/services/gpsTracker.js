@@ -32,6 +32,8 @@
 import { Geolocation } from '@capacitor/geolocation';
 import { Capacitor } from '@capacitor/core';
 
+import { ERROR_CODES } from '@/lib/errors/errorCodes';
+
 // Configuration
 const GPS_OPTIONS = {
   enableHighAccuracy: true, // Use GPS instead of network location
@@ -55,6 +57,58 @@ const MAP_BOUNDS = {
   maxLon: 69.5436061519978,
   maxLat: 41.4359965669526,
 };
+
+/**
+ * Capacitor  erro code mapping
+ *
+ * Map Capacitor native erro codes to our custom error codes
+ *
+ * @param {Object} error - Capacitor error object
+ * @returns {string} - our custom error code
+ */
+function mapCapacitorError(error) {
+  // Check if it`s already our custom error code
+  if (error.code && typeof error.code === 'string' && error.code.startsWith('OS_PLUG_GLOC_')) {
+    return error.code;
+  }
+
+  // Map Capacitor native numberic error codes
+  if (typeof error.code === 'number') {
+    switch (error.code) {
+      case 1:
+        return ERROR_CODES.OS_PLUG_GLOC_0003; // PERMISSION_DENIED
+      case 2:
+        return ERROR_CODES.OS_PLUG_GLOC_0002; // POSITION_UNAVAILABLE
+      case 3:
+        return ERROR_CODES.OS_PLUG_GLOC_0010; // TIMEOUT
+      default:
+        return ERROR_CODES.OS_PLUG_GLOC_0002; // Generic error
+    }
+  }
+
+  // Check error message for specific patterns
+  if (error.message) {
+    const msg = error.message.toLowerCase();
+
+    if (msg.includes('permission') || msg.includes('denied')) {
+      return ERROR_CODES.OS_PLUG_GLOC_0003;
+    }
+
+    if (msg.includes('timeout')) {
+      return ERROR_CODES.OS_PLUG_GLOC_0010;
+    }
+
+    if (msg.includes('location services') || msg.includes('disabled')) {
+      return ERROR_CODES.OS_PLUG_GLOC_0007;
+    }
+
+    if (msg.includes('location')) {
+      return ERROR_CODES.OS_PLUG_GLOC_0017;
+    }
+  }
+
+  return ERROR_CODES.OS_PLUG_GLOC_0002; // Generic error
+}
 
 /**
  * Check if coordinates are within map bounds
@@ -125,6 +179,25 @@ export function findNearestPointOnRoute(position, routeCoordinates) {
 }
 
 /**
+ * Transform Capacitor position to our position format
+ *
+ * @param {Object} position - Capacitor position object
+ * @returns {Object} - Transformed position data
+ */
+function transformPositionData(position) {
+  return {
+    lat: position.coords.latitude,
+    lon: position.coords.longitude,
+    accuracy: position.coords.accuracy,
+    altitude: position.coords.altitude,
+    heading: position.coords.heading,
+    speed: position.coords.speed,
+    timestamp: position.timestamp,
+    isWithinBounds: isWithinMapBounds(position.coords.latitude, position.coords.longitude),
+  };
+}
+
+/**
  * Create GPS tracker instance
  * @param {Object} callbacks - Callback functions
  * @param {Function} callbacks.onPositionUpdate - Called when position updates
@@ -170,9 +243,10 @@ export function createGPSTracker({ onPositionUpdate = null, onError = null } = {
       console.error('[GPSTracker] Failed to request permissions:', error);
 
       if (onError) {
+        const errorCode = mapCapacitorError(error);
         onError({
-          code: 'PERMISSION_DENIED',
-          message: 'GPS permission denied',
+          code: errorCode,
+          message: error.message || 'GPS permission denied',
           error,
         });
       }
@@ -190,17 +264,7 @@ export function createGPSTracker({ onPositionUpdate = null, onError = null } = {
       console.log('[GPSTracker] Getting current position...');
 
       const position = await Geolocation.getCurrentPosition(GPS_OPTIONS);
-
-      const positionData = {
-        lat: position.coords.latitude,
-        lon: position.coords.longitude,
-        accuracy: position.coords.accuracy,
-        altitude: position.coords.altitude,
-        heading: position.coords.heading,
-        speed: position.coords.speed,
-        timestamp: position.timestamp,
-        isWithinBounds: isWithinMapBounds(position.coords.latitude, position.coords.longitude),
-      };
+      const positionData = transformPositionData(position);
 
       console.log('[GPSTracker] Current position:', {
         lat: positionData.lat,
@@ -213,14 +277,11 @@ export function createGPSTracker({ onPositionUpdate = null, onError = null } = {
     } catch (error) {
       console.error('[GPSTracker] Failed to get current position:', error);
 
-      if (error.code === 'OS-PLUG-GLOC-0010') {
-        onError({ code: 'GPS_TIMEOUT', message: 'Waiting for GPS signal...', error: error });
-        return null;
-      }
+      const errorCode = mapCapacitorError(error);
 
       if (onError) {
         onError({
-          code: error.code || 'POSITION_UNAVAILABLE',
+          code: errorCode,
           message: error.message || 'Failed to get GPS position',
           error,
         });
@@ -246,7 +307,7 @@ export function createGPSTracker({ onPositionUpdate = null, onError = null } = {
 
       if (onError) {
         onError({
-          code: 'PLATFORM_NOT_SUPPORTED',
+          code: ERROR_CODES.OS_PLUG_GLOC_0002,
           message: 'GPS tracking requires native platform (Android/iOS)',
         });
       }
@@ -270,21 +331,26 @@ export function createGPSTracker({ onPositionUpdate = null, onError = null } = {
     try {
       console.log('[GPSTracker] Starting position watch...');
 
-      watchId = await Geolocation.watchPosition(WATCH_OPTIONS, (position, err) => {
-        if (err) {
-          console.error('[GPSTracker] Watch position error:', err);
+      watchId = await Geolocation.watchPosition(WATCH_OPTIONS, (position, error) => {
+        if (error) {
+          console.error('[GPSTracker] Watch position error:', error);
 
-          if (err.code === 'OS-PLUG-GLOC-0010') {
-            // не фатально, просто ждём дальше
-            onError({ code: 'GPS_TIMEOUT', message: 'Waiting for GPS signal...', error: err });
+          const errorCode = mapCapacitorError(error);
+
+          // Timeout is not fatal, just waiting for signal
+          if (errorCode === ERROR_CODES.OS_PLUG_GLOC_0010) {
+            if (onError) {
+              onError({ code: errorCode, message: 'Waiting for GPS signal...', error });
+            }
+
             return;
           }
 
           if (onError) {
             onError({
-              code: err.code || 'WATCH_ERROR',
-              message: err.message || 'GPS tracking error',
-              error: err,
+              code: errorCode,
+              message: error.message || 'GPS tracking error',
+              error,
             });
           }
 
@@ -292,17 +358,7 @@ export function createGPSTracker({ onPositionUpdate = null, onError = null } = {
         }
 
         if (position) {
-          const positionData = {
-            lat: position.coords.latitude,
-            lon: position.coords.longitude,
-            accuracy: position.coords.accuracy,
-            altitude: position.coords.altitude,
-            heading: position.coords.heading,
-            speed: position.coords.speed,
-            timestamp: position.timestamp,
-            isWithinBounds: isWithinMapBounds(position.coords.latitude, position.coords.longitude),
-          };
-
+          const positionData = transformPositionData(position);
           lastPosition = positionData;
 
           console.log('[GPSTracker] Position update:', {
@@ -326,9 +382,10 @@ export function createGPSTracker({ onPositionUpdate = null, onError = null } = {
       console.error('[GPSTracker] Failed to start watch:', error);
 
       if (onError) {
+        const errorCode = mapCapacitorError(error);
         onError({
-          code: 'WATCH_START_FAILED',
-          message: 'Failed to start GPS tracking',
+          code: errorCode,
+          message: error.message || 'Failed to start GPS tracking',
           error,
         });
       }

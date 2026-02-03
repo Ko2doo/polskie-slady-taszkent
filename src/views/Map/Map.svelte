@@ -214,7 +214,7 @@
     } catch (error) {
       console.error("[Map] Initialization failed:", error);
 
-      errorToast.error($i18n.t("ui:errors:mapInitFailed"), {
+      errorToast.error($i18n.t("errors:mapInitFailed"), {
         scope: "Map",
         code: ERROR_CODES.MAP_INIT_FAILED,
       });

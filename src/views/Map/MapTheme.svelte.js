@@ -118,7 +118,7 @@ export function createThemeController({ map, builder, navigation, i18n }) {
     } catch (error) {
       console.error('[MapTheme] Failed to apply theme:', error);
 
-      errorToast.error(i18n.t('ui:errors:mapThemeFailed'), {
+      errorToast.error(i18n.t('errors:mapThemeFailed'), {
         scope: 'MapTheme',
         code: ERROR_CODES.MAP_THEME_FAILED,
       });

@@ -56,7 +56,7 @@ export function createGPSNavigationController({ map, builder, i18n }) {
     if (didShowWaitingToast) return;
     didShowWaitingToast = true;
 
-    errorToast.info(i18n.t('ui:errors:gpsWaitingForSignal'), {
+    errorToast.info(i18n.t('errors:gpsWaitingForSignal'), {
       scope: 'GPSNavigation',
       code: 'GPS_WAITING_FOR_FIX',
     });
@@ -99,7 +99,7 @@ export function createGPSNavigationController({ map, builder, i18n }) {
         // User is outside map bounds
         isOutOfBounds = true;
 
-        errorToast.warn(i18n.t('ui:errors:gpsOutOfBounds'), {
+        errorToast.warn(i18n.t('errors:gpsOutOfBounds'), {
           scope: 'GPSNavigation',
           code: 'OUT_OF_BOUNDS',
         });
@@ -126,7 +126,7 @@ export function createGPSNavigationController({ map, builder, i18n }) {
       console.error('[GPSNavigation] Failed to initialize GPS:', error);
 
       if (error.message !== 'GPS permission denied') {
-        errorToast.error(i18n.t('ui:errors:gpsInitFailed'), {
+        errorToast.error(i18n.t('errors:gpsInitFailed'), {
           scope: 'GPSNavigation',
           code: ERROR_CODES.NAV_INIT,
         });
@@ -196,7 +196,7 @@ export function createGPSNavigationController({ map, builder, i18n }) {
         // First time out of bounds
         isOutOfBounds = true;
 
-        errorToast.warn(i18n.t('ui:errors:gpsOutOfBounds'), {
+        errorToast.warn(i18n.t('errors:gpsOutOfBounds'), {
           scope: 'GPSNavigation',
           code: 'OUT_OF_BOUNDS',
         });
@@ -263,14 +263,16 @@ export function createGPSNavigationController({ map, builder, i18n }) {
   }
 
   /**
-   * Handle GPS errors
+   * Enhanced GPS error handling with translated messages
    */
   function handleGPSError(error) {
     console.error('[GPSNavigation] GPS error:', error);
 
-    // Permission denied -> show action "Open settings"
-    if (error.code === 'PERMISSION_DENIED') {
-      // errorToast.error(i18n.t('ui:errors:gpsPermissionDenied'), {
+    const errorCode = error.code;
+
+    // Permission denied
+    if (errorCode === ERROR_CODES.OS_PLUG_GLOC_0003) {
+      // errorToast.error(i18n.t('errors:gpsPermissionDenied'), {
       //   scope: 'GPSNavigation',
       //   code: error.code,
       //   duration: 8000,
@@ -303,16 +305,17 @@ export function createGPSNavigationController({ map, builder, i18n }) {
       //   },
       // });
 
-      errorToast.error(i18n.t('ui:errors:gpsPermissionDenied'), {
+      errorToast.error(i18n.t(`errors:${errorCode}`), {
         scope: 'GPSNavigation',
-        code: error.code,
+        code: errorCode,
       });
 
       return;
     }
 
-    if (error.code === 'GPS_TIMEOUT') {
-      // errorToast.info(i18n.t('ui:errors:gpsWaitingForSignal'), {
+    // Timeout - waiting for gPS signal (not fatal)
+    if (errorCode === ERROR_CODES.OS_PLUG_GLOC_0010) {
+      // errorToast.info(i18n.t('errors:gpsWaitingForSignal'), {
       //   scope: 'GPSNavigation',
       //   code: 'GPS_TIMEOUT',
       // });
@@ -320,9 +323,46 @@ export function createGPSNavigationController({ map, builder, i18n }) {
       return;
     }
 
-    errorToast.error(i18n.t('ui:errors:gpsError'), {
+    // Location services disabled
+    if (errorCode === ERROR_CODES.OS_PLUG_GLOC_0007) {
+      errorToast.error(i18n.t(`errors:${errorCode}`), {
+        scope: 'GPSNavigation',
+        code: errorCode,
+      });
+    }
+
+    // Location turned off
+    if (errorCode === ERROR_CODES.OS_PLUG_GLOC_0017) {
+      errorToast.error(i18n.t(`errors:${errorCode}`), {
+        scope: 'GPSNavigation',
+        code: errorCode,
+      });
+    }
+
+    // Position unavailable
+    if (errorCode === ERROR_CODES.OS_PLUG_GLOC_0002) {
+      errorToast.error(i18n.t(`errors:${errorCode}`), {
+        scope: 'GPSNavigation',
+        code: errorCode,
+      });
+
+      return;
+    }
+
+    // Generic error with translation if available
+    if (errorCode && errorCode.startsWith('OS_PLUG_GLOC_')) {
+      errorToast.error(i18n.t(`errors:${errorCode}`), {
+        scope: 'GPSNavigation',
+        code: errorCode,
+      });
+
+      return;
+    }
+
+    // Fallback generic GPS error
+    errorToast.error(i18n.t('errors:gpsError'), {
       scope: 'GPSNavigation',
-      code: error.code || 'GPS_ERROR',
+      code: errorCode || 'GPS_ERROR',
     });
   }
 
@@ -348,7 +388,7 @@ export function createGPSNavigationController({ map, builder, i18n }) {
     if (!currentPosition.isWithinBounds) {
       isOutOfBounds = true;
 
-      errorToast.warn(i18n.t('ui:errors:gpsOutOfBounds'), {
+      errorToast.warn(i18n.t('errors:gpsOutOfBounds'), {
         scope: 'GPSNavigation',
         code: 'OUT_OF_BOUNDS',
       });
@@ -378,7 +418,7 @@ export function createGPSNavigationController({ map, builder, i18n }) {
       console.error('[GPSNavigation] Route calculation error:', error);
       routeInfo = null;
 
-      errorToast.error(i18n.t('ui:errors:navigationCalculateRouteFailed'), {
+      errorToast.error(i18n.t('errors:navigationCalculateRouteFailed'), {
         scope: 'GPSNavigation',
         code: ERROR_CODES.NAV_ROUTE_CALC,
       });
@@ -432,7 +472,7 @@ export function createGPSNavigationController({ map, builder, i18n }) {
   function handleRouteError(result) {
     routeInfo = null;
 
-    errorToast.error(i18n.t('ui:errors:navigationRouteNotFound'), {
+    errorToast.error(i18n.t('errors:navigationRouteNotFound'), {
       scope: 'GPSNavigation',
       code: ERROR_CODES.NAV_ROUTE_NOT_FOUND,
     });
@@ -502,7 +542,7 @@ export function createGPSNavigationController({ map, builder, i18n }) {
 
     // Check if user is out of bounds
     if (isOutOfBounds) {
-      errorToast.warn(i18n.t('ui:errors:gpsOutOfBoundsNavigation'), {
+      errorToast.warn(i18n.t('errors:gpsOutOfBoundsNavigation'), {
         scope: 'GPSNavigation',
         code: 'OUT_OF_BOUNDS_NAVIGATION',
       });

@@ -119,7 +119,7 @@ export function createNavigationController({ map, builder, i18n }) {
     } catch (error) {
       console.error('[MapNavigation] Failed to load navigation:', error);
 
-      errorToast.error(i18n.t('ui:errors:navigationInitFailed'), {
+      errorToast.error(i18n.t('errors:navigationInitFailed'), {
         scope: 'MapNavigation',
         code: ERROR_CODES.NAV_INIT,
       });
@@ -200,7 +200,7 @@ export function createNavigationController({ map, builder, i18n }) {
       console.error('[MapNavigation] Route calculation error:', error);
       routeInfo = null;
 
-      errorToast.error(i18n.t('ui:errors:navigationCalculateRouteFailed'), {
+      errorToast.error(i18n.t('errors:navigationCalculateRouteFailed'), {
         scope: 'MapNavigation',
         code: ERROR_CODES.NAV_ROUTE_CALC,
       });
@@ -233,7 +233,7 @@ export function createNavigationController({ map, builder, i18n }) {
   function handleRouteError(result) {
     routeInfo = null;
 
-    errorToast.error(i18n.t('ui:errors:navigationRouteNotFound'), {
+    errorToast.error(i18n.t('errors:navigationRouteNotFound'), {
       scope: 'MapNavigation',
       code: ERROR_CODES.NAV_ROUTE_NOT_FOUND,
     });
