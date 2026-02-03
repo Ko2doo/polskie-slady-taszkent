@@ -90,7 +90,7 @@ function mapCapacitorError(error) {
   if (error.message) {
     const msg = error.message.toLowerCase();
 
-    if (msg.includes('permission') || msg.includes('denied')) {
+    if (msg.includes('permission') || msg.includes('denied') || msg.includes('failed')) {
       return ERROR_CODES.OS_PLUG_GLOC_0003;
     }
 
@@ -221,7 +221,17 @@ export function createGPSTracker({ onPositionUpdate = null, onError = null } = {
       return permissions.location === 'granted';
     } catch (error) {
       console.error('[GPSTracker] Failed to check permissions:', error);
-      return false;
+
+      if (onError) {
+        const errorCode = mapCapacitorError(error);
+        onError({
+          code: errorCode,
+          message: error.message || 'Failed to check permissions of GPS',
+          error,
+        });
+
+        return false;
+      }
     }
   }
 
@@ -249,9 +259,9 @@ export function createGPSTracker({ onPositionUpdate = null, onError = null } = {
           message: error.message || 'GPS permission denied',
           error,
         });
-      }
 
-      return false;
+        return false;
+      }
     }
   }
 
@@ -277,9 +287,8 @@ export function createGPSTracker({ onPositionUpdate = null, onError = null } = {
     } catch (error) {
       console.error('[GPSTracker] Failed to get current position:', error);
 
-      const errorCode = mapCapacitorError(error);
-
       if (onError) {
+        const errorCode = mapCapacitorError(error);
         onError({
           code: errorCode,
           message: error.message || 'Failed to get GPS position',
@@ -317,14 +326,8 @@ export function createGPSTracker({ onPositionUpdate = null, onError = null } = {
 
     // Check/request permissions
     let hasPermission = await checkPermissions();
-
     if (!hasPermission) {
       hasPermission = await requestPermissions();
-    }
-
-    if (!hasPermission) {
-      console.error('[GPSTracker] GPS permission denied');
-      return false;
     }
 
     // Start watching

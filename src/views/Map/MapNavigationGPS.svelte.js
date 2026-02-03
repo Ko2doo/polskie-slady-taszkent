@@ -112,11 +112,13 @@ export function createGPSNavigationController({ map, builder, i18n }) {
       //   });
       // }
 
-      map.flyTo({
-        center: [initialPosition.lon, initialPosition.lat],
-        zoom: 15,
-        duration: 1000,
-      });
+      if (!initialPosition.isWithinBounds) {
+        map.flyTo({
+          center: [initialPosition.lon, initialPosition.lat],
+          zoom: 15,
+          duration: 1000,
+        });
+      }
 
       gpsReady = true;
       console.log('[GPSNavigation] GPS initialized');
