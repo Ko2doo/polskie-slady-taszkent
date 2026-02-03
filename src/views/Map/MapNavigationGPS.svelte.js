@@ -103,13 +103,20 @@ export function createGPSNavigationController({ map, builder, i18n }) {
           scope: 'GPSNavigation',
           code: 'OUT_OF_BOUNDS',
         });
-      } else if (initialPosition) {
-        map.flyTo({
-          center: [initialPosition.lon, initialPosition.lat],
-          zoom: 15,
-          duration: 1000,
-        });
       }
+      // else if (initialPosition) {
+      //   map.flyTo({
+      //     center: [initialPosition.lon, initialPosition.lat],
+      //     zoom: 15,
+      //     duration: 1000,
+      //   });
+      // }
+
+      map.flyTo({
+        center: [initialPosition.lon, initialPosition.lat],
+        zoom: 15,
+        duration: 1000,
+      });
 
       gpsReady = true;
       console.log('[GPSNavigation] GPS initialized');
@@ -204,7 +211,7 @@ export function createGPSNavigationController({ map, builder, i18n }) {
         isFirstPosition = false;
         map.flyTo({
           center: [position.lon, position.lat],
-          zoom: 16,
+          zoom: 15,
           duration: 1000,
         });
       }

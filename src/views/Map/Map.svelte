@@ -81,6 +81,15 @@
   // DERIVED STATE
   // ========================================
 
+  // prettier-ignore
+  const activeNav = $derived(
+    navigation?.navigationMode
+      ? navigation
+      : gpsNavigation?.gpsMode
+        ? gpsNavigation
+        : null
+  );
+
   // Resolve target coordinates from route
   $effect(() => {
     targetCoords = resolveTargetCoords(route);
@@ -284,7 +293,8 @@
   <!-- Map container -->
   <div bind:this={mapContainer} class="map-container"></div>
 
-  <!-- Navigation control overlay -->
+  <!-- Navigation Sheet -->
+  <!-- prettier-ignore -->
   {#if navigation && gpsNavigation}
     <NavigationSheet
       {i18n}
@@ -295,6 +305,7 @@
       routeInfo={navigation.routeInfo}
       onToggle={navigation.toggleNavigationMode}
       onClear={navigation.clearNavigation}
+
       bind:gpsMode={gpsNavigation.gpsMode}
       gpsReady={gpsNavigation.gpsReady}
       gpsLoading={gpsNavigation.gpsLoading}
@@ -303,22 +314,21 @@
       onGPSToggle={gpsNavigation.toggleGPSMode}
       onGPSClear={gpsNavigation.clearGPSNavigation}
     />
+  {/if}
 
-    <Dialog opened={navigation ? navigation.dialogState : gpsNavigation.dialogState}>
+  <!-- Navigation control Dialog -->
+  {#if activeNav}
+    <Dialog opened={activeNav.dialogState}>
       {#snippet title()}
         {$i18n.t("ui:dialog:map:newRoute:title")}
       {/snippet}
 
       {#snippet buttons()}
-        <DialogButton onClick={() => navigation.closeDialog()}>
+        <DialogButton onClick={activeNav.closeDialog}>
           {$i18n.t("ui:dialog:map:newRoute:no")}
         </DialogButton>
 
-        <DialogButton
-          onClick={() => {
-            navigation ? navigation.confirmNewDestination() : gpsNavigation.confirmNewDestination();
-          }}
-        >
+        <DialogButton onClick={activeNav.confirmNewDestination}>
           {$i18n.t("ui:dialog:map:newRoute:yes")}
         </DialogButton>
       {/snippet}
