@@ -40,7 +40,7 @@
   <Page>
     <Block class="mt-[100px] text-center text-2xl">
       <p class="text-red-600 text-bold">
-        {$i18n.t("ui:errors:noArticleId")}
+        {$i18n.t("errors:noArticleId")}
       </p>
 
       <Link onClick={handleBack} class="mt-[22px] text-primary underline">
@@ -53,7 +53,7 @@
   <Page>
     <Block class="mt-[100px] text-center text-2xl">
       <p class="text-red-600 text-bold">
-        {$i18n.t("ui:errors:articleNotFound")} ({articleId}).
+        {$i18n.t("errors:articleNotFound")} ({articleId}).
       </p>
 
       <Link onClick={handleBack} class="mt-[22px] text-primary underline">

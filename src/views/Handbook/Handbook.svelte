@@ -134,7 +134,7 @@
     <BlockTitle large class="flex-col">
       <ShieldWarningIcon className="size-20 mb-2 text-red-500" />
 
-      {$i18n.t("ui:errors:notFound")}
+      {$i18n.t("errors:notFound")}
     </BlockTitle>
   </section>
 {:else}
