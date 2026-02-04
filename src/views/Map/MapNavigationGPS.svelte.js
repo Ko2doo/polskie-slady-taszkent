@@ -52,6 +52,9 @@ export function createGPSNavigationController({ map, builder, i18n }) {
   let dialogState = $state(false);
   let isFirstPosition = true;
 
+  // Track show error codes to prevent duplicates
+  let shownErrorCodes = new Set();
+
   function showWaitingForFixOnce() {
     if (didShowWaitingToast) return;
     didShowWaitingToast = true;
@@ -73,6 +76,9 @@ export function createGPSNavigationController({ map, builder, i18n }) {
     if (gpsReady) return true;
 
     gpsLoading = true;
+
+    // Reset error tracking on init
+    shownErrorCodes.clear();
 
     try {
       // Initialize navigation engine
@@ -103,16 +109,7 @@ export function createGPSNavigationController({ map, builder, i18n }) {
           scope: 'GPSNavigation',
           code: 'OUT_OF_BOUNDS',
         });
-      }
-      // else if (initialPosition) {
-      //   map.flyTo({
-      //     center: [initialPosition.lon, initialPosition.lat],
-      //     zoom: 15,
-      //     duration: 1000,
-      //   });
-      // }
-
-      if (!initialPosition.isWithinBounds) {
+      } else if (initialPosition) {
         map.flyTo({
           center: [initialPosition.lon, initialPosition.lat],
           zoom: 15,
@@ -265,48 +262,44 @@ export function createGPSNavigationController({ map, builder, i18n }) {
   }
 
   /**
-   * Enhanced GPS error handling with translated messages
+   * Smart error deduplication with priority handling
    */
   function handleGPSError(error) {
     console.error('[GPSNavigation] GPS error:', error);
 
     const errorCode = error.code;
 
+    // Skip if we already showed this error (except timeout which can repeat)
+    if (shownErrorCodes.has(errorCode) && errorCode !== ERROR_CODES.OS_PLUG_GLOC_0010) {
+      console.log('[GPSNavigation] Error already shown, skipping:', errorCode);
+      return;
+    }
+
+    // Mark as shown
+    shownErrorCodes.add(errorCode);
+
+    // Location services disabled - HIGHEST PRIORITY
+    if (errorCode === ERROR_CODES.OS_PLUG_GLOC_0007) {
+      errorToast.error(i18n.t(`errors:${errorCode}`), {
+        scope: 'GPSNavigation',
+        code: errorCode,
+      });
+
+      return;
+    }
+
+    // Location turned off
+    if (errorCode === ERROR_CODES.OS_PLUG_GLOC_0017) {
+      errorToast.error(i18n.t(`errors:${errorCode}`), {
+        scope: 'GPSNavigation',
+        code: errorCode,
+      });
+
+      return;
+    }
+
     // Permission denied
     if (errorCode === ERROR_CODES.OS_PLUG_GLOC_0003) {
-      // errorToast.error(i18n.t('errors:gpsPermissionDenied'), {
-      //   scope: 'GPSNavigation',
-      //   code: error.code,
-      //   duration: 8000,
-      //   action: {
-      //     text: i18n.t('ui:buttons:openSettings'),
-
-      //     onClick: async () => {
-      //       try {
-      //         const { Capacitor } = await import('@capacitor/core');
-
-      //         if (!Capacitor.isNativePlatform()) {
-      //           // В браузере "настройки приложения" не откроешь
-      //           errorToast.info(i18n.t('ui:hints:enableGPSManually'));
-      //           return;
-      //         }
-
-      //         const { App } = await import('@capacitor/app');
-
-      //         if (typeof App.openSettings === 'function') {
-      //           await App.openSettings();
-      //           return;
-      //         }
-
-      //         errorToast.info(i18n.t('ui:hints:enableGPSManually'));
-      //       } catch (e) {
-      //         console.error('[GPSNavigation] Cannot open settings:', e);
-      //         errorToast.info(i18n.t('ui:hints:enableGPSManually'));
-      //       }
-      //     },
-      //   },
-      // });
-
       errorToast.error(i18n.t(`errors:${errorCode}`), {
         scope: 'GPSNavigation',
         code: errorCode,
@@ -317,28 +310,12 @@ export function createGPSNavigationController({ map, builder, i18n }) {
 
     // Timeout - waiting for gPS signal (not fatal)
     if (errorCode === ERROR_CODES.OS_PLUG_GLOC_0010) {
-      // errorToast.info(i18n.t('errors:gpsWaitingForSignal'), {
-      //   scope: 'GPSNavigation',
-      //   code: 'GPS_TIMEOUT',
-      // });
       showWaitingForFixOnce();
+
+      // Don't mark timeout as "shown" permanently, remove it for next occurrence
+      shownErrorCodes.delete(errorCode);
+
       return;
-    }
-
-    // Location services disabled
-    if (errorCode === ERROR_CODES.OS_PLUG_GLOC_0007) {
-      errorToast.error(i18n.t(`errors:${errorCode}`), {
-        scope: 'GPSNavigation',
-        code: errorCode,
-      });
-    }
-
-    // Location turned off
-    if (errorCode === ERROR_CODES.OS_PLUG_GLOC_0017) {
-      errorToast.error(i18n.t(`errors:${errorCode}`), {
-        scope: 'GPSNavigation',
-        code: errorCode,
-      });
     }
 
     // Position unavailable
@@ -591,6 +568,9 @@ export function createGPSNavigationController({ map, builder, i18n }) {
 
     if (!gpsMode) {
       clearGPSNavigation();
+
+      // Reset error tracking when GPS mode is disabled
+      shownErrorCodes.clear();
     }
 
     console.log('[GPSNavigation] GPS mode:', gpsMode);
@@ -636,6 +616,7 @@ export function createGPSNavigationController({ map, builder, i18n }) {
     }
 
     clearGPSNavigation();
+    shownErrorCodes.clear();
 
     console.log('[GPSNavigation] Disposed');
   }

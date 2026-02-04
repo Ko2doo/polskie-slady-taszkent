@@ -90,20 +90,29 @@ function mapCapacitorError(error) {
   if (error.message) {
     const msg = error.message.toLowerCase();
 
-    if (msg.includes('permission') || msg.includes('denied') || msg.includes('failed')) {
+    // Priority 1: Check for location services disabled FIRST
+    if ((msg.includes('location services') && msg.includes('disabled')) || msg.includes('off')) {
+      return ERROR_CODES.OS_PLUG_GLOC_0007;
+    }
+
+    // Priority 2: Check for network AND location both off
+    if (msg.includes('location') && msg.includes('off')) {
+      return ERROR_CODES.OS_PLUG_GLOC_0017;
+    }
+
+    // Priority 3: Permission denied
+    if (msg.includes('permission') || msg.includes('denied')) {
       return ERROR_CODES.OS_PLUG_GLOC_0003;
     }
 
+    // Priority 4: Timeout
     if (msg.includes('timeout')) {
       return ERROR_CODES.OS_PLUG_GLOC_0010;
     }
 
-    if (msg.includes('location services') || msg.includes('disabled')) {
-      return ERROR_CODES.OS_PLUG_GLOC_0007;
-    }
-
+    // Priority 5: Generic location unavailable
     if (msg.includes('location')) {
-      return ERROR_CODES.OS_PLUG_GLOC_0017;
+      return ERROR_CODES.OS_PLUG_GLOC_0002;
     }
   }
 
@@ -222,16 +231,7 @@ export function createGPSTracker({ onPositionUpdate = null, onError = null } = {
     } catch (error) {
       console.error('[GPSTracker] Failed to check permissions:', error);
 
-      if (onError) {
-        const errorCode = mapCapacitorError(error);
-        onError({
-          code: errorCode,
-          message: error.message || 'Failed to check permissions of GPS',
-          error,
-        });
-
-        return false;
-      }
+      return false;
     }
   }
 
@@ -247,6 +247,14 @@ export function createGPSTracker({ onPositionUpdate = null, onError = null } = {
       const granted = permissions.location === 'granted';
 
       console.log('[GPSTracker] Permissions result:', permissions.location);
+
+      // If denied, call onError with proper code
+      if (!granted && onError) {
+        onError({
+          code: ERROR_CODES.OS_PLUG_GLOC_0003,
+          message: 'GPS permission denied by user',
+        });
+      }
 
       return granted;
     } catch (error) {
@@ -326,8 +334,15 @@ export function createGPSTracker({ onPositionUpdate = null, onError = null } = {
 
     // Check/request permissions
     let hasPermission = await checkPermissions();
+
     if (!hasPermission) {
       hasPermission = await requestPermissions();
+    }
+
+    // Stop here if no permission granted
+    if (!hasPermission) {
+      console.error('[GPSTracker] GPS permission denied, cannot start tracking');
+      return false;
     }
 
     // Start watching

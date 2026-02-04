@@ -33,6 +33,15 @@
   const activeMode = $derived(navigationMode ? "manual" : gpsMode ? "gps" : null);
   const activeRouteInfo = $derived(navigationMode ? routeInfo : gpsRouteInfo);
 
+  // prettier-ignore
+  const navigationLoadingState = $derived(
+    navigationLoading
+      ? navigationLoading
+      : gpsLoading
+        ? gpsLoading
+        : null
+  );
+
   const dialogToggler = createToggle();
 </script>
 
@@ -69,7 +78,12 @@
 
           <!-- Cancel -->
         {:else if isAnyModeActive && !isArrived}
-          <Link iconOnly class="p-2" onClick={activeMode === "manual" ? onToggle : onGPSToggle}>
+          <Link
+            iconOnly
+            class="p-2"
+            onClick={activeMode === "manual" ? onToggle : onGPSToggle}
+            disabled={navigationLoadingState}
+          >
             <Close className="size-5" />
           </Link>
 
