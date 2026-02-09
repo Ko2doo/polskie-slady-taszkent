@@ -506,7 +506,23 @@ export function createGPSNavigationController({ map, builder, i18n }) {
    */
   function confirmNewDestination() {
     closeDialog();
-    clearGPSNavigation();
+
+    // Clear only route-related state, keep destinationPoint
+    currentRoute = null;
+    routeInfo = null;
+    isArrived = false;
+    lastRecalcTime = 0;
+    pendingRouteBuild = false;
+    didShowWaitingToast = false;
+
+    if (builder) {
+      builder.clearNavigationRoute();
+    }
+
+    // Build new route to the destination that was just set
+    calculateRouteFromGPS();
+
+    console.log('[GPSNavigation] Building new route to:', destinationPoint);
   }
 
   // ========================================

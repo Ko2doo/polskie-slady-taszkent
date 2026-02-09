@@ -29,8 +29,15 @@
   import ErrorHandlerToast from "./components/Ui/ErrorHandlerToast.svelte";
 
   import Close from "./lib/icons/Close.svelte";
+  import {
+    initAppFirstStart,
+    APP_FIRST_START_STATE,
+    markFirstStartCompleted,
+  } from "@/capacitor/services/firstAppStart";
+  import WelcomeSheet from "./components/Ui/WelcomeSheet.svelte";
 
   onMount(() => {
+    initAppFirstStart();
     initBackButtonHandler();
 
     // Initialize theme as soon app mounts
@@ -81,6 +88,9 @@
 
     <!-- Centered content -->
     <main class="flex-1 overflow-y-auto">
+      <!-- prettier-ignore -->
+      <WelcomeSheet {i18n} appState={APP_FIRST_START_STATE} makeCompleted={markFirstStartCompleted} />
+
       <Router
         {routes}
         hooks={{
