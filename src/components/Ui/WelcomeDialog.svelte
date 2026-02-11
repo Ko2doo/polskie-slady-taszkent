@@ -130,7 +130,7 @@
   }
 </script>
 
-<Dialog class="w-full" backdrop={true} opened={welcomeDialogToggler.value}>
+<Dialog class="w-full h-[70%]" backdrop={true} opened={welcomeDialogToggler.value}>
   {#snippet title()}
     <div class="flex flex-col items-center gap-1">
       <h1 class="text-xl font-semibold">
