@@ -43,6 +43,11 @@ export default {
   },
   buttons: {
     back: 'Powrót',
+    skip: 'Pomiń',
+    continue: 'Kontynuuj',
+    enableNav: 'Włącz nawigację',
+    allow: 'Zezwól',
+    waiting: 'Oczekiwanie...',
     readMore: 'Przeczytaj więcej..',
     langSwitcher: 'Język',
     toMaps: 'Pokaż na mapie',
@@ -75,6 +80,21 @@ export default {
         yes: 'Tak',
         no: 'Nie',
       },
+    },
+    onboarding: {
+      step1Title: 'Witamy',
+      step2Title: 'Dostęp do lokalizacji',
+      step1Info:
+        'To interaktywny przewodnik o losach Polaków w Turkiestanie z nawigacją offline po historycznych miejscach Taszkentu.',
+      step1Settings: 'Szybkie ustawienia:',
+      step1Locales: 'Język interfejsu',
+      step1Appearance: 'Wygląd',
+      step2Info: 'Włącz nawigację',
+      step2Msg: 'Aby wyznaczać trasy do miejsc historycznych, aplikacja potrzebuje dostępu do Twojej lokalizacji.',
+      step2Warning: 'Twoje dane lokalizacyjne są używane wyłącznie do nawigacji i nie są udostępniane osobom trzecim.',
+      step2Alert: 'Uprawnienie zostało odrzucone. Możesz włączyć je później w ustawieniach aplikacji.',
+      step: 'Krok',
+      stepOf: 'z',
     },
   },
   map: {

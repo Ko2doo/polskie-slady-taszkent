@@ -35,7 +35,7 @@
   const onDarkChange = (e) => theme.setDark(e.target.checked);
 </script>
 
-<List strong inset>
+<List inset>
   <ListItem
     colors={{ primaryTextIos: "text-stone-800 dark:text-stone-300" }}
     title={$i18n.t("ui:settings:appearance:followSystem")}
@@ -45,13 +45,15 @@
     {/snippet}
   </ListItem>
 
-  <ListItem
-    colors={{ primaryTextIos: "text-stone-800 dark:text-stone-300" }}
-    title={$i18n.t("ui:settings:appearance:darkMode")}
-    disabled={followSystem}
-  >
-    {#snippet after()}
-      <Toggle checked={isDark} disabled={followSystem} onChange={onDarkChange} />
-    {/snippet}
-  </ListItem>
+  {#if followSystem === false}
+    <ListItem
+      colors={{ primaryTextIos: "text-stone-800 dark:text-stone-300" }}
+      title={$i18n.t("ui:settings:appearance:darkMode")}
+      disabled={followSystem}
+    >
+      {#snippet after()}
+        <Toggle checked={isDark} disabled={followSystem} onChange={onDarkChange} />
+      {/snippet}
+    </ListItem>
+  {/if}
 </List>

@@ -35,7 +35,7 @@ import { getStorage, setStorage } from '@/capacitor/utils/appStorage';
 // Configuration
 const IS_DEV = import.meta.env.DEV;
 const LANGUAGE_KEY = 'locale';
-const FALLBACK_LANG = 'ru';
+const FALLBACK_LANG = 'en';
 
 /**
  * Detect initial language on first app launch

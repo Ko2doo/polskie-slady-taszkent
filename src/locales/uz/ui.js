@@ -43,6 +43,11 @@ export default {
   },
   buttons: {
     back: 'Orqaga',
+    skip: 'O‘tkazib yuborish',
+    continue: 'Davom etish',
+    enableNav: 'Navigatsiyani yoqish',
+    allow: 'Ruxsat berish',
+    waiting: 'Kutilmoqda...',
     readMore: 'Ko‘proq o‘qish..',
     langSwitcher: 'Til',
     toMaps: 'Xaritada ko‘rsatish',
@@ -75,6 +80,22 @@ export default {
         yes: 'Ha',
         no: 'Yo‘q',
       },
+    },
+    onboarding: {
+      step1Title: 'Xush kelibsiz',
+      step2Title: 'Joylashuvga kirish',
+      step1Info:
+        'Bu — Turkistondagi polyaklar taqdiri haqida interaktiv qo‘llanma bo‘lib, Toshkentning tarixiy joylariga oflayn navigatsiyani taklif etadi.',
+      step1Settings: 'Tez sozlamalar:',
+      step1Locales: 'Interfeys tili',
+      step1Appearance: 'Ko‘rinish',
+      step2Info: 'Navigatsiyani yoqish',
+      step2Msg: 'Tarixiy joylarga marshrut tuzish uchun ilova sizning joylashuvingizga kirish huquqini talab qiladi.',
+      step2Warning:
+        'Sizning joylashuv ma’lumotlaringiz faqat navigatsiya uchun ishlatiladi va uchinchi shaxslarga uzatilmaydi.',
+      step2Alert: 'Ruxsat rad etildi. Uni keyinroq ilova sozlamalarida yoqishingiz mumkin.',
+      step: 'Bosqich',
+      stepOf: 'dan',
     },
   },
   map: {

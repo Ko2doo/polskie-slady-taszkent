@@ -43,6 +43,11 @@ export default {
   },
   buttons: {
     back: 'Back',
+    skip: 'Skip',
+    continue: 'Continue',
+    enableNav: 'Enable navigation',
+    allow: 'Allow',
+    waiting: 'Waiting...',
     readMore: 'Read more..',
     langSwitcher: 'Language',
     toMaps: 'Show on map',
@@ -75,6 +80,21 @@ export default {
         yes: 'Yes',
         no: 'No',
       },
+    },
+    onboarding: {
+      step1Title: 'Welcome',
+      step2Title: 'Location access',
+      step1Info:
+        'This is an interactive guide about the fate of Poles in Turkestan, with offline navigation to the historical sites of Tashkent.',
+      step1Settings: 'Quick settings:',
+      step1Locales: 'Interface language',
+      step1Appearance: 'Appearance',
+      step2Info: 'Enable navigation',
+      step2Msg: 'To build routes to historical places, the app needs access to your location.',
+      step2Warning: 'Your location data are used only for navigation and are not shared with third parties.',
+      step2Alert: 'Permission was denied. You can enable it later in the app settings.',
+      step: 'Step',
+      stepOf: 'of',
     },
   },
   map: {
