@@ -14,7 +14,7 @@
 
   import { getThemeManager } from "@/lib/theme/themeManager";
 
-  let { i18n } = $props();
+  let { i18n, ...listSettings } = $props();
 
   // states
   let followSystem = $state(true);
@@ -35,7 +35,7 @@
   const onDarkChange = (e) => theme.setDark(e.target.checked);
 </script>
 
-<List inset>
+<List {...listSettings}>
   <ListItem
     colors={{ primaryTextIos: "text-stone-800 dark:text-stone-300" }}
     title={$i18n.t("ui:settings:appearance:followSystem")}

@@ -50,7 +50,7 @@
       </span>
 
       <div class="ml-auto">
-        <LangSwitcher {i18n} />
+        <LangSwitcher raised={true} rounded={true} large={true} {i18n} />
       </div>
     </BlockTitle>
 
@@ -80,6 +80,6 @@
       </p>
     </div>
 
-    <DarkModeToggler {i18n} />
+    <DarkModeToggler inset={true} {i18n} />
   </Block>
 </section>

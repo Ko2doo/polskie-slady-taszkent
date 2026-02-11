@@ -1,12 +1,13 @@
 <script>
   import { Dialog, Block, Button } from "konsta/svelte";
   import { createToggle } from "@/lib/state/createToggler.svelte";
+  import { Geolocation } from "@capacitor/geolocation";
+
   import LangSwitcher from "./LangSwitcher.svelte";
   import DarkModeToggler from "./DarkModeToggler.svelte";
-  import { Geolocation } from "@capacitor/geolocation";
+
   import TranslateIcon from "@/lib/icons/TranslateIcon.svelte";
   import PaletteIcon from "@/lib/icons/PaletteIcon.svelte";
-  import SettingsIcon from "@/lib/icons/SettingsIcon.svelte";
   import GPSIcon from "@/lib/icons/GPSIcon.svelte";
 
   let { i18n, appState, makeCompleted } = $props();
@@ -78,7 +79,7 @@
   }
 </script>
 
-<Dialog class="w-auto" backdrop={true} opened={welcomeDialogToggler.value}>
+<Dialog class="w-full" backdrop={true} opened={welcomeDialogToggler.value}>
   {#snippet title()}
     <div class="flex flex-col items-center gap-1">
       <h1 class="text-xl font-semibold">
@@ -100,31 +101,30 @@
           {$i18n.t("ui:dialog:onboarding:step1Info")}
         </p>
 
-        <div>
+        <div class="space-y-2">
           <p class="flex items-center text-lg font-medium text-gray-700 dark:text-gray-300">
-            <SettingsIcon className="size-6 mr-2" />
             {$i18n.t("ui:dialog:onboarding:step1Settings")}
           </p>
 
           <div class="flex items-center justify-between">
-            <span class="flex text-sm">
-              <TranslateIcon className="size-6 mr-4" />
+            <span class="flex text-[16px]">
+              <TranslateIcon className="size-5 mr-2" />
               {$i18n.t("ui:dialog:onboarding:step1Locales")}
             </span>
-            <div class="size-min"><LangSwitcher {i18n} /></div>
+            <div class="size-min"><LangSwitcher raise={true} rounded={true} {i18n} /></div>
           </div>
 
           <div class="flex flex-col">
-            <p class="flex items-center text-sm">
-              <PaletteIcon className="size-6 mr-4" />
+            <p class="flex items-center text-[16px]">
+              <PaletteIcon className="size-5 mr-2" />
               {$i18n.t("ui:dialog:onboarding:step1Appearance")}
             </p>
-            <DarkModeToggler {i18n} />
+            <DarkModeToggler inset={true} nested={true} {i18n} />
           </div>
         </div>
 
         <div class="flex gap-2 justify-end pt-2">
-          <Button inline rounded raised large onClick={nextStep}>
+          <Button inline rounded raised onClick={nextStep}>
             {$i18n.t("ui:buttons:continue")}
           </Button>
         </div>
@@ -156,15 +156,15 @@
         {/if}
 
         <div class="flex gap-2 justify-between pt-2">
-          <Button inline rounded large onClick={prevStep}>
+          <Button inline rounded onClick={prevStep}>
             {$i18n.t("ui:buttons:back")}
           </Button>
 
           <div class="flex gap-2">
-            <Button inline rounded large onClick={completeOnboarding}>
+            <Button inline rounded onClick={completeOnboarding}>
               {$i18n.t("ui:buttons:skip")}
             </Button>
-            <Button inline rounded raised large onClick={requestLocationPermission} disabled={isRequestingPermission}>
+            <Button inline rounded raised onClick={requestLocationPermission} disabled={isRequestingPermission}>
               {isRequestingPermission ? $i18n.t("ui:buttons:waiting") : $i18n.t("ui:buttons:allow")}
             </Button>
           </div>
