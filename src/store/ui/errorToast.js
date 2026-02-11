@@ -2,7 +2,12 @@
  * Global Error Toast Store
  *
  * A centralized error notification system with queue management,
- * deduplication, rate limiting, and type-safe error handling.
+ * deduplication, rate limiting, type-safe error handling, and action support.
+ *
+ * NEW FEATURES (v2):
+ * - Action buttons support (e.g., "Open Settings", "Retry")
+ * - Custom action handlers
+ * - Built-in common actions (openSettings, retry)
  *
  * FEATURES:
  * - Accepts string | Error | unknown input types
@@ -13,49 +18,55 @@
  * - Type validation with automatic fallback
  * - Helper methods for different severity levels
  * - Metadata support (scope, code, data)
+ * - Action buttons with callbacks
  *
  * USAGE EXAMPLES:
  *
  * // Basic usage
  * errorToast.show('Something went wrong');
  *
- * // With severity and metadata
- * errorToast.show('Failed to load map', 'error', {
- *   scope: 'Map',
- *   code: ERROR_CODES.MAP_INIT_FAILED
+ * // With action button
+ * errorToast.error('Permission denied', {
+ *   scope: 'GPSNavigation',
+ *   code: ERROR_CODES.OS_PLUG_GLOC_0003,
+ *   action: {
+ *     label: 'Open Settings',
+ *     handler: () => openAppSettings()
+ *   }
  * });
  *
- * // Helper methods
- * errorToast.error('Critical error', { scope: 'Auth', code: 'AUTH_001' });
- * errorToast.warn('Network is slow');
- * errorToast.info('Update available');
+ * // With built-in openSettings action
+ * import { openAppSettings } from '@/services/locationPermissions';
  *
- * // From Error object with automatic code extraction
- * try {
- *   throw new Error('Database connection failed');
- * } catch (err) {
- *   err.code = 'DB_CONN_001';
- *   errorToast.fromError(err, 'Database');
- * }
+ * errorToast.error('Location permission required', {
+ *   scope: 'GPSNavigation',
+ *   code: ERROR_CODES.OS_PLUG_GLOC_0003,
+ *   action: {
+ *     type: 'openSettings',
+ *     handler: openAppSettings
+ *   }
+ * });
  *
  * // Manual control
  * errorToast.hide();  // Hide current toast, show next in queue
  * errorToast.clear(); // Clear everything including queue
- *
- * // Subscribe to state changes
- * const unsubscribe = errorToast.subscribe((state) => {
- *   console.log('Toast state:', state);
- * });
  */
 
 import { writable } from 'svelte/store';
 
 /**
  * @typedef {'error' | 'warn' | 'info'} ToastKind
+ *
+ * @typedef {Object} ToastAction
+ * @property {string} [label] - Button label (auto-generated for common types)
+ * @property {'openSettings' | 'retry' | 'custom'} [type] - Action type
+ * @property {Function} handler - Action callback
+ *
  * @typedef {Object} ToastMeta
  * @property {string} [scope] - Component or module name
  * @property {string} [code] - Error code from ERROR_CODES
  * @property {any} [data] - Additional context data
+ * @property {ToastAction} [action] - Optional action button
  *
  * @typedef {Object} ToastQueueItem
  * @property {string} content
@@ -66,6 +77,12 @@ import { writable } from 'svelte/store';
 const VALID_KINDS = ['error', 'warn', 'info'];
 const RATE_LIMIT_WINDOW = 1000; // 1 second
 const MAX_SAME_MESSAGE = 3; // Max same message per window
+
+// Default action labels for common types
+const ACTION_LABELS = {
+  openSettings: 'Open Settings',
+  retry: 'Retry',
+};
 
 /**
  * Normalize various error types to string message
@@ -129,6 +146,38 @@ function validateKind(kind) {
 }
 
 /**
+ * Sanitize and normalize action
+ * @param {ToastAction} action
+ * @returns {ToastAction|null}
+ */
+function sanitizeAction(action) {
+  if (!action || typeof action !== 'object') return null;
+
+  // Validate handler
+  if (typeof action.handler !== 'function') {
+    console.warn('[errorToast] Action handler must be a function');
+    return null;
+  }
+
+  // Auto-generate label for known types
+  let label = action.label;
+  if (!label && action.type && ACTION_LABELS[action.type]) {
+    label = ACTION_LABELS[action.type];
+  }
+
+  // Default label
+  if (!label) {
+    label = 'Action';
+  }
+
+  return {
+    label,
+    type: action.type || 'custom',
+    handler: action.handler,
+  };
+}
+
+/**
  * Sanitize meta object to prevent XSS or large payloads
  * @param {ToastMeta|null} meta
  * @returns {ToastMeta|null}
@@ -137,11 +186,17 @@ function sanitizeMeta(meta) {
   if (!meta || typeof meta !== 'object') return null;
 
   const sanitized = {};
-  const allowedKeys = ['scope', 'code', 'data'];
+  const allowedKeys = ['scope', 'code', 'data', 'action'];
 
   for (const key of allowedKeys) {
     if (key in meta) {
       const value = meta[key];
+
+      // Handle action separately
+      if (key === 'action') {
+        sanitized.action = sanitizeAction(value);
+        continue;
+      }
 
       // Ensure strings aren't too long (prevent UI overflow)
       if (typeof value === 'string') {

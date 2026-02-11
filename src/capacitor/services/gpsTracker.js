@@ -33,6 +33,7 @@ import { Geolocation } from '@capacitor/geolocation';
 import { Capacitor } from '@capacitor/core';
 
 import { ERROR_CODES } from '@/lib/errors/errorCodes';
+import { checkLocationPermission, requestLocationPermission, mapGeolocationError } from './locationPermission';
 
 // Configuration
 const GPS_OPTIONS = {
@@ -57,67 +58,6 @@ const MAP_BOUNDS = {
   maxLon: 69.5436061519978,
   maxLat: 41.4359965669526,
 };
-
-/**
- * Capacitor  erro code mapping
- *
- * Map Capacitor native erro codes to our custom error codes
- *
- * @param {Object} error - Capacitor error object
- * @returns {string} - our custom error code
- */
-function mapCapacitorError(error) {
-  // Check if it`s already our custom error code
-  if (error.code && typeof error.code === 'string' && error.code.startsWith('OS_PLUG_GLOC_')) {
-    return error.code;
-  }
-
-  // Map Capacitor native numberic error codes
-  if (typeof error.code === 'number') {
-    switch (error.code) {
-      case 1:
-        return ERROR_CODES.OS_PLUG_GLOC_0003; // PERMISSION_DENIED
-      case 2:
-        return ERROR_CODES.OS_PLUG_GLOC_0002; // POSITION_UNAVAILABLE
-      case 3:
-        return ERROR_CODES.OS_PLUG_GLOC_0010; // TIMEOUT
-      default:
-        return ERROR_CODES.OS_PLUG_GLOC_0002; // Generic error
-    }
-  }
-
-  // Check error message for specific patterns
-  if (error.message) {
-    const msg = error.message.toLowerCase();
-
-    // Priority 1: Check for location services disabled FIRST
-    if ((msg.includes('location services') && msg.includes('disabled')) || msg.includes('off')) {
-      return ERROR_CODES.OS_PLUG_GLOC_0007;
-    }
-
-    // Priority 2: Check for network AND location both off
-    if (msg.includes('location') && msg.includes('off')) {
-      return ERROR_CODES.OS_PLUG_GLOC_0017;
-    }
-
-    // Priority 3: Permission denied
-    if (msg.includes('permission') || msg.includes('denied')) {
-      return ERROR_CODES.OS_PLUG_GLOC_0003;
-    }
-
-    // Priority 4: Timeout
-    if (msg.includes('timeout')) {
-      return ERROR_CODES.OS_PLUG_GLOC_0010;
-    }
-
-    // Priority 5: Generic location unavailable
-    if (msg.includes('location')) {
-      return ERROR_CODES.OS_PLUG_GLOC_0002;
-    }
-  }
-
-  return ERROR_CODES.OS_PLUG_GLOC_0002; // Generic error
-}
 
 /**
  * Check if coordinates are within map bounds
@@ -220,57 +160,57 @@ export function createGPSTracker({ onPositionUpdate = null, onError = null } = {
 
   /**
    * Check if GPS permissions are granted
+   * Uses locationPermissions service
    * @returns {Promise<boolean>}
    */
   async function checkPermissions() {
     try {
-      const permissions = await Geolocation.checkPermissions();
-      console.log('[GPSTracker] Current permissions:', permissions.location);
+      const result = await checkLocationPermission();
+      console.log('[GPSTracker] Current permissions:', result.status);
 
-      return permissions.location === 'granted';
+      return result.isGranted;
     } catch (error) {
       console.error('[GPSTracker] Failed to check permissions:', error);
-
       return false;
     }
   }
 
   /**
    * Request GPS permissions
+   * Uses locationPermissions service
    * @returns {Promise<boolean>} - true if granted
    */
   async function requestPermissions() {
-    try {
-      console.log('[GPSTracker] Requesting permissions...');
+    console.log('[GPSTracker] Requesting permissions...');
 
-      const permissions = await Geolocation.requestPermissions();
-      const granted = permissions.location === 'granted';
+    const result = await requestLocationPermission({
+      onSuccess: () => {
+        console.log('[GPSTracker] Permissions granted');
+      },
+      onDenied: () => {
+        console.log('[GPSTracker] Permissions denied');
 
-      console.log('[GPSTracker] Permissions result:', permissions.location);
+        if (onError) {
+          onError({
+            code: ERROR_CODES.OS_PLUG_GLOC_0003,
+            message: 'GPS permission denied by user',
+          });
+        }
+      },
+      onError: (err) => {
+        console.error('[GPSTracker] Permission request error:', err);
 
-      // If denied, call onError with proper code
-      if (!granted && onError) {
-        onError({
-          code: ERROR_CODES.OS_PLUG_GLOC_0003,
-          message: 'GPS permission denied by user',
-        });
-      }
+        if (onError) {
+          onError({
+            code: err.code,
+            message: err.message,
+            error: err.error,
+          });
+        }
+      },
+    });
 
-      return granted;
-    } catch (error) {
-      console.error('[GPSTracker] Failed to request permissions:', error);
-
-      if (onError) {
-        const errorCode = mapCapacitorError(error);
-        onError({
-          code: errorCode,
-          message: error.message || 'GPS permission denied',
-          error,
-        });
-
-        return false;
-      }
-    }
+    return result.success;
   }
 
   /**
@@ -296,7 +236,7 @@ export function createGPSTracker({ onPositionUpdate = null, onError = null } = {
       console.error('[GPSTracker] Failed to get current position:', error);
 
       if (onError) {
-        const errorCode = mapCapacitorError(error);
+        const errorCode = mapGeolocationError(error);
         onError({
           code: errorCode,
           message: error.message || 'Failed to get GPS position',
@@ -353,7 +293,7 @@ export function createGPSTracker({ onPositionUpdate = null, onError = null } = {
         if (error) {
           console.error('[GPSTracker] Watch position error:', error);
 
-          const errorCode = mapCapacitorError(error);
+          const errorCode = mapGeolocationError(error);
 
           // Timeout is not fatal, just waiting for signal
           if (errorCode === ERROR_CODES.OS_PLUG_GLOC_0010) {
@@ -400,7 +340,7 @@ export function createGPSTracker({ onPositionUpdate = null, onError = null } = {
       console.error('[GPSTracker] Failed to start watch:', error);
 
       if (onError) {
-        const errorCode = mapCapacitorError(error);
+        const errorCode = mapGeolocationError(error);
         onError({
           code: errorCode,
           message: error.message || 'Failed to start GPS tracking',

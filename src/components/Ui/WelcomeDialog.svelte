@@ -1,8 +1,11 @@
 <script>
   import { Dialog, Block, Button } from "konsta/svelte";
-  import { createToggle } from "@/lib/state/createToggler.svelte";
-  import { Geolocation } from "@capacitor/geolocation";
 
+  // Use permission service
+  import { requestLocationPermission, openAppSettings } from "@/capacitor/services/locationPermission";
+  import { errorToast } from "@/store/ui/errorToast";
+
+  import { createToggle } from "@/lib/state/createToggler.svelte";
   import LangSwitcher from "./LangSwitcher.svelte";
   import DarkModeToggler from "./DarkModeToggler.svelte";
 
@@ -16,8 +19,9 @@
   const welcomeDialogToggler = createToggle();
 
   let activeStep = $state(1);
+
+  // Permissions state
   let isRequestingPermission = $state(false);
-  let permissionStatus = $state(null);
 
   const TOTAL_STEPS = 2;
 
@@ -26,31 +30,74 @@
     if ($appState === false) welcomeDialogToggler.set(false);
   });
 
-  async function checkLocationPermission() {
-    try {
-      const permission = await Geolocation.checkPermissions();
-      permissionStatus = permission.location;
-      return permission.location === "granted";
-    } catch (error) {
-      console.error("Permission check failed:", error);
-      return false;
-    }
-  }
-
-  async function requestLocationPermission() {
+  async function handleRequestPermission() {
     isRequestingPermission = true;
-    try {
-      const permission = await Geolocation.requestPermissions();
-      permissionStatus = permission.location;
 
-      if (permission.location === "granted") {
-        await completeOnboarding();
-      } else if (permission.location === "denied") {
-        alert($i18n.t("onboarding.location.deniedMessage"));
-      }
+    try {
+      const result = await requestLocationPermission({
+        onSuccess: async () => {
+          console.log("Location permission granted");
+          // Complete onboarding immediately
+          await completeOnboarding();
+        },
+        onDenied: () => {
+          console.log("Location permission denied");
+
+          // Show toast with "Open Settings" action button
+          errorToast.error($i18n.t("errors:OS_PLUG_GLOC_0003"), {
+            scope: "WelcomeDialog",
+            code: "OS_PLUG_GLOC_0003",
+            action: {
+              type: "openSettings",
+              label: $i18n.t("ui:buttons:openSettings"),
+              handler: async () => {
+                console.log("[WelcomeDialog] Opening app settings...");
+                await openAppSettings();
+                // After opening settings, complete onboarding
+                // User will grant permission manually in settings
+                await completeOnboarding();
+              },
+            },
+          });
+        },
+        onError: (err) => {
+          console.error("Location permission error:", err);
+
+          // Ignore web platform error - not relevant for onboarding in dev mode
+          if (err.code === "WEB_PLATFORM_NOT_SUPPORTED") {
+            console.log("[WelcomeDialog] Web platform detected, skipping permission request");
+            // Don't show error, just complete onboarding
+            completeOnboarding();
+            return;
+          }
+
+          // Show error via toast with action button for permission errors
+          const isPermissionError = err.code === "OS_PLUG_GLOC_0003";
+
+          errorToast.error($i18n.t(`errors:${err.code}`), {
+            scope: "WelcomeDialog",
+            code: err.code,
+            action: isPermissionError
+              ? {
+                  type: "openSettings",
+                  label: $i18n.t("ui:buttons:openSettings"),
+                  handler: async () => {
+                    console.log("[WelcomeDialog] Opening app settings from error...");
+                    await openAppSettings();
+                    await completeOnboarding();
+                  },
+                }
+              : undefined,
+          });
+        },
+      });
     } catch (error) {
-      console.error("Permission request failed:", error);
-      alert($i18n.t("onboarding.location.errorMessage"));
+      console.error("Failed to request location permission:", error);
+
+      // Show generic error
+      errorToast.error("Failed to request location permission", {
+        scope: "WelcomeDialog",
+      });
     } finally {
       isRequestingPermission = false;
     }
@@ -60,9 +107,13 @@
     try {
       await makeCompleted();
       welcomeDialogToggler.set(false);
+      console.log("Onboarding completed");
     } catch (error) {
       console.error("Failed to complete onboarding:", error);
-      alert("Не удалось сохранить настройки. Попробуйте ещё раз.");
+
+      errorToast.error("Failed to save settings. Please try again.", {
+        scope: "WelcomeDialog",
+      });
     }
   }
 
@@ -147,24 +198,16 @@
           </p>
         </div>
 
-        {#if permissionStatus === "denied"}
-          <div class="bg-orange-50 dark:bg-orange-900/30 rounded-lg p-3">
-            <p class="text-xs text-orange-800 dark:text-orange-200">
-              {$i18n.t("ui:dialog:onboarding:step2Alert")}
-            </p>
-          </div>
-        {/if}
-
         <div class="flex gap-2 justify-between pt-2">
-          <Button inline rounded onClick={prevStep}>
+          <Button inline rounded onClick={prevStep} disabled={isRequestingPermission}>
             {$i18n.t("ui:buttons:back")}
           </Button>
 
           <div class="flex gap-2">
-            <Button inline rounded onClick={completeOnboarding}>
+            <Button inline rounded onClick={completeOnboarding} disabled={isRequestingPermission}>
               {$i18n.t("ui:buttons:skip")}
             </Button>
-            <Button inline rounded raised onClick={requestLocationPermission} disabled={isRequestingPermission}>
+            <Button inline rounded raised onClick={handleRequestPermission} disabled={isRequestingPermission}>
               {isRequestingPermission ? $i18n.t("ui:buttons:waiting") : $i18n.t("ui:buttons:allow")}
             </Button>
           </div>

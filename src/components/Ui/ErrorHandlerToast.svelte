@@ -8,13 +8,44 @@
   function onButton() {
     errorToast.hide();
   }
+
+  async function onActionButton() {
+    const action = $errorToast.meta?.action;
+
+    if (!action || typeof action.handler !== "function") {
+      console.warn("[ErrorHandlerToast] No valid action handler");
+      return;
+    }
+
+    try {
+      await action.handler();
+
+      errorToast.hide();
+    } catch (error) {
+      console.error("[ErrorHandlerToast] Action handler failed:", error);
+    }
+  }
+
+  function onCloseButton() {
+    errorToast.hide();
+  }
 </script>
 
 <Toast opened={$errorToast.opened} class="bottom-safe-24" position="center">
   {#snippet button()}
-    <Button clear inline small rounded onClick={onButton}>
-      {$i18n.t("errors:toastBtn")}
-    </Button>
+    <div class="flex flex-col gap-2">
+      <!-- Action button (if present) -->
+      {#if $errorToast.meta?.action}
+        <Button clear inline small rounded onClick={onActionButton}>
+          {$errorToast.meta.action.label}
+        </Button>
+      {:else}
+        <!-- Close button -->
+        <Button clear inline small rounded onClick={onCloseButton}>
+          {$i18n.t("errors:toastBtn")}
+        </Button>
+      {/if}
+    </div>
   {/snippet}
 
   <div class="shrink flex items-start">
@@ -28,9 +59,6 @@
           {#if $errorToast.meta?.scope}{`Name: ${$errorToast.meta.scope}`}{/if}
 
           {#if $errorToast.meta?.code}
-            {#if $errorToast.meta?.scope}
-              ·
-            {/if}
             {`Code: ${$errorToast.meta.code}`}
           {/if}
         </code>

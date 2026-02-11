@@ -17,6 +17,7 @@ import { initNavigation, findRoute } from '@/services/navigationLoader';
 import { errorToast } from '@/store/ui/errorToast';
 import { ERROR_CODES } from '@/lib/errors/errorCodes';
 import { ROUTE_FIT_PADDING } from './MapConstants';
+// import { openAppSettings, openLocationSettings } from '@/capacitor/services/locationPermission';
 
 // Configuration
 const RECALC_THROTTLE_MS = 10000; // Don't recalculate more often than 10s
@@ -293,6 +294,16 @@ export function createGPSNavigationController({ map, builder, i18n }) {
       errorToast.error(i18n.t(`errors:${errorCode}`), {
         scope: 'GPSNavigation',
         code: errorCode,
+        action: {
+          type: 'openSettings',
+          label: i18n.t('ui:buttons:openSettings'),
+          handler: async () => {
+            console.log('[GPSNavigation] Opening location settings...');
+
+            const { openLocationSettings } = await import('@/capacitor/services/locationPermission');
+            await openLocationSettings();
+          },
+        },
       });
 
       return;
@@ -303,6 +314,15 @@ export function createGPSNavigationController({ map, builder, i18n }) {
       errorToast.error(i18n.t(`errors:${errorCode}`), {
         scope: 'GPSNavigation',
         code: errorCode,
+        action: {
+          type: 'openSettings',
+          label: i18n.t('ui:buttons:openSettings'),
+          handler: async () => {
+            console.log('[GPSNavigation] opening app settings...');
+            const { openAppSettings } = await import('@/capacitor/services/locationPermission');
+            await openAppSettings();
+          },
+        },
       });
 
       return;

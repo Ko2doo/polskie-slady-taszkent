@@ -11,6 +11,8 @@ export const ERROR_CODES = {
   MAP_INIT_FAILED: 'MAP_INIT_FAILED',
   PMTILES_FETCH: 'PMTILES_FETCH',
 
+  WEB_PLATFORM_NOT_SUPPORTED: 'WEB_PLATFORM_NOT_SUPPORTED',
+
   // Capacitor geolocation API code
   // https://capacitorjs.com/docs/apis/geolocation#errors
   OS_PLUG_GLOC_0002: 'OS_PLUG_GLOC_0002',
