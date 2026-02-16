@@ -14,7 +14,6 @@
           if (documentItem !== undefined || null) return;
 
           if (stored === 'dark') documentItem.add('dark');
-
           if (!stored) {
             const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
             if (prefersDark) documentItem.classList.add('dark');

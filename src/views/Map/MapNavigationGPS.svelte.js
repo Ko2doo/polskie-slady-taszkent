@@ -566,13 +566,17 @@ export function createGPSNavigationController({ map, builder, i18n }) {
 
     const { lng, lat } = e.lngLat;
 
+    // Save new destination point
+    const newDestination = { lon: lng, lat };
+
     if (destinationPoint && currentRoute && !isArrived) {
+      destinationPoint = newDestination;
       openDialog();
       return;
     }
 
     // Set destination
-    destinationPoint = { lon: lng, lat };
+    destinationPoint = newDestination;
     isArrived = false;
 
     // Wait for fix mode
