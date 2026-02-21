@@ -24,26 +24,26 @@
   ],
   "author": "NИ",
   "devDependencies": {
-    "@capacitor/cli": "^8.0.2",
+    "@capacitor/cli": "^8.1.0",
     "@sveltejs/vite-plugin-svelte": "^6.2.4",
-    "@tailwindcss/vite": "^4.1.18",
+    "@tailwindcss/vite": "^4.2.0",
     "svelte": "^5.53.1",
-    "tailwindcss": "^4.1.18",
+    "tailwindcss": "^4.2.0",
     "vite": "^7.3.1"
   },
   "dependencies": {
-    "@capacitor/android": "^8.0.2",
-    "@capacitor/app": "^8.0.0",
-    "@capacitor/core": "^8.0.2",
-    "@capacitor/device": "^8.0.0",
-    "@capacitor/geolocation": "^8.0.0",
-    "@capacitor/preferences": "^8.0.0",
+    "@capacitor/android": "^8.1.0",
+    "@capacitor/app": "^8.0.1",
+    "@capacitor/core": "^8.1.0",
+    "@capacitor/device": "^8.0.1",
+    "@capacitor/geolocation": "^8.1.0",
+    "@capacitor/preferences": "^8.0.1",
     "@mateothegreat/svelte5-router": "^2.16.19",
     "@protomaps/basemaps": "^5.7.0",
     "capacitor-native-settings": "^8.0.0",
-    "i18next": "^25.8.0",
+    "i18next": "^25.8.13",
     "konsta": "^5.0.6",
-    "maplibre-gl": "^5.17.0",
-    "pmtiles": "^4.3.2"
+    "maplibre-gl": "^5.18.0",
+    "pmtiles": "^4.4.0"
   }
 }
