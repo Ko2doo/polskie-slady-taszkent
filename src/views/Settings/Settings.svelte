@@ -39,7 +39,7 @@
   });
 </script>
 
-<section class="flex flex-col">
+<section class="settings-view relative z-60 flex flex-col">
   <Block strong inset>
     <!-- Language section -->
     <BlockTitle large class="text-stone-500 justify-baseline">
@@ -50,7 +50,7 @@
       </span>
 
       <div class="ml-auto">
-        <LangSwitcher raised={true} rounded={true} large={true} {i18n} />
+        <LangSwitcher raised={true} rounded={true} large={true} {i18n} targetElement=".settings-view" />
       </div>
     </BlockTitle>
 
@@ -62,7 +62,7 @@
     </div>
 
     <!-- Divider -->
-    <div class="border-t border-gray-200 dark:border-gray-700 my-2"></div>
+    <div class="border-t border-gray-400 dark:border-gray-700 my-2"></div>
 
     <!-- Appearance Section -->
     <BlockTitle large class="text-stone-500 justify-baseline">
@@ -73,7 +73,7 @@
       </span>
     </BlockTitle>
 
-    <!-- Appearance Hint (optional) -->
+    <!-- Appearance Hint -->
     <div class="mt-4 px-4 pt-2">
       <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
         {$i18n.t("ui:settings:appearance:hint")}

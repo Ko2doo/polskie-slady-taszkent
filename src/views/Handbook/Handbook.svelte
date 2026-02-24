@@ -72,7 +72,7 @@
     const disposeNavbar = withNavbar({
       title: "",
       leftSnippet: PanelOpenedButton, // left slot: open side panel button
-      rightSnippet: null, // right slot: (unused for now)
+      // rightSnippet: null, // right slot: (unused for now)
       // subnavSnippet: null, // subnavbar: search bar
     });
 
@@ -130,6 +130,7 @@
     patchNavbar({
       title: navTitle || pageKey,
       subnavSnippet: isSearchBarVisible ? Subnavigation : null,
+      rightSnippet: hasScrolledPast ? SearchBarOpenedButton : null,
     });
     patchPanel({ title: panelTitle });
   });
@@ -147,12 +148,12 @@
   <Link iconOnly onClick={() => openPanel()}>
     <FilterIcon />
   </Link>
+{/snippet}
 
-  {#if hasScrolledPast}
-    <Link iconOnly onClick={openSearch}>
-      <SearchIcon />
-    </Link>
-  {/if}
+{#snippet SearchBarOpenedButton()}
+  <Link iconOnly onClick={openSearch}>
+    <SearchIcon />
+  </Link>
 {/snippet}
 
 {#snippet Subnavigation()}

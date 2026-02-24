@@ -130,7 +130,7 @@
   }
 </script>
 
-<Popup backdrop={true} opened={welcomeDialogToggler.value}>
+<Popup backdrop={true} opened={welcomeDialogToggler.value} class="welcome-popup">
   <!-- prettier-ignore -->
   <Navbar
     title={activeStep === 1
@@ -163,7 +163,9 @@
               <TranslateIcon className="size-5 mr-2" />
               {$i18n.t("ui:dialog:onboarding:step1Locales")}
             </span>
-            <div class="size-min"><LangSwitcher raise={true} rounded={true} {i18n} /></div>
+            <div class="size-min">
+              <LangSwitcher raise={true} rounded={true} {i18n} targetElement=".welcome-popup" />
+            </div>
           </div>
 
           <div class="flex flex-col">

@@ -7,7 +7,7 @@
 
   import { translations } from "@/locales/collections";
 
-  let { i18n, ...btnSettings } = $props();
+  let { i18n, targetElement, ...btnSettings } = $props();
 
   let popoverState = $state(false);
   let popoverTargetEl = $state(null);
@@ -44,11 +44,11 @@
   });
 </script>
 
-<Button {...btnSettings} class="popover-button" onClick={() => popoverClickHandler(".popover-button")}>
+<Button {...btnSettings} class="popover-button" onClick={() => popoverClickHandler(targetElement)}>
   {currentLocale}
 </Button>
 
-<Popover opened={popoverState} target={popoverTargetEl} onBackdropClick={backdropClickHandler}>
+<Popover opened={popoverState} target={popoverTargetEl} backdrop={true} onBackdropClick={backdropClickHandler}>
   <List nested>
     {#each locales as [code, label]}
       <ListButton colors={{ bgIos: "active:bg-neutral-600/10" }} value={code} onClick={i18nClickHandler}>
