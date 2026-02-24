@@ -2,7 +2,7 @@
   import { App, Page, Navbar, Panel, Link, Block } from "konsta/svelte";
 
   // Svelte
-  import { onMount } from "svelte";
+  import { onMount, setContext } from "svelte";
 
   // Capacitor
   import { initBackButtonHandler } from "@/capacitor/backButton";
@@ -31,6 +31,26 @@
   import Close from "./lib/icons/Close.svelte";
   import { initAppFirstStart, APP_FIRST_START_STATE, markFirstStartCompleted } from "@/store/appStart";
   import WelcomDialog from "./components/Ui/WelcomeDialog.svelte";
+
+  function createScrollState() {
+    let y = $state(0);
+
+    return {
+      get y() {
+        return y;
+      },
+      set y(val) {
+        y = val;
+      },
+    };
+  }
+
+  const scrollState = createScrollState();
+  setContext("appScroll", scrollState);
+
+  function handleScroll(e) {
+    scrollState.y = e.currentTarget.scrollTop;
+  }
 
   onMount(() => {
     initAppFirstStart();
@@ -83,7 +103,7 @@
     {/if}
 
     <!-- Centered content -->
-    <main class="flex-1 overflow-y-auto">
+    <main class="flex-1 overflow-y-auto" onscroll={handleScroll}>
       <!-- prettier-ignore -->
       <WelcomDialog
         {i18n}

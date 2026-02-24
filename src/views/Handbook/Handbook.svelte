@@ -10,6 +10,7 @@
   // Icons
   import FilterIcon from "@/lib/icons/FilterIcon.svelte";
   import ShieldWarningIcon from "@/lib/icons/ShieldWarningIcon.svelte";
+  import SearchIcon from "@/lib/icons/SearchIcon.svelte";
 
   // Navbar/Panel stores and helpers
   import { resolvePageKeyFromRouteResult } from "@/utils/routerUtils";
@@ -20,10 +21,11 @@
   import { articlesMeta } from "@/data/articles";
 
   // Lifecycles
-  import { onMount, onDestroy } from "svelte";
+  import { onMount, onDestroy, getContext } from "svelte";
 
   // Layout global store
   import { layoutView } from "@/store/ui/layoutView";
+  import { fade } from "svelte/transition";
 
   // Route prop (Svelte 5)
   let { route, i18n } = $props();
@@ -37,6 +39,14 @@
   // Layout state
   let layout = $state(null);
 
+  // Scroll State
+  const scrollState = getContext("appScroll");
+
+  let lastY = 0;
+  let isSearchBarVisible = $state(true);
+  let isSearchBarActive = $state(false);
+  let hasScrolledPast = $state(false);
+
   // Receive search results from SearchBar
   function handleSearchResults(list) {
     searchResults = list;
@@ -47,13 +57,23 @@
     selectedCat = typeof id === "string" && id ? id : "all";
   }
 
+  function openSearch() {
+    isSearchBarActive = true;
+    isSearchBarVisible = true;
+  }
+
+  function closeSearch() {
+    isSearchBarActive = false;
+    if (hasScrolledPast) isSearchBarVisible = false;
+  }
+
   // Setup Navbar and Panel profiles once on mount; cleaned on destroy
   onMount(() => {
     const disposeNavbar = withNavbar({
       title: "",
       leftSnippet: PanelOpenedButton, // left slot: open side panel button
-      rightSnippet: null, // right slot: (unused for now)c
-      subnavSnippet: Subnavigation, // subnavbar: search bar
+      rightSnippet: null, // right slot: (unused for now)
+      // subnavSnippet: null, // subnavbar: search bar
     });
 
     const disposePanel = withPanel({
@@ -66,6 +86,22 @@
       disposeNavbar();
       disposePanel();
     });
+  });
+
+  $effect(() => {
+    const currentY = scrollState.y;
+
+    if (!isSearchBarActive) {
+      if (currentY > lastY && currentY > 120) {
+        isSearchBarVisible = false;
+        hasScrolledPast = true;
+      } else if (currentY < lastY && currentY === 0) {
+        isSearchBarVisible = true;
+        hasScrolledPast = false;
+      }
+    }
+
+    lastY = currentY;
   });
 
   $effect(() => {
@@ -88,13 +124,13 @@
     //    "/handbook" -> "handbook"
     const pageKey = resolvePageKeyFromRouteResult(result);
 
-    /* prettier-ignore */
-    const navTitle = pageKey
-      ? $i18n.t(`ui:navbar:${pageKey}:title`)
-      : "";
+    const navTitle = pageKey ? $i18n.t(`ui:navbar:${pageKey}:title`) : "";
     const panelTitle = $i18n.t("ui:sidePanel:handbook:title");
 
-    patchNavbar({ title: navTitle || pageKey });
+    patchNavbar({
+      title: navTitle || pageKey,
+      subnavSnippet: isSearchBarVisible ? Subnavigation : null,
+    });
     patchPanel({ title: panelTitle });
   });
 
@@ -111,6 +147,12 @@
   <Link iconOnly onClick={() => openPanel()}>
     <FilterIcon />
   </Link>
+
+  {#if hasScrolledPast}
+    <Link iconOnly onClick={openSearch}>
+      <SearchIcon />
+    </Link>
+  {/if}
 {/snippet}
 
 {#snippet Subnavigation()}
@@ -119,6 +161,7 @@
     items={articlesMeta}
     nameSpace="articles"
     fields={["title", "description"]}
+    onHideBar={closeSearch}
     onResults={handleSearchResults}
     onQueryChange={(v) => (query = v)}
   />
@@ -130,7 +173,7 @@
 {/snippet}
 
 {#if query.trim() && itemsView.length === 0}
-  <section class="grid grid-1 justify-center">
+  <section class="grid grid-1 justify-center" transition:fade={{ duration: 120 }}>
     <BlockTitle large class="flex-col">
       <ShieldWarningIcon className="size-20 mb-2 text-red-500" />
 
@@ -138,7 +181,11 @@
     </BlockTitle>
   </section>
 {:else}
-  <section class={layout ? layout.classes : "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4"}>
+  <section
+    class={layout ? layout.classes : "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4"}
+    in:fade={{ duration: 90 }}
+    out:fade={{ duration: 120 }}
+  >
     {#each itemsView as article (article.id)}
       <Card class="flex flex-col justify-between">
         {#snippet header()}

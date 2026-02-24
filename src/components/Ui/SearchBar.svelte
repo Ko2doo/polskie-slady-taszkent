@@ -16,6 +16,7 @@
     nameSpace = "articles",
     fields = ["title", "description"],
     value = $bindable(""),
+    onHideBar = () => {},
     onQueryChange = null,
     onResults = null,
   } = $props();
@@ -117,6 +118,7 @@
     value = "";
     notifyQuery("");
     emitResults(items.slice());
+    onHideBar();
   }
 </script>
 
