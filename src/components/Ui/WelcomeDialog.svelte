@@ -1,5 +1,5 @@
 <script>
-  import { Dialog, Block, Button } from "konsta/svelte";
+  import { Popup, Navbar, Block, Button } from "konsta/svelte";
 
   // Use permission service
   import { requestLocationPermission, openAppSettings } from "@/capacitor/services/locationPermission";
@@ -130,29 +130,30 @@
   }
 </script>
 
-<Dialog class="w-full h-[70%]" backdrop={true} opened={welcomeDialogToggler.value}>
-  {#snippet title()}
-    <div class="flex flex-col items-center gap-1">
-      <h1 class="text-xl font-semibold">
-        {activeStep === 1 ? $i18n.t("ui:dialog:onboarding:step1Title") : $i18n.t("ui:dialog:onboarding:step2Title")}
-      </h1>
-      <p class="text-xs text-gray-500">
-        {$i18n.t("ui:dialog:onboarding:step")}
-        {activeStep}
-        {$i18n.t("ui:dialog:onboarding:stepOf")}
-        {TOTAL_STEPS}
-      </p>
-    </div>
-  {/snippet}
+<Popup backdrop={true} opened={welcomeDialogToggler.value}>
+  <!-- prettier-ignore -->
+  <Navbar
+    title={activeStep === 1
+      ? $i18n.t("ui:dialog:onboarding:step1Title")
+      : $i18n.t("ui:dialog:onboarding:step2Title")}
 
-  <Block inset nested class="px-4">
+    subtitle={`
+      ${$i18n.t("ui:dialog:onboarding:step")}
+      ${activeStep}
+      ${$i18n.t("ui:dialog:onboarding:stepOf")}
+      ${TOTAL_STEPS}
+    `}
+  >
+  </Navbar>
+
+  <Block inset class="px-4">
     {#if activeStep === 1}
       <div class="space-y-4">
         <p class="text-base leading-relaxed">
           {$i18n.t("ui:dialog:onboarding:step1Info")}
         </p>
 
-        <div class="space-y-2">
+        <div class="space-y-4">
           <p class="flex items-center text-lg font-medium text-gray-700 dark:text-gray-300">
             {$i18n.t("ui:dialog:onboarding:step1Settings")}
           </p>
@@ -215,4 +216,4 @@
       </div>
     {/if}
   </Block>
-</Dialog>
+</Popup>
