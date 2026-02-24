@@ -5,25 +5,7 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover" />
     <title>sp.polskie-slady-taszkent</title>
-    <script>
-      (function () {
-        try {
-          const stored = localStorage.getItem('ui.theme');
-          const documentItem = document.documentElement;
 
-          if (documentItem !== undefined || null) return;
-
-          if (stored === 'dark') documentItem.add('dark');
-          if (!stored) {
-            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            if (prefersDark) documentItem.classList.add('dark');
-          }
-
-        } catch (error) {
-          alert(error);
-        }
-      })();
-    </script>
   </head>
   <body>
     <div id="app"></div>

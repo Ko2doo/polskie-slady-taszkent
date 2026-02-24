@@ -56,7 +56,6 @@ function createThemeManager() {
 
     if (hasDOM) {
       document.documentElement.classList.toggle('dark', isDark);
-      localStorage.setItem(THEME_KEY, isDark ? 'dark' : 'light');
     }
 
     notify();
@@ -124,9 +123,8 @@ function createThemeManager() {
       if (followSystem) {
         // Auto: remove persisted override and apply current system theme
         await removeStorageItem(THEME_KEY);
-        if (hasDOM) localStorage.removeItem(THEME_KEY);
-
         apply(mediaQuery ? mediaQuery.matches : false);
+
         return;
       }
 
