@@ -175,18 +175,16 @@ export function createNavigationController({ map, builder, i18n }) {
   // ========================================
 
   /**
-   * Calculate and display route
+   * Calculate and display route.
+   *
+   * Note: findRoute (A*) is synchronous and blocks the JS thread while running.
+   * A loading spinner won't render before it completes — if route calc ever
+   * becomes slow enough to need a visible loader, move A* to a Web Worker.
    */
-  async function calculateRoute() {
+  function calculateRoute() {
     if (!startPoint || !endPoint) return;
 
     console.log('[MapNavigation] Calculating route...');
-
-    // Show loading state
-    routeInfo = { loading: true };
-
-    // Small delay to let UI update
-    await new Promise((resolve) => setTimeout(resolve, 100));
 
     try {
       const result = findRoute(startPoint.lon, startPoint.lat, endPoint.lon, endPoint.lat);
@@ -322,6 +320,9 @@ export function createNavigationController({ map, builder, i18n }) {
    */
   function dispose() {
     clearNavigation();
+    navigationMode = false;
+    navigationReady = false;
+    navigationLoading = false;
     console.log('[MapNavigation] Disposed');
   }
 

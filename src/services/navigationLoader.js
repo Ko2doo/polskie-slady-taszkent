@@ -1,8 +1,13 @@
 /**
  * NavigationLoader
  *
- * Lazy loads navigation graph and initializes NavigationEngine
- * Includes route caching for better performance
+ * Lazy loads navigation graph and initializes NavigationEngine.
+ * Includes LRU route caching for better performance.
+ *
+ * Cache behaviour:
+ * - Routes are cached bidirectionally (A→B lookup also covers B→A)
+ * - LRU eviction: least recently used entry is removed when cache is full
+ * - Cache size: MAX_CACHE_SIZE unique origin-destination pairs
  */
 
 import NavigationEngine from './navigation';
@@ -10,26 +15,42 @@ import NavigationEngine from './navigation';
 let navigationEngine = null;
 let loadingPromise = null;
 
-// Route cache
+// Route cache — Map preserves insertion order, which we exploit for LRU
 const routeCache = new Map();
 const MAX_CACHE_SIZE = 50;
 
 /**
- * Generate cache key from coordinates
+ * Generate a canonical cache key from coordinates.
+ * Keys are sorted so A→B and B→A map to the same entry.
+ * Rounded to 5 decimal places (~1 meter precision).
  */
 function getCacheKey(fromLon, fromLat, toLon, toLat) {
-  // Round to 5 decimal places (~1 meter precision)
-  return `${fromLon.toFixed(5)},${fromLat.toFixed(5)}-${toLon.toFixed(5)},${toLat.toFixed(5)}`;
+  const a = `${fromLon.toFixed(5)},${fromLat.toFixed(5)}`;
+  const b = `${toLon.toFixed(5)},${toLat.toFixed(5)}`;
+  // Lexicographic sort gives a stable key regardless of direction
+  return a < b ? `${a}-${b}` : `${b}-${a}`;
 }
 
 /**
- * Find cached route
+ * Touch a key to mark it as recently used (LRU promotion).
+ * Map iteration order reflects insertion order in JS —
+ * re-inserting moves the key to the end (most recent).
+ */
+function touchKey(key) {
+  const value = routeCache.get(key);
+  routeCache.delete(key);
+  routeCache.set(key, value);
+}
+
+/**
+ * Find cached route (checks both directions via canonical key)
  */
 export function findCachedRoute(fromLon, fromLat, toLon, toLat) {
   const key = getCacheKey(fromLon, fromLat, toLon, toLat);
   const cached = routeCache.get(key);
 
   if (cached) {
+    touchKey(key); // Promote to most-recently-used
     console.log('[NavigationLoader] Using cached route');
     return cached;
   }
@@ -38,19 +59,23 @@ export function findCachedRoute(fromLon, fromLat, toLon, toLat) {
 }
 
 /**
- * Cache a route
+ * Cache a route with LRU eviction
  */
 export function cacheRoute(fromLon, fromLat, toLon, toLat, route) {
   const key = getCacheKey(fromLon, fromLat, toLon, toLat);
 
-  // Add to cache
+  // If key already exists, remove it first so re-insert puts it at the end
+  if (routeCache.has(key)) {
+    routeCache.delete(key);
+  }
+
   routeCache.set(key, route);
 
-  // Limit cache size (FIFO)
+  // LRU eviction: the first key in the Map is the least recently used
   if (routeCache.size > MAX_CACHE_SIZE) {
-    const firstKey = routeCache.keys().next().value;
-    routeCache.delete(firstKey);
-    console.log('[NavigationLoader] Cache limit reached, removed oldest entry');
+    const lruKey = routeCache.keys().next().value;
+    routeCache.delete(lruKey);
+    console.log('[NavigationLoader] Cache limit reached, removed LRU entry');
   }
 
   console.log(`[NavigationLoader] Route cached (${routeCache.size}/${MAX_CACHE_SIZE})`);
@@ -66,13 +91,12 @@ export function clearRouteCache() {
 }
 
 /**
- * Get cache statistics
+ * Get cache statistics (size only — keys are internal implementation detail)
  */
 export function getCacheStats() {
   return {
     size: routeCache.size,
     maxSize: MAX_CACHE_SIZE,
-    keys: Array.from(routeCache.keys()),
   };
 }
 
@@ -85,7 +109,7 @@ export async function initNavigation() {
     return navigationEngine;
   }
 
-  // Loading in progress
+  // Loading in progress — return the same promise so concurrent callers wait together
   if (loadingPromise) {
     return loadingPromise;
   }
@@ -115,6 +139,7 @@ export async function initNavigation() {
       return navigationEngine;
     } catch (error) {
       console.error('[NavigationLoader] Failed to initialize navigation:', error);
+      // Reset so the next call to initNavigation() can retry
       loadingPromise = null;
       throw error;
     }
@@ -124,7 +149,7 @@ export async function initNavigation() {
 }
 
 /**
- * Get navigation engine instance
+ * Get navigation engine instance (throws if not initialized)
  */
 export function getNavigationEngine() {
   if (!navigationEngine) {
@@ -141,20 +166,18 @@ export function isNavigationReady() {
 }
 
 /**
- * Find route with caching
+ * Find route with LRU caching.
+ * Cache is bidirectional — A→B and B→A share the same cached result.
  */
 export function findRoute(fromLon, fromLat, toLon, toLat) {
-  // Check cache first
   const cached = findCachedRoute(fromLon, fromLat, toLon, toLat);
   if (cached) {
     return cached;
   }
 
-  // Calculate new route
   const nav = getNavigationEngine();
   const result = nav.findRoute(fromLon, fromLat, toLon, toLat);
 
-  // Cache successful routes
   if (result.success) {
     cacheRoute(fromLon, fromLat, toLon, toLat, result);
   }

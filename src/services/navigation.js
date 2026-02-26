@@ -4,6 +4,71 @@
  * A* pathfinding algorithm for pedestrian navigation
  */
 
+// A* limits — named constants instead of magic numbers at call site
+const MAX_ITERATIONS = 100000;
+const MAX_ROUTE_DISTANCE = 50000; // meters
+const MAX_NODE_SNAP_DISTANCE = 1000; // meters — point must be within 1km of road network
+
+// Spatial index cell size in degrees (~1km)
+const GRID_CELL_SIZE = 0.01;
+
+// ─── Min-Heap ────────────────────────────────────────────────────────────────
+// Simple binary min-heap keyed by numeric priority.
+// Replaces the O(n) Set scan in the A* open set — gives O(log n) push/pop.
+
+class MinHeap {
+  constructor() {
+    this._heap = []; // [{priority, value}]
+  }
+
+  get size() {
+    return this._heap.length;
+  }
+
+  push(value, priority) {
+    this._heap.push({ value, priority });
+    this._bubbleUp(this._heap.length - 1);
+  }
+
+  pop() {
+    const top = this._heap[0];
+    const last = this._heap.pop();
+
+    if (this._heap.length > 0) {
+      this._heap[0] = last;
+      this._sinkDown(0);
+    }
+
+    return top?.value;
+  }
+
+  _bubbleUp(i) {
+    while (i > 0) {
+      const parent = (i - 1) >> 1;
+      if (this._heap[parent].priority <= this._heap[i].priority) break;
+      [this._heap[parent], this._heap[i]] = [this._heap[i], this._heap[parent]];
+      i = parent;
+    }
+  }
+
+  _sinkDown(i) {
+    const n = this._heap.length;
+    while (true) {
+      let smallest = i;
+      const l = 2 * i + 1;
+      const r = 2 * i + 2;
+
+      if (l < n && this._heap[l].priority < this._heap[smallest].priority) smallest = l;
+      if (r < n && this._heap[r].priority < this._heap[smallest].priority) smallest = r;
+      if (smallest === i) break;
+
+      [this._heap[smallest], this._heap[i]] = [this._heap[i], this._heap[smallest]];
+      i = smallest;
+    }
+  }
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
 class NavigationEngine {
   constructor(graphData) {
     this.nodes = graphData.nodes;
@@ -20,6 +85,7 @@ class NavigationEngine {
         distance: edge.distance,
       });
     });
+
     this.buildSpatialIndex();
 
     // Check graph integrity
@@ -57,13 +123,11 @@ class NavigationEngine {
   }
 
   buildSpatialIndex() {
-    // Разделяем карту на сетку для быстрого поиска
     this.grid = {};
-    const cellSize = 0.01; // ~1км
 
     Object.entries(this.nodes).forEach(([nodeId, node]) => {
-      const cellX = Math.floor(node.lon / cellSize);
-      const cellY = Math.floor(node.lat / cellSize);
+      const cellX = Math.floor(node.lon / GRID_CELL_SIZE);
+      const cellY = Math.floor(node.lat / GRID_CELL_SIZE);
       const cellKey = `${cellX},${cellY}`;
 
       if (!this.grid[cellKey]) {
@@ -75,35 +139,54 @@ class NavigationEngine {
     console.log('[NavigationEngine] Spatial index built');
   }
 
+  /**
+   * Find nearest graph node to given coordinates.
+   * Searches 3×3 cell window first; expands to 5×5 if nothing found
+   * (handles edge cases where point sits on cell boundary with no nearby nodes).
+   */
   findNearestNode(lon, lat) {
-    const cellSize = 0.01;
-    const cellX = Math.floor(lon / cellSize);
-    const cellY = Math.floor(lat / cellSize);
+    const cellX = Math.floor(lon / GRID_CELL_SIZE);
+    const cellY = Math.floor(lat / GRID_CELL_SIZE);
 
-    let nearestNode = null;
-    let minDistance = Infinity;
+    const search = (radius) => {
+      let nearestNode = null;
+      let minDistance = Infinity;
 
-    // Проверяем только близкие ячейки (3x3 сетка)
-    for (let dx = -1; dx <= 1; dx++) {
-      for (let dy = -1; dy <= 1; dy++) {
-        const cellKey = `${cellX + dx},${cellY + dy}`;
-        const cellNodes = this.grid[cellKey] || [];
+      for (let dx = -radius; dx <= radius; dx++) {
+        for (let dy = -radius; dy <= radius; dy++) {
+          const cellKey = `${cellX + dx},${cellY + dy}`;
+          const cellNodes = this.grid[cellKey] || [];
 
-        cellNodes.forEach((node) => {
-          const dist = this.distance(lon, lat, node.lon, node.lat);
-          if (dist < minDistance) {
-            minDistance = dist;
-            nearestNode = node.id;
-          }
-        });
+          cellNodes.forEach((node) => {
+            const dist = this.distance(lon, lat, node.lon, node.lat);
+            if (dist < minDistance) {
+              minDistance = dist;
+              nearestNode = node.id;
+            }
+          });
+        }
       }
+
+      return { nodeId: nearestNode, distance: minDistance };
+    };
+
+    // Try 3×3 first
+    const result = search(1);
+
+    // Fall back to 5×5 if nothing found (point on cell edge with sparse nodes)
+    if (!result.nodeId) {
+      console.warn('[NavigationEngine] No node found in 3x3 window, expanding to 5x5');
+      return search(2);
     }
 
-    return { nodeId: nearestNode, distance: minDistance };
+    return result;
   }
 
-  // A* pathfinding algorithm with timeout protection
-  findPath(startNodeId, endNodeId, maxIterations = 100000, maxDistance = 50000) {
+  /**
+   * A* pathfinding with min-heap open set for O(log n) node selection.
+   * Includes iteration limit and straight-line distance guard.
+   */
+  findPath(startNodeId, endNodeId) {
     const start = performance.now();
 
     const endNode = this.nodes[endNodeId];
@@ -118,10 +201,10 @@ class NavigationEngine {
       };
     }
 
-    // Check if points are too far apart
+    // Bail early if points are unreachably far apart
     const straightLineDistance = this.distance(startNode.lon, startNode.lat, endNode.lon, endNode.lat);
 
-    if (straightLineDistance > maxDistance) {
+    if (straightLineDistance > MAX_ROUTE_DISTANCE) {
       return {
         success: false,
         message: `Points are too far apart: ${(straightLineDistance / 1000).toFixed(1)} km`,
@@ -129,157 +212,129 @@ class NavigationEngine {
       };
     }
 
-    const openSet = new Set([startNodeId]);
+    // Open set as min-heap keyed by fScore — O(log n) vs O(n) Set scan
+    const openHeap = new MinHeap();
+    openHeap.push(startNodeId, straightLineDistance);
+
+    // Track which nodes are in the heap to avoid duplicate processing
+    const inOpen = new Set([startNodeId]);
     const closedSet = new Set();
     const cameFrom = {};
 
-    const gScore = {};
-    gScore[startNodeId] = 0;
-
-    const fScore = {};
-    fScore[startNodeId] = straightLineDistance;
+    const gScore = { [startNodeId]: 0 };
+    const fScore = { [startNodeId]: straightLineDistance };
 
     let iterations = 0;
 
-    while (openSet.size > 0) {
+    while (openHeap.size > 0) {
       iterations++;
 
-      // Timeout protection
-      if (iterations > maxIterations) {
+      if (iterations > MAX_ITERATIONS) {
         console.error('[NavigationEngine] Max iterations reached');
         return {
           success: false,
-          message: `Pathfinding timeout after ${maxIterations} iterations`,
+          message: `Pathfinding timeout after ${MAX_ITERATIONS} iterations`,
           computeTime: Math.round(performance.now() - start),
         };
       }
 
-      // Progress logging every 10k iterations
       if (iterations % 10000 === 0) {
-        console.log(`[NavigationEngine] Iteration ${iterations}, openSet size: ${openSet.size}`);
+        console.log(`[NavigationEngine] Iteration ${iterations}, open set size: ${openHeap.size}`);
       }
 
-      // Find node with minimum fScore using more efficient method
-      let current = null;
-      let minFScore = Infinity;
-
-      for (const nodeId of openSet) {
-        const score = fScore[nodeId];
-        if (score !== undefined && score < minFScore) {
-          minFScore = score;
-          current = nodeId;
-        }
-      }
-
-      if (!current) {
-        console.error('[NavigationEngine] No valid node found in openSet');
-        break;
-      }
+      const current = openHeap.pop();
+      inOpen.delete(current);
 
       if (current === endNodeId) {
-        // Path found!
         const path = this.reconstructPath(cameFrom, current);
-        const end = performance.now();
 
         console.log(`[NavigationEngine] Path found in ${iterations} iterations`);
 
         return {
           success: true,
-          path: path,
+          path,
           distance: gScore[endNodeId],
-          computeTime: Math.round(end - start),
-          iterations: iterations,
+          computeTime: Math.round(performance.now() - start),
+          iterations,
         };
       }
 
-      openSet.delete(current);
       closedSet.add(current);
 
-      // Check neighbors
       const neighbors = this.adjacency[current] || [];
 
       for (const neighbor of neighbors) {
-        // Skip if node doesn't exist
-        if (!this.nodes[neighbor.to]) {
-          continue;
-        }
-
-        // Skip if already evaluated
-        if (closedSet.has(neighbor.to)) {
-          continue;
-        }
+        if (!this.nodes[neighbor.to]) continue;
+        if (closedSet.has(neighbor.to)) continue;
 
         const tentativeGScore = gScore[current] + neighbor.distance;
 
-        // Skip if this path is worse than existing
-        if (tentativeGScore >= (gScore[neighbor.to] || Infinity)) {
-          continue;
-        }
+        if (tentativeGScore >= (gScore[neighbor.to] ?? Infinity)) continue;
 
-        // This path is the best so far
         cameFrom[neighbor.to] = current;
         gScore[neighbor.to] = tentativeGScore;
 
         const neighborNode = this.nodes[neighbor.to];
         const heuristic = this.distance(neighborNode.lon, neighborNode.lat, endNode.lon, endNode.lat);
+        const f = tentativeGScore + heuristic;
 
-        fScore[neighbor.to] = tentativeGScore + heuristic;
+        fScore[neighbor.to] = f;
 
-        openSet.add(neighbor.to);
+        // Always push — stale entries in the heap are harmless:
+        // closedSet guard above skips already-processed nodes
+        openHeap.push(neighbor.to, f);
+        inOpen.add(neighbor.to);
       }
     }
 
-    const end = performance.now();
     return {
       success: false,
       message: 'No path found between points',
-      computeTime: Math.round(end - start),
-      iterations: iterations,
+      computeTime: Math.round(performance.now() - start),
+      iterations,
     };
   }
 
-  // Reconstruct path from cameFrom map
+  // Reconstruct path from cameFrom map — push + reverse avoids O(n²) unshift
   reconstructPath(cameFrom, current) {
-    const path = [current];
-    while (cameFrom[current]) {
+    const path = [];
+    while (current !== undefined) {
+      path.push(current);
       current = cameFrom[current];
-      path.unshift(current);
     }
-    return path;
+    return path.reverse();
   }
 
   // Main function: find route from point A to point B
   findRoute(fromLon, fromLat, toLon, toLat) {
     console.log(`[NavigationEngine] Finding route from [${fromLon}, ${fromLat}] to [${toLon}, ${toLat}]`);
 
-    // Find nearest nodes
     const startResult = this.findNearestNode(fromLon, fromLat);
     const endResult = this.findNearestNode(toLon, toLat);
 
     console.log(`  Start node: ${startResult.nodeId} (${startResult.distance.toFixed(1)}m away)`);
     console.log(`  End node: ${endResult.nodeId} (${endResult.distance.toFixed(1)}m away)`);
 
-    if (startResult.distance > 1000 || endResult.distance > 1000) {
+    if (startResult.distance > MAX_NODE_SNAP_DISTANCE || endResult.distance > MAX_NODE_SNAP_DISTANCE) {
       return {
         success: false,
-        message: 'Point is too far from road network (>1km)',
+        message: `Point is too far from road network (>${MAX_NODE_SNAP_DISTANCE / 1000}km)`,
       };
     }
 
-    // Find path with limits: 100k iterations, 50km max distance
-    const pathResult = this.findPath(startResult.nodeId, endResult.nodeId, 100000, 50000);
+    const pathResult = this.findPath(startResult.nodeId, endResult.nodeId);
 
     if (!pathResult.success) {
       return pathResult;
     }
 
-    // Convert nodes to coordinates
+    // Convert node IDs to coordinates
     const coordinates = pathResult.path.map((nodeId) => {
       const node = this.nodes[nodeId];
       return [node.lon, node.lat];
     });
 
-    // Add start and end points
+    // Prepend actual start point and append actual end point
     coordinates.unshift([fromLon, fromLat]);
     coordinates.push([toLon, toLat]);
 
@@ -289,7 +344,7 @@ class NavigationEngine {
         type: 'Feature',
         geometry: {
           type: 'LineString',
-          coordinates: coordinates,
+          coordinates,
         },
         properties: {
           distance: pathResult.distance + startResult.distance + endResult.distance,
