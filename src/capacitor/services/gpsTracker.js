@@ -289,38 +289,68 @@ export function createGPSTracker({ onPositionUpdate = null, onError = null } = {
   }
 
   /**
-   * Get current position (one-time)
+   * Get current position (one-time).
+   * Retries up to MAX_POSITION_ATTEMPTS times if accuracy is too poor —
+   * GPS often returns a coarse network-based fix on the first call,
+   * then converges to a more accurate reading within a few seconds.
+   *
    * @returns {Promise<Object|null>} - Position object or null
    */
   async function getCurrentPosition() {
-    try {
-      console.log('[GPSTracker] Getting current position...');
+    const MAX_POSITION_ATTEMPTS = 3;
+    const RETRY_DELAY_MS = 2000;
 
-      const position = await Geolocation.getCurrentPosition(GPS_OPTIONS);
-      const positionData = transformPositionData(position);
+    for (let attempt = 1; attempt <= MAX_POSITION_ATTEMPTS; attempt++) {
+      try {
+        console.log(`[GPSTracker] Getting current position (attempt ${attempt}/${MAX_POSITION_ATTEMPTS})...`);
 
-      console.log('[GPSTracker] Current position:', {
-        lat: positionData.lat,
-        lon: positionData.lon,
-        accuracy: positionData.accuracy,
-        withinBounds: positionData.isWithinBounds,
-      });
+        const position = await Geolocation.getCurrentPosition(GPS_OPTIONS);
+        const positionData = transformPositionData(position);
 
-      return positionData;
-    } catch (error) {
-      console.error('[GPSTracker] Failed to get current position:', error);
-
-      if (onError) {
-        const errorCode = mapGeolocationError(error);
-        onError({
-          code: errorCode,
-          message: error.message || 'Failed to get GPS position',
-          error,
+        console.log('[GPSTracker] Current position:', {
+          lat: positionData.lat,
+          lon: positionData.lon,
+          accuracy: positionData.accuracy,
+          withinBounds: positionData.isWithinBounds,
         });
-      }
 
-      return null;
+        // Accept position if accuracy is good enough
+        if (positionData.accuracy <= MAX_ACCEPTABLE_ACCURACY) {
+          return positionData;
+        }
+
+        console.log(
+          `[GPSTracker] Position accuracy too low (${positionData.accuracy.toFixed(0)}m > ${MAX_ACCEPTABLE_ACCURACY}m)` +
+            (attempt < MAX_POSITION_ATTEMPTS ? `, retrying in ${RETRY_DELAY_MS}ms...` : ', using best available'),
+        );
+
+        // On last attempt return whatever we have — better than nothing for flyTo
+        if (attempt === MAX_POSITION_ATTEMPTS) {
+          return positionData;
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
+      } catch (error) {
+        console.error(`[GPSTracker] Failed to get current position (attempt ${attempt}):`, error);
+
+        // Only report error on last attempt to avoid spamming on transient failures
+        if (attempt === MAX_POSITION_ATTEMPTS) {
+          if (onError) {
+            const errorCode = mapGeolocationError(error);
+
+            onError({
+              code: errorCode,
+              message: error.message || 'Failed to get GPS position',
+              error,
+            });
+          }
+        } else {
+          await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
+        }
+      }
     }
+
+    return null;
   }
 
   /**

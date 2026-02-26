@@ -175,7 +175,7 @@ class NavigationEngine {
 
     // Fall back to 5×5 if nothing found (point on cell edge with sparse nodes)
     if (!result.nodeId) {
-      console.warn('[NavigationEngine] No node found in 3x3 window, expanding to 5x5');
+      console.warn('[NavigationEngine] No node found in 3×3 window, expanding to 5×5');
       return search(2);
     }
 
@@ -212,17 +212,17 @@ class NavigationEngine {
       };
     }
 
-    // Open set as min-heap keyed by fScore — O(log n) vs O(n) Set scan
+    // Open set as min-heap keyed by fScore — O(log n) vs O(n) Set scan.
+    // We allow duplicate entries for the same node (lazy deletion):
+    // when a better path is found we push again with a lower priority,
+    // and skip stale entries via the closedSet check after pop.
     const openHeap = new MinHeap();
     openHeap.push(startNodeId, straightLineDistance);
 
-    // Track which nodes are in the heap to avoid duplicate processing
-    const inOpen = new Set([startNodeId]);
     const closedSet = new Set();
     const cameFrom = {};
 
     const gScore = { [startNodeId]: 0 };
-    const fScore = { [startNodeId]: straightLineDistance };
 
     let iterations = 0;
 
@@ -243,7 +243,9 @@ class NavigationEngine {
       }
 
       const current = openHeap.pop();
-      inOpen.delete(current);
+
+      // Skip stale duplicate entries — node was already processed via a better path
+      if (closedSet.has(current)) continue;
 
       if (current === endNodeId) {
         const path = this.reconstructPath(cameFrom, current);
@@ -278,12 +280,9 @@ class NavigationEngine {
         const heuristic = this.distance(neighborNode.lon, neighborNode.lat, endNode.lon, endNode.lat);
         const f = tentativeGScore + heuristic;
 
-        fScore[neighbor.to] = f;
-
-        // Always push — stale entries in the heap are harmless:
-        // closedSet guard above skips already-processed nodes
+        // Push with updated priority — old entry (if any) becomes stale
+        // and will be skipped by the closedSet check after pop
         openHeap.push(neighbor.to, f);
-        inOpen.add(neighbor.to);
       }
     }
 
