@@ -10,6 +10,7 @@
    */
 
   import { onMount, onDestroy } from "svelte";
+  import { fade } from "svelte/transition";
   import { List, ListItem, Toggle } from "konsta/svelte";
 
   import { getThemeManager } from "@/lib/theme/themeManager";
@@ -45,15 +46,19 @@
     {/snippet}
   </ListItem>
 
-  {#if followSystem === false}
-    <ListItem
-      colors={{ primaryTextIos: "text-stone-800 dark:text-stone-300" }}
-      title={$i18n.t("ui:settings:appearance:darkMode")}
-      disabled={followSystem}
-    >
-      {#snippet after()}
-        <Toggle checked={isDark} disabled={followSystem} onChange={onDarkChange} />
-      {/snippet}
-    </ListItem>
+  {#if !followSystem}
+    <li in:fade={{ duration: 150 }} out:fade={{ duration: 150 }} class="list-none">
+      <ListItem
+        component="div"
+        dividers={false}
+        colors={{ primaryTextIos: "text-stone-800 dark:text-stone-300" }}
+        title={$i18n.t("ui:settings:appearance:darkMode")}
+        disabled={followSystem}
+      >
+        {#snippet after()}
+          <Toggle checked={isDark} disabled={followSystem} onChange={onDarkChange} />
+        {/snippet}
+      </ListItem>
+    </li>
   {/if}
 </List>
