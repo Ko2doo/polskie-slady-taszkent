@@ -177,7 +177,7 @@
 {/snippet}
 
 {#if query.trim() && itemsView.length === 0}
-  <section class="grid grid-1 justify-center" transition:fade={{ duration: 120 }}>
+  <section class="grid grid-1 justify-center" in:fade={{ duration: 120 }}>
     <BlockTitle large class="flex-col">
       <ShieldWarningIcon className="size-20 mb-2 text-red-500" />
 
@@ -187,7 +187,7 @@
 {:else}
   <section
     class={layout ? layout.classes : "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4"}
-    transition:fade={{ duration: 120 }}
+    in:fade={{ duration: 120 }}
   >
     {#each itemsView as article (article.id)}
       <Card class="flex flex-col justify-between">
