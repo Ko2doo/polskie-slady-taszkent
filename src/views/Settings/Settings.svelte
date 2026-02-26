@@ -82,4 +82,6 @@
 
     <DarkModeToggler {i18n} inset={true} />
   </Block>
+
+  <Block strong inset>About information, app version, copyright and other</Block>
 </section>

@@ -6,7 +6,6 @@
 
 import Handbook from '@/views/Handbook/Handbook.svelte';
 import Map from '@/views/Map/Map.svelte';
-import About from '@/views/About/About.svelte';
 import Settings from '@/views/Settings/Settings.svelte';
 import PopupArticle from '@/components/Ui/PopupArticle.svelte';
 
@@ -19,10 +18,6 @@ export const routes = [
   {
     path: '/map',
     component: Map,
-  },
-  {
-    path: '/about',
-    component: About,
   },
   {
     path: '/settings',

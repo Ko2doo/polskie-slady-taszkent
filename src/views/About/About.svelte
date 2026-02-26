@@ -1,37 +1,8 @@
 <script>
   import { Block } from "konsta/svelte";
 
-  import { resolvePageKeyFromRouteResult } from "@/utils/routerUtils";
-  import { withNavbar } from "@/store/ui/navbar";
-
   // router props
-  let { route, i18n } = $props();
-
-  // Inspector check console in browser
-  // $inspect(route);
-
-  $effect(() => {
-    const result = route?.result;
-    // console.log(result);
-
-    // get "pageKey" from route path
-    //    "/about" -> "about"
-    //    "/handbook" -> "handbook"
-    const pageKey = resolvePageKeyFromRouteResult(result);
-
-    /* prettier-ignore */
-    const title = pageKey
-      ? $i18n.t(`ui:navbar:${pageKey}:title`)
-      : "";
-
-    const dispose = withNavbar({
-      title: title || pageKey,
-      showSidePanel: false,
-      showFavorites: false,
-    });
-
-    return dispose;
-  });
+  let { i18n } = $props();
 </script>
 
 <Block>
