@@ -84,9 +84,9 @@ export default {
     onboarding: {
       step1Title: 'Witamy',
       step2Title: 'Dostęp do lokalizacji',
-      step1Info:
-        'To interaktywny przewodnik o losach Polaków w Turkiestanie z nawigacją offline po historycznych miejscach Taszkentu.',
-      step1Settings: 'Szybkie ustawienia:',
+      welcomeDialog:
+        'Odkryj polskie dziedzictwo w Uzbekistanie: biografie, miejsca pamięci oraz wygodną nawigację offline po Taszkencie.',
+      welcomeDialogSubtitle: 'Wybierz preferowany język i motyw aplikacji.',
       step1Locales: 'Język interfejsu',
       step1Appearance: 'Wygląd',
       step2Info: 'Włącz nawigację',

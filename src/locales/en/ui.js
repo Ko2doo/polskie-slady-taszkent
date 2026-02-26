@@ -84,9 +84,9 @@ export default {
     onboarding: {
       step1Title: 'Welcome',
       step2Title: 'Location access',
-      step1Info:
-        'This is an interactive guide about the fate of Poles in Turkestan, with offline navigation to the historical sites of Tashkent.',
-      step1Settings: 'Quick settings:',
+      welcomeDialog:
+        'Discover the Polish heritage in Uzbekistan: biographies, memorial sites, and convenient offline navigation around Tashkent.',
+      welcomeDialogSubtitle: 'Choose your preferred language and theme.',
       step1Locales: 'Interface language',
       step1Appearance: 'Appearance',
       step2Info: 'Enable navigation',

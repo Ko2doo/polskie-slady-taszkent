@@ -29,8 +29,8 @@
   import ErrorHandlerToast from "./components/Ui/ErrorHandlerToast.svelte";
 
   import Close from "./lib/icons/Close.svelte";
-  import { initAppFirstStart, APP_FIRST_START_STATE, markFirstStartCompleted } from "@/store/appStart";
-  import WelcomDialog from "./components/Ui/WelcomeDialog.svelte";
+  import { initFirstLaunch, APP_FIRST_LAUNCH_STORAGE_VAL, markFirstLaunchCompleted } from "@/store/appStartInitialize";
+  import OnboardingWizard from "./components/Ui/OnboardingWizard.svelte";
 
   function createScrollState() {
     let y = $state(0);
@@ -56,7 +56,7 @@
     // Initialize theme as soon app mounts
     getThemeManager().init();
 
-    initAppFirstStart();
+    initFirstLaunch();
     initBackButtonHandler();
   });
 </script>
@@ -136,10 +136,10 @@
     </Panel>
 
     <!-- prettier-ignore -->
-    <WelcomDialog
+    <OnboardingWizard
       {i18n}
-      appState={APP_FIRST_START_STATE}
-      makeCompleted={markFirstStartCompleted}
+      appState={APP_FIRST_LAUNCH_STORAGE_VAL}
+      makeCompleted={markFirstLaunchCompleted}
     />
 
     <ExitToast {i18n} />

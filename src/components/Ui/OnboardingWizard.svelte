@@ -131,7 +131,7 @@
 </script>
 
 <Popup backdrop={true} opened={welcomeDialogToggler.value} class="welcome-popup">
-  <Page>
+  <Page class="h-dvw flex flex-col">
     <!-- prettier-ignore -->
     <Navbar
       title={activeStep === 1
@@ -146,25 +146,26 @@
       `}>
     </Navbar>
 
-    <Block inset class="px-4">
+    <Block inset class="onboarding-wizard-content mt-auto mb-auto px-4">
       {#if activeStep === 1}
         <div class="mt-6 space-y-4">
-          <p class="text-base leading-relaxed">
-            {$i18n.t("ui:dialog:onboarding:step1Info")}
-          </p>
+          <div class="text-center space-y-2">
+            <h3 class="text-lg font-semibold">
+              {$i18n.t("ui:dialog:onboarding:welcomeDialog")}
+            </h3>
+            <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+              {$i18n.t("ui:dialog:onboarding:welcomeDialogSubtitle")}
+            </p>
+          </div>
 
           <div class="mt-8 space-y-4">
-            <p class="flex items-center text-lg font-medium text-gray-700 dark:text-gray-300">
-              {$i18n.t("ui:dialog:onboarding:step1Settings")}
-            </p>
-
             <div class="flex items-center justify-between">
               <span class="flex text-[16px]">
                 <TranslateIcon className="size-5 mr-2" />
                 {$i18n.t("ui:dialog:onboarding:step1Locales")}
               </span>
-              <div class="size-min">
-                <LangSwitcher raise={true} rounded={true} {i18n} />
+              <div class="size-fit">
+                <LangSwitcher {i18n} raised={true} rounded={true} />
               </div>
             </div>
 
@@ -173,7 +174,7 @@
                 <PaletteIcon className="size-5 mr-2" />
                 {$i18n.t("ui:dialog:onboarding:step1Appearance")}
               </p>
-              <DarkModeToggler inset={true} nested={true} {i18n} />
+              <DarkModeToggler {i18n} inset={true} nested={true} />
             </div>
           </div>
 

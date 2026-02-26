@@ -84,9 +84,9 @@ export default {
     onboarding: {
       step1Title: 'Xush kelibsiz',
       step2Title: 'Joylashuvga kirish',
-      step1Info:
-        'Bu — Turkistondagi polyaklar taqdiri haqida interaktiv qo‘llanma bo‘lib, Toshkentning tarixiy joylariga oflayn navigatsiyani taklif etadi.',
-      step1Settings: 'Tez sozlamalar:',
+      welcomeDialog:
+        'O‘zbekistondagi polyak merosini kashf eting: tarjimai hollar, xotira maskanlari va Toshkent bo‘ylab qulay oflayn navigatsiya.',
+      welcomeDialogSubtitle: 'Qulay til va mavzuni tanlang.',
       step1Locales: 'Interfeys tili',
       step1Appearance: 'Ko‘rinish',
       step2Info: 'Navigatsiyani yoqish',
