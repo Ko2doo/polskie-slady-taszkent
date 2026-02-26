@@ -131,7 +131,7 @@
 </script>
 
 <Popup backdrop={true} opened={welcomeDialogToggler.value} class="welcome-popup">
-  <Page class="h-dvw flex flex-col">
+  <Page class="flex flex-col">
     <!-- prettier-ignore -->
     <Navbar
       title={activeStep === 1
