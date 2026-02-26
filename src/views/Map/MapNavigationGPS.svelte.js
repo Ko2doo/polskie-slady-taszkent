@@ -41,7 +41,7 @@ export function createGPSNavigationController({ map, builder, i18n }) {
   let currentRoute = $state(null);
   let routeInfo = $state(null);
   let isArrived = $state(false);
-  let isOutOfBounds = $state(false); // Track if user is outside map bounds
+  let isOutOfBounds = $state(false);
 
   // GPS tracker
   let gpsTracker = null;
@@ -50,10 +50,13 @@ export function createGPSNavigationController({ map, builder, i18n }) {
   let pendingRouteBuild = $state(false);
   let didShowWaitingToast = false;
 
+  // Prevents parallel route calculations from racing each other
+  let isCalculatingRoute = false;
+
   let dialogState = $state(false);
   let isFirstPosition = true;
 
-  // Track show error codes to prevent duplicates
+  // Track shown error codes to prevent duplicates
   let shownErrorCodes = new Set();
 
   function showWaitingForFixOnce() {
@@ -94,7 +97,6 @@ export function createGPSNavigationController({ map, builder, i18n }) {
       // Start tracking
       const started = await gpsTracker.start();
       if (!started) {
-        // throw new Error('Failed to start GPS tracking');
         gpsMode = false;
         return false;
       }
@@ -103,7 +105,6 @@ export function createGPSNavigationController({ map, builder, i18n }) {
       const initialPosition = await gpsTracker.getCurrentPosition();
 
       if (initialPosition && !initialPosition.isWithinBounds) {
-        // User is outside map bounds
         isOutOfBounds = true;
 
         errorToast.warn(i18n.t('errors:gpsOutOfBounds'), {
@@ -111,6 +112,7 @@ export function createGPSNavigationController({ map, builder, i18n }) {
           code: 'OUT_OF_BOUNDS',
         });
       } else if (initialPosition) {
+        isFirstPosition = false;
         map.flyTo({
           center: [initialPosition.lon, initialPosition.lat],
           zoom: 15,
@@ -148,7 +150,6 @@ export function createGPSNavigationController({ map, builder, i18n }) {
    */
   function updateUserMarker(position) {
     if (!userMarker) {
-      // Create marker element
       const el = document.createElement('div');
       el.className = 'user-location-marker';
       el.innerHTML = `
@@ -165,7 +166,6 @@ export function createGPSNavigationController({ map, builder, i18n }) {
 
       console.log('[GPSNavigation] User marker created');
     } else {
-      // Update marker position
       userMarker.setLngLat([position.lon, position.lat]);
     }
   }
@@ -190,10 +190,22 @@ export function createGPSNavigationController({ map, builder, i18n }) {
   function handlePositionUpdate(position) {
     console.log('[GPSNavigation] Position update:', position);
 
+    // First position ever — fly to it regardless of bounds status
+    if (isFirstPosition) {
+      isFirstPosition = false;
+
+      if (position.isWithinBounds) {
+        map.flyTo({
+          center: [position.lon, position.lat],
+          zoom: 15,
+          duration: 1000,
+        });
+      }
+    }
+
     // Check if position is within map bounds
     if (!position.isWithinBounds) {
       if (!isOutOfBounds) {
-        // First time out of bounds
         isOutOfBounds = true;
 
         errorToast.warn(i18n.t('errors:gpsOutOfBounds'), {
@@ -201,22 +213,12 @@ export function createGPSNavigationController({ map, builder, i18n }) {
           code: 'OUT_OF_BOUNDS',
         });
 
-        // Clear route if exists
         if (currentRoute) {
           clearGPSNavigation();
         }
       }
 
-      if (isFirstPosition && position.isWithinBounds) {
-        isFirstPosition = false;
-        map.flyTo({
-          center: [position.lon, position.lat],
-          zoom: 15,
-          duration: 1000,
-        });
-      }
-
-      // Update marker position even if out of bounds
+      // Update marker even when out of bounds so user sees their dot
       updateUserMarker(position);
       return;
     }
@@ -230,18 +232,16 @@ export function createGPSNavigationController({ map, builder, i18n }) {
       });
     }
 
-    // Update user marker
     updateUserMarker(position);
 
-    // wait for fix mode
+    // Still waiting for first fix before building route
     if (pendingRouteBuild && destinationPoint && !currentRoute) {
       pendingRouteBuild = false;
       calculateRouteFromGPS();
-
       return;
     }
 
-    // Check if arrived
+    // Check if arrived — skip route checks if already arrived
     if (destinationPoint && !isArrived) {
       const distanceToDestination = calculateDistance(
         position.lat,
@@ -254,11 +254,11 @@ export function createGPSNavigationController({ map, builder, i18n }) {
         handleArrival();
         return;
       }
-    }
 
-    // Check if off route and recalculate
-    if (currentRoute && destinationPoint) {
-      checkAndRecalculateRoute(position);
+      // Check if off route and recalculate — only when not arrived
+      if (currentRoute) {
+        checkAndRecalculateRoute(position);
+      }
     }
   }
 
@@ -328,7 +328,7 @@ export function createGPSNavigationController({ map, builder, i18n }) {
       return;
     }
 
-    // Timeout - waiting for gPS signal (not fatal)
+    // Timeout - waiting for GPS signal (not fatal)
     if (errorCode === ERROR_CODES.OS_PLUG_GLOC_0010) {
       showWaitingForFixOnce();
 
@@ -370,10 +370,17 @@ export function createGPSNavigationController({ map, builder, i18n }) {
   // ========================================
 
   /**
-   * Calculate route from current position to destination
+   * Calculate route from current position to destination.
+   * Guards against parallel calls — only one calculation runs at a time.
    */
   async function calculateRouteFromGPS() {
     if (!gpsTracker || !destinationPoint) return;
+
+    // Prevent parallel route calculations from racing
+    if (isCalculatingRoute) {
+      console.log('[GPSNavigation] Route calculation already in progress, skipping');
+      return;
+    }
 
     const currentPosition = gpsTracker.lastPosition;
 
@@ -392,7 +399,6 @@ export function createGPSNavigationController({ map, builder, i18n }) {
         code: 'OUT_OF_BOUNDS',
       });
 
-      // clear route if any (you already do this on live updates)
       if (currentRoute) {
         clearGPSNavigation();
       }
@@ -402,7 +408,7 @@ export function createGPSNavigationController({ map, builder, i18n }) {
 
     console.log('[GPSNavigation] Calculating route from GPS position...');
 
-    // Show loading
+    isCalculatingRoute = true;
     routeInfo = { loading: true };
 
     try {
@@ -421,6 +427,8 @@ export function createGPSNavigationController({ map, builder, i18n }) {
         scope: 'GPSNavigation',
         code: ERROR_CODES.NAV_ROUTE_CALC,
       });
+    } finally {
+      isCalculatingRoute = false;
     }
   }
 
@@ -436,7 +444,6 @@ export function createGPSNavigationController({ map, builder, i18n }) {
       return;
     }
 
-    // Check if off route
     const offRouteCheck = gpsTracker.checkOffRoute(currentRoute.geometry.coordinates);
 
     if (offRouteCheck && offRouteCheck.isOffRoute) {
@@ -502,15 +509,17 @@ export function createGPSNavigationController({ map, builder, i18n }) {
   function handleArrival() {
     isArrived = true;
 
+    // Clear route state so checkAndRecalculateRoute stops triggering
+    currentRoute = null;
+    routeInfo = null;
+
+    if (builder) {
+      builder.clearNavigationRoute();
+    }
+
     console.log('[GPSNavigation] Arrived at destination!');
 
-    // Show success message
-    errorToast.info(i18n.t('ui:map:gps:arrived'), {
-      scope: 'GPSNavigation',
-    });
-
-    // Stop tracking but keep GPS on for next navigation
-    // User can manually stop GPS mode
+    errorToast.info(i18n.t('ui:map:gps:arrived'), { scope: 'GPSNavigation' });
   }
 
   function openDialog() {
@@ -527,19 +536,23 @@ export function createGPSNavigationController({ map, builder, i18n }) {
   function confirmNewDestination() {
     closeDialog();
 
-    // Clear only route-related state, keep destinationPoint
     currentRoute = null;
     routeInfo = null;
     isArrived = false;
     lastRecalcTime = 0;
     pendingRouteBuild = false;
     didShowWaitingToast = false;
+    isCalculatingRoute = false;
 
     if (builder) {
       builder.clearNavigationRoute();
     }
 
-    // Build new route to the destination that was just set
+    // Reset route progress in tracker so windowed search starts from the beginning
+    if (gpsTracker) {
+      gpsTracker.resetRoute();
+    }
+
     calculateRouteFromGPS();
 
     console.log('[GPSNavigation] Building new route to:', destinationPoint);
@@ -555,7 +568,6 @@ export function createGPSNavigationController({ map, builder, i18n }) {
   function handleMapClick(e) {
     if (!gpsMode || !gpsReady) return;
 
-    // Check if user is out of bounds
     if (isOutOfBounds) {
       errorToast.warn(i18n.t('errors:gpsOutOfBoundsNavigation'), {
         scope: 'GPSNavigation',
@@ -565,8 +577,6 @@ export function createGPSNavigationController({ map, builder, i18n }) {
     }
 
     const { lng, lat } = e.lngLat;
-
-    // Save new destination point
     const newDestination = { lon: lng, lat };
 
     if (destinationPoint && currentRoute && !isArrived) {
@@ -575,17 +585,14 @@ export function createGPSNavigationController({ map, builder, i18n }) {
       return;
     }
 
-    // Set destination
     destinationPoint = newDestination;
     isArrived = false;
 
-    // Wait for fix mode
     pendingRouteBuild = true;
     didShowWaitingToast = false;
 
     console.log('[GPSNavigation] Destination set:', destinationPoint);
 
-    // Calculate route from current GPS position
     calculateRouteFromGPS();
   }
 
@@ -608,8 +615,6 @@ export function createGPSNavigationController({ map, builder, i18n }) {
 
     if (!gpsMode) {
       clearGPSNavigation();
-
-      // Reset error tracking when GPS mode is disabled
       shownErrorCodes.clear();
     }
 
@@ -625,13 +630,17 @@ export function createGPSNavigationController({ map, builder, i18n }) {
     routeInfo = null;
     isArrived = false;
     lastRecalcTime = 0;
+    isCalculatingRoute = false;
 
     pendingRouteBuild = false;
     didShowWaitingToast = false;
 
     dialogState = false;
-
     isFirstPosition = true;
+
+    if (gpsTracker) {
+      gpsTracker.resetRoute();
+    }
 
     removeUserMarker();
 
@@ -657,6 +666,12 @@ export function createGPSNavigationController({ map, builder, i18n }) {
 
     clearGPSNavigation();
     shownErrorCodes.clear();
+
+    // Reset ready/mode flags so the controller can be re-initialized cleanly
+    gpsReady = false;
+    gpsMode = false;
+    gpsLoading = false;
+    isOutOfBounds = false;
 
     console.log('[GPSNavigation] Disposed');
   }
