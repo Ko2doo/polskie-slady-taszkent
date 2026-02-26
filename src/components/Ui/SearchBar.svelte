@@ -16,10 +16,20 @@
     nameSpace = "articles",
     fields = ["title", "description"],
     value = $bindable(""),
+    shouldFocus = false,
     onHideBar = () => {},
     onQueryChange = null,
     onResults = null,
   } = $props();
+
+  let inputEl = $state(null);
+
+  $effect(() => {
+    if (shouldFocus === true) {
+      const element = document.getElementById("searchbarInput");
+      if (element) element.focus();
+    }
+  });
 
   /**
    * normalizeString
@@ -125,6 +135,7 @@
 <Searchbar
   {value}
   placeholder={$i18n.t("ui:searchbar:placeholder")}
+  inputId="searchbarInput"
   onInput={handleSearch}
   onClear={handleClear}
   disableButton

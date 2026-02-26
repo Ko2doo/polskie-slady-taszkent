@@ -53,11 +53,11 @@
   }
 
   onMount(() => {
-    initAppFirstStart();
-    initBackButtonHandler();
-
     // Initialize theme as soon app mounts
     getThemeManager().init();
+
+    initAppFirstStart();
+    initBackButtonHandler();
   });
 </script>
 
@@ -85,7 +85,7 @@
         {/snippet}
       </Navbar>
     {:else}
-      <Navbar title={$navbarState.title ?? ""}>
+      <Navbar title={$navbarState.title ?? ""} class="pb-2 rounded-b-2xl">
         <!-- Left content -->
         {#snippet left()}
           {#if $navbarState.leftSnippet}
@@ -104,13 +104,6 @@
 
     <!-- Centered content -->
     <main class="flex-1 overflow-y-auto" onscroll={handleScroll}>
-      <!-- prettier-ignore -->
-      <WelcomDialog
-        {i18n}
-        appState={APP_FIRST_START_STATE}
-        makeCompleted={markFirstStartCompleted}
-      />
-
       <Router
         {routes}
         hooks={{
@@ -118,7 +111,6 @@
         }}
         {i18n}
       />
-      <ExitToast {i18n} />
     </main>
 
     <!-- Panel -->
@@ -142,6 +134,15 @@
         {@render $panelState.contentSnippet()}
       {/if}
     </Panel>
+
+    <!-- prettier-ignore -->
+    <WelcomDialog
+      {i18n}
+      appState={APP_FIRST_START_STATE}
+      makeCompleted={markFirstStartCompleted}
+    />
+
+    <ExitToast {i18n} />
 
     <!-- Error toast init -->
     <ErrorHandlerToast {i18n} />

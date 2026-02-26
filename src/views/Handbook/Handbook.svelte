@@ -92,7 +92,7 @@
     const currentY = scrollState.y;
 
     if (!isSearchBarActive) {
-      if (currentY > lastY && currentY > 120) {
+      if (currentY > lastY && currentY > 80) {
         isSearchBarVisible = false;
         hasScrolledPast = true;
       } else if (currentY < lastY && currentY === 0) {
@@ -151,9 +151,11 @@
 {/snippet}
 
 {#snippet SearchBarOpenedButton()}
-  <Link iconOnly onClick={openSearch}>
-    <SearchIcon />
-  </Link>
+  {#if !isSearchBarActive}
+    <Link iconOnly onClick={openSearch}>
+      <SearchIcon />
+    </Link>
+  {/if}
 {/snippet}
 
 {#snippet Subnavigation()}
@@ -162,6 +164,7 @@
     items={articlesMeta}
     nameSpace="articles"
     fields={["title", "description"]}
+    shouldFocus={isSearchBarActive}
     onHideBar={closeSearch}
     onResults={handleSearchResults}
     onQueryChange={(v) => (query = v)}
@@ -184,8 +187,7 @@
 {:else}
   <section
     class={layout ? layout.classes : "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4"}
-    in:fade={{ duration: 90 }}
-    out:fade={{ duration: 120 }}
+    transition:fade={{ duration: 120 }}
   >
     {#each itemsView as article (article.id)}
       <Card class="flex flex-col justify-between">

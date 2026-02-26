@@ -7,7 +7,7 @@
 
   import { translations } from "@/locales/collections";
 
-  let { i18n, targetElement, ...btnSettings } = $props();
+  let { i18n, ...btnSettings } = $props();
 
   let popoverState = $state(false);
   let popoverTargetEl = $state(null);
@@ -44,7 +44,7 @@
   });
 </script>
 
-<Button {...btnSettings} class="popover-button" onClick={() => popoverClickHandler(targetElement)}>
+<Button {...btnSettings} class="popover-trigger" onClick={() => popoverClickHandler(".popover-trigger")}>
   {currentLocale}
 </Button>
 

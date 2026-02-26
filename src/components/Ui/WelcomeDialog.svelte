@@ -1,5 +1,5 @@
 <script>
-  import { Popup, Navbar, Block, Button } from "konsta/svelte";
+  import { Popup, Navbar, Block, Button, Page } from "konsta/svelte";
 
   // Use permission service
   import { requestLocationPermission, openAppSettings } from "@/capacitor/services/locationPermission";
@@ -131,91 +131,92 @@
 </script>
 
 <Popup backdrop={true} opened={welcomeDialogToggler.value} class="welcome-popup">
-  <!-- prettier-ignore -->
-  <Navbar
-    title={activeStep === 1
-      ? $i18n.t("ui:dialog:onboarding:step1Title")
-      : $i18n.t("ui:dialog:onboarding:step2Title")}
+  <Page>
+    <!-- prettier-ignore -->
+    <Navbar
+      title={activeStep === 1
+        ? $i18n.t("ui:dialog:onboarding:step1Title")
+        : $i18n.t("ui:dialog:onboarding:step2Title")}
 
-    subtitle={`
-      ${$i18n.t("ui:dialog:onboarding:step")}
-      ${activeStep}
-      ${$i18n.t("ui:dialog:onboarding:stepOf")}
-      ${TOTAL_STEPS}
-    `}
-  >
-  </Navbar>
+      subtitle={`
+        ${$i18n.t("ui:dialog:onboarding:step")}
+        ${activeStep}
+        ${$i18n.t("ui:dialog:onboarding:stepOf")}
+        ${TOTAL_STEPS}
+      `}>
+    </Navbar>
 
-  <Block inset class="px-4">
-    {#if activeStep === 1}
-      <div class="space-y-4">
-        <p class="text-base leading-relaxed">
-          {$i18n.t("ui:dialog:onboarding:step1Info")}
-        </p>
-
-        <div class="space-y-4">
-          <p class="flex items-center text-lg font-medium text-gray-700 dark:text-gray-300">
-            {$i18n.t("ui:dialog:onboarding:step1Settings")}
+    <Block inset class="px-4">
+      {#if activeStep === 1}
+        <div class="mt-6 space-y-4">
+          <p class="text-base leading-relaxed">
+            {$i18n.t("ui:dialog:onboarding:step1Info")}
           </p>
 
-          <div class="flex items-center justify-between">
-            <span class="flex text-[16px]">
-              <TranslateIcon className="size-5 mr-2" />
-              {$i18n.t("ui:dialog:onboarding:step1Locales")}
-            </span>
-            <div class="size-min">
-              <LangSwitcher raise={true} rounded={true} {i18n} targetElement=".welcome-popup" />
+          <div class="mt-8 space-y-4">
+            <p class="flex items-center text-lg font-medium text-gray-700 dark:text-gray-300">
+              {$i18n.t("ui:dialog:onboarding:step1Settings")}
+            </p>
+
+            <div class="flex items-center justify-between">
+              <span class="flex text-[16px]">
+                <TranslateIcon className="size-5 mr-2" />
+                {$i18n.t("ui:dialog:onboarding:step1Locales")}
+              </span>
+              <div class="size-min">
+                <LangSwitcher raise={true} rounded={true} {i18n} />
+              </div>
+            </div>
+
+            <div class="flex flex-col">
+              <p class="flex items-center text-[16px]">
+                <PaletteIcon className="size-5 mr-2" />
+                {$i18n.t("ui:dialog:onboarding:step1Appearance")}
+              </p>
+              <DarkModeToggler inset={true} nested={true} {i18n} />
             </div>
           </div>
 
-          <div class="flex flex-col">
-            <p class="flex items-center text-[16px]">
-              <PaletteIcon className="size-5 mr-2" />
-              {$i18n.t("ui:dialog:onboarding:step1Appearance")}
+          <div class="flex gap-2 justify-end pt-2">
+            <Button inline rounded raised onClick={nextStep}>
+              {$i18n.t("ui:buttons:continue")}
+            </Button>
+          </div>
+        </div>
+      {/if}
+
+      {#if activeStep === 2}
+        <div class="space-y-4">
+          <div class="text-center space-y-2">
+            <GPSIcon className="size-14 ml-auto mr-auto" />
+            <h3 class="text-lg font-semibold">{$i18n.t("ui:dialog:onboarding:step2Info")}</h3>
+            <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+              {$i18n.t("ui:dialog:onboarding:step2Msg")}
             </p>
-            <DarkModeToggler inset={true} nested={true} {i18n} />
+          </div>
+
+          <div class="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-3">
+            <p class="text-xs text-blue-800 dark:text-blue-200">
+              {$i18n.t("ui:dialog:onboarding:step2Warning")}
+            </p>
+          </div>
+
+          <div class="flex gap-2 justify-between pt-2">
+            <Button inline rounded onClick={prevStep} disabled={isRequestingPermission}>
+              {$i18n.t("ui:buttons:back")}
+            </Button>
+
+            <div class="flex gap-2">
+              <Button inline rounded onClick={completeOnboarding} disabled={isRequestingPermission}>
+                {$i18n.t("ui:buttons:skip")}
+              </Button>
+              <Button inline rounded raised onClick={handleRequestPermission} disabled={isRequestingPermission}>
+                {isRequestingPermission ? $i18n.t("ui:buttons:waiting") : $i18n.t("ui:buttons:allow")}
+              </Button>
+            </div>
           </div>
         </div>
-
-        <div class="flex gap-2 justify-end pt-2">
-          <Button inline rounded raised onClick={nextStep}>
-            {$i18n.t("ui:buttons:continue")}
-          </Button>
-        </div>
-      </div>
-    {/if}
-
-    {#if activeStep === 2}
-      <div class="space-y-4">
-        <div class="text-center space-y-2">
-          <GPSIcon className="size-14 ml-auto mr-auto" />
-          <h3 class="text-lg font-semibold">{$i18n.t("ui:dialog:onboarding:step2Info")}</h3>
-          <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-            {$i18n.t("ui:dialog:onboarding:step2Msg")}
-          </p>
-        </div>
-
-        <div class="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-3">
-          <p class="text-xs text-blue-800 dark:text-blue-200">
-            {$i18n.t("ui:dialog:onboarding:step2Warning")}
-          </p>
-        </div>
-
-        <div class="flex gap-2 justify-between pt-2">
-          <Button inline rounded onClick={prevStep} disabled={isRequestingPermission}>
-            {$i18n.t("ui:buttons:back")}
-          </Button>
-
-          <div class="flex gap-2">
-            <Button inline rounded onClick={completeOnboarding} disabled={isRequestingPermission}>
-              {$i18n.t("ui:buttons:skip")}
-            </Button>
-            <Button inline rounded raised onClick={handleRequestPermission} disabled={isRequestingPermission}>
-              {isRequestingPermission ? $i18n.t("ui:buttons:waiting") : $i18n.t("ui:buttons:allow")}
-            </Button>
-          </div>
-        </div>
-      </div>
-    {/if}
-  </Block>
+      {/if}
+    </Block>
+  </Page>
 </Popup>
