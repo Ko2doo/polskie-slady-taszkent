@@ -140,5 +140,8 @@ export default {
       darkMode: 'Тёмная тема',
       followSystem: 'Следовать системе',
     },
+    about: {
+      popupTitle: 'О проекте',
+    },
   },
 };

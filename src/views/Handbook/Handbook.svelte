@@ -3,9 +3,9 @@
   import { goto, normalize } from "@mateothegreat/svelte5-router";
 
   // Filters and searching
-  import LayoutSwitcher from "@/components/Ui/Filters/LayoutSwitcher.svelte";
-  import SortingByCategories from "@/components/Ui/Filters/SortingByCategories.svelte";
-  import SearchBar from "@/components/Ui/SearchBar.svelte";
+  import LayoutSwitcher from "@/components/Filters/LayoutSwitcher.svelte";
+  import SortingByCategories from "@/components/Filters/SortingByCategories.svelte";
+  import SearchBar from "@/components/SearchBar.svelte";
 
   // Icons
   import FilterIcon from "@/lib/icons/FilterIcon.svelte";

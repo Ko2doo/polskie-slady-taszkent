@@ -6,7 +6,6 @@
 
   // Capacitor
   import { initBackButtonHandler } from "@/capacitor/backButton";
-  import ExitToast from "@/components/Ui/ExitToast.svelte";
 
   // i18Next
   import { i18nStores } from "@/capacitor/services/i18n";
@@ -19,18 +18,21 @@
   import { navigationHistoryPostHook } from "@/services/navigationHistoryHook";
 
   // Components
-  import BottomTabbarNav from "@/components/Ui/BottomTabbarNav.svelte";
+  import BottomTabbarNav from "@/components/BottomTabbarNav.svelte";
+  import ErrorHandlerToast from "@/components/ErrorHandlerToast.svelte";
+  import ExitToast from "@/components/ExitToast.svelte";
+  import OnboardingWizard from "@/components/OnboardingWizard.svelte";
+
+  // Icons
+  import Close from "@/lib/icons/Close.svelte";
 
   // Store imports
   import { navbarState } from "@/store/ui/navbar";
   import { panelState, openPanel, closePanel } from "@/store/ui/panel";
-
-  import { getThemeManager } from "@/lib/theme/themeManager";
-  import ErrorHandlerToast from "./components/Ui/ErrorHandlerToast.svelte";
-
-  import Close from "./lib/icons/Close.svelte";
   import { initFirstLaunch, APP_FIRST_LAUNCH_STORAGE_VAL, markFirstLaunchCompleted } from "@/store/appStartInitialize";
-  import OnboardingWizard from "./components/Ui/OnboardingWizard.svelte";
+
+  // Theme manager
+  import { getThemeManager } from "@/lib/theme/themeManager";
 
   function createScrollState() {
     let y = $state(0);

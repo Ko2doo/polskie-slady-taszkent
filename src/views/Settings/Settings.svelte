@@ -1,13 +1,17 @@
 <script>
-  import { Block, BlockTitle, MenuList, MenuListItem } from "konsta/svelte";
+  import { Block, BlockTitle, Button, MenuList, MenuListItem } from "konsta/svelte";
   // Components
-  import LangSwitcher from "@/components/Ui/LangSwitcher.svelte";
+  import LangSwitcher from "@/components/LangSwitcher.svelte";
   import TranslateIcon from "@/lib/icons/TranslateIcon.svelte";
   import PaletteIcon from "@/lib/icons/PaletteIcon.svelte";
 
   import { resolvePageKeyFromRouteResult } from "@/utils/routerUtils";
   import { withNavbar } from "@/store/ui/navbar";
-  import DarkModeToggler from "@/components/Ui/DarkModeToggler.svelte";
+  import DarkModeToggler from "@/components/DarkModeToggler.svelte";
+
+  import { createToggle } from "@/lib/state/createToggler.svelte";
+  import AboutProject from "@/components/AboutProject.svelte";
+  const popupToggler = createToggle();
 
   // router props
   let { route, i18n } = $props();
@@ -83,5 +87,10 @@
     <DarkModeToggler {i18n} inset={true} />
   </Block>
 
-  <Block strong inset>About information, app version, copyright and other</Block>
+  <Block strong inset>
+    About information, app version, copyright and other
+
+    <Button raised rounded inline onClick={() => popupToggler.open()}>О проекте</Button>
+    <AboutProject {i18n} {popupToggler} />
+  </Block>
 </section>

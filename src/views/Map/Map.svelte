@@ -40,7 +40,7 @@
 
   // Components
   // import NavigationControl from "@/components/Ui/NavigationControl.svelte";
-  import NavigationSheet from "@/components/Ui/Navigation/NavigationSheet.svelte";
+  import NavigationSheet from "@/components/Navigation/NavigationSheet.svelte";
   import { createToggle } from "@/lib/state/createToggler.svelte";
 
   // Map modules

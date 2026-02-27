@@ -4,9 +4,9 @@
 
   // Icons
   import Close from "@/lib/icons/Close.svelte";
-  import ModeSelection from "./ModeSelection.svelte";
+  import ModeSelection from "./NavigationModeSelection.svelte";
   import NavigationInstruction from "./NavigationInstruction.svelte";
-  import RouteInfo from "./RouteInfo.svelte";
+  import RouteInfo from "./NavigationRouteInfo.svelte";
   import NavigationArrivalMsg from "./NavigationArrivalMsg.svelte";
 
   let {
