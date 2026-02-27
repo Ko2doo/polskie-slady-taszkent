@@ -15,9 +15,13 @@
     </Navbar>
 
     <Block strong inset>
-      <div class="logo-wrapper flex justify-center">
+      <figure class="logo-wrapper flex flex-col items-center">
         <SPLogo />
-      </div>
+
+        <figcaption class="mt-4">
+          {@html $i18n.t("ui:settings:about:info")}
+        </figcaption>
+      </figure>
     </Block>
   </Page>
 </Popup>

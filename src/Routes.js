@@ -7,7 +7,7 @@
 import Handbook from '@/views/Handbook/Handbook.svelte';
 import Map from '@/views/Map/Map.svelte';
 import Settings from '@/views/Settings/Settings.svelte';
-import PopupArticle from '@/components/Ui/PopupArticle.svelte';
+import PopupArticle from '@/components/PopupArticle.svelte';
 
 // Router params (paths, components & etc.)
 export const routes = [
