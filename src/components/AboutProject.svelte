@@ -1,27 +1,57 @@
 <script>
+  import { Block, NavbarBackLink } from "konsta/svelte";
+
+  import { resolvePageKeyFromRouteResult } from "@/utils/routerUtils";
+  import { withNavbar } from "@/store/ui/navbar";
+
+  // Icons
   import Close from "@/lib/icons/Close.svelte";
   import SPLogo from "@/lib/icons/SPLogo.svelte";
-  import { Block, Link, Navbar, Page, Popup } from "konsta/svelte";
 
-  let { i18n, popupToggler } = $props();
+  import { routerBack } from "@/services/navigationHistoryHook";
+
+  let { route, i18n } = $props();
+
+  $effect(() => {
+    const result = route?.result;
+    // console.log(result);
+
+    // get "pageKey" from route path
+    //    "/about" -> "about"
+    //    "/handbook" -> "handbook"
+    const pageKey = resolvePageKeyFromRouteResult(result);
+
+    /* prettier-ignore */
+    const title = pageKey
+      ? $i18n.t(`ui:navbar:${pageKey}:title`)
+      : "";
+
+    const dispose = withNavbar({
+      title: title || pageKey,
+      showSidePanel: false,
+      leftSnippet: BackButton,
+    });
+
+    return dispose;
+  });
+
+  function handleBack() {
+    routerBack("/");
+  }
 </script>
 
-<Popup opened={popupToggler.value} backdrop={true}>
-  <Page>
-    <Navbar title={$i18n.t("ui:settings:about:popupTitle")}>
-      {#snippet right()}
-        <Link iconOnly onClick={() => popupToggler.close()}><Close /></Link>
-      {/snippet}
-    </Navbar>
+{#snippet BackButton()}
+  <NavbarBackLink text="Back" onClick={handleBack} />
+{/snippet}
 
-    <Block strong inset>
-      <figure class="logo-wrapper flex flex-col items-center">
-        <SPLogo />
+<section class="about-view relative z-60 flex flex-col">
+  <Block strong inset>
+    <figure class="logo-wrapper flex flex-col items-center">
+      <SPLogo />
 
-        <figcaption class="mt-4">
-          {@html $i18n.t("ui:settings:about:info")}
-        </figcaption>
-      </figure>
-    </Block>
-  </Page>
-</Popup>
+      <figcaption class="mt-4">
+        {@html $i18n.t("ui:more:about:info")}
+      </figcaption>
+    </figure>
+  </Block>
+</section>

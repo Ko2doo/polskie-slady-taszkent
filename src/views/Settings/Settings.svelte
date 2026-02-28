@@ -1,5 +1,5 @@
 <script>
-  import { Block, BlockTitle, Button, MenuList, MenuListItem } from "konsta/svelte";
+  import { Block, BlockTitle, NavbarBackLink } from "konsta/svelte";
   // Components
   import LangSwitcher from "@/components/LangSwitcher.svelte";
   import TranslateIcon from "@/lib/icons/TranslateIcon.svelte";
@@ -9,9 +9,7 @@
   import { withNavbar } from "@/store/ui/navbar";
   import DarkModeToggler from "@/components/DarkModeToggler.svelte";
 
-  import { createToggle } from "@/lib/state/createToggler.svelte";
-  import AboutProject from "@/components/AboutProject.svelte";
-  const popupToggler = createToggle();
+  import { routerBack } from "@/services/navigationHistoryHook";
 
   // router props
   let { route, i18n } = $props();
@@ -36,12 +34,20 @@
     const dispose = withNavbar({
       title: title || pageKey,
       showSidePanel: false,
-      showFavorites: false,
+      leftSnippet: BackButton,
     });
 
     return dispose;
   });
+
+  function handleBack() {
+    routerBack("/");
+  }
 </script>
+
+{#snippet BackButton()}
+  <NavbarBackLink text="Back" onClick={handleBack} />
+{/snippet}
 
 <section class="settings-view relative z-60 flex flex-col">
   <Block strong inset>
@@ -85,12 +91,5 @@
     </div>
 
     <DarkModeToggler {i18n} inset={true} />
-  </Block>
-
-  <Block strong inset>
-    About information, app version, copyright and other
-
-    <Button raised rounded inline onClick={() => popupToggler.open()}>О проекте</Button>
-    <AboutProject {i18n} {popupToggler} />
   </Block>
 </section>

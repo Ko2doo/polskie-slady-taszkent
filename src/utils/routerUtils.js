@@ -37,8 +37,14 @@ export function resolvePageKeyFromRouteResult(result) {
     case '/map':
       return 'map';
 
+    case '/more':
+      return 'more';
+
     case '/settings':
       return 'settings';
+
+    case '/about':
+      return 'about';
 
     default:
       // fallback

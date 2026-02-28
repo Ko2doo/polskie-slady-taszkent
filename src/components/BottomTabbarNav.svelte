@@ -9,7 +9,7 @@
   // Icons
   import HandbookIcon from "@/lib/icons/HandbookIcon.svelte";
   import PaperMapIcon from "@/lib/icons/PaperMapIcon.svelte";
-  import SettingsIcon from "@/lib/icons/SettingsIcon.svelte";
+  import MenuDotsIcon from "@/lib/icons/MenuDotsIcon.svelte";
 
   let { i18n } = $props();
 
@@ -43,9 +43,9 @@
       icon: PaperMapIcon,
     },
     {
-      id: "settings",
-      href: "/settings",
-      icon: SettingsIcon,
+      id: "more",
+      href: "/more",
+      icon: MenuDotsIcon,
     },
   ];
 </script>

@@ -33,6 +33,9 @@ export default {
     about: {
       title: 'О нас',
     },
+    more: {
+      title: 'Ещё...',
+    },
     settings: {
       title: 'Настройки',
     },
@@ -139,6 +142,12 @@ export default {
       hint: 'Настройте внешний вид приложения. Автоматический режим следует за системной темой.',
       darkMode: 'Тёмная тема',
       followSystem: 'Следовать системе',
+    },
+  },
+  more: {
+    menuListItem: {
+      settingsTitle: 'Настройки',
+      aboutTitle: 'О проекте',
     },
     about: {
       popupTitle: 'О проекте',

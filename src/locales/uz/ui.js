@@ -33,6 +33,9 @@ export default {
     about: {
       title: 'Biz haqimizda',
     },
+    more: {
+      title: 'Ko‘proq...',
+    },
     settings: {
       title: 'Sozlamalar',
     },
@@ -140,6 +143,12 @@ export default {
       hint: "Ilova ko'\rinishini sozlang. Avtomatik rejim tizim mavzusiga amal qiladi.",
       darkMode: 'Qorong‘i mavzu',
       followSystem: 'Tizimga ergashish',
+    },
+  },
+  more: {
+    about: {
+      popupTitle: 'Loyiha haqida',
+      info: '<b>Oflayn GPS navigatsiyaga ega ma’lumotnoma ilovasi.</b> <p class="mt-4">U hozirgi O‘zbekiston hududida yashab, mintaqa tarixida muhim iz qoldirgan polyaklar bilan bog‘liq joylarni topish va o‘rganishga yordam beradi.<p class="mt-2">2025 yilda Agnieszka Mikulec tomonidan tashkil etilgan va O‘zbekistondagi polyaklar tarixiga bag‘ishlangan tadbir hamda ishtirokchilarga tarqatilgan qog‘oz marshrut xaritalari ushbu loyihaning raqamli shaklini yaratishga ilhom bo‘ldi — internetga ulanmasdan foydalanish mumkin bo‘lgan mobil ilova aynan shu g‘oya asosida yaratilgan.</p></p>',
     },
   },
 };

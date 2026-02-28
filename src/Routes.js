@@ -6,7 +6,9 @@
 
 import Handbook from '@/views/Handbook/Handbook.svelte';
 import Map from '@/views/Map/Map.svelte';
+import More from '@/views/More/More.svelte';
 import Settings from '@/views/Settings/Settings.svelte';
+import AboutProject from '@/components/AboutProject.svelte';
 import PopupArticle from '@/components/PopupArticle.svelte';
 
 // Router params (paths, components & etc.)
@@ -20,8 +22,16 @@ export const routes = [
     component: Map,
   },
   {
+    path: '/more',
+    component: More,
+  },
+  {
     path: '/settings',
     component: Settings,
+  },
+  {
+    path: '/about',
+    component: AboutProject,
   },
   {
     path: /^\/articles\/(.+)$/,
