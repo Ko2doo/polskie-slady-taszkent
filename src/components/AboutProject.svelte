@@ -1,5 +1,6 @@
 <script>
   import { Block, NavbarBackLink } from "konsta/svelte";
+  import { fly } from "svelte/transition";
 
   import { resolvePageKeyFromRouteResult } from "@/utils/routerUtils";
   import { withNavbar } from "@/store/ui/navbar";
@@ -44,7 +45,7 @@
   <NavbarBackLink text="Back" onClick={handleBack} />
 {/snippet}
 
-<section class="about-view relative z-60 flex flex-col">
+<section class="about-view relative z-60 flex flex-col" in:fly={{ duration: 120, x: 20 }}>
   <Block strong inset>
     <figure class="logo-wrapper flex flex-col items-center">
       <SPLogo />

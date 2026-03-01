@@ -1,5 +1,7 @@
 <script>
   import { Block, BlockTitle, NavbarBackLink } from "konsta/svelte";
+  import { fly } from "svelte/transition";
+
   // Components
   import LangSwitcher from "@/components/LangSwitcher.svelte";
   import TranslateIcon from "@/lib/icons/TranslateIcon.svelte";
@@ -49,7 +51,7 @@
   <NavbarBackLink text="Back" onClick={handleBack} />
 {/snippet}
 
-<section class="settings-view relative z-60 flex flex-col">
+<section class="settings-view relative z-60 flex flex-col" in:fly={{ duration: 120, x: 20 }}>
   <Block strong inset>
     <!-- Language section -->
     <BlockTitle large class="text-stone-500 justify-baseline">

@@ -1,7 +1,9 @@
 <script>
+  import { Block, MenuList, MenuListItem } from "konsta/svelte";
+  import { fly } from "svelte/transition";
+
   import { withNavbar } from "@/store/ui/navbar";
   import { resolvePageKeyFromRouteResult } from "@/utils/routerUtils";
-  import { Block, MenuList, MenuListItem } from "konsta/svelte";
 
   import { goto } from "@mateothegreat/svelte5-router";
 
@@ -40,33 +42,36 @@
 
   const menu = [
     {
-      id: "settingsTitle",
+      id: "settings",
       href: "/settings",
       icon: SettingsIcon,
     },
     {
-      id: "aboutTitle",
+      id: "about",
       href: "/about",
       icon: AboutUsIcon,
     },
   ];
 </script>
 
-<Block strong inset>
-  <MenuList>
-    {#each menu as menuItem (menuItem.id)}
-      <MenuListItem
-        title={$i18n.t(`ui:more:menuListItem:${menuItem.id}`)}
-        active={false}
-        dividers={true}
-        onClick={() => goto(menuItem.href)}
-      >
-        {#snippet media()}
-          <!-- Check this: https://svelte.dev/docs/svelte/compiler-warnings#svelte_component_deprecated -->
-          {@const IconComponent = menuItem.icon}
-          <IconComponent className="size-6" strokeColor="currentColor" />
-        {/snippet}
-      </MenuListItem>
-    {/each}
-  </MenuList>
-</Block>
+<section class="more-view" in:fly={{ duration: 120, y: 20 }}>
+  <Block strong inset>
+    <MenuList>
+      {#each menu as menuItem (menuItem.id)}
+        <MenuListItem
+          title={$i18n.t(`ui:more:menuListItem:${menuItem.id}Title`)}
+          active={false}
+          dividers={true}
+          onClick={() => goto(menuItem.href)}
+          linkProps={{ "data-link-id": menuItem.id }}
+        >
+          {#snippet media()}
+            <!-- Check this: https://svelte.dev/docs/svelte/compiler-warnings#svelte_component_deprecated -->
+            {@const IconComponent = menuItem.icon}
+            <IconComponent className="size-6" strokeColor="currentColor" />
+          {/snippet}
+        </MenuListItem>
+      {/each}
+    </MenuList>
+  </Block>
+</section>

@@ -25,7 +25,7 @@
 
   // Layout global store
   import { layoutView } from "@/store/ui/layoutView";
-  import { fade } from "svelte/transition";
+  import { fade, fly } from "svelte/transition";
 
   // Route prop (Svelte 5)
   let { route, i18n } = $props();
@@ -176,39 +176,41 @@
   <SortingByCategories {i18n} items={articlesMeta} onSelectedChange={handleCatUpdate} />
 {/snippet}
 
-{#if query.trim() && itemsView.length === 0}
-  <section class="grid grid-1 justify-center" in:fade={{ duration: 120 }}>
-    <BlockTitle large class="flex-col">
-      <ShieldWarningIcon className="size-20 mb-2 text-red-500" />
+<section in:fly={{ duration: 120, y: 20 }}>
+  {#if query.trim() && itemsView.length === 0}
+    <section class="grid grid-1 justify-center" in:fade={{ duration: 120 }}>
+      <BlockTitle large class="flex-col">
+        <ShieldWarningIcon className="size-20 mb-2 text-red-500" />
 
-      {$i18n.t("errors:notFound")}
-    </BlockTitle>
-  </section>
-{:else}
-  <section
-    class={layout ? layout.classes : "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4"}
-    in:fade={{ duration: 120 }}
-  >
-    {#each itemsView as article (article.id)}
-      <Card class="flex flex-col justify-between">
-        {#snippet header()}
-          <h1 class="w-full text-gray-900 dark:text-stone-300 text-base font-medium sm:font-bold sm:text-xl">
-            {$i18n.t(`articles:${article.id}:title`)}
-          </h1>
-        {/snippet}
+        {$i18n.t("errors:notFound")}
+      </BlockTitle>
+    </section>
+  {:else}
+    <section
+      class={layout ? layout.classes : "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4"}
+      in:fade={{ duration: 120 }}
+    >
+      {#each itemsView as article (article.id)}
+        <Card class="flex flex-col justify-between">
+          {#snippet header()}
+            <h1 class="w-full text-gray-900 dark:text-stone-300 text-base font-medium sm:font-bold sm:text-xl">
+              {$i18n.t(`articles:${article.id}:title`)}
+            </h1>
+          {/snippet}
 
-        <p class="line-clamp-3 text-sm sm:text-base">
-          {@html $i18n.t(`articles:${article.id}:description`)}
-        </p>
+          <p class="line-clamp-3 text-sm sm:text-base">
+            {@html $i18n.t(`articles:${article.id}:description`)}
+          </p>
 
-        {#snippet footer()}
-          <div class="flex justify-between space-x-2 rtl:space-x-reverse">
-            <Button small raised rounded inline class="text-sm" onClick={() => openArticle(article.id)}>
-              {$i18n.t("ui:buttons:readMore")}
-            </Button>
-          </div>
-        {/snippet}
-      </Card>
-    {/each}
-  </section>
-{/if}
+          {#snippet footer()}
+            <div class="flex justify-between space-x-2 rtl:space-x-reverse">
+              <Button small raised rounded inline class="text-sm" onClick={() => openArticle(article.id)}>
+                {$i18n.t("ui:buttons:readMore")}
+              </Button>
+            </div>
+          {/snippet}
+        </Card>
+      {/each}
+    </section>
+  {/if}
+</section>
