@@ -9,6 +9,7 @@
 
   import { resolvePageKeyFromRouteResult } from "@/utils/routerUtils";
   import { withNavbar } from "@/store/ui/navbar";
+  import { setTabbar } from "@/store/ui/bottomTabbarNav";
   import DarkModeToggler from "@/components/DarkModeToggler.svelte";
 
   import { routerBack } from "@/services/navigationHistoryHook";
@@ -40,6 +41,12 @@
     });
 
     return dispose;
+  });
+
+  $effect(() => {
+    setTabbar({
+      isVisible: false,
+    });
   });
 
   function handleBack() {

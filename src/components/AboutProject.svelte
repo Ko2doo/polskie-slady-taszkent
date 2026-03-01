@@ -4,6 +4,7 @@
 
   import { resolvePageKeyFromRouteResult } from "@/utils/routerUtils";
   import { withNavbar } from "@/store/ui/navbar";
+  import { setTabbar } from "@/store/ui/bottomTabbarNav";
 
   // Icons
   import Close from "@/lib/icons/Close.svelte";
@@ -34,6 +35,12 @@
     });
 
     return dispose;
+  });
+
+  $effect(() => {
+    setTabbar({
+      isVisible: false,
+    });
   });
 
   function handleBack() {

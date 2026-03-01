@@ -6,6 +6,8 @@
   import { Icon } from "konsta/svelte";
   import { route as linkAction } from "@mateothegreat/svelte5-router";
 
+  import { fly } from "svelte/transition";
+
   // Icons
   import HandbookIcon from "@/lib/icons/HandbookIcon.svelte";
   import PaperMapIcon from "@/lib/icons/PaperMapIcon.svelte";
@@ -50,7 +52,11 @@
   ];
 </script>
 
-<nav class="pb-safe-4 px-safe-4 flex justify-center w-full z-20">
+<nav
+  class="pb-safe-4 px-safe-4 flex justify-center w-full z-20"
+  in:fly={{ duration: 120, y: 20 }}
+  out:fly={{ duration: 120, y: 20 }}
+>
   <div class="gap-4 items-stretch h-16 w-full md:w-auto flex justify-between">
     <div
       class="bg-ios-light-glass shadow-ios-light-glass backdrop-blur-lg touch-none dark:bg-ios-dark-glass dark:shadow-ios-dark-glass flex justify-between items-center h-full rounded-full w-full md:w-auto p-1"

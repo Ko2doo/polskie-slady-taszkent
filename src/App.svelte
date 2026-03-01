@@ -30,6 +30,7 @@
   import { navbarState } from "@/store/ui/navbar";
   import { panelState, openPanel, closePanel } from "@/store/ui/panel";
   import { initFirstLaunch, APP_FIRST_LAUNCH_STORAGE_VAL, markFirstLaunchCompleted } from "@/store/appStartInitialize";
+  import { bottomTabbarState } from "@/store/ui/bottomTabbarNav";
 
   // Theme manager
   import { getThemeManager } from "@/lib/theme/themeManager";
@@ -149,7 +150,9 @@
     <!-- Error toast init -->
     <ErrorHandlerToast {i18n} />
 
-    <!-- Fixed bottom navigation -->
-    <BottomTabbarNav {i18n} />
+    {#if $bottomTabbarState.isVisible}
+      <!-- Fixed bottom navigation -->
+      <BottomTabbarNav {i18n} />
+    {/if}
   </Page>
 </App>

@@ -3,6 +3,7 @@
   import { fly } from "svelte/transition";
 
   import { withNavbar } from "@/store/ui/navbar";
+  import { resetTabbar } from "@/store/ui/bottomTabbarNav";
   import { resolvePageKeyFromRouteResult } from "@/utils/routerUtils";
 
   import { goto } from "@mateothegreat/svelte5-router";
@@ -38,6 +39,11 @@
     });
 
     return dispose;
+  });
+
+  $effect(() => {
+    // Default tabbar state
+    resetTabbar();
   });
 
   const menu = [
