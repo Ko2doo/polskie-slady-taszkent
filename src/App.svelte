@@ -57,7 +57,7 @@
     scrollState.y = e.currentTarget.scrollTop;
   }
 
-  let APP_READY = $state(true);
+  let APP_READY = $state(false);
 
   $effect(() => {
     setTimeout(() => {

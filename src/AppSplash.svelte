@@ -1,3 +1,5 @@
+<script></script>
+
 <div class="app-splash-screen">
   <img class="app-logo" src="/icon.svg" alt="App logo" />
   <h1 class="app-name">Polskie Ślady Taszkent</h1>
