@@ -1,5 +1,6 @@
 <script>
   import { Popup, Navbar, Block, Button, Page } from "konsta/svelte";
+  import { fly } from "svelte/transition";
 
   // Use permission service
   import { requestLocationPermission, openAppSettings } from "@/capacitor/services/locationPermission";
@@ -148,7 +149,7 @@
 
     <Block inset class="onboarding-wizard-content mt-auto mb-auto px-4">
       {#if activeStep === 1}
-        <div class="mt-6 space-y-4">
+        <div class="mt-6 space-y-4" in:fly={{ duration: 120, x: 20 }}>
           <div class="text-center space-y-2">
             <h3 class="text-lg font-semibold">
               {$i18n.t("ui:dialog:onboarding:welcomeDialog")}
@@ -160,7 +161,7 @@
 
           <div class="mt-8 space-y-4">
             <div class="flex items-center justify-between">
-              <span class="flex text-[16px]">
+              <span class="flex text-[18px]">
                 <TranslateIcon className="size-5 mr-2" />
                 {$i18n.t("ui:dialog:onboarding:step1Locales")}
               </span>
@@ -170,7 +171,7 @@
             </div>
 
             <div class="flex flex-col">
-              <p class="flex items-center text-[16px]">
+              <p class="flex items-center text-[18px]">
                 <PaletteIcon className="size-5 mr-2" />
                 {$i18n.t("ui:dialog:onboarding:step1Appearance")}
               </p>
@@ -187,9 +188,8 @@
       {/if}
 
       {#if activeStep === 2}
-        <div class="space-y-4">
+        <div class="space-y-4" in:fly={{ duration: 120, x: 20 }}>
           <div class="text-center space-y-2">
-            <GPSIcon className="size-14 ml-auto mr-auto" />
             <h3 class="text-lg font-semibold">{$i18n.t("ui:dialog:onboarding:step2Info")}</h3>
             <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
               {$i18n.t("ui:dialog:onboarding:step2Msg")}

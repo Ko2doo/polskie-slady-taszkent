@@ -1,5 +1,12 @@
 {
   "appId": "com.github.polskiesladytaszkent",
-  "appName": "Polskie Slady Taszkent",
-  "webDir": "dist"
+  "appName": "Polskie Ślady Taszkent",
+  "webDir": "dist",
+  "plugins": {
+    "SplashScreen": {
+      "launchAutoHide": false,
+      "backgroundColor": "#ffffff",
+      "showSpinner": false
+    }
+  }
 }

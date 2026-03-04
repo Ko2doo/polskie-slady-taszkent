@@ -31,5 +31,5 @@
    * Use global.d.ts instead of compilerOptions.types
    * to avoid limiting type declarations.
    */
-  "include": ["src/**/*.js", "src/**/*.svelte", "src/main.js", "src/main.js"]
+  "include": ["src/**/*.js", "src/**/*.svelte", "src/main.js"]
 }

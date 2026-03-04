@@ -1,6 +1,8 @@
 <script>
   import { App, Page, Navbar, Panel, Link, Block } from "konsta/svelte";
 
+  import AppSplash from "@/AppSplash.svelte";
+
   // Svelte
   import { onMount, setContext } from "svelte";
 
@@ -33,7 +35,7 @@
   import { bottomTabbarState } from "@/store/ui/bottomTabbarNav";
 
   // Theme manager
-  import { getThemeManager } from "@/lib/theme/themeManager";
+  // import { getThemeManager } from "@/lib/theme/themeManager";
 
   function createScrollState() {
     let y = $state(0);
@@ -55,104 +57,116 @@
     scrollState.y = e.currentTarget.scrollTop;
   }
 
+  let APP_READY = $state(true);
+
+  $effect(() => {
+    setTimeout(() => {
+      APP_READY = true;
+    }, 1500);
+  });
+
   onMount(() => {
     // Initialize theme as soon app mounts
-    getThemeManager().init();
+    // getThemeManager().init();
 
     initFirstLaunch();
     initBackButtonHandler();
   });
 </script>
 
-<App theme="ios" safeAreas>
-  <Page class="flex flex-col min-h-[100dvh] !p-0">
-    {#if $navbarState.subnavSnippet}
-      <Navbar title={$navbarState.title ?? ""}>
-        <!-- Left content -->
-        {#snippet left()}
-          {#if $navbarState.leftSnippet}
-            {@render $navbarState.leftSnippet()}
-          {/if}
-        {/snippet}
+{#if !APP_READY}
+  <AppSplash />
+{:else}
+  <App theme="ios" safeAreas>
+    <Page class="flex flex-col min-h-[100dvh] !p-0">
+      {#if $navbarState.subnavSnippet}
+        <Navbar title={$navbarState.title ?? ""}>
+          <!-- Left content -->
+          {#snippet left()}
+            {#if $navbarState.leftSnippet}
+              {@render $navbarState.leftSnippet()}
+            {/if}
+          {/snippet}
 
-        <!-- Right content -->
-        {#snippet right()}
-          {#if $navbarState.rightSnippet}
-            {@render $navbarState.rightSnippet()}
-          {/if}
-        {/snippet}
+          <!-- Right content -->
+          {#snippet right()}
+            {#if $navbarState.rightSnippet}
+              {@render $navbarState.rightSnippet()}
+            {/if}
+          {/snippet}
 
-        <!-- Subnav -->
-        {#snippet subnavbar()}
-          {@render $navbarState.subnavSnippet()}
-        {/snippet}
-      </Navbar>
-    {:else}
-      <Navbar title={$navbarState.title ?? ""} class="pb-2 rounded-b-2xl">
-        <!-- Left content -->
-        {#snippet left()}
-          {#if $navbarState.leftSnippet}
-            {@render $navbarState.leftSnippet()}
-          {/if}
-        {/snippet}
+          <!-- Subnav -->
+          {#snippet subnavbar()}
+            {@render $navbarState.subnavSnippet()}
+          {/snippet}
+        </Navbar>
+      {:else}
+        <Navbar title={$navbarState.title ?? ""} class="pb-2 rounded-b-2xl">
+          <!-- Left content -->
+          {#snippet left()}
+            {#if $navbarState.leftSnippet}
+              {@render $navbarState.leftSnippet()}
+            {/if}
+          {/snippet}
 
-        <!-- Right content -->
-        {#snippet right()}
-          {#if $navbarState.rightSnippet}
-            {@render $navbarState.rightSnippet()}
-          {/if}
-        {/snippet}
-      </Navbar>
-    {/if}
-
-    <!-- Centered content -->
-    <main class="flex-1 overflow-y-auto" onscroll={handleScroll}>
-      <Router
-        {routes}
-        hooks={{
-          post: navigationHistoryPostHook,
-        }}
-        {i18n}
-      />
-    </main>
-
-    <!-- Panel -->
-    <Panel
-      side={$panelState.side}
-      floating={$panelState.floating}
-      backdrop={$panelState.backdrop}
-      opened={$panelState.isOpen}
-      onBackdropClick={() => closePanel()}
-    >
-      <Navbar title={$panelState.title}>
-        {#snippet right()}
-          <Link iconOnly onClick={() => closePanel()}>
-            <Close />
-          </Link>
-        {/snippet}
-      </Navbar>
-
-      <!-- Dynamical content -->
-      {#if $panelState.contentSnippet}
-        {@render $panelState.contentSnippet()}
+          <!-- Right content -->
+          {#snippet right()}
+            {#if $navbarState.rightSnippet}
+              {@render $navbarState.rightSnippet()}
+            {/if}
+          {/snippet}
+        </Navbar>
       {/if}
-    </Panel>
 
-    <!-- prettier-ignore -->
-    <OnboardingWizard
+      <!-- Centered content -->
+      <main class="flex-1 overflow-y-auto" onscroll={handleScroll}>
+        <Router
+          {routes}
+          hooks={{
+            post: navigationHistoryPostHook,
+          }}
+          {i18n}
+        />
+      </main>
+
+      <!-- Panel -->
+      <Panel
+        side={$panelState.side}
+        floating={$panelState.floating}
+        backdrop={$panelState.backdrop}
+        opened={$panelState.isOpen}
+        onBackdropClick={() => closePanel()}
+      >
+        <Navbar title={$panelState.title}>
+          {#snippet right()}
+            <Link iconOnly onClick={() => closePanel()}>
+              <Close />
+            </Link>
+          {/snippet}
+        </Navbar>
+
+        <!-- Dynamical content -->
+        {#if $panelState.contentSnippet}
+          {@render $panelState.contentSnippet()}
+        {/if}
+      </Panel>
+
+      <!-- prettier-ignore -->
+      <OnboardingWizard
       {i18n}
       appState={APP_FIRST_LAUNCH_STORAGE_VAL}
       makeCompleted={markFirstLaunchCompleted}
     />
 
-    <ExitToast {i18n} />
+      <ExitToast {i18n} />
 
-    <!-- Error toast init -->
-    <ErrorHandlerToast {i18n} />
+      <!-- Error toast init -->
+      <ErrorHandlerToast {i18n} />
 
-    {#if $bottomTabbarState.isVisible}
-      <!-- Fixed bottom navigation -->
-      <BottomTabbarNav {i18n} />
-    {/if}
-  </Page>
-</App>
+      {#if $bottomTabbarState.isVisible}
+        <!-- Fixed bottom navigation -->
+        <BottomTabbarNav {i18n} />
+      {/if}
+    </Page>
+  </App>
+{/if}

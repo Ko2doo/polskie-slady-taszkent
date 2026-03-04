@@ -61,8 +61,18 @@
 </script>
 
 <section class="more-view" in:fly={{ duration: 120, y: 20 }}>
+  <Block nested>
+    <figure class="logo-wrapper flex flex-col items-center">
+      <img src="/project-logo.png" alt="Project logo" />
+
+      <figcaption class="mt-4 text-center">
+        {@html $i18n.t("about:shortInfo")}
+      </figcaption>
+    </figure>
+  </Block>
+
   <Block strong inset>
-    <MenuList>
+    <MenuList nested>
       {#each menu as menuItem (menuItem.id)}
         <MenuListItem
           title={$i18n.t(`ui:more:menuListItem:${menuItem.id}Title`)}

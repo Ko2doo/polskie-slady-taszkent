@@ -8,7 +8,6 @@
 
   // Icons
   import Close from "@/lib/icons/Close.svelte";
-  import SPLogo from "@/lib/icons/SPLogo.svelte";
 
   import { routerBack } from "@/services/navigationHistoryHook";
 
@@ -55,10 +54,8 @@
 <section class="about-view relative z-60 flex flex-col" in:fly={{ duration: 120, x: 20 }}>
   <Block strong inset>
     <figure class="logo-wrapper flex flex-col items-center">
-      <SPLogo />
-
       <figcaption class="mt-4">
-        {@html $i18n.t("ui:more:about:info")}
+        {@html $i18n.t("about:fullInfo")}
       </figcaption>
     </figure>
   </Block>
