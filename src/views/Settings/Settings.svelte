@@ -65,8 +65,8 @@
 <section class="settings-view relative z-60 flex flex-col" in:fly={{ duration: 120, x: 20 }}>
   <Block strong inset>
     <!-- Language section -->
-    <BlockTitle large class="text-stone-500 justify-baseline">
-      <TranslateIcon className="w-10 h-10" strokeColor="currentColor" />
+    <BlockTitle medium class="text-stone-500 justify-baseline">
+      <TranslateIcon className="size-8" strokeColor="currentColor" />
 
       <span class="ml-4">
         {$i18n.t("ui:settings:translations:title")}
@@ -79,7 +79,7 @@
 
     <!-- Language Hint -->
     <div class="mt-4 px-4 pb-4">
-      <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+      <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
         {$i18n.t("ui:settings:translations:hint")}
       </p>
     </div>
@@ -88,8 +88,8 @@
     <div class="border-t border-gray-400 dark:border-gray-700 my-2"></div>
 
     <!-- Appearance Section -->
-    <BlockTitle large class="text-stone-500 justify-baseline">
-      <PaletteIcon className="w-10 h-10" strokeColor="currentColor" />
+    <BlockTitle medium class="text-stone-500 justify-baseline">
+      <PaletteIcon className="size-8" strokeColor="currentColor" />
 
       <span class="ml-4">
         {$i18n.t("ui:settings:appearance:title")}
@@ -98,7 +98,7 @@
 
     <!-- Appearance Hint -->
     <div class="mt-4 px-4 pt-2">
-      <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+      <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
         {$i18n.t("ui:settings:appearance:hint")}
       </p>
     </div>
@@ -109,8 +109,8 @@
     <div class="border-t border-gray-400 dark:border-gray-700 my-2"></div>
 
     <!-- Permission section -->
-    <BlockTitle large class="text-stone-500 justify-baseline">
-      <TuningIcon className="w-10 h-10" strokeColor="currentColor" />
+    <BlockTitle medium class="text-stone-500 justify-baseline">
+      <TuningIcon className="size-8" strokeColor="currentColor" />
 
       <span class="ml-4">
         {$i18n.t("ui:settings:permissions:title")}
@@ -125,7 +125,7 @@
 
     <!-- Permission Hint -->
     <div class="mt-4 px-4 pb-4">
-      <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+      <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
         {$i18n.t("ui:settings:permissions:hint")}
       </p>
     </div>

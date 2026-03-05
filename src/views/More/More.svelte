@@ -75,7 +75,6 @@
     <MenuList nested>
       {#each menu as menuItem (menuItem.id)}
         <MenuListItem
-          title={$i18n.t(`ui:more:menuListItem:${menuItem.id}Title`)}
           active={false}
           dividers={true}
           onClick={() => goto(menuItem.href)}
@@ -84,7 +83,13 @@
           {#snippet media()}
             <!-- Check this: https://svelte.dev/docs/svelte/compiler-warnings#svelte_component_deprecated -->
             {@const IconComponent = menuItem.icon}
-            <IconComponent className="size-6" strokeColor="currentColor" />
+            <IconComponent className="size-8" strokeColor="currentColor" />
+          {/snippet}
+
+          {#snippet title()}
+            <p class="text-[18px]">
+              {$i18n.t(`ui:more:menuListItem:${menuItem.id}Title`)}
+            </p>
           {/snippet}
         </MenuListItem>
       {/each}

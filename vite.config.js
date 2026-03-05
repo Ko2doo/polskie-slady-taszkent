@@ -5,11 +5,13 @@ import tailwindcss from '@tailwindcss/vite';
 import path from 'node:path';
 import { readFileSync } from 'node:fs';
 
+// Read package.json file
 const pkg = JSON.parse(readFileSync('./package.json', 'utf-8'));
 
 // https://vite.dev/config/
 export default defineConfig({
   define: {
+    // global variables:
     __APP_VERSION__: JSON.stringify(pkg.version),
   },
   base: '', // or './'

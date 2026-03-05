@@ -2,6 +2,10 @@
 @import 'tailwindcss';
 @import 'konsta/svelte/theme.css';
 
+@theme {
+  --color-brand-primary: #f5312f;
+}
+
 /* MapLibre Map */
 @import 'maplibre-gl/dist/maplibre-gl.css';
 

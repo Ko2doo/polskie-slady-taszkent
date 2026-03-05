@@ -1,4 +1,8 @@
 import { mount } from 'svelte';
+
+// Capacitor
+import { Capacitor } from '@capacitor/core';
+import { App as CapApp } from '@capacitor/app';
 import { SplashScreen } from '@capacitor/splash-screen';
 
 import { getThemeManager } from '@/lib/theme/themeManager';
@@ -10,9 +14,17 @@ async function bootstrap() {
   // Theme init
   await getThemeManager().init();
 
+  /* prettier-ignore */
+  const version = Capacitor.isNativePlatform()
+    ? (await CapApp.getInfo()).version
+    : __APP_VERSION__ ?? "dev";
+
   // Svelte app mount
   const app = mount(App, {
     target: document.getElementById('app'),
+    props: {
+      version,
+    },
   });
 
   // hide system splash

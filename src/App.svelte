@@ -8,8 +8,6 @@
   import AppSplash from "@/AppSplash.svelte";
 
   // Capacitor
-  import { Capacitor } from "@capacitor/core";
-  import { App as CapApp } from "@capacitor/app";
   import { initBackButtonHandler } from "@/capacitor/backButton";
 
   // i18Next
@@ -39,7 +37,7 @@
 
   // App ready state
   let APP_READY = $state(false);
-  let APP_VERSION = $state("");
+  let { version = "" } = $props();
 
   function createScrollState() {
     let y = $state(0);
@@ -65,18 +63,12 @@
   onMount(async () => {
     await initFirstLaunch(); // waiting Capacitor Preferences
     initBackButtonHandler();
-
-    /* prettier-ignore */
-    APP_VERSION = Capacitor.isNativePlatform()
-      ? (await CapApp.getInfo()).version
-      : __APP_VERSION__ ?? "dev";
-
     APP_READY = true;
   });
 </script>
 
 {#if !APP_READY}
-  <AppSplash version={APP_VERSION} />
+  <AppSplash {version} />
 {:else}
   <App theme="ios" safeAreas>
     <Page class="flex flex-col min-h-[100dvh] !p-0">

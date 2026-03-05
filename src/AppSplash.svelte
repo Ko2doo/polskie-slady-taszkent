@@ -1,12 +1,14 @@
 <script>
   import { fly } from "svelte/transition";
 
-  let { version } = $props();
+  let { version = "" } = $props();
 </script>
 
-<article class="app-splash-screen" out:fly={{ duration: 120, y: 20 }}>
-  <img class="app-logo" src="/icon.svg" alt="App logo" />
-  <h1 class="app-name">Polskie Ślady <br /> Taszkent</h1>
+<article class="app-splash-screen" out:fly={{ duration: 300, y: 20, delay: 100 }}>
+  <div class="app-logo-wrapper">
+    <img class="app-logo" src="/icon.svg" alt="App logo" />
+    <h1 class="app-name">Polskie Ślady <br /> Taszkent</h1>
+  </div>
   <p class="app-version">Version: {version}</p>
 </article>
 
@@ -15,15 +17,22 @@
     width: 100%;
     height: 100dvh;
 
-    padding: 0 18px;
+    padding: 44px 18px;
 
     display: flex;
     flex-direction: column;
 
     align-items: center;
-    justify-content: center;
+    justify-content: space-around;
 
-    background: linear-gradient(180deg, #f05e64, #ffc8c8);
+    background: linear-gradient(180deg, #fff5f5, #fac4c4);
+  }
+
+  .app-logo-wrapper {
+    display: flex;
+    flex-direction: column;
+
+    align-items: center;
   }
 
   .app-logo {
@@ -45,7 +54,7 @@
     display: block;
     text-align: center;
 
-    margin: 14px 0 2px;
+    margin-top: 14px;
 
     color: #fc3431;
   }
@@ -56,6 +65,6 @@
 
     line-height: 1.2;
 
-    color: #fbf5f5;
+    color: #6f6a6a;
   }
 </style>

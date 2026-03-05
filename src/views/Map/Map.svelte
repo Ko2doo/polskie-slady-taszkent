@@ -324,7 +324,7 @@
       {/snippet}
 
       {#snippet buttons()}
-        <DialogButton onClick={activeNav.closeDialog}>
+        <DialogButton strong onClick={activeNav.closeDialog}>
           {$i18n.t("ui:dialog:map:newRoute:no")}
         </DialogButton>
 
