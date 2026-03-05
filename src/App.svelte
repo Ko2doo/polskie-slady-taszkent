@@ -1,12 +1,15 @@
 <script>
   import { App, Page, Navbar, Panel, Link, Block } from "konsta/svelte";
 
-  import AppSplash from "@/AppSplash.svelte";
-
   // Svelte
   import { onMount, setContext } from "svelte";
 
+  // Custom splash screen
+  import AppSplash from "@/AppSplash.svelte";
+
   // Capacitor
+  import { Capacitor } from "@capacitor/core";
+  import { App as CapApp } from "@capacitor/app";
   import { initBackButtonHandler } from "@/capacitor/backButton";
 
   // i18Next
@@ -34,8 +37,9 @@
   import { initFirstLaunch, APP_FIRST_LAUNCH_STORAGE_VAL, markFirstLaunchCompleted } from "@/store/appStartInitialize";
   import { bottomTabbarState } from "@/store/ui/bottomTabbarNav";
 
-  // Theme manager
-  // import { getThemeManager } from "@/lib/theme/themeManager";
+  // App ready state
+  let APP_READY = $state(false);
+  let APP_VERSION = $state("");
 
   function createScrollState() {
     let y = $state(0);
@@ -57,25 +61,22 @@
     scrollState.y = e.currentTarget.scrollTop;
   }
 
-  let APP_READY = $state(false);
-
-  $effect(() => {
-    setTimeout(() => {
-      APP_READY = true;
-    }, 1500);
-  });
-
-  onMount(() => {
-    // Initialize theme as soon app mounts
-    // getThemeManager().init();
-
-    initFirstLaunch();
+  // On mount svelte initialization
+  onMount(async () => {
+    await initFirstLaunch(); // waiting Capacitor Preferences
     initBackButtonHandler();
+
+    /* prettier-ignore */
+    APP_VERSION = Capacitor.isNativePlatform()
+      ? (await CapApp.getInfo()).version
+      : __APP_VERSION__ ?? "dev";
+
+    APP_READY = true;
   });
 </script>
 
 {#if !APP_READY}
-  <AppSplash />
+  <AppSplash version={APP_VERSION} />
 {:else}
   <App theme="ios" safeAreas>
     <Page class="flex flex-col min-h-[100dvh] !p-0">
@@ -153,10 +154,10 @@
 
       <!-- prettier-ignore -->
       <OnboardingWizard
-      {i18n}
-      appState={APP_FIRST_LAUNCH_STORAGE_VAL}
-      makeCompleted={markFirstLaunchCompleted}
-    />
+        {i18n}
+        appState={APP_FIRST_LAUNCH_STORAGE_VAL}
+        makeCompleted={markFirstLaunchCompleted}
+      />
 
       <ExitToast {i18n} />
 
