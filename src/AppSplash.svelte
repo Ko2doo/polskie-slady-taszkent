@@ -4,9 +4,9 @@
   let { version = "" } = $props();
 </script>
 
-<article class="app-splash-screen" out:fly={{ duration: 300, y: 20, delay: 100 }}>
+<article class="app-splash-screen" out:fly={{ duration: 300, y: 20, delay: 120 }}>
   <div class="app-logo-wrapper">
-    <img class="app-logo" src="/icon.svg" alt="App logo" />
+    <img class="app-logo" src="app-icon.png" alt="App logo" />
     <h1 class="app-name">Polskie Ślady <br /> Taszkent</h1>
   </div>
   <p class="app-version">Version: {version}</p>
@@ -24,8 +24,6 @@
 
     align-items: center;
     justify-content: space-around;
-
-    background: linear-gradient(180deg, #fff5f5, #fac4c4);
   }
 
   .app-logo-wrapper {

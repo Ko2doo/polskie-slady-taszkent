@@ -198,17 +198,24 @@
             </h1>
           {/snippet}
 
-          <p class="line-clamp-3 text-sm sm:text-base">
-            {@html $i18n.t(`articles:${article.id}:description`)}
-          </p>
+          {#if layout?.mode === "layoutRows"}
+            <p class="mb-4 line-clamp-3 text-sm sm:text-base">
+              {@html $i18n.t(`articles:${article.id}:description`)}
+            </p>
+          {/if}
 
-          {#snippet footer()}
-            <div class="flex justify-between space-x-2 rtl:space-x-reverse">
-              <Button small raised rounded inline class="text-sm" onClick={() => openArticle(article.id)}>
-                {$i18n.t("ui:buttons:readMore")}
-              </Button>
-            </div>
-          {/snippet}
+          <div class="flex justify-between space-x-2 rtl:space-x-reverse">
+            <Button
+              small
+              raised
+              rounded
+              inline
+              class="k-color-brand-blue text-sm"
+              onClick={() => openArticle(article.id)}
+            >
+              {$i18n.t("ui:buttons:readMore")}
+            </Button>
+          </div>
         </Card>
       {/each}
     </section>

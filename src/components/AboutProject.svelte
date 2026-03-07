@@ -53,10 +53,8 @@
 
 <section class="about-view relative z-60 flex flex-col" in:fly={{ duration: 120, x: 20 }}>
   <Block strong inset>
-    <figure class="logo-wrapper flex flex-col items-center">
-      <figcaption class="mt-4">
-        {@html $i18n.t("about:fullInfo")}
-      </figcaption>
-    </figure>
+    <p class="text-base">
+      {@html $i18n.t("about:fullInfo")}
+    </p>
   </Block>
 </section>

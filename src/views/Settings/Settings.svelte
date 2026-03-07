@@ -115,12 +115,6 @@
       <span class="ml-4">
         {$i18n.t("ui:settings:permissions:title")}
       </span>
-
-      <div class="ml-auto">
-        <Button raised rounded small onClick={() => openAppSettings()}>
-          {$i18n.t("ui:buttons:openSettings")}
-        </Button>
-      </div>
     </BlockTitle>
 
     <!-- Permission Hint -->
@@ -129,5 +123,9 @@
         {$i18n.t("ui:settings:permissions:hint")}
       </p>
     </div>
+
+    <Button raised rounded small onClick={() => openAppSettings()}>
+      {$i18n.t("ui:buttons:openSettings")}
+    </Button>
   </Block>
 </section>

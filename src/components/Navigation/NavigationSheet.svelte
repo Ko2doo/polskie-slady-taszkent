@@ -136,7 +136,7 @@
   {/snippet}
 
   {#snippet buttons()}
-    <DialogButton onClick={dialogToggler.close}>
+    <DialogButton strong onClick={dialogToggler.close}>
       {$i18n.t("ui:dialog:nav:no")}
     </DialogButton>
 

@@ -2,8 +2,11 @@
 @import 'tailwindcss';
 @import 'konsta/svelte/theme.css';
 
+/* more info: https://konstaui.com/svelte/colors */
 @theme {
   --color-brand-primary: #f5312f;
+  --color-brand-blue: #0091ff;
+  --color-brand-green: #00ff00;
 }
 
 /* MapLibre Map */

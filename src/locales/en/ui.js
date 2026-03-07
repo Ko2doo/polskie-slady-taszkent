@@ -1,9 +1,6 @@
 // UI locales collection
 
 export default {
-  app: {
-    name: 'Polish Traces in Tashkent',
-  },
   sidePanel: {
     handbook: {
       title: 'Filters',

@@ -13,27 +13,11 @@
   import AboutUsIcon from "@/lib/icons/AboutUsIcon.svelte";
 
   // router props
-  let { route, i18n } = $props();
-
-  // Inspector check console in browser
-  // $inspect(route);
+  let { i18n } = $props();
 
   $effect(() => {
-    const result = route?.result;
-    // console.log(result);
-
-    // get "pageKey" from route path
-    //    "/about" -> "about"
-    //    "/handbook" -> "handbook"
-    const pageKey = resolvePageKeyFromRouteResult(result);
-
-    /* prettier-ignore */
-    const title = pageKey
-      ? $i18n.t(`ui:navbar:${pageKey}:title`)
-      : "";
-
     const dispose = withNavbar({
-      title: title || pageKey,
+      title: "Polskie Ślady Taszkent",
       showSidePanel: false,
       leftSnippet: false,
     });
@@ -62,13 +46,13 @@
 
 <section class="more-view" in:fly={{ duration: 120, y: 20 }}>
   <Block nested>
-    <figure class="logo-wrapper flex flex-col items-center">
-      <img src="/project-logo.png" alt="Project logo" />
+    <article class="logo-wrapper flex flex-col items-center">
+      <img src="app-icon.png" alt="Project logo" class="size-24" />
 
-      <figcaption class="mt-4 text-center">
+      <p class="mt-4 text-base text-center">
         {@html $i18n.t("about:shortInfo")}
-      </figcaption>
-    </figure>
+      </p>
+    </article>
   </Block>
 
   <Block strong inset>
@@ -83,11 +67,11 @@
           {#snippet media()}
             <!-- Check this: https://svelte.dev/docs/svelte/compiler-warnings#svelte_component_deprecated -->
             {@const IconComponent = menuItem.icon}
-            <IconComponent className="size-8" strokeColor="currentColor" />
+            <IconComponent className="size-7" strokeColor="currentColor" />
           {/snippet}
 
           {#snippet title()}
-            <p class="text-[18px]">
+            <p class="text-[17px]">
               {$i18n.t(`ui:more:menuListItem:${menuItem.id}Title`)}
             </p>
           {/snippet}

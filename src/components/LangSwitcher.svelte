@@ -51,7 +51,11 @@
 <Popover opened={popoverState} target={popoverTargetEl} backdrop={true} onBackdropClick={backdropClickHandler}>
   <List nested>
     {#each locales as [code, label]}
-      <ListButton colors={{ bgIos: "active:bg-neutral-600/10" }} value={code} onClick={i18nClickHandler}>
+      <ListButton
+        colors={{ bgIos: "active:bg-neutral-600/10", textIos: "text-neutral-600" }}
+        value={code}
+        onClick={i18nClickHandler}
+      >
         {label}
       </ListButton>
     {/each}

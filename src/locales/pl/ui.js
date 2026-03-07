@@ -1,9 +1,6 @@
 // UI locales collection
 
 export default {
-  app: {
-    name: 'Polskie Ślady w Taszkiencie',
-  },
   sidePanel: {
     handbook: {
       title: 'Filtry',
