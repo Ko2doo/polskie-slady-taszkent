@@ -41,7 +41,7 @@
 
 <section class="about-view relative z-60 flex flex-col" in:fly={{ duration: 120, x: 20 }}>
   <Block strong inset>
-    <article class="flex flex-col gap-6">
+    <article class="flex flex-col pt-4 pb-4 gap-8">
       <!-- {#each aboutMeta as info (info.id)}
 
         <div class="flex flex-col self-baseline gap-2">

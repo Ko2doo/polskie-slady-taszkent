@@ -12,9 +12,10 @@
   import SettingsIcon from "@/lib/icons/SettingsIcon.svelte";
   import AboutUsIcon from "@/lib/icons/AboutUsIcon.svelte";
   import CodeSquareIcon from "@/lib/icons/CodeSquareIcon.svelte";
+  import SvelteIcon from "@/lib/icons/SvelteIcon.svelte";
 
   // router props
-  let { i18n } = $props();
+  let { i18n, version = "" } = $props();
 
   $effect(() => {
     const dispose = withNavbar({
@@ -50,7 +51,7 @@
   ];
 </script>
 
-<section class="more-view" in:fly={{ duration: 120, y: 20 }}>
+<section class="more-view flex flex-col min-h-[100%]" in:fly={{ duration: 120, y: -20 }}>
   <Block nested>
     <article class="logo-wrapper flex flex-col items-center">
       <img src="app-icon.png" alt="Project logo" class="size-24" />
@@ -85,4 +86,15 @@
       {/each}
     </MenuList>
   </Block>
+
+  <div class="flex items-center justify-center flex-col gap-[4px] pb-4 mt-auto">
+    <div class="flex items-center text-xs text-gray-900 dark:text-stone-300">
+      <p class="mr-1">Powered by</p>
+      <SvelteIcon className="size-4" /> Svelte
+    </div>
+
+    <p class="text-xs text-gray-900 dark:text-stone-300">
+      Version: {version}
+    </p>
+  </div>
 </section>

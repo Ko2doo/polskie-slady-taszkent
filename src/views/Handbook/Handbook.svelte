@@ -193,13 +193,13 @@
       {#each itemsView as article (article.id)}
         <Card class="flex flex-col justify-between">
           {#snippet header()}
-            <h1 class="w-full text-gray-900 dark:text-stone-300 text-base font-medium sm:font-bold sm:text-xl">
+            <h1 class="w-full text-stone-800 dark:text-stone-100 text-base font-medium sm:font-bold sm:text-xl">
               {$i18n.t(`articles:${article.id}:title`)}
             </h1>
           {/snippet}
 
           {#if layout?.mode === "layoutRows"}
-            <p class="mb-4 line-clamp-3 text-sm sm:text-base">
+            <p class="text-gray-900 dark:text-stone-200 mb-4 line-clamp-3 text-sm sm:text-base">
               {@html $i18n.t(`articles:${article.id}:description`)}
             </p>
           {/if}

@@ -31,7 +31,7 @@ export default {
       description: 'Maria Kuczerowa, Sayora Tashpulatova, Agnieszka Mikulec',
     },
     a7: {
-      title: 'Programista',
+      title: 'Główny programista',
       description: 'Dmitrij Adamow',
       email: 'galaxyrobotix@gmail.com',
     },

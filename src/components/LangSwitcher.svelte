@@ -52,7 +52,7 @@
   <List nested>
     {#each locales as [code, label]}
       <ListButton
-        colors={{ bgIos: "active:bg-neutral-600/10", textIos: "text-neutral-600 dark:text-neutral-200" }}
+        colors={{ bgIos: "active:bg-neutral-600/10", textIos: "text-stone-500 dark:text-stone-200" }}
         value={code}
         onClick={i18nClickHandler}
       >

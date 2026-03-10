@@ -119,6 +119,7 @@
             post: navigationHistoryPostHook,
           }}
           {i18n}
+          {version}
         />
       </main>
 

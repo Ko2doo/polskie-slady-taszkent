@@ -52,16 +52,16 @@
 
 <section class="about-view relative z-60 flex flex-col" in:fly={{ duration: 120, x: 20 }}>
   <Block strong inset>
-    <article class="flex flex-col gap-6">
+    <article class="flex flex-col pt-4 pb-4 gap-8">
       {#each aboutMeta as info (info.id)}
         {@const itemData = $i18n.t(`about:fullInfo:${info.id}`, { returnObjects: true })}
 
         <div class="flex flex-col self-baseline gap-2">
-          <b class="block text-[18px]">
+          <b class="block text-[18px] text-stone-800 dark:text-stone-100">
             {itemData.title}
           </b>
 
-          <p class="text-[16px] font-normal">
+          <p class="text-[16px] font-normal text-stone-700 dark:text-stone-200">
             {itemData.description}
 
             {#if itemData && "email" in itemData}

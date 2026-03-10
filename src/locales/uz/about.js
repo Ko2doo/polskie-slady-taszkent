@@ -31,7 +31,7 @@ export default {
       description: 'Mariya Kucherova, Sayora Toshpulatova, Agnieszka Mikulec',
     },
     a7: {
-      title: 'Dasturchi',
+      title: 'Bosh dasturchi',
       description: 'Dmitriy Adamov',
       email: 'galaxyrobotix@gmail.com',
     },

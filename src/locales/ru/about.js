@@ -31,7 +31,7 @@ export default {
       description: 'Мария Кучерова, Саёра Ташпулатова, Агнешка Микулец',
     },
     a7: {
-      title: 'Разработчик',
+      title: 'Ведущий разработчик',
       description: 'Дмитрий Адамов',
       email: 'galaxyrobotix@gmail.com',
     },
