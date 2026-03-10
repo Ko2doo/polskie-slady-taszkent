@@ -55,10 +55,6 @@
 
 <section class="about-view relative z-60 flex flex-col" in:fly={{ duration: 120, x: 20 }}>
   <Block strong inset>
-    <!-- <p class="text-base">
-      {@html $i18n.t("about:fullInfo")}
-    </p> -->
-
     <article class="flex flex-col gap-6">
       {#each aboutMeta as info (info.id)}
         {@const itemData = $i18n.t(`about:fullInfo:${info.id}`, { returnObjects: true })}
