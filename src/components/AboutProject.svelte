@@ -11,6 +11,8 @@
 
   import { routerBack } from "@/services/navigationHistoryHook";
 
+  import { aboutMeta } from "@/data/about";
+
   let { route, i18n } = $props();
 
   $effect(() => {
@@ -53,8 +55,30 @@
 
 <section class="about-view relative z-60 flex flex-col" in:fly={{ duration: 120, x: 20 }}>
   <Block strong inset>
-    <p class="text-base">
+    <!-- <p class="text-base">
       {@html $i18n.t("about:fullInfo")}
-    </p>
+    </p> -->
+
+    <article class="flex flex-col gap-6">
+      {#each aboutMeta as info (info.id)}
+        {@const itemData = $i18n.t(`about:fullInfo:${info.id}`, { returnObjects: true })}
+
+        <div class="flex flex-col self-baseline gap-2">
+          <b class="block text-[18px]">
+            {itemData.title}
+          </b>
+
+          <p class="text-[16px] font-normal">
+            {itemData.description}
+
+            {#if itemData && "email" in itemData}
+              <a class="text-blue-600 font-bold" href="mailto:{itemData.email}">
+                {itemData.email}
+              </a>
+            {/if}
+          </p>
+        </div>
+      {/each}
+    </article>
   </Block>
 </section>

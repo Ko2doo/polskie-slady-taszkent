@@ -4,7 +4,7 @@
   let { version = "" } = $props();
 </script>
 
-<article class="app-splash-screen" out:fly={{ duration: 300, y: 20, delay: 120 }}>
+<article class="app-splash-screen" out:fly={{ duration: 350, y: 20, delay: 180 }}>
   <div class="app-logo-wrapper">
     <img class="app-logo" src="app-icon.png" alt="App logo" />
     <h1 class="app-name">Polskie Ślady <br /> Taszkent</h1>
@@ -23,7 +23,6 @@
     flex-direction: column;
 
     align-items: center;
-    justify-content: space-around;
   }
 
   .app-logo-wrapper {
@@ -31,6 +30,8 @@
     flex-direction: column;
 
     align-items: center;
+
+    margin-top: 20%;
   }
 
   .app-logo {
@@ -52,7 +53,7 @@
     display: block;
     text-align: center;
 
-    margin-top: 14px;
+    margin-top: 22px;
 
     color: #fc3431;
   }
@@ -61,8 +62,11 @@
     font-size: 14px;
     font-weight: 200;
 
+    display: block;
+    margin-top: auto;
+
     line-height: 1.2;
 
-    color: #6f6a6a;
+    color: #7e7e7e;
   }
 </style>
