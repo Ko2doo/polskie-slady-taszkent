@@ -30,6 +30,9 @@ export default {
     about: {
       title: 'Loyiha haqida',
     },
+    technicalInfo: {
+      title: 'Texnik ma’lumotlar',
+    },
     more: {
       title: 'Ko‘proq...',
     },
@@ -150,6 +153,7 @@ export default {
     menuListItem: {
       settingsTitle: 'Sozlamalar',
       aboutTitle: 'Loyiha haqida',
+      technicalInfoTitle: 'Texnik ma’lumotlar',
     },
   },
 };

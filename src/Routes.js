@@ -9,6 +9,7 @@ import Map from '@/views/Map/Map.svelte';
 import More from '@/views/More/More.svelte';
 import Settings from '@/views/Settings/Settings.svelte';
 import About from '@/views/About/About.svelte';
+import TechnicalInfo from '@/views/TechnicalInfo/TechnicalInfo.svelte';
 import PopupArticle from '@/components/PopupArticle.svelte';
 
 // Router params (paths, components & etc.)
@@ -32,6 +33,10 @@ export const routes = [
   {
     path: '/about',
     component: About,
+  },
+  {
+    path: '/technical-info',
+    component: TechnicalInfo,
   },
   {
     path: /^\/articles\/(.+)$/,

@@ -11,6 +11,7 @@
   // Icons
   import SettingsIcon from "@/lib/icons/SettingsIcon.svelte";
   import AboutUsIcon from "@/lib/icons/AboutUsIcon.svelte";
+  import CodeSquareIcon from "@/lib/icons/CodeSquareIcon.svelte";
 
   // router props
   let { i18n } = $props();
@@ -40,6 +41,11 @@
       id: "about",
       href: "/about",
       icon: AboutUsIcon,
+    },
+    {
+      id: "technicalInfo",
+      href: "/technical-info",
+      icon: CodeSquareIcon,
     },
   ];
 </script>

@@ -30,6 +30,9 @@ export default {
     about: {
       title: 'About the project',
     },
+    technicalInfo: {
+      title: 'Technical Information',
+    },
     more: {
       title: 'More...',
     },
@@ -149,6 +152,7 @@ export default {
     menuListItem: {
       settingsTitle: 'Settings',
       aboutTitle: 'About the project',
+      technicalInfoTitle: 'Technical Information',
     },
   },
 };
