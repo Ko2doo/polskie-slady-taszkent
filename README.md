@@ -23,10 +23,10 @@ application is a digital continuation of that initiative.
 
 ## Features
 
-- 📚 Reference guide about Polish historical figures and places\
-- 🗺 Offline map with GPS navigation\
-- 📍 Historical routes across Tashkent\
-- 🌍 Multilingual interface\
+- 📚 Reference guide about Polish historical figures and places
+- 🗺 Offline map with GPS navigation
+- 📍 Historical routes across Tashkent
+- 🌍 Multilingual interface
 - 📱 Works offline without internet connection
 
 ## Technologies
@@ -37,12 +37,12 @@ technologies.
 Core technologies used in the project:
 
 - **JavaScript**
-- **Svelte** -- user interface framework\
-- **Capacitor** -- hybrid mobile runtime\
-- **Vite** -- development and build tooling\
-- **Tailwind CSS** -- styling\
-- **MapLibre GL** -- map rendering\
-- **PMTiles + Protomaps** -- offline vector map tiles\
+- **Svelte** -- user interface framework
+- **Capacitor** -- hybrid mobile runtime
+- **Vite** -- development and build tooling
+- **Tailwind CSS** -- styling
+- **MapLibre GL** -- map rendering
+- **PMTiles + Protomaps** -- offline vector map tiles
 - **i18next** -- internationalization
 
 ---
@@ -56,7 +56,7 @@ Core technologies used in the project:
 - **Java Runtime:** `java-21-openjdk`
 - **Android SDK** (for Android builds)
 
-Using **NVM** to manage Node versions is recommended:\
+Using **NVM** to manage Node versions is recommended:
 https://github.com/nvm-sh/nvm
 
 ### Install dependencies
@@ -123,28 +123,25 @@ npm run build:all
 
 # Recommended IDE Setup
 
-[VS Code](https://code.visualstudio.com/)\
+[VS Code](https://code.visualstudio.com/)
 
-- [Svelte
-  Extension](https://marketplace.visualstudio.com/items?itemName=svelte.svelte-vscode)\
-- [Gradle for
-  Java](https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-gradle)\
-- [Language Support for Java by Red
-  Hat](https://marketplace.visualstudio.com/items?itemName=redhat.java)
+- [Svelte Extension[(https://marketplace.visualstudio.com/items?itemName=svelte.svelte-vscode)
+- [Gradle for Java](https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-gradle)
+- [Language Support for Java by Red Hat](https://marketplace.visualstudio.com/items?itemName=redhat.java)
 
 For a more comfortable development experience, check recommended
 extensions in:
 
-**VS Code → Extensions → Recommended**
+**VS Code>Extensions>Recommended**
 
 ---
 
 # Recommended Runtime Setup
 
-- **Node.js v22 or later**\
+- **Node.js v22 or later**
   (Using [NVM](https://github.com/nvm-sh/nvm) is recommended)
 
-- **Java Runtime Environment:**\
+- **Java Runtime Environment:**
   `java-21-openjdk` (required for Android builds)
 
 ---
@@ -170,6 +167,6 @@ Contributions, ideas, and improvements are welcome.
 
 # Map Data Attribution
 
-Map data © OpenStreetMap contributors\
-Map rendering powered by MapLibre GL\
+Map data © OpenStreetMap contributors
+Map rendering powered by MapLibre GL
 Offline tiles generated using Protomaps and PMTiles
