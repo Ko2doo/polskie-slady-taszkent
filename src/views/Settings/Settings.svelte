@@ -5,7 +5,7 @@
   // Components
   import TranslateIcon from "@/lib/icons/TranslateIcon.svelte";
   import PaletteIcon from "@/lib/icons/PaletteIcon.svelte";
-  import TuningIcon from "@/lib/icons/TuningIcon.svelte";
+  import LockIcon from "@/lib/icons/LockIcon.svelte";
 
   import { resolvePageKeyFromRouteResult } from "@/utils/routerUtils";
   import { withNavbar } from "@/store/ui/navbar";
@@ -110,7 +110,7 @@
 
     <!-- Permission section -->
     <BlockTitle medium class="text-stone-500 justify-baseline">
-      <TuningIcon className="size-8" strokeColor="currentColor" />
+      <LockIcon className="size-8" strokeColor="currentColor" />
 
       <span class="ml-4">
         {$i18n.t("ui:settings:permissions:title")}

@@ -10,7 +10,7 @@
 
   // Icons
   import SettingsIcon from "@/lib/icons/SettingsIcon.svelte";
-  import AboutUsIcon from "@/lib/icons/AboutUsIcon.svelte";
+  import InfoSquareIcon from "@/lib/icons/InfoSquareIcon.svelte";
   import CodeSquareIcon from "@/lib/icons/CodeSquareIcon.svelte";
   import SvelteIcon from "@/lib/icons/SvelteIcon.svelte";
 
@@ -41,7 +41,7 @@
     {
       id: "about",
       href: "/about",
-      icon: AboutUsIcon,
+      icon: InfoSquareIcon,
     },
     {
       id: "technicalInfo",
