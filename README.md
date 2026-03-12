@@ -1,4 +1,4 @@
-# Polish Heritage in Tashkent
+# Polskie Ślady Taszkent
 
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Node](https://img.shields.io/badge/node-%3E%3D22-brightgreen)
