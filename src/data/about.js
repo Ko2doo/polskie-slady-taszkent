@@ -21,3 +21,47 @@ export const aboutMeta = [
     id: 'a7',
   },
 ];
+
+export const technicalInfoMeta = [
+  {
+    id: 't1',
+  },
+  {
+    id: 't2',
+    links: [
+      {
+        title: 'Frontend',
+        label: 'Svelte.js',
+        href: 'https://github.com/sveltejs/svelte',
+      },
+      {
+        title: 'Framework',
+        label: 'Capacitor.js',
+        href: 'https://github.com/ionic-team/capacitor',
+      },
+      {
+        title: 'UI',
+        label: 'KonstaUI',
+        href: 'https://github.com/konstaui/konstaui.com',
+      },
+      {
+        title: 'Icons',
+        label: 'Solar Linear Icons',
+        href: 'https://www.svgrepo.com/collection/solar-linear-icons/1',
+      },
+      {
+        title: 'Map',
+        label: 'Maplibre GL JS',
+        href: 'https://github.com/maplibre/maplibre-gl-js',
+      },
+      {
+        title: 'Localization',
+        label: 'i18Next',
+        href: 'https://github.com/i18next/i18next',
+      },
+    ],
+  },
+  {
+    id: 't3',
+  },
+];

@@ -56,7 +56,7 @@
       {#each aboutMeta as info (info.id)}
         {@const itemData = $i18n.t(`about:fullInfo:${info.id}`, { returnObjects: true })}
 
-        <div class="flex flex-col self-baseline gap-2">
+        <div class="flex flex-col self-baseline gap-2 w-full">
           <b class="block text-[18px] text-stone-800 dark:text-stone-100">
             {itemData.title}
           </b>

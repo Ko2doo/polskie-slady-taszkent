@@ -36,4 +36,24 @@ export default {
       email: 'galaxyrobotix@gmail.com',
     },
   },
+  technicalInfo: {
+    t1: {
+      title: 'Technologie',
+      description:
+        'Jest to hybrydowa, wieloplatformowa aplikacja typu SPA, stworzona z wykorzystaniem technologii webowych oraz języka programowania JavaScript. Framework Svelte.js odpowiada za interfejs użytkownika, natomiast Capacitor.js umożliwia działanie aplikacji na urządzeniach mobilnych oraz dostęp do funkcji systemu operacyjnego.',
+    },
+    t2: {
+      title: 'Pod maską',
+    },
+    t3: {
+      title: 'Licencje',
+      description: [
+        'Dane mapy © autorzy OpenStreetMap',
+        'Renderowanie mapy realizowane przy użyciu MapLibre GL',
+        'Kafelki offline wygenerowane przy użyciu Protomaps i PMTiles',
+        'Ten projekt jest oprogramowaniem open source i jest udostępniany na licencji MIT.',
+      ],
+    },
+  },
+  repoLabel: 'Repozytorium projektu na GitHubie',
 };

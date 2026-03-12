@@ -36,4 +36,24 @@ export default {
       email: 'galaxyrobotix@gmail.com',
     },
   },
+  technicalInfo: {
+    t1: {
+      title: 'Technologies',
+      description:
+        'This is a hybrid cross-platform SPA application built using web technologies and the JavaScript programming language. The Svelte.js framework powers the user interface, while Capacitor.js enables the application to run on mobile devices and access native operating system features.',
+    },
+    t2: {
+      title: 'Under the hood',
+    },
+    t3: {
+      title: 'Licenses',
+      description: [
+        'Map data © OpenStreetMap contributors',
+        'Map rendering powered by MapLibre GL',
+        'Offline tiles generated using Protomaps and PMTiles',
+        'This project is open source and the source code is released under the MIT License.',
+      ],
+    },
+  },
+  repoLabel: 'Project GitHub repository',
 };

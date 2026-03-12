@@ -1,13 +1,15 @@
 <script>
   import { fly } from "svelte/transition";
 
-  let { version = "" } = $props();
+  let { appName = "", version = "" } = $props();
 </script>
 
-<article class="app-splash-screen" out:fly={{ duration: 350, y: 20, delay: 180 }}>
+<article class="app-splash-screen" out:fly={{ duration: 400, y: 20, delay: 320 }}>
   <div class="app-logo-wrapper">
     <img class="app-logo" src="app-icon.png" alt="App logo" />
-    <h1 class="app-name">Polskie Ślady <br /> Taszkent</h1>
+    <h1 class="app-name">
+      {appName}
+    </h1>
   </div>
   <p class="app-version">Version: {version}</p>
 </article>

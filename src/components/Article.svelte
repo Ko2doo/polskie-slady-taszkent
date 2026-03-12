@@ -1,8 +1,9 @@
 <script>
   /**
-   * A component with a dynamic router based on the article ID that opens a new screen with an expanded popup.
+   * A component with a dynamic router based on the article ID that opens a new screen.
    */
-  import { Popup, Page, Navbar, NavbarBackLink, Block, Link, Button } from "konsta/svelte";
+  import { Page, Navbar, NavbarBackLink, Block, Link, Button } from "konsta/svelte";
+
   import { routerBack } from "@/services/navigationHistoryHook";
 
   import { articlesMeta } from "@/data/articles";
@@ -13,7 +14,6 @@
   import ArrowRightIcon from "@/lib/icons/ArrowRightIcon.svelte";
 
   let { route, i18n } = $props();
-  // $inspect("PopupArticle props >>>", route.result);
 
   // svelte-ignore state_referenced_locally
   // check this: https://github.com/sveltejs/svelte/issues/12877
@@ -62,7 +62,7 @@
     </Block>
   </Page>
 {:else}
-  <Popup opened class="safe-area-inset">
+  <section class="h-full w-full left-0 top-0 absolute z-80 safe-area-inset">
     <Page>
       <Navbar>
         {#snippet left()}
@@ -92,5 +92,5 @@
         </Button>
       </Block>
     </Page>
-  </Popup>
+  </section>
 {/if}

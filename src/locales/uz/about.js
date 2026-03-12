@@ -36,4 +36,24 @@ export default {
       email: 'galaxyrobotix@gmail.com',
     },
   },
+  technicalInfo: {
+    t1: {
+      title: 'Texnologiyalar',
+      description:
+        'Bu veb-texnologiyalar va JavaScript dasturlash tilidan foydalangan holda yaratilgan gibrid kross-platformali SPA ilovasidir. Svelte.js freymvorki foydalanuvchi interfeysi uchun javob beradi, Capacitor.js esa ilovaning mobil qurilmalarda ishlashini va operatsion tizim imkoniyatlariga kirishni ta’minlaydi.',
+    },
+    t2: {
+      title: 'Ichki tuzilma',
+    },
+    t3: {
+      title: 'Litsenziyalar',
+      description: [
+        'Xarita ma’lumotlari © OpenStreetMap hamjamiyati',
+        'Xarita tasviri MapLibre GL yordamida yaratiladi',
+        'Oflayn xarita plitkalari Protomaps va PMTiles yordamida tayyorlangan',
+        'Ushbu loyiha ochiq manbali bo‘lib, dastur kodi MIT litsenziyasi asosida tarqatiladi.',
+      ],
+    },
+  },
+  repoLabel: 'Loyihaning GitHub repozitoriyasi',
 };

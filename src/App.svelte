@@ -37,7 +37,7 @@
 
   // App ready state
   let APP_READY = $state(false);
-  let { version = "" } = $props();
+  let { appName = "", version = "" } = $props();
 
   function createScrollState() {
     let y = $state(0);
@@ -68,7 +68,7 @@
 </script>
 
 {#if !APP_READY}
-  <AppSplash {version} />
+  <AppSplash {appName} {version} />
 {:else}
   <App theme="ios" safeAreas>
     <Page class="flex flex-col min-h-[100dvh] !p-0">
@@ -119,6 +119,7 @@
             post: navigationHistoryPostHook,
           }}
           {i18n}
+          {appName}
           {version}
         />
       </main>

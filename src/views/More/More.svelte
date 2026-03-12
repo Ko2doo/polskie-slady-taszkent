@@ -11,15 +11,16 @@
   // Icons
   import SettingsIcon from "@/lib/icons/SettingsIcon.svelte";
   import InfoSquareIcon from "@/lib/icons/InfoSquareIcon.svelte";
-  import CodeSquareIcon from "@/lib/icons/CodeSquareIcon.svelte";
+  import CodeIcon from "@/lib/icons/CodeIcon.svelte";
   import SvelteIcon from "@/lib/icons/SvelteIcon.svelte";
+  import GitIcon from "@/lib/icons/GitIcon.svelte";
 
   // router props
-  let { i18n, version = "" } = $props();
+  let { i18n, appName = "", version = "" } = $props();
 
   $effect(() => {
     const dispose = withNavbar({
-      title: "Polskie Ślady Taszkent",
+      title: appName,
       showSidePanel: false,
       leftSnippet: false,
     });
@@ -46,7 +47,7 @@
     {
       id: "technicalInfo",
       href: "/technical-info",
-      icon: CodeSquareIcon,
+      icon: CodeIcon,
     },
   ];
 </script>
@@ -88,13 +89,22 @@
   </Block>
 
   <div class="flex items-center justify-center flex-col gap-[4px] pb-4 mt-auto">
+    <a
+      href="https://github.com/Ko2doo/sp.polskie-slady-taszkent"
+      class="text-sm font-bold text-blue-600 dark:text-blue-400 flex gap-2 items-center"
+      target="_blank"
+    >
+      <GitIcon className="size-8 fill-black dark:fill-white" />
+      <span class="pt-[2px]">{appName}</span>
+    </a>
+
+    <p class="text-xs text-gray-900 dark:text-stone-300">
+      App Version: {version}
+    </p>
+
     <div class="flex items-center text-xs text-gray-900 dark:text-stone-300">
       <p class="mr-1">Powered by</p>
       <SvelteIcon className="size-4" /> Svelte
     </div>
-
-    <p class="text-xs text-gray-900 dark:text-stone-300">
-      Version: {version}
-    </p>
   </div>
 </section>

@@ -19,11 +19,17 @@ async function bootstrap() {
     ? (await CapApp.getInfo()).version
     : __APP_VERSION__ ?? "dev";
 
+  /* prettier-ignore */
+  const appName = Capacitor.isNativePlatform()
+    ? (await CapApp.getInfo()).name
+    : __APP_NAME__ ?? 'dev';
+
   // Svelte app mount
   const app = mount(App, {
     target: document.getElementById('app'),
     props: {
       version,
+      appName,
     },
   });
 

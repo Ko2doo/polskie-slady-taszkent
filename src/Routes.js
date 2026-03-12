@@ -10,7 +10,7 @@ import More from '@/views/More/More.svelte';
 import Settings from '@/views/Settings/Settings.svelte';
 import About from '@/views/About/About.svelte';
 import TechnicalInfo from '@/views/TechnicalInfo/TechnicalInfo.svelte';
-import PopupArticle from '@/components/PopupArticle.svelte';
+import Article from '@/components/Article.svelte';
 
 // Router params (paths, components & etc.)
 export const routes = [
@@ -40,6 +40,6 @@ export const routes = [
   },
   {
     path: /^\/articles\/(.+)$/,
-    component: PopupArticle,
+    component: Article,
   },
 ];
