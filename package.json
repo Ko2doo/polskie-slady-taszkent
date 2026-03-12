@@ -26,6 +26,10 @@
     "Capacitor.js"
   ],
   "author": "NИ",
+  "license": {
+    "type": "MIT",
+    "url": "https://opensource.org/license/mit"
+  },
   "devDependencies": {
     "@capacitor/assets": "^3.0.5",
     "@capacitor/cli": "^8.2.0",
