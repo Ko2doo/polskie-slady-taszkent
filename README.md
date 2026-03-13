@@ -125,7 +125,7 @@ npm run build:all
 
 [VS Code](https://code.visualstudio.com/)
 
-- [Svelte Extension[(https://marketplace.visualstudio.com/items?itemName=svelte.svelte-vscode)
+- [Svelte Extension](https://marketplace.visualstudio.com/items?itemName=svelte.svelte-vscode)
 - [Gradle for Java](https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-gradle)
 - [Language Support for Java by Red Hat](https://marketplace.visualstudio.com/items?itemName=redhat.java)
 
