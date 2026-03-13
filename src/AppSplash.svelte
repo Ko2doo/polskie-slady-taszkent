@@ -4,7 +4,7 @@
   let { appName = "", version = "" } = $props();
 </script>
 
-<article class="app-splash-screen" out:fly={{ duration: 400, y: 20, delay: 320 }}>
+<article class="app-splash-screen" out:fly={{ duration: 500, y: 20, delay: 250 }}>
   <div class="app-logo-wrapper">
     <img class="app-logo" src="app-icon.png" alt="App logo" />
     <h1 class="app-name">
