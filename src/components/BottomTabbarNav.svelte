@@ -54,7 +54,7 @@
 </script>
 
 <nav
-  class="pb-safe-4 px-safe-4 flex justify-center w-full z-20"
+  class="pb-safe-4 px-safe-4 fixed bottom-0 flex justify-center w-full z-20"
   in:fly={{ duration: 120, y: 20 }}
   out:fly={{ duration: 120, y: 20 }}
 >

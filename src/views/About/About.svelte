@@ -50,7 +50,7 @@
   <NavbarBackLink text="Back" onClick={handleBack} />
 {/snippet}
 
-<section class="about-view relative z-60 flex flex-col" in:fly={{ duration: 120, x: 20 }}>
+<section class="about-view flex flex-col" in:fly={{ duration: 120, x: 20 }}>
   <Block strong inset>
     <article class="flex flex-col pt-4 pb-4 gap-8">
       {#each aboutMeta as info (info.id)}
