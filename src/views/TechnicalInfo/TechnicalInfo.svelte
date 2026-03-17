@@ -3,7 +3,7 @@
   import { fly } from "svelte/transition";
 
   import { withNavbar } from "@/store/ui/navbar";
-  import { setTabbar } from "@/store/ui/bottomTabbarNav";
+  import { withTabbar } from "@/store/ui/bottomTabbarNav";
 
   // Icons
   import Close from "@/lib/icons/Close.svelte";
@@ -26,8 +26,10 @@
   });
 
   $effect(() => {
-    setTabbar({
+    withTabbar({
       isVisible: false,
+      duration: 120,
+      delay: 40,
     });
   });
 

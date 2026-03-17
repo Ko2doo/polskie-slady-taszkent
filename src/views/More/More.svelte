@@ -3,7 +3,7 @@
   import { fly } from "svelte/transition";
 
   import { withNavbar } from "@/store/ui/navbar";
-  import { resetTabbar } from "@/store/ui/bottomTabbarNav";
+  import { withTabbar } from "@/store/ui/bottomTabbarNav";
   import { resolvePageKeyFromRouteResult } from "@/utils/routerUtils";
 
   import { goto } from "@mateothegreat/svelte5-router";
@@ -30,7 +30,11 @@
 
   $effect(() => {
     // Default tabbar state
-    resetTabbar();
+    withTabbar({
+      isVisible: true,
+      duration: 120,
+      delay: 40,
+    });
   });
 
   const menu = [

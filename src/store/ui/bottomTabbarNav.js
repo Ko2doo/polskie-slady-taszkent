@@ -4,7 +4,11 @@
 
 import { writable } from 'svelte/store';
 
-const defaults = { isVisible: true };
+const defaults = {
+  isVisible: true,
+  duration: 120, // by default
+  delay: 500, // by defalut
+};
 
 export const bottomTabbarState = writable({ ...defaults });
 

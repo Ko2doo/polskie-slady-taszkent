@@ -9,7 +9,7 @@
 
   import { resolvePageKeyFromRouteResult } from "@/utils/routerUtils";
   import { withNavbar } from "@/store/ui/navbar";
-  import { setTabbar } from "@/store/ui/bottomTabbarNav";
+  import { withTabbar } from "@/store/ui/bottomTabbarNav";
 
   import { openAppSettings } from "@/capacitor/services/locationPermission";
 
@@ -48,8 +48,10 @@
   });
 
   $effect(() => {
-    setTabbar({
+    withTabbar({
       isVisible: false,
+      duration: 120,
+      delay: 40,
     });
   });
 

@@ -13,7 +13,7 @@
   import PaperMapIcon from "@/lib/icons/PaperMapIcon.svelte";
   import MenuDotsIcon from "@/lib/icons/MenuDotsIcon.svelte";
 
-  let { i18n } = $props();
+  let { i18n, duration, delay } = $props();
 
   // Router link params
   // Check https://github.com/mateothegreat/svelte5-router/blob/main/docs/actions.md#route
@@ -55,8 +55,8 @@
 
 <nav
   class="pb-safe-4 px-safe-4 fixed bottom-0 flex justify-center w-full z-20"
-  in:fly={{ duration: 120, y: 20 }}
-  out:fly={{ duration: 120, y: 20 }}
+  in:fly={{ duration: duration, delay: delay, y: 20 }}
+  out:fly={{ duration: duration, delay: delay, y: 20 }}
 >
   <div class="gap-4 items-stretch h-16 w-full md:w-auto flex justify-between">
     <div
@@ -66,7 +66,7 @@
         <a
           href={link.href}
           use:linkAction={routeParam}
-          class="active:opacity-50 k-link inline-flex flex-col justify-center items-center cursor-pointer select-none px-4 text-xs truncate w-full h-full duration-120 transition-colors rounded-full"
+          class="active:opacity-50 k-link inline-flex flex-col justify-center items-center cursor-pointer select-none px-4 text-[14px] truncate w-full h-full duration-120 transition-colors rounded-full"
         >
           <!-- Render icons (if it exists iconCollection) -->
           <Icon class="mb-1">

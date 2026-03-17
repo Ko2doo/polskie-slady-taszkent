@@ -33,7 +33,7 @@
   import { navbarState } from "@/store/ui/navbar";
   import { panelState, openPanel, closePanel } from "@/store/ui/panel";
   import { initFirstLaunch, APP_FIRST_LAUNCH_STORAGE_VAL, markFirstLaunchCompleted } from "@/store/appStartInitialize";
-  import { bottomTabbarState } from "@/store/ui/bottomTabbarNav";
+  import { bottomTabbarState, resetTabbar } from "@/store/ui/bottomTabbarNav";
 
   // App ready state
   let APP_READY = $state(false);
@@ -58,6 +58,10 @@
   function handleScroll(e) {
     scrollState.y = e.currentTarget.scrollTop;
   }
+
+  $effect(() => {
+    if (APP_READY) resetTabbar();
+  });
 
   // On mount svelte initialization
   onMount(async () => {
@@ -162,7 +166,7 @@
 
         {#if $bottomTabbarState.isVisible}
           <!-- Fixed bottom navigation -->
-          <BottomTabbarNav {i18n} />
+          <BottomTabbarNav {i18n} duration={$bottomTabbarState.duration} delay={$bottomTabbarState.delay} />
         {/if}
       </div>
     </Page>

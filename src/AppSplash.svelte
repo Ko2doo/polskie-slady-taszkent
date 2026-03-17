@@ -1,10 +1,15 @@
 <script>
   import { fly } from "svelte/transition";
+  import { setTabbar } from "./store/ui/bottomTabbarNav";
 
   let { appName = "", version = "" } = $props();
+
+  $effect(() => {
+    setTabbar({ isVisible: false });
+  });
 </script>
 
-<article class="app-splash-screen" out:fly={{ duration: 500, y: 20, delay: 250 }}>
+<article class="app-splash-screen" out:fly={{ duration: 500, y: 20, delay: 200 }}>
   <div class="app-logo-wrapper">
     <img class="app-logo" src="app-icon.png" alt="App logo" />
     <h1 class="app-name">
@@ -20,6 +25,9 @@
     height: 100dvh;
 
     padding: 44px 18px;
+
+    position: relative;
+    z-index: 60;
 
     display: flex;
     flex-direction: column;
@@ -51,6 +59,8 @@
     font-weight: 600;
 
     line-height: 1.2;
+
+    width: 80%;
 
     display: block;
     text-align: center;
