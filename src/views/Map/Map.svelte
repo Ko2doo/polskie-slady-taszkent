@@ -23,7 +23,7 @@
    */
 
   import { onMount, onDestroy } from "svelte";
-  import { Dialog, DialogButton, Link } from "konsta/svelte";
+  import { Progressbar, Dialog, DialogButton, Link } from "konsta/svelte";
   import RoutingNavigationIcon from "@/lib/icons/RoutingNavigationIcon.svelte";
   import { goto } from "@mateothegreat/svelte5-router";
 
@@ -55,6 +55,7 @@
     cleanupMap,
     resolveTargetCoords,
   } from "./MapLifecycle.svelte.js";
+  import { createMapLoadTracker } from "./MapLoadTracker.js";
 
   // ========================================
   // PROPS
@@ -73,6 +74,10 @@
   let navigation = $state(null); // Point-to-point navigation
   let gpsNavigation = $state(null); // GPS navigation
   let theme = null;
+
+  // Progressbar state
+  let mapLoadingProgress = $state(0);
+  let mapReady = $state(false);
 
   // Target coordinates from URL params (?lon=X&lat=Y)
   let targetCoords = $state(null);
@@ -165,6 +170,14 @@
         style,
       });
 
+      // mapLibre loading tracker
+      const tracker = createMapLoadTracker({
+        map,
+        setProgress: (v) => (mapLoadingProgress = v),
+        setReady: () => (mapReady = true),
+        startOffset: 40,
+      });
+
       // 5. Create MapPointsBuilder
       builder = createMapPointsBuilder({
         map,
@@ -208,6 +221,7 @@
 
         // Attach unified click handler
         map.on("click", handleUnifiedMapClick);
+        tracker.markSourcesAdded();
       });
 
       console.log("[Map] Initialization complete");
@@ -290,8 +304,23 @@
 {/snippet}
 
 <section class="map-section">
+  {#if !mapReady}
+    <div class="absolute inset-0 flex items-center justify-center">
+      <div class="w-64 text-center space-y-2">
+        <h1 class="text-sm font-medium">
+          {Math.round(mapLoadingProgress * 100)}%
+        </h1>
+
+        <Progressbar progress={mapLoadingProgress} />
+      </div>
+    </div>
+  {/if}
+
   <!-- Map container -->
-  <div bind:this={mapContainer} class="map-container"></div>
+  <div
+    bind:this={mapContainer}
+    class={`map-container transition-opacity duration-300 ${mapReady ? "opacity-100" : "opacity-0"}`}
+  ></div>
 
   <!-- Navigation Sheet -->
   <!-- prettier-ignore -->

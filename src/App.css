@@ -4,7 +4,8 @@
 
 /* more info: https://konstaui.com/svelte/colors */
 @theme {
-  --color-brand-primary: #cd2b35;
+  --color-brand-primary: #df556a;
+  --color-brand-primary-dark: #b13447;
   --color-brand-blue: #0091ff;
   --color-brand-green: #00ff00;
 }
