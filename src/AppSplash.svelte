@@ -61,6 +61,8 @@
     line-height: 1.2;
 
     width: 80%;
+    padding-left: 18px;
+    padding-right: 18px;
 
     display: block;
     text-align: center;

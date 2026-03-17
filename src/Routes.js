@@ -16,11 +16,11 @@ import Article from '@/components/Article.svelte';
 export const routes = [
   {
     path: '/',
-    component: Handbook,
+    component: Map,
   },
   {
-    path: '/map',
-    component: Map,
+    path: '/handbook',
+    component: Handbook,
   },
   {
     path: '/more',

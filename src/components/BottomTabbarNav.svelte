@@ -36,14 +36,14 @@
   // Navigation collection
   const linksParams = [
     {
-      id: "handbook",
+      id: "map",
       href: "/",
-      icon: HandbookIcon,
+      icon: PaperMapIcon,
     },
     {
-      id: "map",
-      href: "/map",
-      icon: PaperMapIcon,
+      id: "handbook",
+      href: "/handbook",
+      icon: HandbookIcon,
     },
     {
       id: "more",

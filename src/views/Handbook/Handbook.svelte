@@ -176,7 +176,7 @@
   <SortingByCategories {i18n} items={articlesMeta} onSelectedChange={handleCatUpdate} />
 {/snippet}
 
-<section in:fly={{ duration: 120, y: 20 }}>
+<section class="pb-safe-24" in:fly={{ duration: 120, y: 20 }}>
   {#if query.trim() && itemsView.length === 0}
     <section class="grid grid-1 justify-center" in:fade={{ duration: 120 }}>
       <BlockTitle large class="flex-col">

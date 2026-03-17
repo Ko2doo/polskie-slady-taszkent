@@ -56,7 +56,7 @@
   ];
 </script>
 
-<section class="more-view flex flex-col min-h-[100%]" in:fly={{ duration: 120, y: -20 }}>
+<section class="more-view flex flex-col min-h-[100%] pb-safe-24" in:fly={{ duration: 120, y: -20 }}>
   <Block nested>
     <article class="logo-wrapper flex flex-col items-center">
       <img src="app-icon.png" alt="Project logo" class="size-24" />
@@ -92,16 +92,7 @@
     </MenuList>
   </Block>
 
-  <div class="flex items-center justify-center flex-col gap-[4px] pb-4 mt-auto">
-    <a
-      href="https://github.com/Ko2doo/sp.polskie-slady-taszkent"
-      class="text-sm font-bold text-blue-600 dark:text-blue-400 flex gap-2 items-center"
-      target="_blank"
-    >
-      <GitIcon className="size-8 fill-black dark:fill-white" />
-      <span class="pt-[2px]">{appName}</span>
-    </a>
-
+  <div class="flex items-center justify-center flex-col gap-[4px] mt-auto">
     <p class="text-xs text-gray-900 dark:text-stone-300">
       App Version: {version}
     </p>
@@ -110,5 +101,14 @@
       <p class="mr-1">Powered by</p>
       <SvelteIcon className="size-4" /> Svelte
     </div>
+
+    <a
+      href="https://github.com/Ko2doo/sp.polskie-slady-taszkent"
+      class="text-sm font-bold text-blue-600 dark:text-blue-400 flex gap-2 items-center"
+      target="_blank"
+    >
+      <GitIcon className="size-8 fill-black dark:fill-white" />
+      <span class="pt-[1.2px]">{appName}</span>
+    </a>
   </div>
 </section>

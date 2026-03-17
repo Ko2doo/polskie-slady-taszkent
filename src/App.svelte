@@ -117,7 +117,7 @@
         {/if}
 
         <!-- Centered content -->
-        <main class="flex-1 pb-safe-24">
+        <main class="flex-1">
           <Router
             {routes}
             hooks={{

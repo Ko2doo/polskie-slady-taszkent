@@ -27,7 +27,7 @@
       lat: String(lat),
     });
 
-    goto(`/map?${search.toString()}`);
+    goto(`/?${search.toString()}`);
   }
 
   function handleBack() {
@@ -83,7 +83,7 @@
           small
           raised
           rounded
-          class="mt-4 ml-auto w-auto justify-between text-md"
+          class="k-color-brand-blue mt-4 ml-auto w-auto justify-between text-md"
           onClick={() => getToMap(meta.coords)}
         >
           <span> {$i18n.t("ui:buttons:toMaps")} </span>
