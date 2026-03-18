@@ -176,6 +176,7 @@
         setProgress: (v) => (mapLoadingProgress = v),
         setReady: () => (mapReady = true),
         startOffset: 40,
+        debug: import.meta.env.DEV,
       });
 
       // 5. Create MapPointsBuilder

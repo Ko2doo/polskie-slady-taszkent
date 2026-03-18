@@ -51,7 +51,7 @@ export default {
     enableNav: 'Enable navigation',
     allow: 'Allow',
     waiting: 'Waiting...',
-    readMore: 'Read more..',
+    readMore: 'Details',
     langSwitcher: 'Language',
     toMaps: 'Show on map',
     popupGetOtherMaps: 'Open in Google Maps',

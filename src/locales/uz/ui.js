@@ -51,7 +51,7 @@ export default {
     enableNav: 'Navigatsiyani yoqish',
     allow: 'Ruxsat berish',
     waiting: 'Kutilmoqda...',
-    readMore: 'Ko‘proq o‘qish..',
+    readMore: 'Batafsil',
     langSwitcher: 'Til',
     toMaps: 'Xaritada ko‘rsatish',
     popupGetOtherMaps: 'Google Xaritalarda ochish',

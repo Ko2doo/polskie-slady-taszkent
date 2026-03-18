@@ -51,7 +51,7 @@ export default {
     enableNav: 'Włącz nawigację',
     allow: 'Zezwól',
     waiting: 'Oczekiwanie...',
-    readMore: 'Przeczytaj więcej..',
+    readMore: 'Szczegóły',
     langSwitcher: 'Język',
     toMaps: 'Pokaż na mapie',
     popupGetOtherMaps: 'Otwórz w Mapach Google',

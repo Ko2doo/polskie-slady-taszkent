@@ -51,7 +51,7 @@ export default {
     enableNav: 'Включить навигацию',
     allow: 'Разрешить',
     waiting: 'Ожидание...',
-    readMore: 'Читать далее..',
+    readMore: 'Подробнее',
     langSwitcher: 'Язык',
     toMaps: 'Показать на карте',
     popupGetOtherMaps: 'Открыть в Google Maps',
