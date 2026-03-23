@@ -56,31 +56,56 @@ if (existsSync(pbxprojPath)) {
 
 // ─── Changelog ────────────────────────────────────────
 
-// Collect commits from current branch only (since branching point from main/master)
+// Try to find the last release tag
 let range = '';
-try {
-  const mergeBase = execSync('git merge-base HEAD main').toString().trim();
-  range = `${mergeBase}..HEAD`;
-} catch (mainError) {
-  console.warn(`⚠️  Could not find base branch "main": ${mainError.message}`);
+let lastTag = '';
 
+try {
+  // Get all tags sorted by version
+  const allTags = execSync('git tag -l "v*" --sort=-version:refname').toString().trim().split('\n').filter(Boolean);
+  if (allTags.length > 0) {
+    lastTag = allTags[0];
+    range = `${lastTag}..HEAD`;
+    console.log(`ℹ️  Collecting commits since last tag: ${lastTag}`);
+  }
+} catch (e) {
+  console.warn('⚠️  No previous tags found');
+}
+
+// If no tags found, try to find merge base with main/master
+if (!range) {
   try {
-    const mergeBase = execSync('git merge-base HEAD master').toString().trim();
+    const mergeBase = execSync('git merge-base HEAD main').toString().trim();
     range = `${mergeBase}..HEAD`;
-  } catch (masterError) {
-    console.warn('⚠️  Could not detect base branch, using full HEAD history');
-    range = 'HEAD';
+    console.log('ℹ️  Collecting commits since branching from main');
+  } catch (mainError) {
+    try {
+      const mergeBase = execSync('git merge-base HEAD master').toString().trim();
+      range = `${mergeBase}..HEAD`;
+      console.log('ℹ️  Collecting commits since branching from master');
+    } catch (masterError) {
+      console.warn('⚠️  Could not detect base branch, using last 50 commits');
+      range = 'HEAD~50..HEAD';
+    }
   }
 }
 
 const raw = execSync(`git log ${range} --pretty=format:"%s"`).toString().trim();
 const commits = raw.split('\n').filter(Boolean);
 
+console.log(`ℹ️  Found ${commits.length} commits to process`);
+
 const updates = [];
 const fixes = [];
 const releases = [];
+const other = [];
 
 for (const commit of commits) {
+  // Skip the release commit itself
+  if (/^RELEASE:/i.test(commit)) {
+    continue;
+  }
+
   // UPD:FIX — mixed commit, goes into both Updates and Fixes
   if (/^UPD:FIX:/i.test(commit)) {
     const msg = commit.replace(/^UPD:FIX:\d{4}-\d{2}-\d{2}::\s*/i, '');
@@ -95,11 +120,20 @@ for (const commit of commits) {
     continue;
   }
 
-  // REL:/RELEASE: - only releases
-  if (/^(REL|RELEASE):/i.test(commit)) {
-    releases.push(commit.replace(/^(REL|RELEASE):\d{4}-\d{2}-\d{2}::\s*/i, ''));
+  // FIX: - Only Fixes
+  if (/^FIX:/i.test(commit)) {
+    fixes.push(commit.replace(/^FIX:\d{4}-\d{2}-\d{2}::\s*/i, ''));
     continue;
   }
+
+  // REL: - Releases (but we skip these above)
+  if (/^REL:/i.test(commit)) {
+    releases.push(commit.replace(/^REL:\d{4}-\d{2}-\d{2}::\s*/i, ''));
+    continue;
+  }
+
+  // Everything else
+  other.push(commit);
 }
 
 const today = new Date().toISOString().split('T')[0];
@@ -114,6 +148,9 @@ if (fixes.length) {
 }
 if (releases.length) {
   newEntry += `### 🚀 Releases\n${releases.map((m) => `- ${m}`).join('\n')}\n\n`;
+}
+if (other.length) {
+  newEntry += `### 📝 Other Changes\n${other.map((m) => `- ${m}`).join('\n')}\n\n`;
 }
 
 // Prepend new release entry on top, keep previous history below
@@ -135,8 +172,7 @@ execSync('git add .', { stdio: 'inherit' });
 execSync(`git commit -m "RELEASE:${today}:: v${version}"`, { stdio: 'inherit' });
 execSync(`git checkout -b v${version}`, { stdio: 'inherit' });
 execSync(`git tag v${version}`, { stdio: 'inherit' });
-// execSync(`git push origin v${version}`, { stdio: 'inherit' });
-// execSync(`git push origin v${version} --tags`, { stdio: 'inherit' });
+
 // Push branch and tag separately to avoid ambiguity
 execSync(`git push origin refs/heads/v${version}`, { stdio: 'inherit' });
 execSync(`git push origin refs/tags/v${version}`, { stdio: 'inherit' });
