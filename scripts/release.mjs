@@ -135,7 +135,10 @@ execSync('git add .', { stdio: 'inherit' });
 execSync(`git commit -m "RELEASE:${today}:: v${version}"`, { stdio: 'inherit' });
 execSync(`git checkout -b v${version}`, { stdio: 'inherit' });
 execSync(`git tag v${version}`, { stdio: 'inherit' });
-execSync(`git push origin v${version}`, { stdio: 'inherit' });
-execSync(`git push origin v${version} --tags`, { stdio: 'inherit' });
+// execSync(`git push origin v${version}`, { stdio: 'inherit' });
+// execSync(`git push origin v${version} --tags`, { stdio: 'inherit' });
+// Push branch and tag separately to avoid ambiguity
+execSync(`git push origin refs/heads/v${version}`, { stdio: 'inherit' });
+execSync(`git push origin refs/tags/v${version}`, { stdio: 'inherit' });
 
 console.log(`\n🚀 Released v${version}`);
