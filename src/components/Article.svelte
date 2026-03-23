@@ -2,23 +2,26 @@
   /**
    * A component with a dynamic router based on the article ID that opens a new screen.
    */
-  import { Page, Navbar, NavbarBackLink, Block, Link, Button } from "konsta/svelte";
+  import { Popup, Page, Navbar, NavbarBackLink, Block, Link, Button } from "konsta/svelte";
 
   import { routerBack } from "@/services/navigationHistoryHook";
 
   import { articlesMeta } from "@/data/articles";
+  import { articlePopupState } from "@/lib/state/article.svelte";
 
   // Router
   import { goto } from "@mateothegreat/svelte5-router";
 
   import ArrowRightIcon from "@/lib/icons/ArrowRightIcon.svelte";
 
-  let { route, i18n } = $props();
+  let { i18n } = $props();
 
   // svelte-ignore state_referenced_locally
   // check this: https://github.com/sveltejs/svelte/issues/12877
-  let articleId = route?.result?.path.params;
-  const meta = articlesMeta.find((a) => a.id === articleId);
+  // let articleId = route?.result?.path.params;
+  // const meta = articlesMeta.find((a) => a.id === articleId);
+
+  const meta = $derived(articlePopupState.id ? articlesMeta.find((a) => a.id === articlePopupState.id) : null);
 
   function getToMap(coords) {
     const [lat, lon] = coords;
@@ -35,41 +38,15 @@
   }
 </script>
 
-{#if !articleId}
-  <!-- Not id`s -->
+<Popup opened={articlePopupState.isOpen}>
   <Page>
-    <Block class="mt-[100px] text-center text-2xl">
-      <p class="text-red-600 text-bold">
-        {$i18n.t("errors:noArticleId")}
-      </p>
+    <Navbar>
+      {#snippet left()}
+        <NavbarBackLink text="Back" onClick={articlePopupState.close} />
+      {/snippet}
+    </Navbar>
 
-      <Link onClick={handleBack} class="mt-[22px] text-primary underline">
-        {$i18n.t("ui:buttons:back")}
-      </Link>
-    </Block>
-  </Page>
-{:else if !meta}
-  <!-- article not found -->
-  <Page>
-    <Block class="mt-[100px] text-center text-2xl">
-      <p class="text-red-600 text-bold">
-        {$i18n.t("errors:articleNotFound")} ({articleId}).
-      </p>
-
-      <Link onClick={handleBack} class="mt-[22px] text-primary underline">
-        {$i18n.t("ui:buttons:back")}
-      </Link>
-    </Block>
-  </Page>
-{:else}
-  <section class="h-full w-full left-0 top-0 absolute z-80 safe-area-inset">
-    <Page>
-      <Navbar>
-        {#snippet left()}
-          <NavbarBackLink text="Back" onClick={handleBack} />
-        {/snippet}
-      </Navbar>
-
+    {#if meta}
       <Block class="text-base leading-relaxed">
         <h1 class="mb-4 text-bold text-2xl text-neutral-800 dark:text-neutral-300">
           {$i18n.t(`articles:${meta.id}:title`)}
@@ -91,6 +68,6 @@
           <ArrowRightIcon className="size-5" />
         </Button>
       </Block>
-    </Page>
-  </section>
-{/if}
+    {/if}
+  </Page>
+</Popup>

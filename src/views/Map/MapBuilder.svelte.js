@@ -7,6 +7,7 @@
 
 import { MapPointsBuilder } from '@/services/mapPointsBuilder';
 import { MARKER_CONFIG, BOUNDARY_CONFIG } from './MapConstants';
+import { articlePopupState } from '@/lib/state/article.svelte';
 
 /**
  * Create and configure MapPointsBuilder instance
@@ -19,11 +20,11 @@ import { MARKER_CONFIG, BOUNDARY_CONFIG } from './MapConstants';
  * @param {maplibreGL.Map} params.map - Initialized MapLibre map instance
  * @param {Array} params.data - Array of article metadata
  * @param {Object} params.i18n - i18n store with translation functions
- * @param {Function} params.routeFunc - SPA routing function
+ * @param {Function} params.popupTrigger - Svelte + KonstaUI popup state
  * @param {number} params.styleVersion - Current style version
  * @returns {MapPointsBuilder} - Configured builder instance
  */
-export function createMapPointsBuilder({ map, data, i18n, routeFunc, styleVersion }) {
+export function createMapPointsBuilder({ map, data, i18n, popupTrigger, styleVersion }) {
   return (
     MapPointsBuilder.create()
       // Core configuration
@@ -39,7 +40,7 @@ export function createMapPointsBuilder({ map, data, i18n, routeFunc, styleVersio
       })
 
       // SPA routing integration
-      .withRouter(routeFunc)
+      .withPopup(popupTrigger)
 
       // Markers configuration (custom icon and labels)
       .withMarkers(MARKER_CONFIG.customMarkers)

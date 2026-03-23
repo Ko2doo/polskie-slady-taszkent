@@ -24,6 +24,7 @@
   import BottomTabbarNav from "@/components/BottomTabbarNav.svelte";
   import ErrorHandlerToast from "@/components/ErrorHandlerToast.svelte";
   import ExitToast from "@/components/ExitToast.svelte";
+  import Article from "@/components/Article.svelte";
   import OnboardingWizard from "@/components/OnboardingWizard.svelte";
 
   // Icons
@@ -158,6 +159,9 @@
           appState={APP_FIRST_LAUNCH_STORAGE_VAL}
           makeCompleted={markFirstLaunchCompleted}
         />
+
+        <!-- Articles Popup -->
+        <Article {i18n} />
 
         <ExitToast {i18n} />
 

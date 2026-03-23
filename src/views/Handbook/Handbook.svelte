@@ -1,6 +1,5 @@
 <script>
   import { Card, Link, Button, BlockTitle } from "konsta/svelte";
-  import { goto, normalize } from "@mateothegreat/svelte5-router";
 
   // Filters and searching
   import LayoutSwitcher from "@/components/Filters/LayoutSwitcher.svelte";
@@ -20,12 +19,16 @@
   // Content meta
   import { articlesMeta } from "@/data/articles";
 
+  import { articlePopupState } from "@/lib/state/article.svelte";
+
   // Lifecycles
   import { onMount, onDestroy, getContext } from "svelte";
 
+  // Transition
+  import { fade, fly } from "svelte/transition";
+
   // Layout global store
   import { layoutView } from "@/store/ui/layoutView";
-  import { fade, fly } from "svelte/transition";
 
   // Route prop (Svelte 5)
   let { route, i18n } = $props();
@@ -134,13 +137,6 @@
     });
     patchPanel({ title: panelTitle });
   });
-
-  // Inspector check console in browser
-  // $inspect(route);
-
-  function openArticle(id) {
-    goto(`/articles/${id}`);
-  }
 </script>
 
 <!-- Snippets -->
@@ -191,7 +187,7 @@
       in:fade={{ duration: 120 }}
     >
       {#each itemsView as article (article.id)}
-        <Card class="flex flex-col justify-between">
+        <Card class="flex flex-col justify-between" onclick={() => articlePopupState.open(article.id)}>
           {#snippet header()}
             <h1 class="w-full text-stone-800 dark:text-stone-100 text-base font-medium sm:font-bold sm:text-xl">
               {$i18n.t(`articles:${article.id}:title`)}
@@ -211,7 +207,7 @@
               rounded
               inline
               class="k-color-brand-blue text-sm"
-              onClick={() => openArticle(article.id)}
+              onClick={() => articlePopupState.open(article.id)}
             >
               {$i18n.t("ui:buttons:readMore")}
             </Button>

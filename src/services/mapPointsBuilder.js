@@ -8,7 +8,7 @@
  *     - Adds sources for points and boundaries
  *     - Creates symbol layers for icons and labels
  *     - Attaches click handlers and renders custom HTML popups
- *     - Integrates with SPA routing via callback (routeFunc)
+ *     - Integrates with SPA routing via callback (popupTrigger)
  *     - Manages navigation routes (add/clear)
  *
  * Requirements:
@@ -66,7 +66,7 @@ export class MapPointsBuilder {
         popupGetOtherMaps: null,
       },
       styleVersion: 0,
-      routeFunc: () => {},
+      popupTrigger: () => {},
       currentMap: null,
       markers: {
         render: false,
@@ -143,13 +143,13 @@ export class MapPointsBuilder {
   }
 
   /**
-   * Set the router function for SPA navigation
-   * @param {Function} routeFunc - Function called with article ID on marker click
+   * Set the popup function for Popup state
+   * @param {Function} popupTrigger - Function called with article ID on marker click
    * @returns {MapPointsBuilder}
    */
-  withRouter(routeFunc) {
-    if (typeof routeFunc === 'function') {
-      this._config.routeFunc = routeFunc;
+  withPopup(popupTrigger) {
+    if (typeof popupTrigger === 'function') {
+      this._config.popupTrigger = popupTrigger;
     }
     return this;
   }
@@ -612,20 +612,20 @@ export class MapPointsBuilder {
         <button
           type="button"
           class="map-popup-close cursor-pointer w-7 h-7 flex items-center justify-center rounded-full bg-white/80 dark:text-black text-xs font-bold shadow"
-          aria-label="Close"
-        >&times;</button>
+          aria-label="Close">
+            &times;
+        </button>
       </div>
       <div class="flex flex-col text-sm">
         <p class="w-full text-gray-900 dark:text-gray-900 text-base font-medium sm:font-bold">
           ${this._escapeHtml(title)}
         </p>
-        <a 
-          class="w-full text-blue-500 dark:text-blue-500 text-base mt-4" 
-          href="/articles/${this._escapeHtml(id)}" 
-          data-article-id="${this._escapeHtml(id)}"
-        >
+        <button
+          class="w-full text-left text-blue-500 dark:text-blue-500 text-base mt-4"
+          data-article-id="${this._escapeHtml(id)}">
+
           ${this._escapeHtml(popupLinkText)}
-        </a>
+        </button>
         <a 
           class="w-full text-blue-500 dark:text-blue-500 text-base mt-1" 
           target="_blank" 
@@ -669,13 +669,11 @@ export class MapPointsBuilder {
       });
     }
 
-    // Attach article link handler (SPA routing)
-    const articleLink = container.querySelector('a[data-article-id]');
-    if (articleLink) {
-      articleLink.addEventListener('click', (event) => {
+    const articlePopup = container.querySelector('button[data-article-id]');
+    if (articlePopup) {
+      articlePopup.addEventListener('click', (event) => {
         event.preventDefault();
-        this._config.routeFunc(id);
-        popup.remove();
+        this._config.popupTrigger(id);
       });
     }
 

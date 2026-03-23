@@ -25,7 +25,7 @@
   import { onMount, onDestroy } from "svelte";
   import { Progressbar, Dialog, DialogButton, Link } from "konsta/svelte";
   import RoutingNavigationIcon from "@/lib/icons/RoutingNavigationIcon.svelte";
-  import { goto } from "@mateothegreat/svelte5-router";
+  // import { goto } from "@mateothegreat/svelte5-router";
 
   // Navbar
   import { resolvePageKeyFromRouteResult } from "@/utils/routerUtils";
@@ -42,6 +42,7 @@
   // import NavigationControl from "@/components/Ui/NavigationControl.svelte";
   import NavigationSheet from "@/components/Navigation/NavigationSheet.svelte";
   import { createToggle } from "@/lib/state/createToggler.svelte";
+  import { articlePopupState } from "@/lib/state/article.svelte.js";
 
   // Map modules
   import { createMapPointsBuilder } from "./MapBuilder.svelte.js";
@@ -184,7 +185,7 @@
         map,
         data: articlesMeta,
         i18n: $i18n,
-        routeFunc: (id) => goto(`/articles/${id}`),
+        popupTrigger: (id) => articlePopupState.open(id),
         styleVersion: theme.styleVersion,
       });
 
