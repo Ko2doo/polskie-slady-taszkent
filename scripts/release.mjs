@@ -56,6 +56,13 @@ if (existsSync(pbxprojPath)) {
 
 // ─── Changelog ────────────────────────────────────────
 
+const currentBranch = execSync('git rev-parse --abbrev-ref HEAD').toString().trim();
+
+if (currentBranch !== 'master' && currentBranch !== 'main') {
+  console.error(`❌ Releases must be created from main/master. Current: ${currentBranch}`);
+  process.exit(1);
+}
+
 // Try to find the last release tag
 let range = '';
 let lastTag = '';
@@ -154,7 +161,7 @@ if (other.length) {
 }
 
 // Prepend new release entry on top, keep previous history below
-let changelog = `# Changelog\n\n${newEntry}`;
+const changelog = `# Changelog\n\n${newEntry}`;
 if (existsSync('./CHANGELOG.md')) {
   const existing = readFileSync('./CHANGELOG.md', 'utf-8');
   const existingBody = existing.replace(/^# Changelog\n\n/, '');
