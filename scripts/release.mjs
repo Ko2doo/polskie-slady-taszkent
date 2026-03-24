@@ -65,39 +65,55 @@ if (currentBranch !== 'master' && currentBranch !== 'main') {
 
 // Try to find the last release tag
 let range = '';
-let lastTag = '';
+// let lastTag = '';
+
+// try {
+//   // Get all tags sorted by version
+//   const allTags = execSync('git tag -l "v*" --sort=-version:refname').toString().trim().split('\n').filter(Boolean);
+//   if (allTags.length > 0) {
+//     lastTag = allTags[0];
+//     range = `${lastTag}..HEAD`;
+//     console.log(`ℹ️  Collecting commits since last tag: ${lastTag}`);
+//   }
+// } catch (e) {
+//   console.warn('⚠️  No previous tags found');
+// }
 
 try {
-  // Get all tags sorted by version
-  const allTags = execSync('git tag -l "v*" --sort=-version:refname').toString().trim().split('\n').filter(Boolean);
-  if (allTags.length > 0) {
-    lastTag = allTags[0];
-    range = `${lastTag}..HEAD`;
-    console.log(`ℹ️  Collecting commits since last tag: ${lastTag}`);
-  }
-} catch (e) {
-  console.warn('⚠️  No previous tags found');
+  const lastTag = execSync('git describe --tags --abbrev=0').toString().trim();
+
+  range = `${lastTag}..HEAD`;
+  console.log(`ℹ️  Collecting commits since last tag: ${lastTag}`);
+} catch {
+  console.log('ℹ️  No previous tags found, using full history');
 }
 
-// If no tags found, try to find merge base with main/master
+// // If no tags found, try to find merge base with main/master
+// if (!range) {
+//   try {
+//     const mergeBase = execSync('git merge-base HEAD main').toString().trim();
+//     range = `${mergeBase}..HEAD`;
+//     console.log('ℹ️  Collecting commits since branching from main');
+//   } catch (mainError) {
+//     try {
+//       const mergeBase = execSync('git merge-base HEAD master').toString().trim();
+//       range = `${mergeBase}..HEAD`;
+//       console.log('ℹ️  Collecting commits since branching from master');
+//     } catch (masterError) {
+//       console.warn('⚠️  Could not detect base branch, using last 50 commits');
+//       range = 'HEAD~50..HEAD';
+//     }
+//   }
+// }
+// If no tags found > take full history
 if (!range) {
-  try {
-    const mergeBase = execSync('git merge-base HEAD main').toString().trim();
-    range = `${mergeBase}..HEAD`;
-    console.log('ℹ️  Collecting commits since branching from main');
-  } catch (mainError) {
-    try {
-      const mergeBase = execSync('git merge-base HEAD master').toString().trim();
-      range = `${mergeBase}..HEAD`;
-      console.log('ℹ️  Collecting commits since branching from master');
-    } catch (masterError) {
-      console.warn('⚠️  Could not detect base branch, using last 50 commits');
-      range = 'HEAD~50..HEAD';
-    }
-  }
+  console.log('ℹ️  No tags found, using full commit history');
+  range = '';
 }
 
-const raw = execSync(`git log ${range} --pretty=format:"%s"`).toString().trim();
+const raw = execSync(range ? `git log ${range} --pretty=format:"%s"` : `git log --pretty=format:"%s"`)
+  .toString()
+  .trim();
 const commits = raw.split('\n').filter(Boolean);
 
 console.log(`ℹ️  Found ${commits.length} commits to process`);
