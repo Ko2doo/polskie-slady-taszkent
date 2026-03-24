@@ -1,6 +1,13 @@
+import { useOverlay } from '@/services/useOverlay';
+
 function createArticlePopupUI() {
   let id = $state(null);
   let isOpen = $state(false);
+
+  // Overlay logic integration
+  const { open: registerOverlay, close: unregisterOverlay } = useOverlay(() => {
+    isOpen = false;
+  });
 
   return {
     get id() {
@@ -13,10 +20,14 @@ function createArticlePopupUI() {
     open(newId) {
       id = newId;
       isOpen = true;
+
+      registerOverlay();
     },
 
     close() {
       isOpen = false;
+
+      unregisterOverlay();
     },
   };
 }
