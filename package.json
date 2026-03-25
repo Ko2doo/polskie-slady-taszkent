@@ -1,5 +1,5 @@
 {
-  "name": "sp.polskie-slady-taszkent",
+  "name": "polskie-slady-taszkent",
   "private": true,
   "version": "1.0.1",
   "type": "module",
@@ -11,7 +11,7 @@
     "build:copy:android": "npx cap copy android",
     "build:debugApp:android": "cd android && ./gradlew assembleDebug",
     "build:releaseApp:android": "cd android && ./gradlew bundleRelease",
-    "build:all": "npm run build && npm run build:sync:android && npm run build:copy:android && npm run build:debugApp:android",
+    "build:all": "npm run build && npm run build:sync:android && npm run build:copy:android && npm run build:debugApp:android && npm run build:releaseApp:android",
     "release": "node scripts/release.mjs",
     "preview": "vite preview --port 6060",
     "map:download-sprites": "node scripts/downloadProtomapsSprites.mjs"
@@ -26,7 +26,7 @@
     "Svelte.js",
     "Capacitor.js"
   ],
-  "author": "NИ",
+  "author": "NИ Dmitry Adamov",
   "license": {
     "type": "MIT",
     "url": "https://opensource.org/license/mit"

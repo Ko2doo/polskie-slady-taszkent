@@ -81,7 +81,7 @@
           {$i18n.t("about:repoLabel")}
         </b>
         <a
-          href="https://github.com/Ko2doo/sp.polskie-slady-taszkent"
+          href="https://github.com/Ko2doo/polskie-slady-taszkent"
           class="text-blue-600 font-bold text-[16px] flex gap-2 items-center"
           target="_blank"
         >
