@@ -103,7 +103,7 @@
     </div>
 
     <a
-      href="https://github.com/Ko2doo/sp.polskie-slady-taszkent"
+      href="https://github.com/Ko2doo/polskie-slady-taszkent"
       class="text-sm font-bold text-blue-600 dark:text-blue-400 flex gap-2 items-center"
       target="_blank"
     >
