@@ -177,7 +177,7 @@ if (other.length) {
 }
 
 // Prepend new release entry on top, keep previous history below
-const changelog = `# Changelog\n\n${newEntry}`;
+let changelog = `# Changelog\n\n${newEntry}`;
 if (existsSync('./CHANGELOG.md')) {
   const existing = readFileSync('./CHANGELOG.md', 'utf-8');
   const existingBody = existing.replace(/^# Changelog\n\n/, '');
