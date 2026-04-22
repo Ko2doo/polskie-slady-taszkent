@@ -103,7 +103,7 @@ export default {
   },
   map: {
     nav: {
-      pointToPoint: "Yo'nalish A>B",
+      pointToPoint: 'Chizg‘ich',
       navigate: 'Navigatsiya',
       loading: 'Yuklanmoqda...',
       cancel: 'Bekor qilish',

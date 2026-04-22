@@ -102,7 +102,7 @@ export default {
   },
   map: {
     nav: {
-      pointToPoint: 'Route A>B',
+      pointToPoint: 'Ruler',
       navigate: 'Navigate',
       loading: 'Loading...',
       cancel: 'Cancel',

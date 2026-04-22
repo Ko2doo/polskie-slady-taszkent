@@ -47,7 +47,7 @@ export const technicalInfoMeta = [
       {
         title: 'Icons',
         label: 'Solar Linear Icons',
-        href: 'https://www.svgrepo.com/collection/solar-linear-icons/1',
+        href: 'https://www.figma.com/community/file/1166831539721848736',
       },
       {
         title: 'Map',

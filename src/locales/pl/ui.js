@@ -102,7 +102,7 @@ export default {
   },
   map: {
     nav: {
-      pointToPoint: 'Trasa A>B',
+      pointToPoint: 'Linijka',
       navigate: 'Nawigacja',
       loading: 'Ładowanie...',
       cancel: 'Anuluj',

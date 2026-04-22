@@ -102,7 +102,7 @@ export default {
   },
   map: {
     nav: {
-      pointToPoint: 'Маршрут А>Б',
+      pointToPoint: 'Линейка',
       navigate: 'Навигация',
       loading: 'Загрузка...',
       cancel: 'Отмена',

@@ -300,7 +300,7 @@
 
 <!-- Navigation modal sheet button trigger -->
 {#snippet NavigationSheetBtn()}
-  <Link iconOnly onClick={sheetToggler.toggle}>
+  <Link iconOnly onClick={sheetToggler.open}>
     <RoutingNavigationIcon />
   </Link>
 {/snippet}

@@ -2,12 +2,28 @@
 @import 'tailwindcss';
 @import 'konsta/svelte/theme.css';
 
+/* Tailwind */
+:root {
+  --color-black: var(--color-stone-800);
+  --color-white: var(--color-stone-100);
+
+  --k-color-text: var(--color-black);
+  --k-color-bg: var(--color-white);
+}
+
 /* more info: https://konstaui.com/svelte/colors */
 @theme {
   --color-brand-primary: #df556a;
   --color-brand-primary-dark: #b13447;
   --color-brand-blue: #0091ff;
   --color-brand-green: #00ff00;
+}
+
+.dark {
+  --k-color-text: var(--color-black);
+  --k-color-bg: var(--color-white);
+
+  color: var(--color-white);
 }
 
 /* MapLibre Map */

@@ -4,7 +4,7 @@
    */
 
   import { Icon } from "konsta/svelte";
-  import { route as linkAction } from "@mateothegreat/svelte5-router";
+  import { route as linkAction, registry } from "@mateothegreat/svelte5-router";
 
   import { fly } from "svelte/transition";
 
@@ -51,6 +51,15 @@
       icon: MenuDotsIcon,
     },
   ];
+
+  const currentPath = $derived(
+    [...registry.instances.values()][0]?.current?.result?.path?.original ?? window.location.pathname,
+  );
+
+  function isActive(href) {
+    if (href === "/") return currentPath === "/" || currentPath === "";
+    return currentPath.startsWith(href);
+  }
 </script>
 
 <nav
@@ -72,7 +81,7 @@
           <Icon class="mb-1">
             <!-- Check this: https://svelte.dev/docs/svelte/compiler-warnings#svelte_component_deprecated -->
             {@const IconComponent = link.icon}
-            <IconComponent className="size-7" strokeColor="currentColor" />
+            <IconComponent className="size-7" strokeColor="currentColor" isActive={isActive(link.href)} />
           </Icon>
 
           <!-- Render locales for id -->
