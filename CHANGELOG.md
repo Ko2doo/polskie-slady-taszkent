@@ -1,5 +1,20 @@
 # Changelog
 
+## v1.0.2 — 2026-04-22
+
+### 🆕 Updates
+- UPD:2026-04-22: Updates package; Added new icons; Edited default variables & added tailwind config; And other micro fixes
+- Updates dependencies
+- Deleted @capacitor/assets package.
+- Added full build command + full author name; Renaming repo links.
+
+### 📝 Other Changes
+- fix
+- Merge pull request #14 from Ko2doo/v1.0.1
+- Merge branch 'master' into v1.0.1
+- Merge pull request #13 from Ko2doo/master
+- Merge pull request #12 from Ko2doo/v1.0.1
+
 ## v1.0.1 — 2026-03-24
 
 ### 🆕 Updates
