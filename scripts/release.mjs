@@ -42,7 +42,7 @@ const rl = readline.createInterface({
   output: process.stdout,
 });
 
-const answer = await rl.question(`\n⚠️ Confirm release v${version} on branch "${currentBranch}"? (Y/n): `);
+const answer = await rl.question(`\n[!] Confirm release v${version} on branch "${currentBranch}"? (Y/n): `);
 rl.close();
 
 if (answer.toLowerCase() !== 'y') {
@@ -79,7 +79,7 @@ if (existsSync(gradlePath)) {
   writeFileSync(gradlePath, gradle);
   console.log('✅ build.gradle updated to:', version);
 } else {
-  console.warn('⚠️  Android project not found, skipping');
+  console.warn('[!] Android project not found, skipping');
 }
 
 // Update IOS version
@@ -99,7 +99,7 @@ if (existsSync(pbxprojPath)) {
   writeFileSync(pbxprojPath, pbxproj);
   console.log('✅ project.pbxproj updated:', version);
 } else {
-  console.warn('⚠️  iOS project not found, skipping');
+  console.warn('[!] iOS project not found, skipping');
 }
 
 // ─── Changelog ────────────────────────────────────────
@@ -115,14 +115,14 @@ try {
   const lastTag = execSync('git describe --tags --abbrev=0').toString().trim();
 
   range = `${lastTag}..HEAD`;
-  console.log(`ℹ️  Collecting commits since last tag: ${lastTag}`);
+  console.log(`Collecting commits since last tag: ${lastTag}`);
 } catch {
-  console.log('ℹ️  No previous tags found, using full history');
+  console.log('No previous tags found, using full history');
 }
 
 // If no tags found > take full history
 if (!range) {
-  console.log('ℹ️  No tags found, using full commit history');
+  console.log('No tags found, using full commit history');
   range = '';
 }
 
@@ -131,7 +131,7 @@ const raw = execSync(range ? `git log ${range} --pretty=format:"%s"` : `git log 
   .trim();
 const commits = raw.split('\n').filter(Boolean);
 
-console.log(`ℹ️  Found ${commits.length} commits to process`);
+console.log(`Found ${commits.length} commits to process`);
 
 const updates = [];
 const fixes = [];
@@ -193,7 +193,7 @@ if (existsSync('./CHANGELOG.md')) {
 
   changelog += existingBody;
 } else {
-  console.log('ℹ️  No existing CHANGELOG.md found, creating a new one');
+  console.log('No existing CHANGELOG.md found, creating a new one');
 }
 
 writeFileSync('./CHANGELOG.md', changelog);
