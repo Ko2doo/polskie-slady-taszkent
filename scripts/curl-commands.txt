@@ -1,1 +1,0 @@
-curl -X POST -d @query.overpass "https://overpass-api.de/api/interpreter" -o tashkent_roads.json

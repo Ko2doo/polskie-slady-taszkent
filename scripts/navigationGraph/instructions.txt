@@ -1,0 +1,16 @@
+1 step - download data in root project:
+  $ cd scripts/overpass && bash curl-commands.txt
+
+2 step converting json to GeoJson, install osmtogeojson
+  $ npm i -g osmtogeojson
+  And converting:
+  $ npx osmtogeojson tashkent_roads.json > tashkent_roads.geojson
+
+3 step - building graph:
+  $ node scripts/navigationGraph/build-navigation-graph.mjs
+
+4 finnaly - optimize GeoJSON graph:
+  $ node scripts/navigationGraph/optimize-graph.mjs
+  
+5 optional: compress coordinates:
+  $ node scripts/navigationGraph/compress-coordinates.mjs
