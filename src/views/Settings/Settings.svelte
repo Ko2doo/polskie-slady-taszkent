@@ -67,7 +67,7 @@
 <section class="settings-view relative z-60 flex flex-col" in:fly={{ duration: 120, x: 20 }}>
   <Block strong inset>
     <!-- Language section -->
-    <BlockTitle medium class="text-stone-500 justify-baseline">
+    <BlockTitle medium class="justify-baseline">
       <TranslateIcon className="size-8" strokeColor="currentColor" />
 
       <span class="ml-4">
@@ -90,7 +90,7 @@
     <div class="border-t border-gray-400 dark:border-gray-700 my-2"></div>
 
     <!-- Appearance Section -->
-    <BlockTitle medium class="text-stone-500 justify-baseline">
+    <BlockTitle medium class="justify-baseline">
       <PaletteIcon className="size-8" strokeColor="currentColor" />
 
       <span class="ml-4">
@@ -111,7 +111,7 @@
     <div class="border-t border-gray-400 dark:border-gray-700 my-2"></div>
 
     <!-- Permission section -->
-    <BlockTitle medium class="text-stone-500 justify-baseline">
+    <BlockTitle medium class="justify-baseline">
       <LockIcon className="size-8" strokeColor="currentColor" />
 
       <span class="ml-4">

@@ -53,6 +53,9 @@
  */
 
 import { writable } from 'svelte/store';
+import { createLogger, IS_DEBUG } from '@/utils/debugMode';
+
+const errorToastLogger = createLogger('ErrorToast');
 
 /**
  * @typedef {'error' | 'warn' | 'info'} ToastKind
@@ -141,7 +144,7 @@ function validateKind(kind) {
     return kind;
   }
 
-  console.warn(`[errorToast] Invalid kind "${kind}", defaulting to "error"`);
+  IS_DEBUG && errorToastLogger.warn(`Invalid kind "${kind}", defaulting to "error"`);
   return 'error';
 }
 
@@ -155,7 +158,7 @@ function sanitizeAction(action) {
 
   // Validate handler
   if (typeof action.handler !== 'function') {
-    console.warn('[errorToast] Action handler must be a function');
+    IS_DEBUG && errorToastLogger.warn('Action handler must be a function');
     return null;
   }
 
@@ -271,7 +274,7 @@ function createErrorToast() {
 
     // Rate limit check
     if (isRateLimited(text, validKind)) {
-      console.warn('[errorToast] Rate limited:', text);
+      IS_DEBUG && errorToastLogger.warn('Rate limited:', text);
       return;
     }
 

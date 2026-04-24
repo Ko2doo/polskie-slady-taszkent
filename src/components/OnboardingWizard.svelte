@@ -13,8 +13,11 @@
   import TranslateIcon from "@/lib/icons/TranslateIcon.svelte";
   import PaletteIcon from "@/lib/icons/PaletteIcon.svelte";
   import GPSIcon from "@/lib/icons/GPSIcon.svelte";
+  import { createLogger, IS_DEBUG } from "@/utils/debugMode";
 
   let { i18n, appState, makeCompleted } = $props();
+
+  const onboardingLogger = createLogger("WelcomeDialog");
 
   // Toggler
   const welcomeDialogToggler = createToggle();
@@ -37,12 +40,12 @@
     try {
       const result = await requestLocationPermission({
         onSuccess: async () => {
-          console.log("Location permission granted");
+          IS_DEBUG && onboardingLogger.log("Location permission granted");
           // Complete onboarding immediately
           await completeOnboarding();
         },
         onDenied: () => {
-          console.log("Location permission denied");
+          IS_DEBUG && onboardingLogger.log("Location permission denied");
 
           // Show toast with "Open Settings" action button
           errorToast.error($i18n.t("errors:OS_PLUG_GLOC_0003"), {
@@ -52,7 +55,7 @@
               type: "openSettings",
               label: $i18n.t("ui:buttons:openSettings"),
               handler: async () => {
-                console.log("[WelcomeDialog] Opening app settings...");
+                IS_DEBUG && onboardingLogger.log("Opening app settings...");
                 await openAppSettings();
                 // After opening settings, complete onboarding
                 // User will grant permission manually in settings
@@ -62,11 +65,11 @@
           });
         },
         onError: (err) => {
-          console.error("Location permission error:", err);
+          IS_DEBUG && onboardingLogger.error("Location permission error:", err);
 
           // Ignore web platform error - not relevant for onboarding in dev mode
           if (err.code === "WEB_PLATFORM_NOT_SUPPORTED") {
-            console.log("[WelcomeDialog] Web platform detected, skipping permission request");
+            IS_DEBUG && onboardingLogger.log("Web platform detected, skipping permission request");
             // Don't show error, just complete onboarding
             completeOnboarding();
             return;
@@ -83,7 +86,7 @@
                   type: "openSettings",
                   label: $i18n.t("ui:buttons:openSettings"),
                   handler: async () => {
-                    console.log("[WelcomeDialog] Opening app settings from error...");
+                    IS_DEBUG && onboardingLogger.log("Opening app settings from error...");
                     await openAppSettings();
                     await completeOnboarding();
                   },
@@ -93,7 +96,7 @@
         },
       });
     } catch (error) {
-      console.error("Failed to request location permission:", error);
+      IS_DEBUG && onboardingLogger.error("Failed to request location permission:", error);
 
       // Show generic error
       errorToast.error("Failed to request location permission", {
@@ -108,9 +111,9 @@
     try {
       await makeCompleted();
       welcomeDialogToggler.set(false);
-      console.log("Onboarding completed");
+      IS_DEBUG && onboardingLogger.log("Onboarding completed");
     } catch (error) {
-      console.error("Failed to complete onboarding:", error);
+      IS_DEBUG && onboardingLogger.error("Failed to complete onboarding:", error);
 
       errorToast.error("Failed to save settings. Please try again.", {
         scope: "WelcomeDialog",

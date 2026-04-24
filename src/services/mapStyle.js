@@ -77,7 +77,7 @@ export function buildBaseMapStyle({
   origin,
   pmtilesKey,
   theme = 'light', // by default
-  lang = 'ru',
+  lang = 'en',
   fontstack = 'Roboto Regular',
 }) {
   const flavor = resolveFlavor(theme);

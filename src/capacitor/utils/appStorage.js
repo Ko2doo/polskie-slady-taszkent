@@ -4,6 +4,9 @@
  */
 
 import { Preferences } from '@capacitor/preferences';
+import { createLogger, IS_DEBUG } from '@/utils/debugMode';
+
+const capStorageLogger = createLogger('Storage');
 
 export async function setStorage(key, value) {
   try {
@@ -14,7 +17,7 @@ export async function setStorage(key, value) {
 
     await Preferences.set({ key, value: serialized });
   } catch (error) {
-    console.error('Capacitor Preferences.set(...) failed:', error);
+    IS_DEBUG && capStorageLogger.error('Capacitor Preferences.set(...) failed:', error);
   }
 }
 
@@ -33,7 +36,7 @@ export async function getStorage(key, fallback = null) {
       return value;
     }
   } catch (error) {
-    console.error('Capacitor Preferences.get(...) failed:', error);
+    IS_DEBUG && capStorageLogger.error('Capacitor Preferences.get(...) failed:', error);
     return fallback;
   }
 }
@@ -42,6 +45,6 @@ export async function removeStorageItem(key) {
   try {
     await Preferences.remove({ key });
   } catch (error) {
-    console.error('Capacitor Preferences.remove(...) failed:', error);
+    IS_DEBUG && capStorageLogger.error('Capacitor Preferences.remove(...) failed:', error);
   }
 }

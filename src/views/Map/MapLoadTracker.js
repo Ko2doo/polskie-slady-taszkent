@@ -1,17 +1,18 @@
+import { createLogger, IS_DEBUG } from '@/utils/debugMode';
+
 /**
  * Creates a map load progress tracker for MapLibre maps.
  *
  * Tracks source loading events to calculate and report loading progress,
  * then signals readiness when the map reaches an idle state.
  *
- * Progress scale: startOffset% (initial) → 100% (all sources loaded)
+ * Progress scale: startOffset% (initial) -> 100% (all sources loaded)
  *
  * @param {Object} params - Tracker configuration
  * @param {maplibreGL.Map} params.map - MapLibre map instance to track
  * @param {function(number): void} params.setProgress - Callback to update progress (0–1)
  * @param {function(): void} params.setReady - Callback to signal map is ready
  * @param {number} [params.startOffset=40] - Initial progress percentage (0–100) before sources begin loading
- * @param {boolean} [params.debug=false] - Enable console logging. Automatically disabled in production via import.meta.env.DEV
  *
  * @returns {{ markSourcesAdded: function(): void }} - Tracker control API
  *
@@ -21,7 +22,6 @@
  *   setProgress: (v) => (mapLoadingProgress = v),
  *   setReady: () => (mapReady = true),
  *   startOffset: 40,
- *   debug: import.meta.env.DEV,
  * });
  *
  * map.on('load', () => {
@@ -29,12 +29,12 @@
  *   tracker.markSourcesAdded();
  * });
  */
-export function createMapLoadTracker({ map, setProgress, setReady, startOffset = 40, debug = false }) {
+export function createMapLoadTracker({ map, setProgress, setReady, startOffset = 40 }) {
   const loadingSources = new Set();
   const loadedSources = new Set();
   let sourcesAdded = false;
 
-  const log = (...args) => debug && console.log('[MapLoadTracker]', ...args);
+  const trackerLogger = createLogger('MapLoadTracker');
 
   setProgress(startOffset / 100);
 
@@ -45,46 +45,55 @@ export function createMapLoadTracker({ map, setProgress, setReady, startOffset =
     const percent = startOffset + Math.min(loadProgress, 1) * (100 - startOffset);
     const value = Math.min(percent, 100) / 100;
 
-    log(
-      `progress: ${Math.round(value * 100)}%`,
-      `| loaded: ${loadedSources.size}/${loadingSources.size}`,
-      `| sources: [${[...loadedSources].join(', ')}]`
-    );
+    IS_DEBUG &&
+      trackerLogger.log(
+        `progress: ${Math.round(value * 100)}%`,
+        `| loaded: ${loadedSources.size}/${loadingSources.size}`,
+        `| sources: [${[...loadedSources].join(', ')}]`,
+      );
 
     setProgress(value);
   }
 
-  map.on('sourcedataloading', (e) => {
+  function onSourceDataLoading(e) {
     if (e?.sourceId) {
       const isNew = !loadingSources.has(e.sourceId);
       loadingSources.add(e.sourceId);
 
-      if (isNew) log(`[MapLoadTracker] new source loading: "${e.sourceId}" | total: ${loadingSources.size}`);
+      if (isNew && IS_DEBUG) trackerLogger.log(`new source loading: "${e.sourceId}" | total: ${loadingSources.size}`);
 
       update();
     }
-  });
+  }
 
-  map.on('sourcedata', (e) => {
+  function onSourceData(e) {
     if (e?.sourceId && e?.isSourceLoaded) {
       const isNew = !loadedSources.has(e.sourceId);
       loadedSources.add(e.sourceId);
 
-      if (isNew)
-        log(`[MapLoadTracker] source loaded: "${e.sourceId}" | loaded: ${loadedSources.size}/${loadingSources.size}`);
+      if (isNew && IS_DEBUG)
+        trackerLogger.log(`source loaded: "${e.sourceId}" | loaded: ${loadedSources.size}/${loadingSources.size}`);
 
       update();
     }
-  });
+  }
 
-  map.on('idle', () => {
-    log(
-      `idle fired | sourcesAdded: ${sourcesAdded}`,
-      `| loaded: ${loadedSources.size}/${loadingSources.size}`,
-      `| pending: [${[...loadingSources].filter((id) => !loadedSources.has(id)).join(', ')}]`
-    );
+  function onIdle() {
+    IS_DEBUG &&
+      trackerLogger.log(
+        `idle fired | sourcesAdded: ${sourcesAdded}`,
+        `| loaded: ${loadedSources.size}/${loadingSources.size}`,
+        `| pending: [${[...loadingSources].filter((id) => !loadedSources.has(id)).join(', ')}]`,
+      );
 
     if (!sourcesAdded) return;
+
+    // Unsubscribe all events - tracker`s need only for first loading.
+    map.off('sourcedataloading', onSourceDataLoading);
+    map.off('sourcedata', onSourceData);
+    map.off('idle', onIdle);
+
+    IS_DEBUG && trackerLogger.log('tracker disposed');
 
     setProgress(1);
     requestAnimationFrame(() => {
@@ -92,7 +101,11 @@ export function createMapLoadTracker({ map, setProgress, setReady, startOffset =
         setReady(true);
       });
     });
-  });
+  }
+
+  map.on('sourcedataloading', onSourceDataLoading);
+  map.on('sourcedata', onSourceData);
+  map.on('idle', onIdle);
 
   return {
     /**
@@ -103,7 +116,7 @@ export function createMapLoadTracker({ map, setProgress, setReady, startOffset =
      */
     markSourcesAdded() {
       sourcesAdded = true;
-      log(`[MapLoadTracker] markSourcesAdded called | loaded: ${loadedSources.size}/${loadingSources.size}`);
+      IS_DEBUG && trackerLogger.log(`markSourcesAdded called | loaded: ${loadedSources.size}/${loadingSources.size}`);
     },
   };
 }

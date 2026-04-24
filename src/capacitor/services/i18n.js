@@ -31,9 +31,11 @@ import res from '@/locales/resources';
 // Capacitor APIs
 import { Device } from '@capacitor/device';
 import { getStorage, setStorage } from '@/capacitor/utils/appStorage';
+import { createLogger, IS_DEBUG } from '@/utils/debugMode';
+
+const i18nLogger = createLogger('i18n');
 
 // Configuration
-const IS_DEV = import.meta.env.DEV;
 const LANGUAGE_KEY = 'locale';
 const FALLBACK_LANG = 'en';
 
@@ -48,7 +50,7 @@ async function detectInitialLanguage() {
   const stored = await getStorage(LANGUAGE_KEY, null);
 
   if (stored && res[stored]) {
-    console.log('[i18n] Using stored language:', stored);
+    IS_DEBUG && i18nLogger.log('[i18n] Using stored language:', stored);
     return stored;
   }
 
@@ -62,18 +64,18 @@ async function detectInitialLanguage() {
 
       // Check if language exists in resources
       if (res[lang]) {
-        console.log('[i18n] Using system language:', lang);
+        IS_DEBUG && i18nLogger.log('[i18n] Using system language:', lang);
         return lang;
       }
 
-      console.log(`[i18n] System language "${lang}" not available in resources`);
+      IS_DEBUG && i18nLogger.log(`[i18n] System language "${lang}" not available in resources`);
     }
   } catch (error) {
-    console.warn('[i18n] Failed to detect system language:', error);
+    IS_DEBUG && i18nLogger.warn('[i18n] Failed to detect system language:', error);
   }
 
   // 3. Use fallback
-  console.log('[i18n] Using fallback language:', FALLBACK_LANG);
+  IS_DEBUG && i18nLogger.log('[i18n] Using fallback language:', FALLBACK_LANG);
   return FALLBACK_LANG;
 }
 
@@ -81,14 +83,14 @@ async function detectInitialLanguage() {
  * Initialize i18next
  */
 async function initializeI18n() {
-  console.log('[i18n] Initializing...');
+  IS_DEBUG && i18nLogger.log('[i18n] Initializing...');
 
   // Detect initial language
   const initialLng = await detectInitialLanguage();
 
   // Initialize i18next
   await i18next.init({
-    debug: IS_DEV,
+    debug: IS_DEBUG,
     lng: initialLng,
     fallbackLng: FALLBACK_LANG,
     resources: res,
@@ -97,7 +99,7 @@ async function initializeI18n() {
     },
   });
 
-  console.log('[i18n] Initialized with language:', initialLng);
+  IS_DEBUG && i18nLogger.log('[i18n] Initialized with language:', initialLng);
 }
 
 // Initialize
@@ -110,9 +112,9 @@ await initializeI18n();
 i18next.on('languageChanged', async (lng) => {
   try {
     await setStorage(LANGUAGE_KEY, lng);
-    console.log('[i18n] Language changed and saved:', lng);
+    IS_DEBUG && i18nLogger.log('[i18n] Language changed and saved:', lng);
   } catch (error) {
-    console.error('[i18n] Failed to save language:', error);
+    IS_DEBUG && i18nLogger.error('[i18n] Failed to save language:', error);
   }
 });
 

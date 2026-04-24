@@ -11,6 +11,9 @@
  */
 
 import NavigationEngine from './navigation';
+import { createLogger, IS_DEBUG } from '@/utils/debugMode';
+
+const navLoaderLogger = createLogger('NavigationLoader');
 
 let navigationEngine = null;
 let loadingPromise = null;
@@ -51,7 +54,7 @@ export function findCachedRoute(fromLon, fromLat, toLon, toLat) {
 
   if (cached) {
     touchKey(key); // Promote to most-recently-used
-    console.log('[NavigationLoader] Using cached route');
+    IS_DEBUG && navLoaderLogger.log('Using cached route');
     return cached;
   }
 
@@ -75,10 +78,10 @@ export function cacheRoute(fromLon, fromLat, toLon, toLat, route) {
   if (routeCache.size > MAX_CACHE_SIZE) {
     const lruKey = routeCache.keys().next().value;
     routeCache.delete(lruKey);
-    console.log('[NavigationLoader] Cache limit reached, removed LRU entry');
+    IS_DEBUG && navLoaderLogger.log('Cache limit reached, removed LRU entry');
   }
 
-  console.log(`[NavigationLoader] Route cached (${routeCache.size}/${MAX_CACHE_SIZE})`);
+  IS_DEBUG && navLoaderLogger.log(`Route cached (${routeCache.size}/${MAX_CACHE_SIZE})`);
 }
 
 /**
@@ -87,7 +90,7 @@ export function cacheRoute(fromLon, fromLat, toLon, toLat, route) {
 export function clearRouteCache() {
   const size = routeCache.size;
   routeCache.clear();
-  console.log(`[NavigationLoader] Cache cleared (${size} entries removed)`);
+  IS_DEBUG && navLoaderLogger.log(`Cache cleared (${size} entries removed)`);
 }
 
 /**
@@ -115,7 +118,7 @@ export async function initNavigation() {
   }
 
   loadingPromise = (async () => {
-    console.log('[NavigationLoader] Loading navigation graph...');
+    IS_DEBUG && navLoaderLogger.log('Loading navigation graph...');
     const startTime = performance.now();
 
     try {
@@ -128,17 +131,17 @@ export async function initNavigation() {
       const graphData = await response.json();
       const loadTime = performance.now() - startTime;
 
-      console.log(`[NavigationLoader] Graph loaded in ${loadTime.toFixed(0)}ms`);
-      console.log('[NavigationLoader] Initializing navigation engine...');
+      IS_DEBUG && navLoaderLogger.log(`Graph loaded in ${loadTime.toFixed(0)}ms`);
+      IS_DEBUG && navLoaderLogger.log('Initializing navigation engine...');
 
       navigationEngine = new NavigationEngine(graphData);
 
       const totalTime = performance.now() - startTime;
-      console.log(`[NavigationLoader] Ready in ${totalTime.toFixed(0)}ms`);
+      IS_DEBUG && navLoaderLogger.log(`Ready in ${totalTime.toFixed(0)}ms`);
 
       return navigationEngine;
     } catch (error) {
-      console.error('[NavigationLoader] Failed to initialize navigation:', error);
+      IS_DEBUG && navLoaderLogger.error('Failed to initialize navigation:', error);
       // Reset so the next call to initNavigation() can retry
       loadingPromise = null;
       throw error;

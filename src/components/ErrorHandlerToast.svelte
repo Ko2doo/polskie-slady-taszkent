@@ -2,8 +2,11 @@
   import DangerTriangleIcon from "@/lib/icons/DangerTriangleIcon.svelte";
   import { Toast, Button } from "konsta/svelte";
   import { errorToast } from "@/store/ui/errorToast";
+  import { createLogger, IS_DEBUG } from "@/utils/debugMode";
 
   let { i18n } = $props();
+
+  const ErrHandlerToastLogger = createLogger("ErrorHandlerToast");
 
   function onButton() {
     errorToast.hide();
@@ -13,7 +16,7 @@
     const action = $errorToast.meta?.action;
 
     if (!action || typeof action.handler !== "function") {
-      console.warn("[ErrorHandlerToast] No valid action handler");
+      IS_DEBUG && ErrHandlerToastLogger.warn("No valid action handler");
       return;
     }
 
@@ -22,7 +25,7 @@
 
       errorToast.hide();
     } catch (error) {
-      console.error("[ErrorHandlerToast] Action handler failed:", error);
+      IS_DEBUG && ErrHandlerToastLogger.error("Action handler failed:", error);
     }
   }
 

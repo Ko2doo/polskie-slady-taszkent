@@ -12,6 +12,9 @@ import { errorToast } from '@/store/ui/errorToast';
 import { ERROR_CODES } from '@/lib/errors/errorCodes';
 import { getThemeManager } from '@/lib/theme/themeManager';
 import { PMTILES_KEY, MAP_BOUNDS } from './MapConstants';
+import { createLogger, IS_DEBUG } from '@/utils/debugMode';
+
+const mapThemeLogger = createLogger('MapTheme');
 
 /**
  * Create theme controller
@@ -72,7 +75,7 @@ export function createThemeController({ map, builder, navigation, i18n }) {
     // map.off('click', navigation.handleMapClick);
     // map.on('click', navigation.handleMapClick);
 
-    console.log('[MapTheme] Overlays restored');
+    IS_DEBUG && mapThemeLogger.log('Overlays restored');
   }
 
   /**
@@ -80,7 +83,7 @@ export function createThemeController({ map, builder, navigation, i18n }) {
    */
   async function applyTheme(theme) {
     if (!map) {
-      console.warn('[MapTheme] Cannot apply theme: map not initialized');
+      IS_DEBUG && mapThemeLogger.warn('Cannot apply theme: map not initialized');
       return;
     }
 
@@ -99,7 +102,7 @@ export function createThemeController({ map, builder, navigation, i18n }) {
       const onIdle = () => {
         // Check if style version is still current
         if (myVersion !== styleVersion) {
-          console.log('[MapTheme] Style version changed, aborting restoration');
+          IS_DEBUG && mapThemeLogger.log('Style version changed, aborting restoration');
           return;
         }
 
@@ -114,9 +117,9 @@ export function createThemeController({ map, builder, navigation, i18n }) {
 
       map.on('idle', onIdle);
 
-      console.log('[MapTheme] Theme applied:', theme);
+      IS_DEBUG && mapThemeLogger.log('Theme applied:', theme);
     } catch (error) {
-      console.error('[MapTheme] Failed to apply theme:', error);
+      IS_DEBUG && mapThemeLogger.error('Failed to apply theme:', error);
 
       errorToast.error(i18n.t('errors:mapThemeFailed'), {
         scope: 'MapTheme',
@@ -143,7 +146,7 @@ export function createThemeController({ map, builder, navigation, i18n }) {
       applyTheme(nextTheme);
     });
 
-    console.log('[MapTheme] Initialized with theme:', uiThemeStyle);
+    IS_DEBUG && mapThemeLogger.log('Initialized with theme:', uiThemeStyle);
 
     return uiThemeStyle;
   }
@@ -157,7 +160,7 @@ export function createThemeController({ map, builder, navigation, i18n }) {
       unsubscribeTheme = null;
     }
 
-    console.log('[MapTheme] Disposed');
+    IS_DEBUG && mapThemeLogger.log('Disposed');
   }
 
   // ========================================

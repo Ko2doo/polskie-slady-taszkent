@@ -4,6 +4,9 @@
  */
 
 import { getStorage, setStorage } from '@/capacitor/utils/appStorage';
+import { createLogger, IS_DEBUG } from '@/utils/debugMode';
+
+const layoutLogger = createLogger('LayoutView');
 
 // Capacitor storage key
 const STORAGE_KEY = 'handbook.layoutMode';
@@ -40,7 +43,7 @@ function notify() {
       notify();
     }
   } catch (error) {
-    console.error('[layoutView hydrate() error:]', error);
+    IS_DEBUG && layoutLogger.error('hydrate() error:', error);
   }
 })();
 

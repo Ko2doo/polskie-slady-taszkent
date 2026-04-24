@@ -50,6 +50,9 @@
  */
 
 import maplibreGL from 'maplibre-gl';
+import { createLogger, IS_DEBUG } from '@/utils/debugMode';
+
+const pointsBuilderLogger = createLogger('MapPointsBuilder');
 
 export class MapPointsBuilder {
   /**
@@ -243,7 +246,7 @@ export class MapPointsBuilder {
     this._onMarkerClick = null;
     this._clickLayerId = null;
 
-    console.log('[MapPointsBuilder] Disposed');
+    IS_DEBUG && pointsBuilderLogger.log('Disposed');
   }
 
   /**
@@ -254,7 +257,7 @@ export class MapPointsBuilder {
 
     const map = this._config.currentMap;
     if (!map) {
-      console.warn('[MapPointsBuilder] Cannot add boundaries: map not available');
+      IS_DEBUG && pointsBuilderLogger.warn('Cannot add boundaries: map not available');
       return;
     }
 
@@ -264,12 +267,12 @@ export class MapPointsBuilder {
     // Add sources
     sources.forEach((source) => {
       if (!source?.boundaryName) {
-        console.warn('[MapPointsBuilder] Boundary source missing name, skipping');
+        IS_DEBUG && pointsBuilderLogger.warn('Boundary source missing name, skipping');
         return;
       }
 
       if (map.getSource(source.boundaryName)) {
-        console.log(`[MapPointsBuilder] Source "${source.boundaryName}" already exists, skipping`);
+        IS_DEBUG && pointsBuilderLogger.log(`Source "${source.boundaryName}" already exists, skipping`);
         return;
       }
 
@@ -282,12 +285,12 @@ export class MapPointsBuilder {
     // Add layers
     layers.forEach((layer) => {
       if (!layer?.id) {
-        console.warn('[MapPointsBuilder] Boundary layer missing id, skipping');
+        IS_DEBUG && pointsBuilderLogger.warn('Boundary layer missing id, skipping');
         return;
       }
 
       if (map.getLayer(layer.id)) {
-        console.log(`[MapPointsBuilder] Layer "${layer.id}" already exists, skipping`);
+        IS_DEBUG && pointsBuilderLogger.log(`Layer "${layer.id}" already exists, skipping`);
         return;
       }
 
@@ -302,7 +305,7 @@ export class MapPointsBuilder {
       });
     });
 
-    console.log('[MapPointsBuilder] City boundaries added');
+    IS_DEBUG && pointsBuilderLogger.log('City boundaries added');
   }
 
   /**
@@ -313,7 +316,7 @@ export class MapPointsBuilder {
 
     const map = this._config.currentMap;
     if (!map) {
-      console.warn('[MapPointsBuilder] Cannot add markers: map not available');
+      IS_DEBUG && pointsBuilderLogger.warn('Cannot add markers: map not available');
       return;
     }
 
@@ -321,7 +324,7 @@ export class MapPointsBuilder {
     const iconUrl = this._config.markers.icon.url;
 
     if (!iconUrl) {
-      console.error('[MapPointsBuilder] Icon URL is required for markers');
+      IS_DEBUG && pointsBuilderLogger.error('Icon URL is required for markers');
       return;
     }
 
@@ -331,7 +334,7 @@ export class MapPointsBuilder {
     ].filter(Boolean);
 
     if (clickLayerIds.length === 0) {
-      console.warn('[MapPointsBuilder] No click layer IDs configured, popup will not work');
+      IS_DEBUG && pointsBuilderLogger.warn('No click layer IDs configured, popup will not work');
     }
 
     // Clean up previous listener if it exists
@@ -354,7 +357,7 @@ export class MapPointsBuilder {
     this._iconImage.onload = () => {
       // Check if style version changed (theme switched during loading)
       if (this._config.styleVersion !== myVersion) {
-        console.log('[MapPointsBuilder] Style version changed, aborting marker setup');
+        IS_DEBUG && pointsBuilderLogger.log('Style version changed, aborting marker setup');
         return;
       }
 
@@ -362,7 +365,7 @@ export class MapPointsBuilder {
       const imageId = `${iconName}-point`;
       if (!map.hasImage(imageId)) {
         map.addImage(imageId, this._iconImage);
-        console.log(`[MapPointsBuilder] Icon "${imageId}" registered`);
+        IS_DEBUG && pointsBuilderLogger.log(`Icon "${imageId}" registered`);
       }
 
       // Build GeoJSON from data
@@ -371,12 +374,12 @@ export class MapPointsBuilder {
       // Add sources
       this._config.markers.mapSource.forEach((source) => {
         if (!source?.pointSourceName) {
-          console.warn('[MapPointsBuilder] Marker source missing name, skipping');
+          IS_DEBUG && pointsBuilderLogger.warn('Marker source missing name, skipping');
           return;
         }
 
         if (map.getSource(source.pointSourceName)) {
-          console.log(`[MapPointsBuilder] Source "${source.pointSourceName}" already exists, skipping`);
+          IS_DEBUG && pointsBuilderLogger.log(`Source "${source.pointSourceName}" already exists, skipping`);
           return;
         }
 
@@ -389,12 +392,12 @@ export class MapPointsBuilder {
       // Add layers
       this._config.markers.mapLayer.forEach((layer) => {
         if (!layer?.id) {
-          console.warn('[MapPointsBuilder] Marker layer missing id, skipping');
+          IS_DEBUG && pointsBuilderLogger.warn('Marker layer missing id, skipping');
           return;
         }
 
         if (map.getLayer(layer.id)) {
-          console.log(`[MapPointsBuilder] Layer "${layer.id}" already exists, skipping`);
+          IS_DEBUG && pointsBuilderLogger.log(`Layer "${layer.id}" already exists, skipping`);
           return;
         }
 
@@ -410,16 +413,16 @@ export class MapPointsBuilder {
           map.on('click', layerId, this._onMarkerClick);
         });
 
-        console.log('[MapPointsBuilder] Click handlers attached');
+        IS_DEBUG && pointsBuilderLogger.log('Click handlers attached');
       }
 
-      console.log('[MapPointsBuilder] Markers added successfully');
+      IS_DEBUG && pointsBuilderLogger.log('Markers added successfully');
     };
 
     this._iconImage.onerror = (error) => {
       if (this._config.styleVersion !== myVersion) return;
 
-      console.error('[MapPointsBuilder] Failed to load icon image:', error);
+      IS_DEBUG && pointsBuilderLogger.error('Failed to load icon image:', error);
     };
 
     // Trigger image loading
@@ -433,25 +436,25 @@ export class MapPointsBuilder {
   addNavigationRoute(routeGeoJSON) {
     const map = this._config.currentMap;
     if (!map) {
-      console.warn('[MapPointsBuilder] Cannot add route: map not available');
+      IS_DEBUG && pointsBuilderLogger.warn('Cannot add route: map not available');
       return;
     }
 
     // Validate GeoJSON
     if (!routeGeoJSON || !routeGeoJSON.geometry) {
-      console.error('[MapPointsBuilder] Invalid route GeoJSON: missing geometry');
+      IS_DEBUG && pointsBuilderLogger.error('Invalid route GeoJSON: missing geometry');
       return;
     }
 
     const { type, coordinates } = routeGeoJSON.geometry;
 
     if (type !== 'LineString') {
-      console.error(`[MapPointsBuilder] Invalid geometry type: expected "LineString", got "${type}"`);
+      IS_DEBUG && pointsBuilderLogger.error(`Invalid geometry type: expected "LineString", got "${type}"`);
       return;
     }
 
     if (!Array.isArray(coordinates) || coordinates.length < 2) {
-      console.error('[MapPointsBuilder] Invalid LineString: must have at least 2 coordinates');
+      IS_DEBUG && pointsBuilderLogger.error('Invalid LineString: must have at least 2 coordinates');
       return;
     }
 
@@ -479,7 +482,7 @@ export class MapPointsBuilder {
       },
     });
 
-    console.log('[MapPointsBuilder] Navigation route added');
+    IS_DEBUG && pointsBuilderLogger.log('Navigation route added');
   }
 
   /**
@@ -501,10 +504,10 @@ export class MapPointsBuilder {
         map.removeSource('navigation-route');
       }
 
-      console.log('[MapPointsBuilder] Navigation route cleared');
+      IS_DEBUG && pointsBuilderLogger.log('Navigation route cleared');
     } catch (error) {
       // Map is already removed/destroyed, which is fine during cleanup
-      console.log('[MapPointsBuilder] Map already removed, skipping route cleanup');
+      IS_DEBUG && pointsBuilderLogger.log('Map already removed, skipping route cleanup');
     }
   }
 
@@ -542,13 +545,13 @@ export class MapPointsBuilder {
       .map((item) => {
         const coords = item.coords;
         if (!coords || coords.length !== 2) {
-          console.warn(`[MapPointsBuilder] Invalid coords for item "${item.id}"`);
+          IS_DEBUG && pointsBuilderLogger.warn(`Invalid coords for item "${item.id}"`);
           return null;
         }
 
         const coordinates = this._transformCoords(coords);
         if (!coordinates) {
-          console.warn(`[MapPointsBuilder] Failed to transform coords for item "${item.id}"`);
+          IS_DEBUG && pointsBuilderLogger.warn(`Failed to transform coords for item "${item.id}"`);
           return null;
         }
 

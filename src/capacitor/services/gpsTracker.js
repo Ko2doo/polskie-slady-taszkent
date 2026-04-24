@@ -16,10 +16,10 @@
  *
  * const gps = createGPSTracker({
  *   onPositionUpdate: (position) => {
- *     console.log('New position:', position.coords);
+ *     IS_DEBUG && gpsTrackerLogger.log('New position:', position.coords);
  *   },
  *   onError: (error) => {
- *     console.error('GPS error:', error);
+ *     IS_DEBUG && gpsTrackerLogger.error('GPS error:', error);
  *   }
  * });
  *
@@ -34,6 +34,9 @@ import { Capacitor } from '@capacitor/core';
 
 import { ERROR_CODES } from '@/lib/errors/errorCodes';
 import { checkLocationPermission, requestLocationPermission, mapGeolocationError } from './locationPermission';
+import { createLogger, IS_DEBUG } from '@/utils/debugMode';
+
+const gpsTrackerLogger = createLogger('GPSTracker');
 
 // Configuration
 const GPS_OPTIONS = {
@@ -241,11 +244,11 @@ export function createGPSTracker({ onPositionUpdate = null, onError = null } = {
   async function checkPermissions() {
     try {
       const result = await checkLocationPermission();
-      console.log('[GPSTracker] Current permissions:', result.status);
+      IS_DEBUG && gpsTrackerLogger.log('Current permissions:', result.status);
 
       return result.isGranted;
     } catch (error) {
-      console.error('[GPSTracker] Failed to check permissions:', error);
+      IS_DEBUG && gpsTrackerLogger.error('Failed to check permissions:', error);
       return false;
     }
   }
@@ -256,14 +259,14 @@ export function createGPSTracker({ onPositionUpdate = null, onError = null } = {
    * @returns {Promise<boolean>} - true if granted
    */
   async function requestPermissions() {
-    console.log('[GPSTracker] Requesting permissions...');
+    IS_DEBUG && gpsTrackerLogger.log('Requesting permissions...');
 
     const result = await requestLocationPermission({
       onSuccess: () => {
-        console.log('[GPSTracker] Permissions granted');
+        IS_DEBUG && gpsTrackerLogger.log('Permissions granted');
       },
       onDenied: () => {
-        console.log('[GPSTracker] Permissions denied');
+        IS_DEBUG && gpsTrackerLogger.log('Permissions denied');
 
         if (onError) {
           onError({
@@ -273,7 +276,7 @@ export function createGPSTracker({ onPositionUpdate = null, onError = null } = {
         }
       },
       onError: (err) => {
-        console.error('[GPSTracker] Permission request error:', err);
+        IS_DEBUG && gpsTrackerLogger.error('Permission request error:', err);
 
         if (onError) {
           onError({
@@ -302,27 +305,29 @@ export function createGPSTracker({ onPositionUpdate = null, onError = null } = {
 
     for (let attempt = 1; attempt <= MAX_POSITION_ATTEMPTS; attempt++) {
       try {
-        console.log(`[GPSTracker] Getting current position (attempt ${attempt}/${MAX_POSITION_ATTEMPTS})...`);
+        IS_DEBUG && gpsTrackerLogger.log(`Getting current position (attempt ${attempt}/${MAX_POSITION_ATTEMPTS})...`);
 
         const position = await Geolocation.getCurrentPosition(GPS_OPTIONS);
         const positionData = transformPositionData(position);
 
-        console.log('[GPSTracker] Current position:', {
-          lat: positionData.lat,
-          lon: positionData.lon,
-          accuracy: positionData.accuracy,
-          withinBounds: positionData.isWithinBounds,
-        });
+        IS_DEBUG &&
+          gpsTrackerLogger.log('Current position:', {
+            lat: positionData.lat,
+            lon: positionData.lon,
+            accuracy: positionData.accuracy,
+            withinBounds: positionData.isWithinBounds,
+          });
 
         // Accept position if accuracy is good enough
         if (positionData.accuracy <= MAX_ACCEPTABLE_ACCURACY) {
           return positionData;
         }
 
-        console.log(
-          `[GPSTracker] Position accuracy too low (${positionData.accuracy.toFixed(0)}m > ${MAX_ACCEPTABLE_ACCURACY}m)` +
-            (attempt < MAX_POSITION_ATTEMPTS ? `, retrying in ${RETRY_DELAY_MS}ms...` : ', using best available'),
-        );
+        IS_DEBUG &&
+          gpsTrackerLogger.log(
+            `Position accuracy too low (${positionData.accuracy.toFixed(0)}m > ${MAX_ACCEPTABLE_ACCURACY}m)` +
+              (attempt < MAX_POSITION_ATTEMPTS ? `, retrying in ${RETRY_DELAY_MS}ms...` : ', using best available'),
+          );
 
         // On last attempt return whatever we have — better than nothing for flyTo
         if (attempt === MAX_POSITION_ATTEMPTS) {
@@ -331,7 +336,7 @@ export function createGPSTracker({ onPositionUpdate = null, onError = null } = {
 
         await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
       } catch (error) {
-        console.error(`[GPSTracker] Failed to get current position (attempt ${attempt}):`, error);
+        IS_DEBUG && gpsTrackerLogger.error(`Failed to get current position (attempt ${attempt}):`, error);
 
         // Only report error on last attempt to avoid spamming on transient failures
         if (attempt === MAX_POSITION_ATTEMPTS) {
@@ -359,13 +364,13 @@ export function createGPSTracker({ onPositionUpdate = null, onError = null } = {
    */
   async function start() {
     if (isTracking) {
-      console.warn('[GPSTracker] Already tracking');
+      IS_DEBUG && gpsTrackerLogger.warn('Already tracking');
       return true;
     }
 
     // Check platform
     if (!Capacitor.isNativePlatform()) {
-      console.warn('[GPSTracker] GPS tracking only works on native platforms');
+      IS_DEBUG && gpsTrackerLogger.warn('GPS tracking only works on native platforms');
 
       if (onError) {
         onError({
@@ -386,17 +391,17 @@ export function createGPSTracker({ onPositionUpdate = null, onError = null } = {
 
     // Stop here if no permission granted
     if (!hasPermission) {
-      console.error('[GPSTracker] GPS permission denied, cannot start tracking');
+      IS_DEBUG && gpsTrackerLogger.error('GPS permission denied, cannot start tracking');
       return false;
     }
 
     // Start watching
     try {
-      console.log('[GPSTracker] Starting position watch...');
+      IS_DEBUG && gpsTrackerLogger.log('Starting position watch...');
 
       watchId = await Geolocation.watchPosition(GPS_OPTIONS, (position, error) => {
         if (error) {
-          console.error('[GPSTracker] Watch position error:', error);
+          IS_DEBUG && gpsTrackerLogger.error('Watch position error:', error);
 
           const errorCode = mapGeolocationError(error);
 
@@ -426,7 +431,7 @@ export function createGPSTracker({ onPositionUpdate = null, onError = null } = {
 
         // Discard readings with poor accuracy (e.g. right after cold start)
         if (positionData.accuracy > MAX_ACCEPTABLE_ACCURACY) {
-          console.log(`[GPSTracker] Skipping low-accuracy position (${positionData.accuracy.toFixed(0)}m)`);
+          IS_DEBUG && gpsTrackerLogger.log(`Skipping low-accuracy position (${positionData.accuracy.toFixed(0)}m)`);
           return;
         }
 
@@ -441,12 +446,13 @@ export function createGPSTracker({ onPositionUpdate = null, onError = null } = {
 
         lastPosition = positionData;
 
-        console.log('[GPSTracker] Position update:', {
-          lat: positionData.lat,
-          lon: positionData.lon,
-          accuracy: positionData.accuracy,
-          withinBounds: positionData.isWithinBounds,
-        });
+        IS_DEBUG &&
+          gpsTrackerLogger.log('Position update:', {
+            lat: positionData.lat,
+            lon: positionData.lon,
+            accuracy: positionData.accuracy,
+            withinBounds: positionData.isWithinBounds,
+          });
 
         if (onPositionUpdate) {
           onPositionUpdate(positionData);
@@ -454,11 +460,11 @@ export function createGPSTracker({ onPositionUpdate = null, onError = null } = {
       });
 
       isTracking = true;
-      console.log('[GPSTracker] Position watch started, ID:', watchId);
+      IS_DEBUG && gpsTrackerLogger.log('Position watch started, ID:', watchId);
 
       return true;
     } catch (error) {
-      console.error('[GPSTracker] Failed to start watch:', error);
+      IS_DEBUG && gpsTrackerLogger.error('Failed to start watch:', error);
 
       if (onError) {
         const errorCode = mapGeolocationError(error);
@@ -479,7 +485,7 @@ export function createGPSTracker({ onPositionUpdate = null, onError = null } = {
    */
   async function stop() {
     if (!isTracking || watchId === null) {
-      console.warn('[GPSTracker] Not tracking');
+      IS_DEBUG && gpsTrackerLogger.warn('Not tracking');
       return;
     }
 
@@ -490,9 +496,9 @@ export function createGPSTracker({ onPositionUpdate = null, onError = null } = {
       lastRouteIndex = 0;
       // lastPosition intentionally kept — callers may read it after stop()
 
-      console.log('[GPSTracker] Position watch stopped');
+      IS_DEBUG && gpsTrackerLogger.log('Position watch stopped');
     } catch (error) {
-      console.error('[GPSTracker] Failed to stop watch:', error);
+      IS_DEBUG && gpsTrackerLogger.error('Failed to stop watch:', error);
     }
   }
 

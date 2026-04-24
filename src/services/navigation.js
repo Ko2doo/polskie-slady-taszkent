@@ -1,3 +1,7 @@
+import { createLogger, IS_DEBUG } from '@/utils/debugMode';
+
+const navEngineLogger = createLogger('NavigationEngine');
+
 /**
  * NavigationEngine
  *
@@ -74,13 +78,41 @@ class NavigationEngine {
     this.nodes = graphData.nodes;
     this.edges = graphData.edges;
 
-    // Build adjacency list for fast lookup
+    // // Build adjacency list for fast lookup
+    // this.adjacency = {};
+    // this.edges.forEach((edge) => {
+    //   if (!this.adjacency[edge.from]) {
+    //     this.adjacency[edge.from] = [];
+    //   }
+    //   this.adjacency[edge.from].push({
+    //     to: edge.to,
+    //     distance: edge.distance,
+    //   });
+    // });
+
+    // this.buildSpatialIndex();
+
+    // // Check graph integrity
+    // let invalidEdges = 0;
+    // this.edges.forEach((edge) => {
+    //   if (!this.nodes[edge.from] || !this.nodes[edge.to]) {
+    //     invalidEdges++;
+    //   }
+    // });
+
+    // Build adjacency list + validate in on pass.
+    // Invalid edges are counted but NOT added to the graph.
     this.adjacency = {};
+    let invalidEdges = 0;
+
     this.edges.forEach((edge) => {
-      if (!this.adjacency[edge.from]) {
-        this.adjacency[edge.from] = [];
+      if (!this.nodes[edge.from] || !this.nodes[edge.to]) {
+        invalidEdges++;
+
+        return; // skip - don`t pollute the graph with dangling edges
       }
-      this.adjacency[edge.from].push({
+
+      (this.adjacency[edge.from] ??= []).push({
         to: edge.to,
         distance: edge.distance,
       });
@@ -88,22 +120,16 @@ class NavigationEngine {
 
     this.buildSpatialIndex();
 
-    // Check graph integrity
-    let invalidEdges = 0;
-    this.edges.forEach((edge) => {
-      if (!this.nodes[edge.from] || !this.nodes[edge.to]) {
-        invalidEdges++;
-      }
-    });
-
     if (invalidEdges > 0) {
-      console.warn(`[NavigationEngine] Found ${invalidEdges} edges with missing nodes`);
+      IS_DEBUG && navEngineLogger.warn(`Found ${invalidEdges} edges with missing nodes`);
     }
 
-    console.log('[NavigationEngine] Initialized');
-    console.log('  Nodes:', Object.keys(this.nodes).length);
-    console.log('  Edges:', this.edges.length);
-    console.log('  Invalid edges:', invalidEdges);
+    IS_DEBUG && navEngineLogger.group('Initialized');
+    IS_DEBUG && navEngineLogger.log('  Nodes:', Object.keys(this.nodes).length);
+    IS_DEBUG && navEngineLogger.log('  Edges (total):', this.edges.length);
+    IS_DEBUG && navEngineLogger.log('  Edges (in graph):', this.edges.length - invalidEdges);
+    IS_DEBUG && navEngineLogger.log('  Invalid edges:', invalidEdges);
+    IS_DEBUG && navEngineLogger.groupEnd();
   }
 
   // Haversine distance between two points
@@ -136,7 +162,7 @@ class NavigationEngine {
       this.grid[cellKey].push({ id: nodeId, ...node });
     });
 
-    console.log('[NavigationEngine] Spatial index built');
+    IS_DEBUG && navEngineLogger.log('Spatial index built');
   }
 
   /**
@@ -175,7 +201,7 @@ class NavigationEngine {
 
     // Fall back to 5×5 if nothing found (point on cell edge with sparse nodes)
     if (!result.nodeId) {
-      console.warn('[NavigationEngine] No node found in 3×3 window, expanding to 5×5');
+      IS_DEBUG && navEngineLogger.warn('No node found in 3x3 window, expanding to 5x5');
       return search(2);
     }
 
@@ -193,7 +219,7 @@ class NavigationEngine {
     const startNode = this.nodes[startNodeId];
 
     if (!endNode || !startNode) {
-      console.error('[NavigationEngine] Start or end node not found in graph');
+      IS_DEBUG && navEngineLogger.error('Start or end node not found in graph');
       return {
         success: false,
         message: 'Start or end node not found',
@@ -230,7 +256,7 @@ class NavigationEngine {
       iterations++;
 
       if (iterations > MAX_ITERATIONS) {
-        console.error('[NavigationEngine] Max iterations reached');
+        IS_DEBUG && navEngineLogger.error('Max iterations reached');
         return {
           success: false,
           message: `Pathfinding timeout after ${MAX_ITERATIONS} iterations`,
@@ -239,7 +265,7 @@ class NavigationEngine {
       }
 
       if (iterations % 10000 === 0) {
-        console.log(`[NavigationEngine] Iteration ${iterations}, open set size: ${openHeap.size}`);
+        IS_DEBUG && navEngineLogger.log(`Iteration ${iterations}, open set size: ${openHeap.size}`);
       }
 
       const current = openHeap.pop();
@@ -250,7 +276,7 @@ class NavigationEngine {
       if (current === endNodeId) {
         const path = this.reconstructPath(cameFrom, current);
 
-        console.log(`[NavigationEngine] Path found in ${iterations} iterations`);
+        IS_DEBUG && navEngineLogger.log(`Path found in ${iterations} iterations`);
 
         return {
           success: true,
@@ -306,13 +332,13 @@ class NavigationEngine {
 
   // Main function: find route from point A to point B
   findRoute(fromLon, fromLat, toLon, toLat) {
-    console.log(`[NavigationEngine] Finding route from [${fromLon}, ${fromLat}] to [${toLon}, ${toLat}]`);
+    IS_DEBUG && navEngineLogger.log(`Finding route from [${fromLon}, ${fromLat}] to [${toLon}, ${toLat}]`);
 
     const startResult = this.findNearestNode(fromLon, fromLat);
     const endResult = this.findNearestNode(toLon, toLat);
 
-    console.log(`  Start node: ${startResult.nodeId} (${startResult.distance.toFixed(1)}m away)`);
-    console.log(`  End node: ${endResult.nodeId} (${endResult.distance.toFixed(1)}m away)`);
+    IS_DEBUG && navEngineLogger.log(`  Start node: ${startResult.nodeId} (${startResult.distance.toFixed(1)}m away)`);
+    IS_DEBUG && navEngineLogger.log(`  End node: ${endResult.nodeId} (${endResult.distance.toFixed(1)}m away)`);
 
     if (startResult.distance > MAX_NODE_SNAP_DISTANCE || endResult.distance > MAX_NODE_SNAP_DISTANCE) {
       return {

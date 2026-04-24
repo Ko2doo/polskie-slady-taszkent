@@ -58,6 +58,11 @@
   } from "./MapLifecycle.svelte.js";
   import { createMapLoadTracker } from "./MapLoadTracker.js";
 
+  import { createLogger, IS_DEBUG } from "@/utils/debugMode.js";
+
+  // Logger
+  const mapLogger = createLogger("Map");
+
   // ========================================
   // PROPS
   // ========================================
@@ -110,17 +115,21 @@
    * Only ONE mode can be active at a time
    */
   function handleUnifiedMapClick(e) {
-    console.log("[Map] Unified click handler triggered");
-    console.log("[Map] GPS state:", {
-      exists: !!gpsNavigation,
-      mode: gpsNavigation?.gpsMode,
-      ready: gpsNavigation?.gpsReady,
-    });
-    console.log("[Map] Navigation state:", {
-      exists: !!navigation,
-      mode: navigation?.navigationMode,
-      ready: navigation?.navigationReady,
-    });
+    IS_DEBUG && mapLogger.log("Unified click handler triggered");
+
+    IS_DEBUG &&
+      mapLogger.log("GPS state:", {
+        exists: !!gpsNavigation,
+        mode: gpsNavigation?.gpsMode,
+        ready: gpsNavigation?.gpsReady,
+      });
+
+    IS_DEBUG &&
+      mapLogger.log("Navigation state:", {
+        exists: !!navigation,
+        mode: navigation?.navigationMode,
+        ready: navigation?.navigationReady,
+      });
 
     // Check GPS mode first (priority)
     // GPS requires ready state because it needs permissions and tracker
@@ -136,7 +145,7 @@
       return;
     }
 
-    console.log("[Map] No mode active, click ignored");
+    IS_DEBUG && mapLogger.log("No mode active, click ignored");
 
     // No mode active - do nothing
   }
@@ -146,7 +155,7 @@
   // ========================================
 
   onMount(async () => {
-    console.log("[Map] Mounting...");
+    IS_DEBUG && mapLogger.log("Mounting...");
 
     try {
       // 1. Load PMTiles
@@ -177,7 +186,6 @@
         setProgress: (v) => (mapLoadingProgress = v),
         setReady: () => (mapReady = true),
         startOffset: 40,
-        debug: import.meta.env.DEV,
       });
 
       // 5. Create MapPointsBuilder
@@ -226,9 +234,9 @@
         tracker.markSourcesAdded();
       });
 
-      console.log("[Map] Initialization complete");
+      IS_DEBUG && mapLogger.log("Initialization complete");
     } catch (error) {
-      console.error("[Map] Initialization failed:", error);
+      IS_DEBUG && mapLogger.error("Initialization failed:", error);
 
       errorToast.error($i18n.t("errors:mapInitFailed"), {
         scope: "Map",
@@ -256,7 +264,7 @@
   // ========================================
 
   onDestroy(() => {
-    console.log("[Map] Unmounting...");
+    IS_DEBUG && mapLogger.log("Unmounting...");
 
     // Remove unified click handler
     if (map) {

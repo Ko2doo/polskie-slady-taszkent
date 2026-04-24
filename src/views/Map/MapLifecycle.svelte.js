@@ -1,3 +1,5 @@
+import { createLogger, IS_DEBUG } from '@/utils/debugMode';
+
 /**
  * MapLifecycle Module
  *
@@ -15,6 +17,8 @@ import { errorToast } from '@/store/ui/errorToast';
 import { ERROR_CODES } from '@/lib/errors/errorCodes';
 import { PMTILES_PATH, PMTILES_KEY, INITIAL_VIEW, MAP_BOUNDS } from './MapConstants';
 
+const lifecycleLogger = createLogger('MapLifecycle');
+
 /**
  * Initialize PMTiles source
  *
@@ -22,7 +26,7 @@ import { PMTILES_PATH, PMTILES_KEY, INITIAL_VIEW, MAP_BOUNDS } from './MapConsta
  * @returns {Promise<Protocol>} - PMTiles protocol instance
  */
 export async function initializePMTiles(i18n) {
-  console.log('[MapLifecycle] Loading PMTiles...');
+  IS_DEBUG && lifecycleLogger.log('Loading PMTiles...');
 
   try {
     const response = await fetch(PMTILES_PATH);
@@ -39,10 +43,10 @@ export async function initializePMTiles(i18n) {
     maplibreGL.addProtocol('pmtiles', protocol.tile);
     protocol.add(pmtiles);
 
-    console.log('[MapLifecycle] PMTiles loaded successfully');
+    IS_DEBUG && lifecycleLogger.log('PMTiles loaded successfully');
     return protocol;
   } catch (error) {
-    console.error('[MapLifecycle] Failed to load PMTiles:', error);
+    IS_DEBUG && lifecycleLogger.error('Failed to load PMTiles:', error);
 
     errorToast.error(i18n.t('errors:mapPMTilesFetch'), {
       scope: 'MapLifecycle',
@@ -62,7 +66,7 @@ export async function initializePMTiles(i18n) {
  * @returns {maplibreGL.Map} - Initialized map instance
  */
 export function initializeMap({ container, style }) {
-  console.log('[MapLifecycle] Creating MapLibre instance...');
+  IS_DEBUG && lifecycleLogger.log('Creating MapLibre instance...');
 
   const map = new maplibreGL.Map({
     container,
@@ -81,7 +85,7 @@ export function initializeMap({ container, style }) {
     'top-left',
   );
 
-  console.log('[MapLifecycle] MapLibre instance created');
+  IS_DEBUG && lifecycleLogger.log('MapLibre instance created');
   return map;
 }
 
@@ -97,10 +101,10 @@ export function initializeMap({ container, style }) {
  * NOTE: Navigation click handlers are managed in Map.svelte via handleUnifiedMapClick
  */
 export function setupMapHandlers({ map, builder, targetCoords }) {
-  console.log('[MapLifecycle] Setting up map handlers...');
+  IS_DEBUG && lifecycleLogger.log('Setting up map handlers...');
 
   map.setMaxBounds(MAP_BOUNDS);
-  console.log('[MapLifecycle] MaxBounds set:', MAP_BOUNDS);
+  IS_DEBUG && lifecycleLogger.log('MaxBounds set:', MAP_BOUNDS);
 
   // Add all overlays
   builder.addCityBoundaryLayer();
@@ -115,10 +119,10 @@ export function setupMapHandlers({ map, builder, targetCoords }) {
       center: targetCoords,
       zoom: 16,
     });
-    console.log('[MapLifecycle] Flying to target coordinates:', targetCoords);
+    IS_DEBUG && lifecycleLogger.log('Flying to target coordinates:', targetCoords);
   }
 
-  console.log('[MapLifecycle] Map handlers ready');
+  IS_DEBUG && lifecycleLogger.log('Map handlers ready');
 }
 
 /**
@@ -135,7 +139,7 @@ export function setupMapHandlers({ map, builder, targetCoords }) {
  * @param {Object} params.theme - Theme controller to cleanup
  */
 export function cleanupMap({ map, protocol, builder, navigation, theme }) {
-  console.log('[MapLifecycle] Cleaning up map resources...');
+  IS_DEBUG && lifecycleLogger.log('Cleaning up map resources...');
 
   // 1. Dispose controllers FIRST (they need map to be alive)
   if (theme) {
@@ -160,7 +164,7 @@ export function cleanupMap({ map, protocol, builder, navigation, theme }) {
     maplibreGL.removeProtocol('pmtiles');
   }
 
-  console.log('[MapLifecycle] Cleanup complete');
+  IS_DEBUG && lifecycleLogger.log('Cleanup complete');
 }
 
 /**

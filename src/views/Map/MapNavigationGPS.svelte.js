@@ -18,6 +18,9 @@ import { errorToast } from '@/store/ui/errorToast';
 import { ERROR_CODES } from '@/lib/errors/errorCodes';
 import { ROUTE_FIT_PADDING } from './MapConstants';
 // import { openAppSettings, openLocationSettings } from '@/capacitor/services/locationPermission';
+import { createLogger, IS_DEBUG } from '@/utils/debugMode';
+
+const navigationGPSLogger = createLogger('GPSNavigation');
 
 // Configuration
 const RECALC_THROTTLE_MS = 10000; // Don't recalculate more often than 10s
@@ -121,11 +124,11 @@ export function createGPSNavigationController({ map, builder, i18n }) {
       }
 
       gpsReady = true;
-      console.log('[GPSNavigation] GPS initialized');
+      IS_DEBUG && navigationGPSLogger.log('GPS initialized');
 
       return true;
     } catch (error) {
-      console.error('[GPSNavigation] Failed to initialize GPS:', error);
+      IS_DEBUG && navigationGPSLogger.error('Failed to initialize GPS:', error);
 
       if (error.message !== 'GPS permission denied') {
         errorToast.error(i18n.t('errors:gpsInitFailed'), {
@@ -164,7 +167,7 @@ export function createGPSNavigationController({ map, builder, i18n }) {
         .setLngLat([position.lon, position.lat])
         .addTo(map);
 
-      console.log('[GPSNavigation] User marker created');
+      IS_DEBUG && navigationGPSLogger.log('User marker created');
     } else {
       userMarker.setLngLat([position.lon, position.lat]);
     }
@@ -188,7 +191,7 @@ export function createGPSNavigationController({ map, builder, i18n }) {
    * Handle GPS position updates
    */
   function handlePositionUpdate(position) {
-    console.log('[GPSNavigation] Position update:', position);
+    IS_DEBUG && navigationGPSLogger.log('Position update:', position);
 
     // First position ever — fly to it regardless of bounds status
     if (isFirstPosition) {
@@ -266,13 +269,13 @@ export function createGPSNavigationController({ map, builder, i18n }) {
    * Smart error deduplication with priority handling
    */
   function handleGPSError(error) {
-    console.error('[GPSNavigation] GPS error:', error);
+    IS_DEBUG && navigationGPSLogger.error('GPS error:', error);
 
     const errorCode = error.code;
 
     // Skip if we already showed this error (except timeout which can repeat)
     if (shownErrorCodes.has(errorCode) && errorCode !== ERROR_CODES.OS_PLUG_GLOC_0010) {
-      console.log('[GPSNavigation] Error already shown, skipping:', errorCode);
+      IS_DEBUG && navigationGPSLogger.error('Error already shown, skipping:', errorCode);
       return;
     }
 
@@ -298,7 +301,7 @@ export function createGPSNavigationController({ map, builder, i18n }) {
           type: 'openSettings',
           label: i18n.t('ui:buttons:openSettings'),
           handler: async () => {
-            console.log('[GPSNavigation] Opening location settings...');
+            IS_DEBUG && navigationGPSLogger.log('Opening location settings...');
 
             const { openLocationSettings } = await import('@/capacitor/services/locationPermission');
             await openLocationSettings();
@@ -318,7 +321,7 @@ export function createGPSNavigationController({ map, builder, i18n }) {
           type: 'openSettings',
           label: i18n.t('ui:buttons:openSettings'),
           handler: async () => {
-            console.log('[GPSNavigation] opening app settings...');
+            IS_DEBUG && navigationGPSLogger.log('opening app settings...');
             const { openAppSettings } = await import('@/capacitor/services/locationPermission');
             await openAppSettings();
           },
@@ -378,7 +381,7 @@ export function createGPSNavigationController({ map, builder, i18n }) {
 
     // Prevent parallel route calculations from racing
     if (isCalculatingRoute) {
-      console.log('[GPSNavigation] Route calculation already in progress, skipping');
+      IS_DEBUG && navigationGPSLogger.log('Route calculation already in progress, skipping');
       return;
     }
 
@@ -406,7 +409,7 @@ export function createGPSNavigationController({ map, builder, i18n }) {
       return;
     }
 
-    console.log('[GPSNavigation] Calculating route from GPS position...');
+    IS_DEBUG && navigationGPSLogger.log('Calculating route from GPS position...');
 
     isCalculatingRoute = true;
     routeInfo = { loading: true };
@@ -420,7 +423,7 @@ export function createGPSNavigationController({ map, builder, i18n }) {
         handleRouteError(result);
       }
     } catch (error) {
-      console.error('[GPSNavigation] Route calculation error:', error);
+      IS_DEBUG && navigationGPSLogger.error('Route calculation error:', error);
       routeInfo = null;
 
       errorToast.error(i18n.t('errors:navigationCalculateRouteFailed'), {
@@ -447,7 +450,7 @@ export function createGPSNavigationController({ map, builder, i18n }) {
     const offRouteCheck = gpsTracker.checkOffRoute(currentRoute.geometry.coordinates);
 
     if (offRouteCheck && offRouteCheck.isOffRoute) {
-      console.log('[GPSNavigation] User is off route, recalculating...', offRouteCheck);
+      IS_DEBUG && navigationGPSLogger.log('User is off route, recalculating...', offRouteCheck);
 
       lastRecalcTime = now;
       calculateRouteFromGPS();
@@ -469,7 +472,7 @@ export function createGPSNavigationController({ map, builder, i18n }) {
     builder.addNavigationRoute(currentRoute);
     fitMapToRoute(currentRoute);
 
-    console.log('[GPSNavigation] Route displayed:', routeInfo);
+    IS_DEBUG && navigationGPSLogger.log('Route displayed:', routeInfo);
   }
 
   /**
@@ -483,7 +486,7 @@ export function createGPSNavigationController({ map, builder, i18n }) {
       code: ERROR_CODES.NAV_ROUTE_NOT_FOUND,
     });
 
-    console.error('[GPSNavigation] Route calculation failed:', result.message);
+    IS_DEBUG && navigationGPSLogger.error('Route calculation failed:', result.message);
   }
 
   /**
@@ -517,7 +520,7 @@ export function createGPSNavigationController({ map, builder, i18n }) {
       builder.clearNavigationRoute();
     }
 
-    console.log('[GPSNavigation] Arrived at destination!');
+    IS_DEBUG && navigationGPSLogger.log('Arrived at destination!');
 
     errorToast.info(i18n.t('ui:map:gps:arrived'), { scope: 'GPSNavigation' });
   }
@@ -555,7 +558,7 @@ export function createGPSNavigationController({ map, builder, i18n }) {
 
     calculateRouteFromGPS();
 
-    console.log('[GPSNavigation] Building new route to:', destinationPoint);
+    IS_DEBUG && navigationGPSLogger.log('Building new route to:', destinationPoint);
   }
 
   // ========================================
@@ -591,7 +594,7 @@ export function createGPSNavigationController({ map, builder, i18n }) {
     pendingRouteBuild = true;
     didShowWaitingToast = false;
 
-    console.log('[GPSNavigation] Destination set:', destinationPoint);
+    IS_DEBUG && navigationGPSLogger.log('Destination set:', destinationPoint);
 
     calculateRouteFromGPS();
   }
@@ -618,7 +621,7 @@ export function createGPSNavigationController({ map, builder, i18n }) {
       shownErrorCodes.clear();
     }
 
-    console.log('[GPSNavigation] GPS mode:', gpsMode);
+    IS_DEBUG && navigationGPSLogger.log('GPS mode:', gpsMode);
   }
 
   /**
@@ -648,7 +651,7 @@ export function createGPSNavigationController({ map, builder, i18n }) {
       builder.clearNavigationRoute();
     }
 
-    console.log('[GPSNavigation] Navigation cleared');
+    IS_DEBUG && navigationGPSLogger.log('Navigation cleared');
   }
 
   // ========================================
@@ -673,7 +676,7 @@ export function createGPSNavigationController({ map, builder, i18n }) {
     gpsLoading = false;
     isOutOfBounds = false;
 
-    console.log('[GPSNavigation] Disposed');
+    IS_DEBUG && navigationGPSLogger.log('Disposed');
   }
 
   // ========================================

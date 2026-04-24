@@ -10,7 +10,7 @@
    */
 
   import { onMount, onDestroy } from "svelte";
-  import { fade } from "svelte/transition";
+  import { fly } from "svelte/transition";
   import { List, ListItem, Toggle } from "konsta/svelte";
 
   import { getThemeManager } from "@/lib/theme/themeManager";
@@ -47,7 +47,7 @@
   </ListItem>
 
   {#if !followSystem}
-    <li in:fade={{ duration: 150 }} out:fade={{ duration: 150 }} class="list-none">
+    <li in:fly={{ duration: 120, y: -20 }} class="list-none">
       <ListItem
         component="div"
         dividers={false}

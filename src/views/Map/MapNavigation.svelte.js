@@ -13,6 +13,9 @@ import { initNavigation, findRoute } from '@/services/navigationLoader';
 import { errorToast } from '@/store/ui/errorToast';
 import { ERROR_CODES } from '@/lib/errors/errorCodes';
 import { MARKER_CONFIG, MARKER_STYLE, ROUTE_FIT_PADDING } from './MapConstants';
+import { createLogger, IS_DEBUG } from '@/utils/debugMode';
+
+const navigationLogger = createLogger('MapNavigation');
 
 /**
  * Create navigation controller
@@ -86,7 +89,7 @@ export function createNavigationController({ map, builder, i18n }) {
   function setStartPoint(lon, lat) {
     startPoint = { lon, lat };
     startMarker = addMarker(lon, lat, 'start');
-    console.log('[MapNavigation] Start point set:', startPoint);
+    IS_DEBUG && navigationLogger.log('Start point set:', startPoint);
   }
 
   /**
@@ -96,7 +99,7 @@ export function createNavigationController({ map, builder, i18n }) {
   function setEndPoint(lon, lat) {
     endPoint = { lon, lat };
     endMarker = addMarker(lon, lat, 'end');
-    console.log('[MapNavigation] End point set:', endPoint);
+    IS_DEBUG && navigationLogger.log('End point set:', endPoint);
   }
 
   // ========================================
@@ -115,9 +118,9 @@ export function createNavigationController({ map, builder, i18n }) {
     try {
       await initNavigation();
       navigationReady = true;
-      console.log('[MapNavigation] Navigation engine ready');
+      IS_DEBUG && navigationLogger.log('Navigation engine ready');
     } catch (error) {
-      console.error('[MapNavigation] Failed to load navigation:', error);
+      IS_DEBUG && navigationLogger.error('Failed to load navigation:', error);
 
       errorToast.error(i18n.t('errors:navigationInitFailed'), {
         scope: 'MapNavigation',
@@ -147,9 +150,9 @@ export function createNavigationController({ map, builder, i18n }) {
         builder.clearNavigationRoute();
       }
 
-      console.log('[MapNavigation] Navigation cleared');
+      IS_DEBUG && navigationLogger.log('Navigation cleared');
     } catch (error) {
-      console.error('[MapNavigation] Navigation cleared error', error);
+      IS_DEBUG && navigationLogger.error('Navigation cleared error', error);
     }
   }
 
@@ -167,7 +170,7 @@ export function createNavigationController({ map, builder, i18n }) {
       clearNavigation();
     }
 
-    console.log('[MapNavigation] Navigation mode:', navigationMode);
+    IS_DEBUG && navigationLogger.log('Navigation mode:', navigationMode);
   }
 
   // ========================================
@@ -184,7 +187,7 @@ export function createNavigationController({ map, builder, i18n }) {
   function calculateRoute() {
     if (!startPoint || !endPoint) return;
 
-    console.log('[MapNavigation] Calculating route...');
+    IS_DEBUG && navigationLogger.log('Calculating route...');
 
     try {
       const result = findRoute(startPoint.lon, startPoint.lat, endPoint.lon, endPoint.lat);
@@ -195,7 +198,7 @@ export function createNavigationController({ map, builder, i18n }) {
         handleRouteError(result);
       }
     } catch (error) {
-      console.error('[MapNavigation] Route calculation error:', error);
+      IS_DEBUG && navigationLogger.error('Route calculation error:', error);
       routeInfo = null;
 
       errorToast.error(i18n.t('errors:navigationCalculateRouteFailed'), {
@@ -221,7 +224,7 @@ export function createNavigationController({ map, builder, i18n }) {
     builder.addNavigationRoute(currentRoute);
     fitMapToRoute(currentRoute);
 
-    console.log('[MapNavigation] Route calculated:', routeInfo);
+    IS_DEBUG && navigationLogger.log('Route calculated:', routeInfo);
   }
 
   /**
@@ -236,7 +239,7 @@ export function createNavigationController({ map, builder, i18n }) {
       code: ERROR_CODES.NAV_ROUTE_NOT_FOUND,
     });
 
-    console.error('[MapNavigation] Route calculation failed:', result.message);
+    IS_DEBUG && navigationLogger.error('Route calculation failed:', result.message);
   }
 
   /**
@@ -308,7 +311,7 @@ export function createNavigationController({ map, builder, i18n }) {
       endMarker = addMarker(endPoint.lon, endPoint.lat, 'end');
     }
 
-    console.log('[MapNavigation] Markers restored after style change');
+    IS_DEBUG && navigationLogger.log('Markers restored after style change');
   }
 
   // ========================================
@@ -323,7 +326,7 @@ export function createNavigationController({ map, builder, i18n }) {
     navigationMode = false;
     navigationReady = false;
     navigationLoading = false;
-    console.log('[MapNavigation] Disposed');
+    IS_DEBUG && navigationLogger.log('Disposed');
   }
 
   // ========================================

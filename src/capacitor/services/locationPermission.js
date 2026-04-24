@@ -17,8 +17,11 @@
 import { Capacitor } from '@capacitor/core';
 import { Geolocation } from '@capacitor/geolocation';
 import { NativeSettings, AndroidSettings, IOSSettings } from 'capacitor-native-settings';
+import { createLogger, IS_DEBUG } from '@/utils/debugMode';
 
 import { ERROR_CODES } from '@/lib/errors/errorCodes';
+
+const locationPermissionLogger = createLogger('LocationPermissions');
 
 /**
  * Permission status types
@@ -74,7 +77,7 @@ export async function checkLocationPermission() {
     const permissions = await Geolocation.checkPermissions();
     const status = permissions.location;
 
-    console.log('[LocationPermissions] Current status:', status);
+    IS_DEBUG && locationPermissionLogger.log('Current status:', status);
 
     return {
       status,
@@ -83,7 +86,7 @@ export async function checkLocationPermission() {
       needsSettings: status === 'denied',
     };
   } catch (error) {
-    console.error('[LocationPermissions] Failed to check permissions:', error);
+    IS_DEBUG && locationPermissionLogger.error('Failed to check permissions:', error);
 
     // In case of check error, return safe state
     return {
@@ -110,7 +113,7 @@ export async function checkLocationPermission() {
  *
  * @example
  * const result = await requestLocationPermission({
- *   onSuccess: () => console.log('Granted!'),
+ *   onSuccess: () => IS_DEBUG && locationPermissionLogger.log('Granted!'),
  *   onDenied: () => showSettingsPrompt(),
  *   onError: (err) => showError(err)
  * });
@@ -123,7 +126,7 @@ export async function requestLocationPermission(options = {}) {
   const { onSuccess, onDenied, onError, silent = false } = options;
 
   if (!silent) {
-    console.log('[LocationPermissions] Requesting permissions...');
+    IS_DEBUG && locationPermissionLogger.log('Requesting permissions...');
   }
 
   // Check platform
@@ -132,7 +135,7 @@ export async function requestLocationPermission(options = {}) {
     const message = 'Geolocation permissions are only available on mobile devices';
 
     if (!silent) {
-      console.warn('[LocationPermissions]', message);
+      IS_DEBUG && locationPermissionLogger.warn(message);
     }
 
     if (onError) {
@@ -153,7 +156,7 @@ export async function requestLocationPermission(options = {}) {
     const status = permissions.location;
 
     if (!silent) {
-      console.log('[LocationPermissions] Request result:', status);
+      IS_DEBUG && locationPermissionLogger.log('Request result:', status);
     }
 
     // Handle result
@@ -205,7 +208,7 @@ export async function requestLocationPermission(options = {}) {
     }
   } catch (error) {
     // API error
-    console.error('[LocationPermissions] Request failed:', error);
+    IS_DEBUG && locationPermissionLogger.error('Request failed:', error);
 
     const errorCode = mapGeolocationError(error);
     const message = error.message || 'Error requesting geolocation permission';
@@ -233,12 +236,12 @@ export async function requestLocationPermission(options = {}) {
  * @example
  * const opened = await openAppSettings();
  * if (opened) {
- *   console.log('Settings opened');
+ *   IS_DEBUG && locationPermissionLogger.log('Settings opened');
  * }
  */
 export async function openAppSettings() {
   try {
-    console.log('[LocationPermissions] Opening app settings...');
+    IS_DEBUG && locationPermissionLogger.log('Opening app settings...');
 
     await NativeSettings.open({
       optionAndroid: AndroidSettings.ApplicationDetails,
@@ -247,7 +250,7 @@ export async function openAppSettings() {
 
     return true;
   } catch (error) {
-    console.error('[LocationPermissions] Failed to open settings:', error);
+    IS_DEBUG && locationPermissionLogger.error('Failed to open settings:', error);
     return false;
   }
 }
@@ -297,7 +300,7 @@ export async function isLocationServicesEnabled() {
  */
 export async function openLocationSettings() {
   try {
-    console.log('[LocationPermissions] Opening location settings...');
+    IS_DEBUG && locationPermissionLogger.log('Opening location settings...');
 
     await NativeSettings.open({
       optionAndroid: AndroidSettings.Location,
@@ -306,7 +309,7 @@ export async function openLocationSettings() {
 
     return true;
   } catch (error) {
-    console.error('[LocationPermissions] Failed to open location settings:', error);
+    IS_DEBUG && locationPermissionLogger.error('Failed to open location settings:', error);
     return false;
   }
 }
@@ -382,7 +385,7 @@ export function mapGeolocationError(error) {
  * if (readiness.ready) {
  *   // Can use geolocation
  * } else {
- *   console.log('Issue:', readiness.issue);
+ *   IS_DEBUG && locationPermissionLogger.log('Issue:', readiness.issue);
  * }
  */
 export async function checkLocationReadiness() {
