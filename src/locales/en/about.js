@@ -31,6 +31,11 @@ export default {
       description: 'Maria Kucherova, Sayora Tashpulatova, Agnieszka Mikulec',
     },
     a7: {
+      title: 'Testers',
+      description:
+        'Alexander Walewski, Pavel Zarzhevsky, Sergey Tyutin, Maria Kucherova, Danil Sditanov, EdgardMcQueen, Sogdiana Ergasheva, Daria Barbariska, Arina Valieva, Valentina Adamova, Irina Kovaleva, Dmitry Ilkevich',
+    },
+    a8: {
       title: 'Lead Developer',
       description: 'Dmitry Adamov',
       email: 'galaxyrobotix@gmail.com',

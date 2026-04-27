@@ -611,30 +611,23 @@ export class MapPointsBuilder {
     const googleMapsCoords = [lat, lon]; // Google Maps uses lat,lon
 
     return `
-      <div class="flex justify-end mb-1">
-        <button
-          type="button"
-          class="map-popup-close cursor-pointer w-7 h-7 flex items-center justify-center rounded-full bg-white/80 dark:text-black text-xs font-bold shadow"
-          aria-label="Close">
-            &times;
-        </button>
-      </div>
-      <div class="flex flex-col text-sm">
-        <p class="w-full text-gray-900 dark:text-gray-900 text-base font-medium sm:font-bold">
+      <div class="flex flex-col">
+        <p class="w-full text-gray-900 dark:text-gray-200 text-[15px] font-medium sm:font-bold">
           ${this._escapeHtml(title)}
         </p>
+
         <button
-          class="w-full text-left text-blue-500 dark:text-blue-500 text-base mt-4"
+          class="w-full text-left text-blue-400 dark:text-blue-400 text-[14px] mt-4"
           data-article-id="${this._escapeHtml(id)}">
 
           ${this._escapeHtml(popupLinkText)}
         </button>
         <a 
-          class="w-full text-blue-500 dark:text-blue-500 text-base mt-1" 
+          class="w-full text-blue-400 dark:text-blue-400 text-[14px] mt-1" 
           target="_blank" 
           rel="noopener noreferrer"
-          href="https://www.google.com/maps/place/${googleMapsCoords.join(',')}"
-        >
+          href="https://www.google.com/maps/place/${googleMapsCoords.join(',')}">
+
           ${this._escapeHtml(popupGetOtherMaps)}
         </a>
       </div>

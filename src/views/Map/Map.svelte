@@ -382,6 +382,81 @@
     z-index: 10;
   }
 
+  :global(.maplibregl-popup-content) {
+    padding: 22px 11px;
+    background: var(--color-ios-light-surface);
+    border-radius: var(--radius-3xl);
+  }
+
+  :global(.maplibregl-popup-anchor-top .maplibregl-popup-tip) {
+    border-bottom-color: var(--color-ios-light-surface);
+  }
+
+  :global(.maplibregl-popup-anchor-bottom .maplibregl-popup-tip) {
+    border-top-color: var(--color-ios-light-surface);
+  }
+
+  :global(.maplibregl-popup-anchor-top-left .maplibregl-popup-tip) {
+    border-bottom-color: var(--color-ios-light-surface);
+  }
+
+  :global(.maplibregl-popup-anchor-top-right .maplibregl-popup-tip) {
+    border-bottom-color: var(--color-ios-light-surface);
+  }
+
+  :global(.maplibregl-popup-anchor-right .maplibregl-popup-tip) {
+    border-left-color: var(--color-ios-light-surface);
+  }
+
+  :global(.maplibregl-popup-anchor-left .maplibregl-popup-tip) {
+    border-right-color: var(--color-ios-light-surface);
+  }
+
+  :global(.maplibregl-popup-anchor-bottom-left .maplibregl-popup-tip) {
+    border-top-color: var(--color-ios-light-surface);
+  }
+
+  :global(.maplibregl-popup-anchor-bottom-right .maplibregl-popup-tip) {
+    border-top-color: var(--color-ios-light-surface);
+  }
+
+  /* Dark */
+  :global(.dark .maplibregl-popup-content) {
+    background: var(--color-ios-dark-surface-1-tint);
+  }
+
+  :global(.dark .maplibregl-popup-anchor-top .maplibregl-popup-tip) {
+    border-bottom-color: var(--color-ios-dark-surface-1-tint);
+  }
+
+  :global(.dark .maplibregl-popup-anchor-bottom .maplibregl-popup-tip) {
+    border-top-color: var(--color-ios-dark-surface-1-tint);
+  }
+
+  :global(.dark .maplibregl-popup-anchor-top-left .maplibregl-popup-tip) {
+    border-bottom-color: var(--color-ios-dark-surface-1-tint);
+  }
+
+  :global(.dark .maplibregl-popup-anchor-top-right .maplibregl-popup-tip) {
+    border-bottom-color: var(--color-ios-dark-surface-1-tint);
+  }
+
+  :global(.dark .maplibregl-popup-anchor-right .maplibregl-popup-tip) {
+    border-left-color: var(--color-ios-dark-surface-1-tint);
+  }
+
+  :global(.dark .maplibregl-popup-anchor-left .maplibregl-popup-tip) {
+    border-right-color: var(--color-ios-dark-surface-1-tint);
+  }
+
+  :global(.dark .maplibregl-popup-anchor-bottom-left .maplibregl-popup-tip) {
+    border-top-color: var(--color-ios-dark-surface-1-tint);
+  }
+
+  :global(.dark .maplibregl-popup-anchor-bottom-right .maplibregl-popup-tip) {
+    border-top-color: var(--color-ios-dark-surface-1-tint);
+  }
+
   .map-section {
     width: 100%;
     height: 100%;

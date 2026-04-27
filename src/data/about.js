@@ -20,6 +20,9 @@ export const aboutMeta = [
   {
     id: 'a7',
   },
+  {
+    id: 'a8',
+  },
 ];
 
 export const technicalInfoMeta = [
