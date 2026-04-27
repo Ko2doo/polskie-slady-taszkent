@@ -35,9 +35,9 @@
     "@capacitor/cli": "^8.3.1",
     "@sveltejs/vite-plugin-svelte": "^7.0.0",
     "@tailwindcss/vite": "^4.2.4",
-    "svelte": "^5.55.4",
+    "svelte": "^5.55.5",
     "tailwindcss": "^4.2.4",
-    "vite": "^8.0.9"
+    "vite": "^8.0.10"
   },
   "dependencies": {
     "@capacitor/android": "^8.3.1",
@@ -50,9 +50,9 @@
     "@mateothegreat/svelte5-router": "^2.16.19",
     "@protomaps/basemaps": "^5.7.2",
     "capacitor-native-settings": "^8.1.0",
-    "i18next": "^26.0.6",
+    "i18next": "^26.0.8",
     "konsta": "^5.0.8",
-    "maplibre-gl": "^5.23.0",
+    "maplibre-gl": "^5.24.0",
     "pmtiles": "^4.4.1"
   }
 }
