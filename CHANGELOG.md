@@ -1,5 +1,19 @@
 # Changelog
 
+## v1.1.0 — 2026-04-27
+
+### 🆕 Updates
+- Dependencies upgrades.
+- Improved popup appearance on the 'Map' view. Added a 'testers' section to translations.
+- Logging system enabled only in development mode (applied across the project). Minor fix in NavigationEngine (optimized graph insertion). Fixed unwanted behavior in MapLoadTracker.js (continuous update() on any map interaction) -> now unsubscribes from all events; tracker is used only during initial load. Improved animation in DarkModeToggler.svelte component.
+- Updated graph scripts; Added instruction: scripts/navigationGraph/instructions.txt; Building new graph data
+- updated
+- release - script updated, rewriting logic, added guard question.
+- added versionCode with android/app/build.gradle
+
+### 📝 Other Changes
+- Merge pull request #17 from Ko2doo/v1.0.2
+
 ## v1.0.2 — 2026-04-22
 
 ### 🆕 Updates
