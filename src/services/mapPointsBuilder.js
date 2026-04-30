@@ -567,6 +567,7 @@ export class MapPointsBuilder {
           properties: {
             id: item.id,
             title: title,
+            preview: item.assets?.preview || '', // Popup location previews
           },
         };
       })
@@ -600,7 +601,7 @@ export class MapPointsBuilder {
    * @param {Array} coords - [lon, lat] coordinates
    * @returns {string} - HTML string
    */
-  _createPopupHTML(title, id, coords) {
+  _createPopupHTML(title, id, coords, preview) {
     const popupLinkFn = this._config.i18n.popupLink;
     const popupGetOtherMapsFn = this._config.i18n.popupGetOtherMaps;
 
@@ -610,28 +611,40 @@ export class MapPointsBuilder {
     const [lon, lat] = coords;
     const googleMapsCoords = [lat, lon]; // Google Maps uses lat,lon
 
+    const previewHTML = preview
+      ? `<img
+          src="${this._escapeHtml(preview)}"
+          alt="${this._escapeHtml(title)}"
+          class="map-popup-title w-full h-40 object-bottom object-top rounded-t-3xl"
+          loading="lazy">`
+      : '';
+
     return `
-      <div class="flex flex-col">
-        <p class="w-full text-gray-900 dark:text-gray-200 text-[15px] font-medium sm:font-bold">
-          ${this._escapeHtml(title)}
-        </p>
+      <div class="map-popup-content flex flex-col">
+        ${previewHTML}
 
-        <button
-          class="w-full text-left text-blue-400 dark:text-blue-400 text-[14px] mt-4"
-          data-article-id="${this._escapeHtml(id)}">
+        <div class="map-content-wrapper flex flex-col gap-2">
+          <p class="map-popup-title w-full text-gray-900 dark:text-gray-200 mb-2 text-[15px] font-medium sm:font-bold">
+            ${this._escapeHtml(title)}
+          </p>
 
-          ${this._escapeHtml(popupLinkText)}
-        </button>
-        <a 
-          class="w-full text-blue-400 dark:text-blue-400 text-[14px] mt-1" 
-          target="_blank" 
-          rel="noopener noreferrer"
-          href="https://www.google.com/maps/place/${googleMapsCoords.join(',')}">
+          <button
+            class="map-popup-title w-full text-left text-blue-400 dark:text-blue-400 text-[14px]"
+            data-article-id="${this._escapeHtml(id)}">
 
-          ${this._escapeHtml(popupGetOtherMaps)}
-        </a>
+            ${this._escapeHtml(popupLinkText)}
+          </button>
+          <a 
+            class="map-popup-title w-full text-blue-400 dark:text-blue-400 text-[14px]"
+            target="_blank" 
+            rel="noopener noreferrer"
+            href="https://www.google.com/maps/place/${googleMapsCoords.join(',')}">
+
+            ${this._escapeHtml(popupGetOtherMaps)}
+          </a>
+        </div>
       </div>
-    `;
+    `.trim();
   }
 
   /**
@@ -644,7 +657,7 @@ export class MapPointsBuilder {
 
     const feature = e.features[0];
     const coords = feature.geometry.coordinates;
-    const { id, title } = feature.properties;
+    const { id, title, preview } = feature.properties;
 
     // Create popup
     const popup = new maplibreGL.Popup({
@@ -655,7 +668,7 @@ export class MapPointsBuilder {
     // Create popup container
     const container = document.createElement('div');
     container.className = 'map-popup';
-    container.innerHTML = this._createPopupHTML(title, id, coords);
+    container.innerHTML = this._createPopupHTML(title, id, coords, preview);
 
     // Attach close button handler
     const closeBtn = container.querySelector('.map-popup-close');

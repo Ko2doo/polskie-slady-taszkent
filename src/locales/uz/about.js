@@ -31,11 +31,15 @@ export default {
       description: 'Mariya Kucherova, Sayora Toshpulatova, Agnieszka Mikulec',
     },
     a7: {
+      title: 'Suratlar',
+      description: 'Danil Sditanov, Google Maps, Internet',
+    },
+    a8: {
       title: 'Sinovdan o‘tkazish',
       description:
         'Aleksandr Valevskiy, Pavel Zarjevskiy, Sergey Tyutin, Mariya Kucherova, Danil Sditanov, EdgardMcQueen, Sogdiana Ergasheva, Dariya Barbariska, Arina Valieva, Valentina Adamova, Irina Kovalyova, Dmitriy Ilkevich',
     },
-    a8: {
+    a9: {
       title: 'Bosh dasturchi',
       description: 'Dmitriy Adamov',
       email: 'galaxyrobotix@gmail.com',

@@ -383,9 +383,13 @@
   }
 
   :global(.maplibregl-popup-content) {
-    padding: 22px 11px;
+    padding: 0;
     background: var(--color-ios-light-surface);
     border-radius: var(--radius-3xl);
+  }
+
+  :global(.map-content-wrapper) {
+    padding: 12px 12px 22px 12px;
   }
 
   :global(.maplibregl-popup-anchor-top .maplibregl-popup-tip) {

@@ -31,11 +31,15 @@ export default {
       description: 'Maria Kuczerowa, Sayora Tashpulatova, Agnieszka Mikulec',
     },
     a7: {
+      title: 'Zdjęcia',
+      description: 'Daniel Sditanow, Google Maps, Internet',
+    },
+    a8: {
       title: 'Testerzy',
       description:
         'Aleksander Walewski, Paweł Zarżewski, Siergiej Tiutin, Maria Kuczerowa, Daniel Sditanow, EdgardMcQueen, Sogdiana Ergaszewa, Daria Barbariska, Arina Walijewa, Walentina Adamowa, Irina Kowalowa, Dmitrij Ilkiewicz',
     },
-    a8: {
+    a9: {
       title: 'Główny programista',
       description: 'Dmitrij Adamow',
       email: 'galaxyrobotix@gmail.com',
