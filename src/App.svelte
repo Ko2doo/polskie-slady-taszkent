@@ -75,7 +75,7 @@
 {#if !APP_READY}
   <AppSplash {appName} {version} />
 {:else}
-  <App theme="ios" safeAreas>
+  <App safeAreas theme="ios">
     <Page class="flex flex-col">
       <div class="app-wrapper" onscroll={handleScroll}>
         {#if $navbarState.subnavSnippet}
@@ -182,7 +182,7 @@
     display: flex;
     flex-direction: column;
 
-    min-height: 100dvh;
+    height: 100dvh;
 
     overflow-y: auto;
   }

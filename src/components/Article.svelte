@@ -47,7 +47,7 @@
     </Navbar>
 
     {#if meta}
-      <Block class="text-base leading-relaxed">
+      <Block class="pb-safe-4 text-base leading-relaxed">
         <h1 class="mb-4 text-bold text-2xl text-neutral-800 dark:text-neutral-300">
           {$i18n.t(`articles:${meta.id}:title`)}
         </h1>
