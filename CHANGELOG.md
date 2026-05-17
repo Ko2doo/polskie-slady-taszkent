@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.1.2 — 2026-05-17
+
+### 🆕 Updates
+- Dependencies and security alerts updates.
+
+### 🐛 Fixes
+- Fixed safe-areas from Samsung.
+
 ## v1.1.1 — 2026-04-30
 
 ## v1.1.0 — 2026-04-27
