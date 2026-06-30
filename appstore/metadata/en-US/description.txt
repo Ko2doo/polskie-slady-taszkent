@@ -1,0 +1,17 @@
+Polskie Slady Taszkent (Polish Traces of Tashkent) is an offline guide with GPS navigation that helps you discover places connected with Poles who lived in present-day Uzbekistan and left a meaningful mark on the region's history.
+
+Explore the city with a map that works completely offline - no internet connection required. Memorial sites, churches, monuments and the stories of remarkable people, all in one app.
+
+FEATURES
+- Offline map with GPS: see your position and navigate to heritage sites without a network connection
+- Interactive points of interest: tap a marker to read about each place or person
+- Handbook: browse a catalogue of places and biographies of notable Poles
+- Detailed articles with photos and historical context
+- Open in Google Maps for driving directions
+- Four interface languages: English, Polish, Russian and Uzbek
+- Light and dark themes
+- Privacy-friendly: no accounts, no tracking, no data collection
+
+The project grew out of printed route maps created in 2025 for an event dedicated to the history of Poles in Uzbekistan, organised by Agnieszka Mikulec. This app turns that heritage into a digital companion you can carry in your pocket.
+
+Map data (c) OpenStreetMap contributors. Offline tiles powered by Protomaps and PMTiles. Open source under the MIT License.

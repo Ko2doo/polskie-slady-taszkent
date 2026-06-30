@@ -1,0 +1,17 @@
+Polskie Slady Taszkent to przewodnik offline z nawigacja GPS, ktory pomaga odnajdywac miejsca zwiazane z Polakami zyjacymi na terenie dzisiejszego Uzbekistanu, ktorzy pozostawili znaczacy slad w historii regionu.
+
+Zwiedzaj miasto z mapa dzialajaca calkowicie offline - bez polaczenia z internetem. Miejsca pamieci, koscioly, pomniki oraz historie niezwyklych ludzi w jednej aplikacji.
+
+FUNKCJE
+- Mapa offline z GPS: zobacz swoja pozycje i nawiguj do miejsc bez dostepu do sieci
+- Interaktywne punkty na mapie: dotknij znacznika, aby przeczytac o danym miejscu lub osobie
+- Informator: przegladaj katalog miejsc i biografie zasluzonych Polakow
+- Szczegolowe artykuly ze zdjeciami i kontekstem historycznym
+- Otworz w Mapach Google, aby uzyskac nawigacje samochodowa
+- Cztery jezyki interfejsu: polski, angielski, rosyjski i uzbecki
+- Tryb jasny i ciemny
+- Przyjazny prywatnosci: bez kont, bez sledzenia, bez zbierania danych
+
+Projekt powstal na bazie drukowanych map tras przygotowanych w 2025 roku na wydarzenie poswiecone historii Polakow w Uzbekistanie, zorganizowane przez Agnieszke Mikulec.
+
+Dane mapy (c) wspoltworcy OpenStreetMap. Kafelki offline: Protomaps i PMTiles. Open source na licencji MIT.
