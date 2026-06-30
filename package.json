@@ -45,6 +45,7 @@
     "@capacitor/core": "^8.5.2",
     "@capacitor/device": "^8.0.3",
     "@capacitor/geolocation": "^8.2.3",
+    "@capacitor/ios": "^8.5.2",
     "@capacitor/preferences": "^8.0.1",
     "@capacitor/splash-screen": "^8.0.2",
     "@mateothegreat/svelte5-router": "^2.16.19",
