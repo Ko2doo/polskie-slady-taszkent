@@ -1,50 +1,57 @@
 export default {
   shortInfo:
     '<b>Aplikacja-przewodnik z nawigacją GPS offline.</b> <p class="mt-4">Pomaga odnajdywać i poznawać miejsca związane z Polakami, którzy mieszkali na terenie dzisiejszego Uzbekistanu i pozostawili znaczący ślad w historii regionu.',
-  fullInfo: {
-    a1: {
+  fullInfo: [
+    {
+      id: 'appInfo',
       title: 'Aplikacja-przewodnik z nawigacją GPS offline.',
       description:
         'Pomaga odnajdywać i poznawać miejsca związane z Polakami, którzy mieszkali na terenie dzisiejszego Uzbekistanu i pozostawili znaczący ślad w historii regionu.',
     },
-    a2: {
+    {
+      id: 'appIdeas',
       title: 'Pomysł stworzenia',
       description:
         'Wydarzenie zorganizowane w 2025 roku przez Agnieszkę Mikulec, poświęcone historii Polaków w Uzbekistanie, a także papierowe mapy tras przekazane uczestnikom stały się inspiracją do stworzenia wersji cyfrowej — mobilnej aplikacji umożliwiającej poznawanie tego dziedzictwa bez dostępu do internetu.',
     },
-    a3: {
+    {
+      id: 'appTanks',
       title: 'Podziękowania',
       description:
         'Wszystkim, którzy w taki czy inny sposób uczestniczyli w tworzeniu oryginalnego projektu. Praca tych osób stała się inspiracją i fundamentem dla realizacji obecnego projektu.',
     },
-    a4: {
+    {
+      id: 'appTxtAuthors',
       title: 'Autorzy tekstów',
       description:
         'Piotr Iwaszkiewicz — Ambasador RP w Taszkencie, Katarzyna Boczkowa, Paulina Gołąb, Aleksandra Gwoździecka, Mikhail Jamiulski, Lida Jurek, Marika Krutsowa, Olgana Nafikowa, Jarosława Onichina, Stefan Cziczerin, Anton Pieśnia, Guzal Raimowa, Swietłana Suchowa, Alan Turachanow',
     },
-    a5: {
-      title: 'Redakcja tekstów',
-      description: 'Maria Kuczerowa, Dmitrij Adamow',
-    },
-    a6: {
+    { id: 'appTxtRevisors', title: 'Redakcja tekstów', description: 'Maria Kuczerowa, Dmitrij Adamow' },
+    {
+      id: 'appLocales',
       title: 'Tłumaczenia tekstów',
       description: 'Maria Kuczerowa, Sayora Tashpulatova, Agnieszka Mikulec',
     },
-    a7: {
-      title: 'Zdjęcia',
-      description: 'Daniel Sditanow, Google Maps, Internet',
-    },
-    a8: {
+    { id: 'appPhotos', title: 'Zdjęcia', description: 'Daniel Sditanow, Google Maps, Internet' },
+    {
+      id: 'appTesters',
       title: 'Testerzy',
       description:
         'Aleksander Walewski, Paweł Zarżewski, Siergiej Tiutin, Maria Kuczerowa, Daniel Sditanow, EdgardMcQueen, Sogdiana Ergaszewa, Daria Barbariska, Arina Walijewa, Walentina Adamowa, Irina Kowalowa, Dmitrij Ilkiewicz',
     },
-    a9: {
+    {
+      id: 'appDevelopers',
       title: 'Główny programista',
       description: 'Dmitrij Adamow',
       email: 'galaxyrobotix@gmail.com',
     },
-  },
+    {
+      id: 'appMaintainer',
+      title: 'Opiekun techniczny',
+      description: 'Za wydania na platformę iOS odpowiada Eduard Jelenski.',
+      email: 'eduardelenskii@gmail.com',
+    },
+  ],
   technicalInfo: {
     t1: {
       title: 'Technologie',

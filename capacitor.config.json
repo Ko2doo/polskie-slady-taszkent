@@ -2,6 +2,9 @@
   "appId": "com.github.polskiesladytaszkent",
   "appName": "Polskie Ślady Taszkent",
   "webDir": "dist",
+  "ios": {
+    "contentInset": "never"
+  },
   "plugins": {
     "SplashScreen": {
       "launchAutoHide": false,

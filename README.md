@@ -1,8 +1,8 @@
 # Polskie Ślady Taszkent
 
 ![License](https://img.shields.io/badge/license-MIT-green)
-![Node](https://img.shields.io/badge/node-%3E%3D22-brightgreen)
-![Svelte](https://img.shields.io/badge/Svelte-5.53-orange)
+![Node](https://img.shields.io/badge/node-%3E=24-brightgreen)
+![Svelte](https://img.shields.io/badge/Svelte-5.56-orange)
 ![Capacitor](https://img.shields.io/badge/Capacitor-8-blue)
 ![MapLibre](https://img.shields.io/badge/MapLibre%20GL-5.x-3b82f6)
 ![Made with Svelte](https://img.shields.io/badge/Made%20with-Svelte-ff3e00)
@@ -20,6 +20,15 @@ The idea for this project was inspired by a cultural event organized in
 2025 by Agnieszka Mikulec, where participants received printed route
 maps highlighting historical places connected with Polish heritage. This
 application is a digital continuation of that initiative.
+
+## Download
+
+The app is now released and available on both platforms:
+
+- 🤖 **Google Play:** https://play.google.com/store/apps/details?id=com.github.polskiesladytaszkent
+- 🍎 **App Store:** https://apps.apple.com/us/app/id6782352124
+
+> **Note:** The iOS release is currently available in all countries **except** those in the European Union. This limitation is being worked on.
 
 ## Features
 
@@ -51,7 +60,7 @@ Core technologies used in the project:
 
 ### Requirements
 
-- **Node.js v22 or later**
+- **Node.js v24 or later**
 - **npm v10 or later**
 - **Java Runtime:** `java-21-openjdk`
 - **Android SDK** (for Android builds)
@@ -77,7 +86,8 @@ npm run dev
 
 The application will be available at:
 
-    http://localhost:5050
+-> Local: http://localhost:5173/
+-> Network: http://192.168.1.10:5173/
 
 Preview the production build locally:
 
@@ -138,7 +148,7 @@ extensions in:
 
 # Recommended Runtime Setup
 
-- **Node.js v22 or later**
+- **Node.js v24 or later**
   (Using [NVM](https://github.com/nvm-sh/nvm) is recommended)
 
 - **Java Runtime Environment:**
@@ -154,6 +164,14 @@ when the project is opened.
 While many projects only list extensions in the README, using
 `.vscode/extensions.json` enables VS Code to prompt developers to
 install the recommended extensions directly.
+
+---
+
+# Maintainers
+
+| Name            | Role                   | Contact                                                     |
+| --------------- | ---------------------- | ----------------------------------------------------------- |
+| Eduard Elenskii | iOS support & releases | [eduardelenskii@gmail.com](mailto:eduardelenskii@gmail.com) |
 
 ---
 

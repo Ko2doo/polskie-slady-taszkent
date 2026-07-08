@@ -4,7 +4,7 @@
   "version": "1.1.2",
   "type": "module",
   "scripts": {
-    "dev": "vite --port 5050",
+    "dev": "vite --host",
     "assets:generate:android": "npx capacitor-assets generate --android",
     "build": "vite build",
     "build:sync:android": "npx cap sync android",
@@ -13,12 +13,12 @@
     "build:releaseApp:android": "cd android && ./gradlew bundleRelease",
     "build:all": "npm run build && npm run build:sync:android && npm run build:copy:android && npm run build:debugApp:android && npm run build:releaseApp:android",
     "release": "node scripts/release.mjs",
-    "preview": "vite preview --port 6060",
+    "preview": "vite preview --host",
     "map:download-sprites": "node scripts/downloadProtomapsSprites.mjs"
   },
   "engines": {
-    "node": ">=22",
-    "npm": ">=10"
+    "node": ">=24",
+    "npm": ">=11"
   },
   "keywords": [
     "Hybrid Web App",
@@ -26,23 +26,23 @@
     "Svelte.js",
     "Capacitor.js"
   ],
-  "author": "NИ Dmitry Adamov",
+  "author": "Dmitry Adamov",
   "license": {
     "type": "MIT",
     "url": "https://opensource.org/license/mit"
   },
   "devDependencies": {
-    "@capacitor/cli": "^8.3.4",
-    "@sveltejs/vite-plugin-svelte": "^7.1.2",
-    "@tailwindcss/vite": "^4.3.0",
-    "svelte": "^5.55.7",
-    "tailwindcss": "^4.3.0",
-    "vite": "^8.0.13"
+    "@capacitor/cli": "^8.4.1",
+    "@sveltejs/vite-plugin-svelte": "^7.2.0",
+    "@tailwindcss/vite": "^4.3.2",
+    "svelte": "^5.56.4",
+    "tailwindcss": "^4.3.2",
+    "vite": "^8.1.3"
   },
   "dependencies": {
-    "@capacitor/android": "^8.3.4",
+    "@capacitor/android": "^8.4.1",
     "@capacitor/app": "^8.1.0",
-    "@capacitor/core": "^8.3.4",
+    "@capacitor/core": "^8.4.1",
     "@capacitor/device": "^8.0.2",
     "@capacitor/geolocation": "^8.2.0",
     "@capacitor/preferences": "^8.0.1",
@@ -50,8 +50,8 @@
     "@mateothegreat/svelte5-router": "^2.16.19",
     "@protomaps/basemaps": "^5.7.2",
     "capacitor-native-settings": "^8.1.0",
-    "i18next": "^26.2.0",
-    "konsta": "^5.0.9",
+    "i18next": "^26.3.4",
+    "konsta": "^5.2.0",
     "maplibre-gl": "^5.24.0",
     "pmtiles": "^4.4.1"
   }
