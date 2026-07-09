@@ -2,8 +2,8 @@
   import { Block, NavbarBackLink } from "konsta/svelte";
   import { fly } from "svelte/transition";
 
-  import { withNavbar } from "@/store/ui/navbar";
-  import { withTabbar } from "@/store/ui/bottomTabbarNav";
+  import { withNavbar } from "@/lib/state/navbar.svelte";
+  import { withTabbar } from "@/lib/state/bottomTabbarNav.svelte";
 
   // Icons
   import Close from "@/lib/icons/Close.svelte";

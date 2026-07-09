@@ -47,7 +47,7 @@ import { get } from 'svelte/store';
 import { navigationHistory, routerBack } from '@/services/navigationHistoryHook';
 import { goto } from '@mateothegreat/svelte5-router';
 import { toastController } from '@/services/toastController';
-import { overlayController } from '@/services/overlayController';
+import { overlayController } from '@/store/ui/overlayController';
 
 // Exit window must match the toast countdown duration.
 // Example: 3000ms = 3s visual countdown in ExitToast.svelte.

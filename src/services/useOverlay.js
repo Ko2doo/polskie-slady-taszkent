@@ -23,7 +23,7 @@
 // - Safe to call close() multiple times
 // -------------------------------------------------------------
 
-import { overlayController } from '@/services/overlayController';
+import { overlayController } from '@/store/ui/overlayController';
 
 export function useOverlay(onClose) {
   let overlayId = null;

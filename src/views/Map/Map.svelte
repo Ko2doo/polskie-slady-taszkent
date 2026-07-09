@@ -29,7 +29,7 @@
 
   // Navbar
   import { resolvePageKeyFromRouteResult } from "@/utils/routerUtils";
-  import { patchNavbar, withNavbar } from "@/store/ui/navbar";
+  import { patchNavbar, withNavbar } from "@/lib/state/navbar.svelte";
 
   // Data
   import { articlesMeta } from "@/data/articles";

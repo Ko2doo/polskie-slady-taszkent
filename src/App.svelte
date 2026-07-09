@@ -31,10 +31,12 @@
   import Close from "@/lib/icons/Close.svelte";
 
   // Store imports
-  import { navbarState } from "@/store/ui/navbar";
-  import { panelState, openPanel, closePanel } from "@/store/ui/panel";
   import { initFirstLaunch, APP_FIRST_LAUNCH_STORAGE_VAL, markFirstLaunchCompleted } from "@/store/appStartInitialize";
-  import { bottomTabbarState, resetTabbar } from "@/store/ui/bottomTabbarNav";
+
+  // States import
+  import { bottomTabbarState, resetTabbar } from "@/lib/state/bottomTabbarNav.svelte";
+  import { navbarState } from "@/lib/state/navbar.svelte";
+  import { panelState, closePanel } from "@/lib/state/panel.svelte";
 
   // App ready state
   let APP_READY = $state(false);
@@ -78,40 +80,40 @@
   <App safeAreas theme="ios">
     <Page class="flex flex-col">
       <div class="app-wrapper" onscroll={handleScroll}>
-        {#if $navbarState.subnavSnippet}
-          <Navbar title={$navbarState.title ?? ""}>
+        {#if navbarState.subnavSnippet}
+          <Navbar title={navbarState.title ?? ""}>
             <!-- Left content -->
             {#snippet left()}
-              {#if $navbarState.leftSnippet}
-                {@render $navbarState.leftSnippet()}
+              {#if navbarState.leftSnippet}
+                {@render navbarState.leftSnippet()}
               {/if}
             {/snippet}
 
             <!-- Right content -->
             {#snippet right()}
-              {#if $navbarState.rightSnippet}
-                {@render $navbarState.rightSnippet()}
+              {#if navbarState.rightSnippet}
+                {@render navbarState.rightSnippet()}
               {/if}
             {/snippet}
 
             <!-- Subnav -->
             {#snippet subnavbar()}
-              {@render $navbarState.subnavSnippet()}
+              {@render navbarState.subnavSnippet()}
             {/snippet}
           </Navbar>
         {:else}
-          <Navbar title={$navbarState.title ?? ""} class="pb-2 rounded-b-2xl">
+          <Navbar title={navbarState.title ?? ""} class="pb-2 rounded-b-2xl">
             <!-- Left content -->
             {#snippet left()}
-              {#if $navbarState.leftSnippet}
-                {@render $navbarState.leftSnippet()}
+              {#if navbarState.leftSnippet}
+                {@render navbarState.leftSnippet()}
               {/if}
             {/snippet}
 
             <!-- Right content -->
             {#snippet right()}
-              {#if $navbarState.rightSnippet}
-                {@render $navbarState.rightSnippet()}
+              {#if navbarState.rightSnippet}
+                {@render navbarState.rightSnippet()}
               {/if}
             {/snippet}
           </Navbar>
@@ -132,14 +134,14 @@
 
         <!-- Panel -->
         <Panel
-          side={$panelState.side}
-          floating={$panelState.floating}
-          backdrop={$panelState.backdrop}
-          opened={$panelState.isOpen}
+          side={panelState.side}
+          floating={panelState.floating}
+          backdrop={panelState.backdrop}
+          opened={panelState.isOpen}
           onBackdropClick={() => closePanel()}
           class="overflow-y-auto"
         >
-          <Navbar title={$panelState.title}>
+          <Navbar title={panelState.title}>
             {#snippet right()}
               <Link iconOnly onClick={() => closePanel()}>
                 <Close />
@@ -148,8 +150,8 @@
           </Navbar>
 
           <!-- Dynamical content -->
-          {#if $panelState.contentSnippet}
-            {@render $panelState.contentSnippet()}
+          {#if panelState.contentSnippet}
+            {@render panelState.contentSnippet()}
           {/if}
         </Panel>
 
@@ -168,9 +170,9 @@
         <!-- Error toast init -->
         <ErrorHandlerToast {i18n} />
 
-        {#if $bottomTabbarState.isVisible}
+        {#if bottomTabbarState.isVisible}
           <!-- Fixed bottom navigation -->
-          <BottomTabbarNav {i18n} duration={$bottomTabbarState.duration} delay={$bottomTabbarState.delay} />
+          <BottomTabbarNav {i18n} duration={bottomTabbarState.duration} delay={bottomTabbarState.delay} />
         {/if}
       </div>
     </Page>

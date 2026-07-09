@@ -2,8 +2,8 @@
   import { Block, MenuList, MenuListItem } from "konsta/svelte";
   import { fly } from "svelte/transition";
 
-  import { withNavbar } from "@/store/ui/navbar";
-  import { withTabbar } from "@/store/ui/bottomTabbarNav";
+  import { withNavbar } from "@/lib/state/navbar.svelte";
+  import { withTabbar } from "@/lib/state/bottomTabbarNav.svelte";
   import { resolvePageKeyFromRouteResult } from "@/utils/routerUtils";
 
   import { goto } from "@mateothegreat/svelte5-router";

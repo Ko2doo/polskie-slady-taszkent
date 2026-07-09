@@ -11,10 +11,10 @@
   import ShieldWarningIcon from "@/lib/icons/ShieldWarningIcon.svelte";
   import SearchIcon from "@/lib/icons/SearchIcon.svelte";
 
-  // Navbar/Panel stores and helpers
+  // Navbar/Panel states and helpers
   import { resolvePageKeyFromRouteResult } from "@/utils/routerUtils";
-  import { patchNavbar, withNavbar } from "@/store/ui/navbar";
-  import { withPanel, openPanel, patchPanel } from "@/store/ui/panel";
+  import { patchNavbar, withNavbar } from "@/lib/state/navbar.svelte";
+  import { withPanel, openPanel, patchPanel } from "@/lib/state/panel.svelte";
 
   // Content meta
   import { articlesMeta } from "@/data/articles";

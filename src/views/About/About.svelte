@@ -3,8 +3,8 @@
   import { fly } from "svelte/transition";
 
   import { resolvePageKeyFromRouteResult } from "@/utils/routerUtils";
-  import { withNavbar } from "@/store/ui/navbar";
-  import { withTabbar } from "@/store/ui/bottomTabbarNav";
+  import { withNavbar } from "@/lib/state/navbar.svelte";
+  import { withTabbar } from "@/lib/state/bottomTabbarNav.svelte";
 
   import { routerBack } from "@/services/navigationHistoryHook";
 

@@ -1,6 +1,6 @@
 <script>
   import { fly } from "svelte/transition";
-  import { setTabbar } from "./store/ui/bottomTabbarNav";
+  import { setTabbar } from "@/lib/state/bottomTabbarNav.svelte";
 
   let { appName = "", version = "" } = $props();
 

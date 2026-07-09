@@ -8,8 +8,8 @@
   import LockIcon from "@/lib/icons/LockIcon.svelte";
 
   import { resolvePageKeyFromRouteResult } from "@/utils/routerUtils";
-  import { withNavbar } from "@/store/ui/navbar";
-  import { withTabbar } from "@/store/ui/bottomTabbarNav";
+  import { withNavbar } from "@/lib/state/navbar.svelte";
+  import { withTabbar } from "@/lib/state/bottomTabbarNav.svelte";
 
   import { openAppSettings } from "@/capacitor/services/locationPermission";
 
