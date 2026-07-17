@@ -29,6 +29,7 @@ The app is now released and available on both platforms:
 - 🍎 **App Store:** https://apps.apple.com/us/app/id6782352124
 
 > **Note:** The iOS release is currently available in all countries **except** those in the European Union. This limitation is being worked on.
+
 > UPD:2026-07-17 - All Country available now!
 
 ## Features
