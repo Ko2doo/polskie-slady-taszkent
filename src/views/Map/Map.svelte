@@ -382,6 +382,10 @@
     z-index: 10;
   }
 
+  :global(.maplibregl-popup) {
+    min-width: 220px;
+  }
+
   :global(.maplibregl-popup-content) {
     padding: 0;
     background: var(--color-ios-light-surface);

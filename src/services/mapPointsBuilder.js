@@ -66,7 +66,7 @@ export class MapPointsBuilder {
       i18n: {
         title: null,
         popupLink: null,
-        popupGetOtherMaps: null,
+        // popupGetOtherMaps: null,
       },
       styleVersion: 0,
       popupTrigger: () => {},
@@ -601,15 +601,15 @@ export class MapPointsBuilder {
    * @param {Array} coords - [lon, lat] coordinates
    * @returns {string} - HTML string
    */
-  _createPopupHTML(title, id, coords, preview) {
+  _createPopupHTML(title, id, preview) {
     const popupLinkFn = this._config.i18n.popupLink;
-    const popupGetOtherMapsFn = this._config.i18n.popupGetOtherMaps;
+    // const popupGetOtherMapsFn = this._config.i18n.popupGetOtherMaps;
 
     const popupLinkText = typeof popupLinkFn === 'function' ? popupLinkFn() : 'Read more';
-    const popupGetOtherMaps = typeof popupGetOtherMapsFn === 'function' ? popupGetOtherMapsFn() : 'Open in Google Maps';
+    // const popupGetOtherMaps = typeof popupGetOtherMapsFn === 'function' ? popupGetOtherMapsFn() : 'Open in Google Maps';
 
-    const [lon, lat] = coords;
-    const googleMapsCoords = [lat, lon]; // Google Maps uses lat,lon
+    // const [lon, lat] = coords;
+    // const googleMapsCoords = [lat, lon]; // Google Maps uses lat,lon
 
     const previewHTML = preview
       ? `<img
@@ -629,19 +629,11 @@ export class MapPointsBuilder {
           </p>
 
           <button
-            class="map-popup-title w-full text-left text-blue-400 dark:text-blue-400 text-[14px]"
+            class="map-popup-title k-button text-center bg-primary active:bg-ios-primary-shade k-color-brand-blue rounded-full text-white-400 dark:text-white-400 pt-[4px] pb-[4px] pl-4 pr-4 cursor-pointer text-[16px]"
             data-article-id="${this._escapeHtml(id)}">
 
             ${this._escapeHtml(popupLinkText)}
           </button>
-          <a 
-            class="map-popup-title w-full text-blue-400 dark:text-blue-400 text-[14px]"
-            target="_blank" 
-            rel="noopener noreferrer"
-            href="https://www.google.com/maps/place/${googleMapsCoords.join(',')}">
-
-            ${this._escapeHtml(popupGetOtherMaps)}
-          </a>
         </div>
       </div>
     `.trim();
@@ -668,7 +660,7 @@ export class MapPointsBuilder {
     // Create popup container
     const container = document.createElement('div');
     container.className = 'map-popup';
-    container.innerHTML = this._createPopupHTML(title, id, coords, preview);
+    container.innerHTML = this._createPopupHTML(title, id, preview);
 
     // Attach close button handler
     const closeBtn = container.querySelector('.map-popup-close');
