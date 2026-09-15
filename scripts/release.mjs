@@ -1,9 +1,9 @@
 import { execSync } from 'node:child_process';
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import readline from 'node:readline/promises';
-import { stdin as input, stdout as output } from 'node:process';
 
 const version = process.argv[2];
+const pkg = JSON.parse(readFileSync('./package.json', 'utf-8'));
 
 if (!version) {
   console.error('❌ Usage: node scripts/release.js 1.0.0');
@@ -42,7 +42,9 @@ const rl = readline.createInterface({
   output: process.stdout,
 });
 
-const answer = await rl.question(`\n[!] Confirm release v${version} on branch "${currentBranch}"? (Y/n): `);
+const answer = await rl.question(
+  `\n[!] Confirm release v${version} (current version: ${pkg.version}) on branch "${currentBranch}"? (Y/n): `,
+);
 rl.close();
 
 if (answer.toLowerCase() !== 'y') {
@@ -53,8 +55,6 @@ if (answer.toLowerCase() !== 'y') {
 console.log('🚀 Processing release...');
 
 // ─── Version bump ─────────────────────────────────────
-
-const pkg = JSON.parse(readFileSync('./package.json', 'utf-8'));
 pkg.version = version;
 
 // update package.json version
@@ -218,14 +218,12 @@ try {
 
   // Push tag
   execSync(`git push origin v${version}`, { stdio: 'inherit' });
-  execSync(`git push`, { stdio: 'inherit' });
 
-  console.log(`\n🚀 Released v${version} and tracked branch ${branchName} successfully!`);
+  console.log(`\n🚀 Released v${version} successfully!`);
 } catch (error) {
   console.error('\n❌ Git execution failed. Please check your repository state.');
   console.error('\n❌ Git step failed:', error.message);
   console.error('Local commit and tag may already exist. Fix the issue and push manually:');
-  console.error(`  git push -u origin release-v${version}`);
   console.error(`  git push origin v${version}`);
   process.exit(1);
 }

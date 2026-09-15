@@ -4,7 +4,7 @@ import android.os.Bundle;
 
 import com.getcapacitor.BridgeActivity;
 
-// Unlock user font-size
+// Lock user font-size scaling
 public class MainActivity extends BridgeActivity {
 
   @Override
