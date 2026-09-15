@@ -52,7 +52,7 @@
     "capacitor-native-settings": "^8.2.0",
     "i18next": "^26.4.2",
     "konsta": "^5.4.0",
-    "maplibre-gl": "^5.24.0",
+    "maplibre-gl": "^6.4.1",
     "pmtiles": "^4.5.0"
   }
 }
