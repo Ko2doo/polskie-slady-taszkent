@@ -207,17 +207,18 @@ try {
   execSync(`git commit -m "RELEASE:${today}:: v${version}"`, { stdio: 'inherit' });
 
   // Create new release branch
-  const branchName = `release-v${version}`;
-  execSync(`git checkout -b ${branchName}`, { stdio: 'inherit' });
+  // const branchName = `release-v${version}`;
+  // execSync(`git checkout -b ${branchName}`, { stdio: 'inherit' });
 
   // Create a tag
   execSync(`git tag v${version}`, { stdio: 'inherit' });
 
   // Pushing new branch and binding local branch
-  execSync(`git push -u origin ${branchName}`, { stdio: 'inherit' });
+  // execSync(`git push -u origin ${branchName}`, { stdio: 'inherit' });
 
   // Push tag
   execSync(`git push origin v${version}`, { stdio: 'inherit' });
+  execSync(`git push`, { stdio: 'inherit' });
 
   console.log(`\n🚀 Released v${version} and tracked branch ${branchName} successfully!`);
 } catch (error) {

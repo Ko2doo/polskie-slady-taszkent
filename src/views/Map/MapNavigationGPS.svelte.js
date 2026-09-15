@@ -522,7 +522,8 @@ export function createGPSNavigationController({ map, builder, i18n }) {
 
     IS_DEBUG && navigationGPSLogger.log('Arrived at destination!');
 
-    errorToast.info(i18n.t('ui:map:gps:arrived'), { scope: 'GPSNavigation' });
+    // TODO: Проверить, не дублируется ли вызов
+    // errorToast.info(i18n.t('ui:map:gps:arrived'), { scope: 'GPSNavigation' });
   }
 
   function openDialog() {
