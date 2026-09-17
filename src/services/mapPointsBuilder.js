@@ -49,7 +49,7 @@
  * @class MapPointsBuilder
  */
 
-import maplibreGL from 'maplibre-gl';
+import * as maplibreGL from 'maplibre-gl';
 import { createLogger, IS_DEBUG } from '@/utils/debugMode';
 
 const pointsBuilderLogger = createLogger('MapPointsBuilder');

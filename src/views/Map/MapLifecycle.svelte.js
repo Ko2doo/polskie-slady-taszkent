@@ -10,7 +10,10 @@ import { createLogger, IS_DEBUG } from '@/utils/debugMode';
  * - Cleanup on component unmount
  */
 
-import maplibreGL from 'maplibre-gl';
+import * as maplibreGL from 'maplibre-gl';
+import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
+maplibreGL.setWorkerUrl(maplibreWorkerUrl);
+
 import { PMTiles, Protocol } from 'pmtiles';
 import { InMemoryPMTilesSource } from '@/utils/inMemoryPmtilesSource';
 import { errorToast } from '@/store/ui/errorToast';

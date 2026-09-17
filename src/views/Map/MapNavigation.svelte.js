@@ -8,7 +8,7 @@
  * - Map click handling
  */
 
-import maplibreGL from 'maplibre-gl';
+import * as maplibreGL from 'maplibre-gl';
 import { initNavigation, findRoute } from '@/services/navigationLoader';
 import { errorToast } from '@/store/ui/errorToast';
 import { ERROR_CODES } from '@/lib/errors/errorCodes';

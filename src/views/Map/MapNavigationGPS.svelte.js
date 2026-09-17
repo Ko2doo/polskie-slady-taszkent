@@ -11,7 +11,7 @@
  * - Map bounds checking
  */
 
-import maplibreGL from 'maplibre-gl';
+import * as maplibreGL from 'maplibre-gl';
 import { createGPSTracker, calculateDistance } from '@/capacitor/services/gpsTracker';
 import { initNavigation, findRoute } from '@/services/navigationLoader';
 import { errorToast } from '@/store/ui/errorToast';
