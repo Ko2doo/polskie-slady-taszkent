@@ -1,5 +1,28 @@
 # Changelog
 
+## v1.1.2-rc.1 — 2026-10-08
+
+### 🆕 Updates
+- Updated crytical dependcies maplibre gl js 5.24.0 > 6.10.0.
+- Removed opened other maps; New button design in custom map popups;
+- Micro update.
+- Update dependencies; Locked font-size scaling for Android devices; Comment errorToast with handleArrival() inMapNavigationGPS.svelte.js; Disabled creathing release branch in release.mjs script.
+- Code refactoring.
+- Dependencies update; Warning: Project switched to new LTS version of Node.js; Added new info from README.md; Added: iOS SafeAreas fixes in: capacitor.config.json; Added: locales about iOS maintainer; And other updates;
+- added banners
+
+### 🐛 Fixes
+- 2026-10-08: fixed release script
+- Removed opened other maps; New button design in custom map popups;
+- Micro update.
+- Update dependencies; Locked font-size scaling for Android devices; Comment errorToast with handleArrival() inMapNavigationGPS.svelte.js; Disabled creathing release branch in release.mjs script.
+
+### 📝 Other Changes
+- chore(release): prepare release candidate
+- Revise iOS release note in README
+- Revise iOS release note in README
+- UPD
+
 ## v1.1.2 — 2026-05-17
 
 ### 🆕 Updates
