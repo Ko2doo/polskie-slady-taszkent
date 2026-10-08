@@ -1,5 +1,14 @@
 # Changelog
 
+## v1.1.2-rc.3 — 2026-10-08
+
+### 🐛 Fixes
+- 2026-10-08: Micro fixes and critical security updates.
+
+### 📝 Other Changes
+- Merge pull request #22 from Ko2doo/dependabot/npm_and_yarn/npm_and_yarn-842771bcfa
+- Build(deps): Bump the npm_and_yarn group across 1 directory with 2 updates
+
 ## v1.1.2-rc.2 — 2026-10-08
 
 ### 🐛 Fixes
