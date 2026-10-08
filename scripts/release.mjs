@@ -6,7 +6,7 @@ const version = process.argv[2];
 const pkg = JSON.parse(readFileSync('./package.json', 'utf-8'));
 
 if (!version) {
-  console.error('❌ Usage: node scripts/release.js 1.0.0');
+  console.error('❌ Usage: node scripts/release.js 1.0.0 or 1.0.0-rc.1 (alpha|beta|rc|a|b)');
   process.exit(1);
 }
 
