@@ -629,7 +629,7 @@ export class MapPointsBuilder {
           </p>
 
           <button
-            class="map-popup-title k-button text-center bg-primary active:bg-ios-primary-shade k-color-brand-blue rounded-full text-white-400 dark:text-white-400 pt-[4px] pb-[4px] pl-4 pr-4 cursor-pointer text-[16px]"
+            class="map-popup-title k-button text-center bg-primary active:bg-ios-primary-shade k-color-brand-blue rounded-full text-white dark:text-white pt-[4px] pb-[4px] pl-4 pr-4 cursor-pointer text-[16px]"
             data-article-id="${this._escapeHtml(id)}">
 
             ${this._escapeHtml(popupLinkText)}

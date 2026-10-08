@@ -238,7 +238,7 @@
     top: 0;
     bottom: 0;
 
-    z-index: 66;
+    z-index: 40;
 
     width: 100%;
     height: 100%;
