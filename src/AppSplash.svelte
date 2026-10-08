@@ -2,7 +2,7 @@
   import { fly } from "svelte/transition";
   import { setTabbar } from "@/lib/state/bottomTabbarNav.svelte";
 
-  let { appName = "", version = "" } = $props();
+  let { appName = "", version = "", appLogo } = $props();
 
   $effect(() => {
     setTabbar({ isVisible: false });
@@ -11,7 +11,7 @@
 
 <article class="app-splash-screen" out:fly={{ duration: 500, y: 20, delay: 200 }}>
   <div class="app-logo-wrapper">
-    <img class="app-logo" src="app-icon.png" alt="App logo" />
+    <img class="app-logo" src={appLogo} alt="App logo" />
     <h1 class="app-name">
       {appName}
     </h1>

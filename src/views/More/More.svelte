@@ -16,7 +16,7 @@
   import GitIcon from "@/lib/icons/GitIcon.svelte";
 
   // router props
-  let { i18n, appName = "", version = "" } = $props();
+  let { i18n, appLogo, appName = "", version = "" } = $props();
 
   $effect(() => {
     const dispose = withNavbar({
@@ -59,7 +59,7 @@
 <section class="more-view flex flex-col min-h-[100%] pb-safe-24" in:fly={{ duration: 120, y: -20 }}>
   <Block nested>
     <article class="logo-wrapper flex flex-col items-center">
-      <img src="app-icon.png" alt="Project logo" class="size-24" />
+      <img src={appLogo} alt="Project logo" class="size-24" />
 
       <p class="mt-4 text-base text-center">
         {@html $i18n.t("about:shortInfo")}

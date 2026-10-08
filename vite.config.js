@@ -3,6 +3,7 @@ import { svelte } from '@sveltejs/vite-plugin-svelte';
 import tailwindcss from '@tailwindcss/vite';
 
 import path from 'node:path';
+import { URL, fileURLToPath } from 'node:url';
 import { readFileSync } from 'node:fs';
 
 // Read package.json file
@@ -45,7 +46,8 @@ export default defineConfig({
 
   resolve: {
     alias: {
-      '@': path.resolve(process.cwd(), 'src'),
+      // '@': path.resolve(process.cwd(), 'src'),
+      '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
 });

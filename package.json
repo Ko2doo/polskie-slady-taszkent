@@ -33,26 +33,26 @@
   },
   "devDependencies": {
     "@capacitor/cli": "^8.5.2",
-    "@sveltejs/vite-plugin-svelte": "^7.3.0",
+    "@sveltejs/vite-plugin-svelte": "^7.3.1",
     "@tailwindcss/vite": "^4.3.3",
-    "svelte": "^5.57.0",
+    "svelte": "^5.57.1",
     "tailwindcss": "^4.3.3",
-    "vite": "^8.3.0"
+    "vite": "^8.3.2"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.2",
-    "@capacitor/app": "^8.1.1",
+    "@capacitor/app": "^8.1.2",
     "@capacitor/core": "^8.5.2",
     "@capacitor/device": "^8.0.3",
-    "@capacitor/geolocation": "^8.2.2",
+    "@capacitor/geolocation": "^8.2.3",
     "@capacitor/preferences": "^8.0.1",
     "@capacitor/splash-screen": "^8.0.2",
     "@mateothegreat/svelte5-router": "^2.16.19",
     "@protomaps/basemaps": "^5.7.2",
     "capacitor-native-settings": "^8.2.0",
     "i18next": "^26.4.2",
-    "konsta": "^5.4.0",
-    "maplibre-gl": "^6.10.0",
+    "konsta": "^5.5.0",
+    "maplibre-gl": "^6.12.0",
     "pmtiles": "^4.5.0"
   }
 }

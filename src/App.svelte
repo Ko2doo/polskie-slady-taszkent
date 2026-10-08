@@ -25,7 +25,7 @@
   import ErrorHandlerToast from "@/components/ErrorHandlerToast.svelte";
   import ExitToast from "@/components/ExitToast.svelte";
   import Article from "@/components/Article.svelte";
-  import OnboardingWizard from "@/components/OnboardingWizard.svelte";
+  import OnboardingWizard from "@/views/OnboardingWizard/OnboardingWizard.svelte";
 
   // Icons
   import Close from "@/lib/icons/Close.svelte";
@@ -40,7 +40,7 @@
 
   // App ready state
   let APP_READY = $state(false);
-  let { appName = "", version = "" } = $props();
+  let { appName = "", version = "", appLogo } = $props();
 
   function createScrollState() {
     let y = $state(0);
@@ -75,7 +75,7 @@
 </script>
 
 {#if !APP_READY}
-  <AppSplash {appName} {version} />
+  <AppSplash {appName} {version} {appLogo} />
 {:else}
   <App safeAreas theme="ios">
     <Page class="flex flex-col">
@@ -127,6 +127,7 @@
               post: navigationHistoryPostHook,
             }}
             {i18n}
+            {appLogo}
             {appName}
             {version}
           />
@@ -158,6 +159,7 @@
         <!-- prettier-ignore -->
         <OnboardingWizard
           {i18n}
+          {appLogo}
           appState={APP_FIRST_LAUNCH_STORAGE_VAL}
           makeCompleted={markFirstLaunchCompleted}
         />

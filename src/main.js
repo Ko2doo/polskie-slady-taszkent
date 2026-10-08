@@ -7,6 +7,7 @@ import { SplashScreen } from '@capacitor/splash-screen';
 
 import { getThemeManager } from '@/lib/theme/themeManager';
 
+import appLogo from '@/assets/icons/app-icon.png';
 import './App.css';
 import App from './App.svelte';
 
@@ -30,6 +31,7 @@ async function bootstrap() {
     props: {
       version,
       appName,
+      appLogo,
     },
   });
 

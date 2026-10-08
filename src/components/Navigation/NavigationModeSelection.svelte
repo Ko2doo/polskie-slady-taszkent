@@ -6,7 +6,7 @@
   let { i18n, isAnyModeActive, onToggle, onGPSToggle } = $props();
 </script>
 
-<article class="flex flex-row gap-2">
+<section class="navigation-mode-selector">
   <!-- Point-to-Point Navigation -->
   <Button inline roundedIos class="k-color-brand-blue text-[16px]" onClick={onToggle}>
     <RulerIcon className="size-6 mr-2" />
@@ -21,4 +21,29 @@
       {$i18n.t("ui:map:gps:navigate")}
     </span>
   </Button>
-</article>
+</section>
+
+<style>
+  .navigation-mode-selector {
+    width: 100%;
+
+    display: flex;
+    flex-wrap: nowrap;
+
+    gap: 12px;
+
+    scroll-behavior: auto;
+    scrollbar-width: none;
+
+    overflow-x: scroll;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  .navigation-mode-selector > :global(*) {
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+</style>

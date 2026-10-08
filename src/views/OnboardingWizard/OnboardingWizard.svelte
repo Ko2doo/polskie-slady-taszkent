@@ -7,15 +7,15 @@
   import { errorToast } from "@/store/ui/errorToast";
 
   import { createToggle } from "@/lib/state/createToggler.svelte";
-  import LangSwitcher from "./LangSwitcher.svelte";
-  import DarkModeToggler from "./DarkModeToggler.svelte";
+  import LangSwitcher from "@/components/LangSwitcher.svelte";
+  import DarkModeToggler from "@/components/DarkModeToggler.svelte";
 
   import TranslateIcon from "@/lib/icons/TranslateIcon.svelte";
   import PaletteIcon from "@/lib/icons/PaletteIcon.svelte";
   import GPSIcon from "@/lib/icons/GPSIcon.svelte";
   import { createLogger, IS_DEBUG } from "@/utils/debugMode";
 
-  let { i18n, appState, makeCompleted } = $props();
+  let { i18n, appLogo, appState, makeCompleted } = $props();
 
   const onboardingLogger = createLogger("WelcomeDialog");
 
@@ -134,8 +134,8 @@
   }
 </script>
 
-<article class="onboarding-wizard-wrapper" in:fly={{ duration: 540, y: -20, delay: 300 }}>
-  <Popup backdrop={true} opened={welcomeDialogToggler.value} class="welcome-popup">
+{#if welcomeDialogToggler.value}
+  <section class="onboarding-wizard-wrapper" in:fly={{ duration: 540, y: -20, delay: 300 }}>
     <Page class="flex flex-col">
       <!-- prettier-ignore -->
       <Navbar
@@ -154,7 +154,8 @@
       <Block inset class="onboarding-wizard-content mt-auto mb-auto px-4">
         {#if activeStep === 1}
           <div class="mt-6 space-y-4" in:fly={{ duration: 120, x: 20 }}>
-            <div class="text-center space-y-2">
+            <div class="flex flex-col items-center text-center space-y-2">
+              <img src={appLogo} alt="App logotype" class="w-[120px] h-[120px] mb-6" />
               <h3 class="text-lg font-semibold">
                 {$i18n.t("ui:dialog:onboarding:welcomeDialog")}
               </h3>
@@ -193,7 +194,9 @@
 
         {#if activeStep === 2}
           <div class="space-y-4" in:fly={{ duration: 120, x: 20 }}>
-            <div class="text-center space-y-2">
+            <div class="flex flex-col items-center text-center space-y-2">
+              <GPSIcon className="size-[120px] mb-6" />
+
               <h3 class="text-lg font-semibold">{$i18n.t("ui:dialog:onboarding:step2Info")}</h3>
               <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
                 {$i18n.t("ui:dialog:onboarding:step2Msg")}
@@ -224,5 +227,22 @@
         {/if}
       </Block>
     </Page>
-  </Popup>
-</article>
+  </section>
+{/if}
+
+<style>
+  .onboarding-wizard-wrapper {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+
+    z-index: 66;
+
+    width: 100%;
+    height: 100%;
+
+    overflow-x: auto;
+  }
+</style>

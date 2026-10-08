@@ -58,7 +58,7 @@
               {#each info.links as link}
                 <li class="list-item list-none pb-[2px] text-stone-700 dark:text-stone-200">
                   <span>{link.title}:</span>
-                  <a href={link.href} target="_blank" class="text-blue-600 font-bold">{link.label}</a>
+                  <a href={link.href} target="_blank" class="text-blue-500 font-bold">{link.label}</a>
                 </li>
               {/each}
             </ul>
@@ -82,7 +82,7 @@
         </b>
         <a
           href="https://github.com/Ko2doo/polskie-slady-taszkent"
-          class="text-blue-600 font-bold text-[16px] flex gap-2 items-center"
+          class="text-blue-500 font-bold text-[16px] flex gap-2 items-center"
           target="_blank"
         >
           <GitIcon className="size-8 fill-black dark:fill-white" />

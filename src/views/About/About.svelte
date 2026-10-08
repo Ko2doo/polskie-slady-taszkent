@@ -65,7 +65,7 @@
             {item.description}
 
             {#if item.email}
-              <a class="text-blue-600 font-bold" href="mailto:{item.email}">
+              <a class="text-blue-500 font-bold" href="mailto:{item.email}">
                 {item.email}
               </a>
             {/if}

@@ -10,8 +10,10 @@ if (!version) {
   process.exit(1);
 }
 
-if (!/^\d+\.\d+\.\d+$/.test(version)) {
-  console.error('❌ Invalid version format. Expected: 1.0.0');
+const VERSION_RE = /^\d+\.\d+\.\d+(?:-(?:alpha|beta|rc|a|b)(?:\.\d+)?)?$/;
+
+if (!VERSION_RE.test(version)) {
+  console.error('❌ Invalid version format. Expected: 1.0.0 or 1.0.0-rc.1 (alpha|beta|rc|a|b)');
   process.exit(1);
 }
 
