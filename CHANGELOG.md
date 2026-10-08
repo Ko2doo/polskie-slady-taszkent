@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.1.2-rc.2 — 2026-10-08
+
+### 🐛 Fixes
+- 2026-10-08: micro fixes.
+
 ## v1.1.2-rc.1 — 2026-10-08
 
 ### 🆕 Updates
