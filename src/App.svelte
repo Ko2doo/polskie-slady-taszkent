@@ -34,7 +34,7 @@
   import { initFirstLaunch, APP_FIRST_LAUNCH_STORAGE_VAL, markFirstLaunchCompleted } from "@/store/appStartInitialize";
 
   // States import
-  import { bottomTabbarState, resetTabbar } from "@/lib/state/bottomTabbarNav.svelte";
+  import { resetTabbar, withTabbar } from "@/lib/state/bottomTabbarNav.svelte";
   import { navbarState } from "@/lib/state/navbar.svelte";
   import { panelState, closePanel } from "@/lib/state/panel.svelte";
 
@@ -63,7 +63,12 @@
   }
 
   $effect(() => {
-    if (APP_READY) resetTabbar();
+    if (APP_READY)
+      withTabbar({
+        isVisible: true,
+        duration: 400,
+        delay: 350,
+      });
   });
 
   // On mount svelte initialization
@@ -172,10 +177,8 @@
         <!-- Error toast init -->
         <ErrorHandlerToast {i18n} />
 
-        {#if bottomTabbarState.isVisible}
-          <!-- Fixed bottom navigation -->
-          <BottomTabbarNav {i18n} duration={bottomTabbarState.duration} delay={bottomTabbarState.delay} />
-        {/if}
+        <!-- Fixed bottom navigation -->
+        <BottomTabbarNav {i18n} />
       </div>
     </Page>
   </App>

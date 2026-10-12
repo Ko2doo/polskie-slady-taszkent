@@ -59,6 +59,9 @@
   import { createMapLoadTracker } from "./MapLoadTracker.js";
 
   import { createLogger, IS_DEBUG } from "@/utils/debugMode.js";
+  import MapEditor from "@/lib/icons/MapEditor.svelte";
+  import Close from "@/lib/icons/Close.svelte";
+  import { withTabbar } from "@/lib/state/bottomTabbarNav.svelte.js";
 
   // Logger
   const mapLogger = createLogger("Map");
@@ -108,6 +111,7 @@
 
   // sheet toggler
   const sheetToggler = createToggle();
+  const userCustomPointsToggler = createToggle();
 
   /**
    * Unified map click handler
@@ -294,7 +298,7 @@
   });
 
   // ========================================
-  // NAVBAR CONFIGURATION
+  // Effects
   // ========================================
 
   $effect(() => {
@@ -304,13 +308,39 @@
 
     patchNavbar({ title: title || pageKey });
   });
+
+  $effect(() => {
+    if (userCustomPointsToggler.value) {
+      withTabbar({
+        isVisible: false,
+        duration: 120,
+        delay: 40,
+      });
+    } else {
+      withTabbar({
+        isVisible: true,
+        duration: 120,
+        delay: 90,
+      });
+    }
+  });
 </script>
 
-<!-- Navigation modal sheet button trigger -->
+<!-- Navigation modal sheet button trigger and User custom points button trigger -->
 {#snippet NavigationSheetBtn()}
-  <Link iconOnly onClick={sheetToggler.open}>
-    <RoutingNavigationIcon />
-  </Link>
+  {#if userCustomPointsToggler.value}
+    <Link iconOnly onClick={userCustomPointsToggler.close}>
+      <Close />
+    </Link>
+  {:else if !userCustomPointsToggler.value}
+    <Link iconOnly onClick={userCustomPointsToggler.open}>
+      <MapEditor />
+    </Link>
+
+    <Link iconOnly onClick={sheetToggler.open}>
+      <RoutingNavigationIcon />
+    </Link>
+  {/if}
 {/snippet}
 
 <section class="map-section">
