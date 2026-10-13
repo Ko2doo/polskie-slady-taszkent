@@ -26,6 +26,7 @@ export default {
     },
     map: {
       title: 'Map',
+      editMode: 'Map Editing Mode',
     },
     about: {
       title: 'About the project',
@@ -130,6 +131,12 @@ export default {
       time: 'ms',
       clear: 'Clear',
       footerInfo: 'Tap again to build a new route',
+    },
+    userCustomPoints: {
+      message: 'Welcome to Map Editing Mode!',
+      instruction:
+        'In this mode, you can create your own markers on the map. To add a marker, simply click on the map.',
+      dialogButton: 'Go it',
     },
   },
   settings: {

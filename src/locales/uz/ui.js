@@ -26,6 +26,7 @@ export default {
     },
     map: {
       title: 'Xarita',
+      editMode: 'Xaritani tahrirlash rejimi',
     },
     about: {
       title: 'Loyiha haqida',
@@ -131,6 +132,12 @@ export default {
       time: 'ms',
       clear: 'Tozalash',
       footerInfo: "Yangi yo'nalish yaratish uchun yana bosing",
+    },
+    userCustomPoints: {
+      message: 'Xaritani tahrirlash rejimiga xush kelibsiz!',
+      instruction:
+        'Bu rejimda xaritada o‘zingizning belgilaringizni yaratishingiz mumkin. Belgi qo‘shish uchun xaritani shunchaki bosing.',
+      dialogButton: 'Tushunarli',
     },
   },
   settings: {

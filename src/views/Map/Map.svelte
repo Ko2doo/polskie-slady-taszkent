@@ -22,8 +22,8 @@
    * - MapLifecycle.svelte.js - Initialization and cleanup
    */
 
-  import { onMount, onDestroy } from "svelte";
-  import { Progressbar, Dialog, DialogButton, Link } from "konsta/svelte";
+  import { onMount, onDestroy, setContext } from "svelte";
+  import { Progressbar, Link } from "konsta/svelte";
   import RoutingNavigationIcon from "@/lib/icons/RoutingNavigationIcon.svelte";
   // import { goto } from "@mateothegreat/svelte5-router";
 
@@ -56,12 +56,18 @@
     cleanupMap,
     resolveTargetCoords,
   } from "./MapLifecycle.svelte.js";
+  import { createEditModeController } from "./MapEditMode.svelte.js";
   import { createMapLoadTracker } from "./MapLoadTracker.js";
 
   import { createLogger, IS_DEBUG } from "@/utils/debugMode.js";
   import MapEditor from "@/lib/icons/MapEditor.svelte";
   import Close from "@/lib/icons/Close.svelte";
   import { withTabbar } from "@/lib/state/bottomTabbarNav.svelte.js";
+  import CustomPointsDialog from "@/components/CustomPoints/CustomPointsDialog.svelte";
+  import NavigationControlDialog from "@/components/Navigation/NavigationControlDialog.svelte";
+  import { customPointsDialogState } from "@/lib/state/customPointsDialogState.svelte.js";
+  import { exists } from "i18next";
+  import CustomPointsMapEditorDialog from "@/components/CustomPoints/CustomPointsMapEditorDialog.svelte";
 
   // Logger
   const mapLogger = createLogger("Map");
@@ -82,6 +88,7 @@
   let builder = null;
   let navigation = $state(null); // Point-to-point navigation
   let gpsNavigation = $state(null); // GPS navigation
+  let mapEditMode = $state(null);
   let theme = null;
 
   // Progressbar state
@@ -112,6 +119,7 @@
   // sheet toggler
   const sheetToggler = createToggle();
   const userCustomPointsToggler = createToggle();
+  const userCustomDialogState = customPointsDialogState();
 
   /**
    * Unified map click handler
@@ -135,6 +143,11 @@
         ready: navigation?.navigationReady,
       });
 
+    IS_DEBUG &&
+      mapLogger.log("Edit mode state:", {
+        exists: !!mapEditMode,
+      });
+
     // Check GPS mode first (priority)
     // GPS requires ready state because it needs permissions and tracker
     if (gpsNavigation && gpsNavigation.gpsMode && gpsNavigation.gpsReady) {
@@ -146,6 +159,11 @@
     // Point-to-Point doesn't need ready check - it initializes on first click
     if (navigation && navigation.navigationMode) {
       navigation.handleMapClick(e);
+      return;
+    }
+
+    if (userCustomPointsToggler.value) {
+      mapEditMode.handleMapClick(e);
       return;
     }
 
@@ -224,7 +242,10 @@
       });
       theme.init();
 
-      // 9. Setup map handlers when map loads
+      // 9. Create map editor controller
+      mapEditMode = createEditModeController();
+
+      // 10. Setup map handlers when map loads
       map.on("load", () => {
         setupMapHandlers({
           map,
@@ -263,6 +284,10 @@
     });
   });
 
+  onMount(() => {
+    userCustomDialogState.hasSeen();
+  });
+
   // ========================================
   // LIFECYCLE - UNMOUNT
   // ========================================
@@ -295,6 +320,7 @@
     navigation = null;
     gpsNavigation = null;
     theme = null;
+    mapEditMode = null;
   });
 
   // ========================================
@@ -304,9 +330,13 @@
   $effect(() => {
     const result = route?.result;
     const pageKey = resolvePageKeyFromRouteResult(result);
-    const title = pageKey ? $i18n.t(`ui:navbar:${pageKey}:title`) : "";
+    // const title = pageKey ? $i18n.t(`ui:navbar:${pageKey}:title`) : "";
 
-    patchNavbar({ title: title || pageKey });
+    const isCustomPointsMode = userCustomPointsToggler.value
+      ? $i18n.t(`ui:navbar:${pageKey}:editMode`)
+      : $i18n.t(`ui:navbar:${pageKey}:title`);
+
+    patchNavbar({ title: isCustomPointsMode || pageKey });
   });
 
   $effect(() => {
@@ -324,6 +354,18 @@
       });
     }
   });
+
+  async function customPointsDialogTrigger() {
+    userCustomPointsToggler.open();
+
+    const alreadySeen = await userCustomDialogState.hasSeen();
+    if (alreadySeen === false) userCustomDialogState.open();
+  }
+
+  async function onDialogConfirm() {
+    await userCustomDialogState.markCompleted();
+    userCustomDialogState.close();
+  }
 </script>
 
 <!-- Navigation modal sheet button trigger and User custom points button trigger -->
@@ -332,8 +374,12 @@
     <Link iconOnly onClick={userCustomPointsToggler.close}>
       <Close />
     </Link>
+  {:else if !userCustomPointsToggler.value && sheetToggler.value}
+    <Link iconOnly onClick={sheetToggler.open}>
+      <RoutingNavigationIcon />
+    </Link>
   {:else if !userCustomPointsToggler.value}
-    <Link iconOnly onClick={userCustomPointsToggler.open}>
+    <Link iconOnly onClick={customPointsDialogTrigger}>
       <MapEditor />
     </Link>
 
@@ -385,23 +431,27 @@
     />
   {/if}
 
+  {#if mapEditMode}
+    <CustomPointsMapEditorDialog
+      {i18n}
+      coords={mapEditMode.coordinates}
+      opened={mapEditMode.modalDialogState}
+      onCloseModal={mapEditMode.closeModal}
+    />
+  {/if}
+
+  {#if userCustomDialogState.triggerValue}
+    <CustomPointsDialog {i18n} openedDialog={userCustomDialogState.triggerValue} onConfirm={onDialogConfirm} />
+  {/if}
+
   <!-- Navigation control Dialog -->
   {#if activeNav}
-    <Dialog opened={activeNav.dialogState}>
-      {#snippet title()}
-        {$i18n.t("ui:dialog:map:newRoute:title")}
-      {/snippet}
-
-      {#snippet buttons()}
-        <DialogButton strong onClick={activeNav.closeDialog}>
-          {$i18n.t("ui:dialog:map:newRoute:no")}
-        </DialogButton>
-
-        <DialogButton onClick={activeNav.confirmNewDestination}>
-          {$i18n.t("ui:dialog:map:newRoute:yes")}
-        </DialogButton>
-      {/snippet}
-    </Dialog>
+    <NavigationControlDialog
+      {i18n}
+      openedDialog={activeNav.dialogState}
+      closeDialog={activeNav.closeDialog}
+      confirmDialog={activeNav.confirmNewDestination}
+    />
   {/if}
 </section>
 

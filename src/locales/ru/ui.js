@@ -26,6 +26,7 @@ export default {
     },
     map: {
       title: 'Карта',
+      editMode: 'Режим редактирования карты',
     },
     about: {
       title: 'О проекте',
@@ -135,6 +136,18 @@ export default {
       message: 'Добро пожаловать в режим редактирования карты!',
       instruction:
         'В этом режиме вы можете создавать собственные метки на карте. Чтобы добавить метку просто кликните на карту.',
+      dialogButton: 'Понятно',
+    },
+    mapEditor: {
+      coords: 'Координаты: {{coords}}',
+      modalWindow: 'Создание метки',
+      title: 'Название локации',
+      titlePlaceholder: 'Введите название локации',
+      preview: 'Фото локации (откроется камера)',
+      description: 'Расширенное описание',
+      descriptionPlaceholder: 'Введите описание',
+      save: 'Сохранить',
+      cancel: 'Отмена',
     },
   },
   settings: {

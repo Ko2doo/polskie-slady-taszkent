@@ -26,6 +26,7 @@ export default {
     },
     map: {
       title: 'Mapa',
+      editMode: 'Tryb edycji mapy',
     },
     about: {
       title: 'O projekcie',
@@ -130,6 +131,11 @@ export default {
       time: 'ms',
       clear: 'Wyczyść',
       footerInfo: 'Dotknij ponownie, aby utworzyć nową trasę',
+    },
+    userCustomPoints: {
+      message: 'Witamy w trybie edycji mapy!',
+      instruction: 'W tym trybie możesz dodawać własne znaczniki na mapie. Aby dodać znacznik, wystarczy kliknąć mapę.',
+      dialogButton: 'Rozumiem',
     },
   },
   settings: {
