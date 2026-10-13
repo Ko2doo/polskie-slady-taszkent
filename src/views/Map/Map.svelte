@@ -45,7 +45,7 @@
   import { articlePopupState } from "@/lib/state/article.svelte.js";
 
   // Map modules
-  import { createMapPointsBuilder } from "./MapBuilder.svelte.js";
+  import { createMapPointsBuilder, createCustomPointsBuilder } from "./MapBuilder.svelte.js";
   import { createNavigationController } from "./MapNavigation.svelte.js";
   import { createGPSNavigationController } from "./MapNavigationGPS.svelte.js";
   import { createThemeController } from "./MapTheme.svelte.js";
@@ -66,6 +66,7 @@
   import CustomPointsDialog from "@/components/CustomPoints/CustomPointsDialog.svelte";
   import NavigationControlDialog from "@/components/Navigation/NavigationControlDialog.svelte";
   import { customPointsDialogState } from "@/lib/state/customPointsDialogState.svelte.js";
+  import { customPointsState } from "@/lib/state/customPointsState.svelte.js";
   import { exists } from "i18next";
   import CustomPointsMapEditorDialog from "@/components/CustomPoints/CustomPointsMapEditorDialog.svelte";
 
@@ -86,6 +87,7 @@
   let map = null;
   let protocol = null;
   let builder = null;
+  let customPointsBuilder = null; // User-created points
   let navigation = $state(null); // Point-to-point navigation
   let gpsNavigation = $state(null); // GPS navigation
   let mapEditMode = $state(null);
@@ -219,6 +221,26 @@
         styleVersion: theme.styleVersion,
       });
 
+      // 5.1 Create CustomPointsBuilder (user-created points)
+      customPointsBuilder = createCustomPointsBuilder({
+        map,
+        i18n: $i18n,
+        popupTrigger: (id) => articlePopupState.open(id),
+        // Popups are disabled while the map editor mode is active
+        isPopupEnabled: () => !userCustomPointsToggler.value,
+        styleVersion: theme.styleVersion,
+      });
+
+      // The state outlives this component, so restore already created points
+      customPointsState.points.forEach((point) => {
+        customPointsBuilder.addPoint({
+          id: point.id,
+          coords: point.coords,
+          title: point.title,
+          preview: point.preview,
+        });
+      });
+
       // 6. Create Point-to-Point navigation controller
       navigation = createNavigationController({
         map,
@@ -237,6 +259,7 @@
       theme = createThemeController({
         map,
         builder,
+        customPointsBuilder,
         navigation,
         i18n: $i18n,
       });
@@ -250,6 +273,7 @@
         setupMapHandlers({
           map,
           builder,
+          customPointsBuilder,
           navigation,
           targetCoords,
         });
@@ -304,6 +328,7 @@
       map,
       protocol,
       builder,
+      customPointsBuilder,
       navigation,
       theme,
     });
@@ -317,6 +342,7 @@
     map = null;
     protocol = null;
     builder = null;
+    customPointsBuilder = null;
     navigation = null;
     gpsNavigation = null;
     theme = null;
@@ -365,6 +391,37 @@
   async function onDialogConfirm() {
     await userCustomDialogState.markCompleted();
     userCustomDialogState.close();
+  }
+
+  /**
+   * Save a custom point from the map editor dialog
+   * @param {Object} formData - { title, description }
+   * @returns {boolean} - true if the point was saved and rendered
+   */
+  function onCustomPointSave(formData) {
+    if (!customPointsBuilder || !mapEditMode || !mapEditMode.coordinates) return false;
+
+    const point = customPointsState.add({
+      coords: mapEditMode.coordinates,
+      title: formData.title,
+      description: formData.description,
+    });
+
+    const renderedPoint = customPointsBuilder.addPoint({
+      id: point.id,
+      coords: point.coords,
+      title: point.title,
+      preview: point.preview,
+    });
+
+    // Roll back, otherwise the state would keep a point that is not on the map
+    if (!renderedPoint) {
+      customPointsState.remove(point.id);
+      return false;
+    }
+
+    mapEditMode.closeModal();
+    return true;
   }
 </script>
 
@@ -437,6 +494,7 @@
       coords={mapEditMode.coordinates}
       opened={mapEditMode.modalDialogState}
       onCloseModal={mapEditMode.closeModal}
+      onSave={onCustomPointSave}
     />
   {/if}
 

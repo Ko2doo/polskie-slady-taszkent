@@ -108,6 +108,52 @@ export const MARKER_CONFIG = {
 };
 
 /**
+ * Configuration for user-created points (CustomPointsBuilder)
+ * Fully aligned with MARKER_CONFIG structure.
+ */
+export const CUSTOM_POINTS_CONFIG = {
+  sourceName: 'custom-points-source',
+  layerId: 'custom-points-layer',
+  labelLayerId: 'custom-points-labels-layer',
+  defaultIconName: 'default',
+  icons: [{ name: 'default', url: '/map/icons/gpsIcon.png' }],
+  iconSize: 0.38,
+  minzoom: 12.5,
+
+  mapLayer: [
+    {
+      id: 'custom-points-layer',
+      type: 'symbol',
+      source: 'custom-points-source',
+      layout: {
+        'icon-image': ['get', 'icon'],
+        'icon-size': 0.38,
+        'icon-allow-overlap': true,
+      },
+    },
+    {
+      id: 'custom-points-labels-layer',
+      type: 'symbol',
+      source: 'custom-points-source',
+      minzoom: 12.5,
+      layout: {
+        'text-field': ['get', 'title'],
+        'text-size': 12,
+        'text-offset': [0, 1.2],
+        'text-anchor': 'top',
+        'text-allow-overlap': false,
+        'icon-optional': true,
+      },
+      paint: {
+        'text-color': '#111111',
+        'text-halo-color': '#ffffff',
+        'text-halo-width': 1.5,
+      },
+    },
+  ],
+};
+
+/**
  * CSS styles for navigation markers
  */
 export const MARKER_STYLE = {

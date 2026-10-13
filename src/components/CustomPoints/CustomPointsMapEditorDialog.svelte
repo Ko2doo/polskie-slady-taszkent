@@ -4,15 +4,47 @@
   import { createLogger, IS_DEBUG } from "@/utils/debugMode";
   import { Block, BlockTitle, Link, List, ListButton, ListInput, Sheet, Toolbar, ToolbarPane } from "konsta/svelte";
 
-  let { i18n, coords, opened, onCloseModal } = $props();
+  let { i18n, coords, opened, onCloseModal, onSave } = $props();
 
-  const modalLogger = createLogger("CustomPointsDialog");
+  const modalLogger = createLogger("CustomPointsMapEditorDialog");
+
+  let title = $state("");
+  let description = $state("");
 
   const coordsLabel = $derived.by(() => {
     if (!coords) return "";
 
     return `${coords.lat.toFixed(6)}, ${coords.lng.toFixed(6)}`;
   });
+
+  function resetForm() {
+    title = "";
+    description = "";
+  }
+
+  function handleSave() {
+    const trimmedTitle = title.trim();
+
+    if (!trimmedTitle) {
+      IS_DEBUG && modalLogger.warn("Title is required");
+      return;
+    }
+
+    const isSaved = onSave({
+      title: trimmedTitle,
+      description: description.trim(),
+    });
+
+    // If saving failed, keep the entered data
+    if (isSaved) {
+      resetForm();
+    }
+  }
+
+  function handleClose() {
+    resetForm();
+    onCloseModal();
+  }
 </script>
 
 <Sheet class="pb-safe" {opened} onBackdropClick={false}>
@@ -25,7 +57,7 @@
 
     <div class="flex flex-row gap-2">
       <ToolbarPane>
-        <Link class="p-2" iconOnly onClick={onCloseModal}>
+        <Link class="p-2" iconOnly onClick={handleClose}>
           <Close className="size-5" />
         </Link>
       </ToolbarPane>
@@ -38,6 +70,7 @@
   <Block>
     <List strongIos insetIos>
       <ListInput
+        bind:value={title}
         label={$i18n.t("ui:map:mapEditor:title")}
         floatingLabel
         type="text"
@@ -45,18 +78,19 @@
         required
       />
       <ListInput
+        bind:value={description}
         label={$i18n.t("ui:map:mapEditor:description")}
         floatingLabel
-        type="text"
+        type="textarea"
         placeholder={$i18n.t("ui:map:mapEditor:descriptionPlaceholder")}
         required
       />
 
-      <ListButton>
+      <ListButton onClick={handleSave}>
         {$i18n.t("ui:map:mapEditor:save")}
       </ListButton>
 
-      <ListButton onClick={onCloseModal}>
+      <ListButton onClick={handleClose}>
         {$i18n.t("ui:map:mapEditor:cancel")}
       </ListButton>
     </List>

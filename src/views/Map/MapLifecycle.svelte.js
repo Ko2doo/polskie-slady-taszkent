@@ -98,12 +98,13 @@ export function initializeMap({ container, style }) {
  * @param {Object} params - Setup parameters
  * @param {maplibreGL.Map} params.map - Map instance
  * @param {MapPointsBuilder} params.builder - Builder instance
+ * @param {CustomPointsBuilder} params.customPointsBuilder - Builder instance for user-created points
  * @param {Object} params.navigation - Navigation controller
  * @param {Array|null} params.targetCoords - Optional coordinates to fly to
  *
  * NOTE: Navigation click handlers are managed in Map.svelte via handleUnifiedMapClick
  */
-export function setupMapHandlers({ map, builder, targetCoords }) {
+export function setupMapHandlers({ map, builder, customPointsBuilder, targetCoords }) {
   IS_DEBUG && lifecycleLogger.log('Setting up map handlers...');
 
   map.setMaxBounds(MAP_BOUNDS);
@@ -112,6 +113,10 @@ export function setupMapHandlers({ map, builder, targetCoords }) {
   // Add all overlays
   builder.addCityBoundaryLayer();
   builder.addMarkers();
+
+  if (customPointsBuilder) {
+    customPointsBuilder.init();
+  }
 
   // DON'T attach navigation click handler here - it's handled in Map.svelte
   // via handleUnifiedMapClick which routes to correct navigation controller
@@ -138,10 +143,11 @@ export function setupMapHandlers({ map, builder, targetCoords }) {
  * @param {maplibreGL.Map} params.map - Map instance to cleanup
  * @param {Protocol} params.protocol - PMTiles protocol to cleanup
  * @param {MapPointsBuilder} params.builder - Builder instance to cleanup
+ * @param {CustomPointsBuilder} params.customPointsBuilder - Custom points builder instance to cleanup
  * @param {Object} params.navigation - Navigation controller to cleanup
  * @param {Object} params.theme - Theme controller to cleanup
  */
-export function cleanupMap({ map, protocol, builder, navigation, theme }) {
+export function cleanupMap({ map, protocol, builder, customPointsBuilder, navigation, theme }) {
   IS_DEBUG && lifecycleLogger.log('Cleaning up map resources...');
 
   // 1. Dispose controllers FIRST (they need map to be alive)
@@ -155,6 +161,10 @@ export function cleanupMap({ map, protocol, builder, navigation, theme }) {
 
   if (builder) {
     builder.dispose();
+  }
+
+  if (customPointsBuilder) {
+    customPointsBuilder.dispose();
   }
 
   // 2. Remove map instance (after all controllers are cleaned up)

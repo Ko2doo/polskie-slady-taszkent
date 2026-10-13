@@ -22,11 +22,12 @@ const mapThemeLogger = createLogger('MapTheme');
  * @param {Object} params - Configuration parameters
  * @param {maplibreGL.Map} params.map - MapLibre map instance
  * @param {MapPointsBuilder} params.builder - MapPointsBuilder instance
+ * @param {CustomPointsBuilder} params.customPointsBuilder - CustomPointsBuilder instance
  * @param {Object} params.navigation - Navigation controller
  * @param {Object} params.i18n - i18n store
  * @returns {Object} - Theme controller API
  */
-export function createThemeController({ map, builder, navigation, i18n }) {
+export function createThemeController({ map, builder, customPointsBuilder, navigation, i18n }) {
   const themeManager = getThemeManager();
 
   let uiThemeStyle = $state('light');
@@ -62,6 +63,11 @@ export function createThemeController({ map, builder, navigation, i18n }) {
     // Restore layers
     builder.addCityBoundaryLayer();
     builder.addMarkers();
+
+    // Restore user-created points (they are kept in the builder memory)
+    if (customPointsBuilder) {
+      customPointsBuilder.init();
+    }
 
     // Restore navigation route if exists
     if (currentRoute) {
@@ -110,6 +116,10 @@ export function createThemeController({ map, builder, navigation, i18n }) {
 
         // Update builder style version
         builder.setStyleVersion(myVersion);
+
+        if (customPointsBuilder) {
+          customPointsBuilder.setStyleVersion(myVersion);
+        }
 
         // Restore all overlays
         reapplyOverlays(navigation.currentRoute);
