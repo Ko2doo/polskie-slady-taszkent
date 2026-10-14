@@ -480,6 +480,28 @@
     mapEditMode.closeModal();
     return true;
   }
+
+  /**
+   * Delete the custom point opened in the map editor dialog
+   * @returns {boolean} - true if the point was deleted
+   */
+  function onCustomPointDelete() {
+    if (!customPointsBuilder || !mapEditMode) return false;
+
+    const id = mapEditMode.editingPointId;
+
+    if (!id) return false;
+
+    // Remove from the map first: if the builder does not know the point, the state stays untouched
+    const isRemoved = customPointsBuilder.removePoint(id);
+
+    if (!isRemoved) return false;
+
+    customPointsState.remove(id);
+
+    mapEditMode.closeModal();
+    return true;
+  }
 </script>
 
 <!-- Navigation modal sheet button trigger and User custom points button trigger -->
@@ -553,6 +575,7 @@
       {editingPoint}
       onCloseModal={mapEditMode.closeModal}
       onSave={onCustomPointSave}
+      onDelete={onCustomPointDelete}
     />
   {/if}
 

@@ -150,6 +150,9 @@ export default {
       save: 'Сохранить',
       cancel: 'Отмена',
       update: 'Обновить',
+      deleteTitle: 'Удалить метку?',
+      deleteMessage: 'Метка и её описание будут удалены без возможности восстановления.',
+      delete: 'Удалить',
     },
   },
   settings: {

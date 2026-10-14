@@ -9,7 +9,7 @@
  *     - Loads and registers marker icons on the map
  *     - Adds one GeoJSON source and the symbol layers (icons, title labels) from `markers.mapLayer`
  *     - Keeps rendered points in memory (needed to restore them after a style change)
- *     - Updates the source each time a point is added, updated or cleared
+ *     - Updates the source each time a point is added, updated, removed or cleared
  *     - Shows a popup (title + optional preview) on marker click and hands the point id
  *       over to popupTrigger when the user presses "Read more"
  *
@@ -47,9 +47,10 @@
  *   // Later, when the user presses "Save" in the editor dialog:
  *   builder.addPoint({ id, coords: { lng, lat }, title, preview });
  *
- *   // Map editor mode: which custom point was tapped, and updating it
+ *   // Map editor mode: which custom point was tapped, updating and removing it
  *   const pointId = builder.getPointIdAt(e.point);
  *   builder.updatePoint({ id, title });
+ *   builder.removePoint(id);
  *
  * Note:
  *   Changing the map style (theme switch) removes all images, sources and layers.
@@ -413,6 +414,31 @@ export class CustomPointsBuilder {
     IS_DEBUG && customPointsLogger.log(`Point "${existingPoint.id}" updated`);
 
     return { ...existingPoint };
+  }
+
+  /**
+   * Remove a single point from memory and from the map
+   * @param {string} id - Id of the point to remove
+   * @returns {boolean} - true if the point was removed, false if it was not found
+   */
+  removePoint(id) {
+    if (!this._isBuilt) {
+      IS_DEBUG && customPointsLogger.warn('Cannot remove point: call build() first');
+      return false;
+    }
+
+    const index = this._points.findIndex((point) => point.id === id);
+    if (index === -1) {
+      IS_DEBUG && customPointsLogger.warn(`Point "${id}" not found`);
+      return false;
+    }
+
+    this._points.splice(index, 1);
+    this._syncSource();
+
+    IS_DEBUG && customPointsLogger.log(`Point "${id}" removed`);
+
+    return true;
   }
 
   /**
