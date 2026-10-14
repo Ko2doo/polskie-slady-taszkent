@@ -16,6 +16,15 @@ export default {
         },
       },
     },
+    map: {
+      title: 'Filtry',
+      filters: {
+        markersTitle: 'Znaczniki na mapie',
+        all: 'Wszystkie',
+        custom: 'Własne',
+        historical: 'Historyczne',
+      },
+    },
   },
   navbar: {
     home: {
@@ -136,6 +145,22 @@ export default {
       message: 'Witamy w trybie edycji mapy!',
       instruction: 'W tym trybie możesz dodawać własne znaczniki na mapie. Aby dodać znacznik, wystarczy kliknąć mapę.',
       dialogButton: 'Rozumiem',
+    },
+    mapEditor: {
+      coords: 'Współrzędne: {{coords}}',
+      modalTitleCreate: 'Tworzenie znacznika',
+      modalTitleUpdates: 'Aktualizacja danych',
+      title: 'Nazwa miejsca',
+      titlePlaceholder: 'Wpisz nazwę miejsca',
+      preview: 'Zdjęcie miejsca (otworzy się aparat)',
+      description: 'Rozszerzony opis',
+      descriptionPlaceholder: 'Wpisz opis',
+      save: 'Zapisz',
+      cancel: 'Anuluj',
+      update: 'Zaktualizuj',
+      deleteTitle: 'Usunąć znacznik?',
+      deleteMessage: 'Znacznik i jego opis zostaną trwale usunięte.',
+      delete: 'Usuń',
     },
   },
   settings: {

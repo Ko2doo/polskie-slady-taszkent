@@ -10,6 +10,7 @@
  *     - Adds one GeoJSON source and the symbol layers (icons, title labels) from `markers.mapLayer`
  *     - Keeps rendered points in memory (needed to restore them after a style change)
  *     - Updates the source each time a point is added, updated, removed or cleared
+ *     - Shows or hides all custom points (the markers filter), the state survives a theme change
  *     - Shows a popup (title + optional preview) on marker click and hands the point id
  *       over to popupTrigger when the user presses "Read more"
  *
@@ -47,6 +48,9 @@
  *   // Later, when the user presses "Save" in the editor dialog:
  *   builder.addPoint({ id, coords: { lng, lat }, title, preview });
  *
+ *   // Markers filter: hide / show all custom points
+ *   builder.setVisible(false);
+ *
  *   // Map editor mode: which custom point was tapped, updating and removing it
  *   const pointId = builder.getPointIdAt(e.point);
  *   builder.updatePoint({ id, title });
@@ -62,6 +66,7 @@
 
 import * as maplibreGL from 'maplibre-gl';
 import { createLogger, IS_DEBUG } from '@/utils/debugMode';
+import { getLayerVisibility, setLayersVisibility } from '@/utils/mapLayerVisibility';
 
 const customPointsLogger = createLogger('CustomPointsBuilder');
 
@@ -93,6 +98,7 @@ export class CustomPointsBuilder {
     this._onMarkerClick = null;
     this._clickLayerIds = [];
     this._iconImages = [];
+    this._isVisible = true;
     this._isBuilt = false;
     this._isReady = false;
   }
@@ -296,7 +302,10 @@ export class CustomPointsBuilder {
         return;
       }
 
-      map.addLayer({ ...layer });
+      map.addLayer({
+        ...layer,
+        layout: { ...layer.layout, visibility: getLayerVisibility(this._isVisible) },
+      });
       IS_DEBUG && customPointsLogger.log(`Layer "${layer.id}" added`);
     });
 
@@ -458,6 +467,23 @@ export class CustomPointsBuilder {
     if (features.length === 0) return null;
 
     return features[0].properties.id;
+  }
+
+  /**
+   * Show or hide all custom points (icons and labels).
+   * The value is kept and applied to the layers that are (re)added later, e.g. after a theme change.
+   * @param {boolean} isVisible - true to show, false to hide
+   */
+  setVisible(isVisible) {
+    this._isVisible = isVisible;
+
+    const map = this._config.currentMap;
+    if (!map) return;
+
+    const layerIds = this._config.markers.mapLayer.map((layer) => layer.id);
+    setLayersVisibility(map, layerIds, isVisible);
+
+    IS_DEBUG && customPointsLogger.log(`Visibility set to ${isVisible}`);
   }
 
   /**

@@ -16,6 +16,15 @@ export default {
         },
       },
     },
+    map: {
+      title: 'Filters',
+      filters: {
+        markersTitle: 'Markers on the map',
+        all: 'All',
+        custom: 'Custom',
+        historical: 'Historical',
+      },
+    },
   },
   navbar: {
     home: {
@@ -137,6 +146,22 @@ export default {
       instruction:
         'In this mode, you can create your own markers on the map. To add a marker, simply click on the map.',
       dialogButton: 'Go it',
+    },
+    mapEditor: {
+      coords: 'Coordinates: {{coords}}',
+      modalTitleCreate: 'Create marker',
+      modalTitleUpdates: 'Update data',
+      title: 'Location name',
+      titlePlaceholder: 'Enter the location name',
+      preview: 'Location photo (opens the camera)',
+      description: 'Extended description',
+      descriptionPlaceholder: 'Enter a description',
+      save: 'Save',
+      cancel: 'Cancel',
+      update: 'Update',
+      deleteTitle: 'Delete marker?',
+      deleteMessage: 'The marker and its description will be permanently deleted.',
+      delete: 'Delete',
     },
   },
   settings: {

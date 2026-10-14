@@ -30,6 +30,7 @@
   // Navbar
   import { resolvePageKeyFromRouteResult } from "@/utils/routerUtils";
   import { patchNavbar, withNavbar } from "@/lib/state/navbar.svelte";
+  import { openPanel, patchPanel, withPanel } from "@/lib/state/panel.svelte";
 
   // Data
   import { articlesMeta } from "@/data/articles";
@@ -61,12 +62,15 @@
 
   import { createLogger, IS_DEBUG } from "@/utils/debugMode.js";
   import MapEditor from "@/lib/icons/MapEditor.svelte";
+  import FilterIcon from "@/lib/icons/FilterIcon.svelte";
   import Close from "@/lib/icons/Close.svelte";
   import { withTabbar } from "@/lib/state/bottomTabbarNav.svelte.js";
   import CustomPointsDialog from "@/components/CustomPoints/CustomPointsDialog.svelte";
   import NavigationControlDialog from "@/components/Navigation/NavigationControlDialog.svelte";
   import { customPointsDialogState } from "@/lib/state/customPointsDialogState.svelte.js";
   import { customPointsState } from "@/lib/state/customPointsState.svelte.js";
+  import { MARKER_FILTER, mapMarkerFilter } from "@/lib/state/mapMarkerFilter.svelte.js";
+  import MapMarkersFilter from "@/components/Filters/MapMarkersFilter.svelte";
   import CustomPointsMapEditorDialog from "@/components/CustomPoints/CustomPointsMapEditorDialog.svelte";
 
   // Logger
@@ -126,6 +130,38 @@
   const editingPoint = $derived(
     mapEditMode && mapEditMode.editingPointId ? customPointsState.getById(mapEditMode.editingPointId) : null,
   );
+
+  // The markers filter is available only while custom points exist
+  const hasCustomPoints = $derived(customPointsState.points.length > 0);
+
+  // Markers filter applied to the map:
+  //  - the map editor mode always shows custom points only (the filter saved by the user stays untouched)
+  //  - without custom points there is nothing to filter
+  const markerFilter = $derived.by(() => {
+    if (userCustomPointsToggler.value) return MARKER_FILTER.CUSTOM;
+
+    if (!hasCustomPoints) return MARKER_FILTER.ALL;
+
+    return mapMarkerFilter.selected;
+  });
+
+  /**
+   * Push the applied markers filter to the builders.
+   * The builders keep the value for the layers that are (re)added later, e.g. after a theme change.
+   */
+  function syncMarkerFilter() {
+    // Read it first and unconditionally: while the builders do not exist yet the effect below would otherwise
+    // track nothing and would never run again
+    const filter = markerFilter;
+
+    if (builder) builder.setMarkersVisible(filter !== MARKER_FILTER.CUSTOM);
+
+    if (customPointsBuilder) customPointsBuilder.setVisible(filter !== MARKER_FILTER.HISTORICAL);
+  }
+
+  $effect(() => {
+    syncMarkerFilter();
+  });
 
   /**
    * Map editor mode click handler
@@ -262,6 +298,9 @@
         });
       });
 
+      // The filter could be restored from the storage before the builders were created
+      syncMarkerFilter();
+
       // 6. Create Point-to-Point navigation controller
       navigation = createNavigationController({
         map,
@@ -315,17 +354,24 @@
     }
   });
 
-  // Navbar
+  // Navbar and Panel
   onMount(() => {
     const disposeNavbar = withNavbar({
       title: "",
-      leftSnippet: null, // right slot: (unused for now)
-      rightSnippet: NavigationSheetBtn, // left slot: open navigation modal button
+      leftSnippet: MarkersFilterBtn, // left slot: open markers filter panel button
+      rightSnippet: NavigationSheetBtn, // right slot: open navigation modal button
       subnavSnippet: null, // subnavbar: null
+    });
+
+    const disposePanel = withPanel({
+      title: "",
+      contentSnippet: PanelContent, // panel body content (markers filter)
+      side: "left", // open from the left
     });
 
     onDestroy(() => {
       disposeNavbar();
+      disposePanel();
     });
   });
 
@@ -384,6 +430,7 @@
       : $i18n.t(`ui:navbar:${pageKey}:title`);
 
     patchNavbar({ title: isCustomPointsMode || pageKey });
+    patchPanel({ title: $i18n.t("ui:sidePanel:map:title") });
   });
 
   $effect(() => {
@@ -499,10 +546,26 @@
 
     customPointsState.remove(id);
 
+    // Without custom points the filter button disappears, so the filter must not stay on a mode that hides markers
+    if (!hasCustomPoints) mapMarkerFilter.select(MARKER_FILTER.ALL);
+
     mapEditMode.closeModal();
     return true;
   }
 </script>
+
+<!-- Markers filter panel button trigger (only when custom points exist, hidden in the map editor mode) -->
+{#snippet MarkersFilterBtn()}
+  {#if hasCustomPoints && !userCustomPointsToggler.value}
+    <Link iconOnly onClick={() => openPanel()}>
+      <FilterIcon />
+    </Link>
+  {/if}
+{/snippet}
+
+{#snippet PanelContent()}
+  <MapMarkersFilter {i18n} />
+{/snippet}
 
 <!-- Navigation modal sheet button trigger and User custom points button trigger -->
 {#snippet NavigationSheetBtn()}

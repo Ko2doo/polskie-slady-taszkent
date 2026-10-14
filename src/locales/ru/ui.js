@@ -16,6 +16,15 @@ export default {
         },
       },
     },
+    map: {
+      title: 'Фильтры',
+      filters: {
+        markersTitle: 'Метки на карте',
+        all: 'Все',
+        custom: 'Пользовательские',
+        historical: 'Исторические',
+      },
+    },
   },
   navbar: {
     home: {

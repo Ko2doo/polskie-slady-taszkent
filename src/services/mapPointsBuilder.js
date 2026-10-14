@@ -10,6 +10,7 @@
  *     - Attaches click handlers and renders custom HTML popups
  *     - Integrates with SPA routing via callback (popupTrigger)
  *     - Manages navigation routes (add/clear)
+ *     - Shows or hides all markers (the markers filter), the state survives a theme change
  *
  * Requirements:
  *   - `currentMap` must be an initialized MapLibre map instance
@@ -51,6 +52,7 @@
 
 import * as maplibreGL from 'maplibre-gl';
 import { createLogger, IS_DEBUG } from '@/utils/debugMode';
+import { getLayerVisibility, setLayersVisibility } from '@/utils/mapLayerVisibility';
 
 const pointsBuilderLogger = createLogger('MapPointsBuilder');
 
@@ -95,6 +97,7 @@ export class MapPointsBuilder {
     this._onMarkerClick = null;
     this._clickLayerId = null;
     this._iconImage = null;
+    this._isMarkersVisible = true;
     this._isBuilt = false;
   }
 
@@ -401,7 +404,10 @@ export class MapPointsBuilder {
           return;
         }
 
-        map.addLayer({ ...layer });
+        map.addLayer({
+          ...layer,
+          layout: { ...layer.layout, visibility: getLayerVisibility(this._isMarkersVisible) },
+        });
       });
 
       // Attach click handler for popups
@@ -427,6 +433,23 @@ export class MapPointsBuilder {
 
     // Trigger image loading
     this._iconImage.src = iconUrl;
+  }
+
+  /**
+   * Show or hide article markers (icons and labels).
+   * The value is kept and applied to the layers that are (re)added later, e.g. after a theme change.
+   * @param {boolean} isVisible - true to show, false to hide
+   */
+  setMarkersVisible(isVisible) {
+    this._isMarkersVisible = isVisible;
+
+    const map = this._config.currentMap;
+    if (!map) return;
+
+    const layerIds = this._config.markers.mapLayer.map((layer) => layer.id);
+    setLayersVisibility(map, layerIds, isVisible);
+
+    IS_DEBUG && pointsBuilderLogger.log(`Markers visibility set to ${isVisible}`);
   }
 
   /**

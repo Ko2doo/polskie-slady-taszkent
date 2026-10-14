@@ -16,6 +16,15 @@ export default {
         },
       },
     },
+    map: {
+      title: 'Filtrlar',
+      filters: {
+        markersTitle: 'Xaritadagi belgilar',
+        all: 'Barchasi',
+        custom: 'Shaxsiy',
+        historical: 'Tarixiy',
+      },
+    },
   },
   navbar: {
     home: {
@@ -138,6 +147,22 @@ export default {
       instruction:
         'Bu rejimda xaritada o‘zingizning belgilaringizni yaratishingiz mumkin. Belgi qo‘shish uchun xaritani shunchaki bosing.',
       dialogButton: 'Tushunarli',
+    },
+    mapEditor: {
+      coords: 'Koordinatalar: {{coords}}',
+      modalTitleCreate: 'Belgi yaratish',
+      modalTitleUpdates: "Ma'lumotlarni yangilash",
+      title: 'Joy nomi',
+      titlePlaceholder: 'Joy nomini kiriting',
+      preview: 'Joy surati (kamera ochiladi)',
+      description: 'Batafsil tavsif',
+      descriptionPlaceholder: 'Tavsifni kiriting',
+      save: 'Saqlash',
+      cancel: 'Bekor qilish',
+      update: 'Yangilash',
+      deleteTitle: 'Belgi o‘chirilsinmi?',
+      deleteMessage: 'Belgi va uning tavsifi butunlay o‘chiriladi.',
+      delete: 'O‘chirish',
     },
   },
   settings: {
