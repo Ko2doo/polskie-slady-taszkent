@@ -1,1 +1,1 @@
-First release on the App Store. Explore the Polish heritage of Tashkent with offline maps and GPS navigation.
+Faster map rendering, refreshed onboarding, new map popup buttons. Critical security updates and minor fixes.

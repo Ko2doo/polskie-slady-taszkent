@@ -1,5 +1,5 @@
 # App Store listing copy for all locales. Imported by submit driver.
-PRIVACY_URL = "https://github.com/Ko2doo/polskie-slady-taszkent/blob/release-v1.1.2/PRIVACY.md"
+PRIVACY_URL = "https://github.com/Ko2doo/polskie-slady-taszkent/blob/master/PRIVACY.md"
 SUPPORT_URL = "https://github.com/Ko2doo/polskie-slady-taszkent"
 MARKETING_URL = "https://github.com/Ko2doo/polskie-slady-taszkent"
 COPYRIGHT = "2026 Dmitry Adamov"
@@ -43,9 +43,9 @@ VERSION_LOC = {
             "offline map with GPS navigation around the city — no internet required."
         ),
         "whatsNew": (
-            "First release on the App Store. Discover the Polish heritage of Tashkent with an "
-            "offline map, GPS navigation, a directory of places and people, and detailed "
-            "illustrated articles in four languages."
+            "Faster map rendering, a refreshed onboarding with correct language selection on "
+            "tablets, a new button design in map popups and a single-row navigation mode bar. "
+            "Critical security updates for all key libraries and other minor fixes."
         ),
     },
     "pl": {
@@ -75,8 +75,9 @@ VERSION_LOC = {
             "nawigacją GPS po mieście — bez internetu."
         ),
         "whatsNew": (
-            "Pierwsze wydanie w App Store. Odkrywaj polskie dziedzictwo Taszkentu dzięki mapie "
-            "offline, nawigacji GPS, informatorowi miejsc i osób oraz ilustrowanym artykułom w czterech językach."
+            "Szybsze renderowanie mapy, odświeżony samouczek z poprawnym wyborem języka na "
+            "tabletach, nowy wygląd przycisków w okienkach mapy i pasek trybów nawigacji w jednym "
+            "rzędzie. Krytyczne aktualizacje bezpieczeństwa kluczowych bibliotek i drobne poprawki."
         ),
     },
     "ru": {
@@ -108,8 +109,9 @@ VERSION_LOC = {
             "GPS-навигацией по городу — без интернета."
         ),
         "whatsNew": (
-            "Первый выпуск в App Store. Знакомьтесь с польским наследием Ташкента: офлайн-карта, "
-            "GPS-навигация, справочник мест и людей и иллюстрированные статьи на четырёх языках."
+            "Карта отрисовывается быстрее, обновлён онбординг: выбор языка корректно работает на "
+            "планшетах. Новый дизайн кнопок во всплывающих окнах карты, режимы навигации в один ряд. "
+            "Критические обновления безопасности всех ключевых библиотек и мелкие исправления."
         ),
     },
 }

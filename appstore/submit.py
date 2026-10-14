@@ -3,6 +3,7 @@
 
 Subcommands (run in order, or `all`):
   status        - print current state of app/version/build/localizations
+  newversion    - create the VERSION_STRING app store version (needed for every update)
   metadata      - version attrs, attach build, export compliance, categories, localizations
   screenshots   - upload 6.9" screenshots to the primary (pl) localization
   agerating     - set age rating declaration to 4+ (all NONE)
@@ -21,7 +22,8 @@ import metadata as M
 
 APP_ID = "6782352124"
 BUNDLE_ID = "com.github.polskiesladytaszkent"
-VERSION_STRING = "1.1.2"
+VERSION_STRING = "1.1.4"
+BUILD_NUMBER = "4"  # CURRENT_PROJECT_VERSION of the uploaded build
 PRIMARY_LOCALE = "pl"
 SCREENSHOT_DISPLAY_TYPE = "APP_IPHONE_67"  # 6.9"/6.7" iPhone set (accepts 1320x2868)
 SCREENSHOT_DIR = os.path.join(os.path.dirname(__file__), "screenshots", "ios-6.9")
@@ -61,17 +63,16 @@ def discover():
     d = {}
     v = jget(f"/v1/apps/{APP_ID}/appStoreVersions?filter[versionString]={VERSION_STRING}"
              f"&fields[appStoreVersions]=versionString,appStoreState&limit=10")
-    vers = v.get("data", [])
-    if not vers:
-        # fall back to the single existing editable version
-        v = jget(f"/v1/apps/{APP_ID}/appStoreVersions?limit=10")
-        vers = v.get("data", [])
-    editable = [x for x in vers if x["attributes"]["appStoreState"] in
+    editable = [x for x in v.get("data", []) if x["attributes"]["appStoreState"] in
                 ("PREPARE_FOR_SUBMISSION", "DEVELOPER_REJECTED", "REJECTED", "METADATA_REJECTED")]
-    d["version"] = (editable or vers)[0]
+    # Never fall back to another (e.g. live) version: every command below edits it.
+    if not editable:
+        raise SystemExit(f"no editable version {VERSION_STRING}; run `newversion` first")
+    d["version"] = editable[0]
     d["version_id"] = d["version"]["id"]
 
-    b = jget(f"/v1/builds?filter[app]={APP_ID}&filter[version]=1&limit=5"
+    b = jget(f"/v1/builds?filter[app]={APP_ID}&filter[version]={BUILD_NUMBER}"
+             f"&filter[preReleaseVersion.version]={VERSION_STRING}&limit=5"
              f"&fields[builds]=version,processingState")
     builds = [x for x in b.get("data", []) if x["attributes"]["processingState"] == "VALID"] or b.get("data", [])
     d["build_id"] = builds[0]["id"] if builds else None
@@ -93,6 +94,19 @@ def discover():
 def cmd_status():
     d = discover()
     print(json.dumps({k: v for k, v in d.items() if k not in ("version",)}, indent=2, ensure_ascii=False))
+
+def cmd_newversion():
+    v = jget(f"/v1/apps/{APP_ID}/appStoreVersions?filter[versionString]={VERSION_STRING}&limit=1")
+    if v.get("data"):
+        print(f"version {VERSION_STRING} already exists:", v["data"][0]["attributes"]["appStoreState"])
+        return
+    print(f"• create version {VERSION_STRING}")
+    call("POST", "/v1/appStoreVersions", {
+        "data": {"type": "appStoreVersions",
+                 "attributes": {"platform": "IOS", "versionString": VERSION_STRING,
+                                "copyright": M.COPYRIGHT, "releaseType": "MANUAL"},
+                 "relationships": {"app": {"data": {"type": "apps", "id": APP_ID}}}}})
+    print("newversion done.")
 
 def cmd_metadata():
     d = discover()
@@ -141,9 +155,9 @@ def cmd_metadata():
 
     # Version localizations (description, keywords, urls, promo, whatsNew)
     for locale, f in M.VERSION_LOC.items():
-        # whatsNew is only editable for updates, not the first version -> omit it.
+        # whatsNew is editable for updates only (the app is live since 1.1.2).
         attrs = {"description": f["description"], "keywords": f["keywords"],
-                 "promotionalText": f["promotionalText"],
+                 "promotionalText": f["promotionalText"], "whatsNew": f["whatsNew"],
                  "supportUrl": M.SUPPORT_URL, "marketingUrl": M.MARKETING_URL}
         if locale in d["version_locs"]:
             lid = d["version_locs"][locale]
@@ -308,7 +322,7 @@ def cmd_submit():
                  "relationships": {"appStoreVersion": {"data": {"type": "appStoreVersions", "id": vid}}}}})
     print("SUBMITTED ✅ (appStoreVersionSubmissions)")
 
-CMDS = {"status": cmd_status, "metadata": cmd_metadata, "screenshots": cmd_screenshots,
+CMDS = {"status": cmd_status, "newversion": cmd_newversion, "metadata": cmd_metadata, "screenshots": cmd_screenshots,
         "agerating": cmd_agerating, "privacy": cmd_privacy, "review": cmd_review, "submit": cmd_submit}
 
 if __name__ == "__main__":

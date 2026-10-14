@@ -9,10 +9,10 @@ Usage:
 """
 import base64, json, subprocess, sys, time, urllib.request, urllib.error, os
 
-KEY_ID = "NGRH4W5H3A"
-ISSUER_ID = "a9c52812-62a6-43be-b82d-d102889e30f6"
-KEY_PATH = os.path.expanduser("~/.appstoreconnect/private_keys/AuthKey_NGRH4W5H3A.p8")
-BASE = "https://api.appstoreconnect.com"  # placeholder, real host set below
+# Override with ASC_KEY_ID / ASC_ISSUER_ID when using a different API key.
+KEY_ID = os.environ.get("ASC_KEY_ID", "NGRH4W5H3A")
+ISSUER_ID = os.environ.get("ASC_ISSUER_ID", "a9c52812-62a6-43be-b82d-d102889e30f6")
+KEY_PATH = os.path.expanduser(f"~/.appstoreconnect/private_keys/AuthKey_{KEY_ID}.p8")
 BASE = "https://api.appstoreconnect.apple.com"
 
 def b64url(b: bytes) -> str:
