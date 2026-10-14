@@ -16,6 +16,7 @@ export default {
   mapInitFailed: 'Xarita ishga tushirilmadi',
   mapThemeFailed: "Mavzu qo'llanilmadi",
   mapPMTilesFetch: 'Xarita yuklanmadi',
+  customPointNearHistorical: 'Tarixiy belgi yonida belgi yaratib bo‘lmaydi. Boshqa joyni tanlang.',
 
   // Capacitor geolocation API error
   OS_PLUG_GLOC_0002: 'Joylashuvni olishga urinishda xatolik yuz berdi.',

@@ -150,6 +150,16 @@ export const CUSTOM_POINTS_CONFIG = {
 };
 
 /**
+ * Configuration for the map editor mode
+ *
+ * Article markers are hidden in this mode, so a new point is not allowed closer than `historicalMarkerGuardRadius`
+ * (in screen pixels) to an article marker. It is about the size of the marker icon plus the finger inaccuracy.
+ */
+export const EDIT_MODE_CONFIG = {
+  historicalMarkerGuardRadius: 40,
+};
+
+/**
  * CSS styles for navigation markers
  */
 export const MARKER_STYLE = {

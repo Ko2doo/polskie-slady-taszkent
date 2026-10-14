@@ -16,6 +16,7 @@ export default {
   mapInitFailed: 'Не удалось инициализировать карту',
   mapThemeFailed: 'Не удалось применить тему',
   mapPMTilesFetch: 'Не удалось загрузить карту',
+  customPointNearHistorical: 'Нельзя создать метку рядом с исторической меткой. Выберите другое место.',
 
   // Capacitor geolocation API error
   OS_PLUG_GLOC_0002: 'Произошла ошибка при попытке получить местоположение.',

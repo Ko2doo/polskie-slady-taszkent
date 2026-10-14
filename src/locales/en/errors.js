@@ -16,6 +16,7 @@ export default {
   mapInitFailed: 'Failed to initialize map',
   mapThemeFailed: 'Failed to apply theme',
   mapPMTilesFetch: 'Failed to load map',
+  customPointNearHistorical: 'You cannot create a marker next to a historical marker. Choose another place.',
 
   // Capacitor geolocation API error
   OS_PLUG_GLOC_0002: 'There was en error trying to obtain the location.',

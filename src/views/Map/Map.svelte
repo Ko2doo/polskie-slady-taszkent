@@ -58,6 +58,7 @@
     resolveTargetCoords,
   } from "./MapLifecycle.svelte.js";
   import { createEditModeController } from "./MapEditMode.svelte.js";
+  import { EDIT_MODE_CONFIG } from "./MapConstants.js";
   import { createMapLoadTracker } from "./MapLoadTracker.js";
 
   import { createLogger, IS_DEBUG } from "@/utils/debugMode.js";
@@ -165,7 +166,8 @@
 
   /**
    * Map editor mode click handler
-   * A click on an existing custom point opens it for updating, a click on an empty place starts a new point
+   * A click on an existing custom point opens it for updating, a click on an empty place starts a new point,
+   * a click on (or next to) an article marker is refused with a warning
    * @param {Object} e - MapLibre click event
    */
   function handleEditModeClick(e) {
@@ -174,6 +176,14 @@
 
     if (point) {
       mapEditMode.startEditing(point);
+      return;
+    }
+
+    // Article markers are hidden in the editor mode, so their places must be protected from accidental new points
+    if (builder && builder.isMarkerNear(e.point, EDIT_MODE_CONFIG.historicalMarkerGuardRadius)) {
+      IS_DEBUG && mapLogger.log("Click ignored: too close to a historical marker");
+
+      errorToast.warn($i18n.t("errors:customPointNearHistorical"));
       return;
     }
 

@@ -16,6 +16,7 @@ export default {
   mapInitFailed: 'Nie udało się zainicjować mapy',
   mapThemeFailed: 'Nie udało się zastosować motywu',
   mapPMTilesFetch: 'Nie udało się załadować mapy',
+  customPointNearHistorical: 'Nie można utworzyć znacznika obok znacznika historycznego. Wybierz inne miejsce.',
 
   // Capacitor geolocation API error
   OS_PLUG_GLOC_0002: 'Wystąpił błąd podczas próby uzyskania lokalizacji.',

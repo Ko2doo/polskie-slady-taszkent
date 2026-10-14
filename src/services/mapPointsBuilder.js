@@ -11,6 +11,7 @@
  *     - Integrates with SPA routing via callback (popupTrigger)
  *     - Manages navigation routes (add/clear)
  *     - Shows or hides all markers (the markers filter), the state survives a theme change
+ *     - Tells whether a screen position is close to a marker (also while the markers are hidden)
  *
  * Requirements:
  *   - `currentMap` must be an initialized MapLibre map instance
@@ -450,6 +451,28 @@ export class MapPointsBuilder {
     setLayersVisibility(map, layerIds, isVisible);
 
     IS_DEBUG && pointsBuilderLogger.log(`Markers visibility set to ${isVisible}`);
+  }
+
+  /**
+   * Check whether a screen position is close to any marker.
+   * Works from the data and the map projection, so it also works while the markers are hidden
+   * (a hidden layer has no rendered features to query).
+   * @param {Object} screenPoint - { x, y } position in pixels, e.g. `e.point` of a MapLibre event
+   * @param {number} radius - Max distance to a marker in pixels (inclusive)
+   * @returns {boolean} - true if there is a marker within the radius
+   */
+  isMarkerNear(screenPoint, radius) {
+    const map = this._config.currentMap;
+    if (!map) return false;
+
+    return this._config.data.some((item) => {
+      const coordinates = this._transformCoords(item.coords);
+      if (!coordinates) return false;
+
+      const projected = map.project(coordinates);
+
+      return Math.hypot(projected.x - screenPoint.x, projected.y - screenPoint.y) <= radius;
+    });
   }
 
   /**
