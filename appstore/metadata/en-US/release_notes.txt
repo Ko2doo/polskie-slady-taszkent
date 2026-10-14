@@ -1,0 +1,1 @@
+Faster map rendering, refreshed onboarding, new map popup buttons. Critical security updates and minor fixes.

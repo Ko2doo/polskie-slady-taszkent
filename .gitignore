@@ -12,6 +12,19 @@ dist
 dist-ssr
 *.local
 
+# iOS / Xcode build artifacts
+build/
+*.xcarchive
+DerivedData/
+*.ipa
+
+# Python
+__pycache__/
+*.pyc
+
+# App Store reviewer contact details (PII) — keep out of public repo
+appstore/metadata/review_information/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
