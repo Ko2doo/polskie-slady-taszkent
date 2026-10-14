@@ -9,6 +9,7 @@
  *     - Creates symbol layers for icons and labels
  *     - Attaches click handlers and renders custom HTML popups
  *     - Integrates with SPA routing via callback (popupTrigger)
+ *     - Lets the app switch popups off (popup guard), e.g. while a navigation mode is active
  *     - Manages navigation routes (add/clear)
  *     - Shows or hides all markers (the markers filter), the state survives a theme change
  *     - Tells whether a screen position is close to a marker (also while the markers are hidden)
@@ -73,6 +74,7 @@ export class MapPointsBuilder {
       },
       styleVersion: 0,
       popupTrigger: () => {},
+      isPopupEnabled: () => true,
       currentMap: null,
       markers: {
         render: false,
@@ -157,6 +159,19 @@ export class MapPointsBuilder {
   withPopup(popupTrigger) {
     if (typeof popupTrigger === 'function') {
       this._config.popupTrigger = popupTrigger;
+    }
+    return this;
+  }
+
+  /**
+   * Set the function that decides whether a marker click should open a popup
+   * (for example, popups must be disabled while a navigation mode is active)
+   * @param {Function} isPopupEnabled - Function returning true if the popup may be shown
+   * @returns {MapPointsBuilder}
+   */
+  withPopupGuard(isPopupEnabled) {
+    if (typeof isPopupEnabled === 'function') {
+      this._config.isPopupEnabled = isPopupEnabled;
     }
     return this;
   }
@@ -691,6 +706,9 @@ export class MapPointsBuilder {
    * @param {Object} e - MapLibre click event
    */
   _handleMarkerClick(e) {
+    // Popups are disabled, for example while a navigation mode is active
+    if (!this._config.isPopupEnabled()) return;
+
     if (!e?.features?.length) return;
 
     const feature = e.features[0];

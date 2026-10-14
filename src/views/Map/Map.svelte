@@ -132,6 +132,14 @@
     mapEditMode && mapEditMode.editingPointId ? customPointsState.getById(mapEditMode.editingPointId) : null,
   );
 
+  /**
+   * Marker popups (article markers and custom points) are disabled while the map editor mode
+   * or a navigation mode is active: a click on a marker must only be handled by that mode
+   */
+  function isPopupEnabled() {
+    return !userCustomPointsToggler.value && !activeNav;
+  }
+
   // The markers filter is available only while custom points exist
   const hasCustomPoints = $derived(customPointsState.points.length > 0);
 
@@ -285,6 +293,7 @@
         data: articlesMeta,
         i18n: $i18n,
         popupTrigger: (id) => articlePopupState.open(id),
+        isPopupEnabled,
         styleVersion: theme.styleVersion,
       });
 
@@ -293,8 +302,7 @@
         map,
         i18n: $i18n,
         popupTrigger: (id) => articlePopupState.open(id),
-        // Popups are disabled while the map editor mode is active
-        isPopupEnabled: () => !userCustomPointsToggler.value,
+        isPopupEnabled,
         styleVersion: theme.styleVersion,
       });
 

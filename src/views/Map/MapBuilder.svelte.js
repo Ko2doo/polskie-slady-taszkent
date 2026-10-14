@@ -22,10 +22,11 @@ import { articlePopupState } from '@/lib/state/article.svelte';
  * @param {Array} params.data - Array of article metadata
  * @param {Object} params.i18n - i18n store with translation functions
  * @param {Function} params.popupTrigger - Svelte + KonstaUI popup state
+ * @param {Function} params.isPopupEnabled - Returns false while popups must not open (e.g. navigation modes)
  * @param {number} params.styleVersion - Current style version
  * @returns {MapPointsBuilder} - Configured builder instance
  */
-export function createMapPointsBuilder({ map, data, i18n, popupTrigger, styleVersion }) {
+export function createMapPointsBuilder({ map, data, i18n, popupTrigger, isPopupEnabled, styleVersion }) {
   return (
     MapPointsBuilder.create()
       // Core configuration
@@ -42,6 +43,7 @@ export function createMapPointsBuilder({ map, data, i18n, popupTrigger, styleVer
 
       // SPA routing integration
       .withPopup(popupTrigger)
+      .withPopupGuard(isPopupEnabled)
 
       // Markers configuration (custom icon and labels)
       .withMarkers(MARKER_CONFIG.customMarkers)
