@@ -140,7 +140,8 @@ export default {
     },
     mapEditor: {
       coords: 'Координаты: {{coords}}',
-      modalWindow: 'Создание метки',
+      modalTitleCreate: 'Создание метки',
+      modalTitleUpdates: 'Обновить данные',
       title: 'Название локации',
       titlePlaceholder: 'Введите название локации',
       preview: 'Фото локации (откроется камера)',
@@ -148,6 +149,7 @@ export default {
       descriptionPlaceholder: 'Введите описание',
       save: 'Сохранить',
       cancel: 'Отмена',
+      update: 'Обновить',
     },
   },
   settings: {

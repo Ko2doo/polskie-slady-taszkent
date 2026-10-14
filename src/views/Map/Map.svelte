@@ -67,7 +67,6 @@
   import NavigationControlDialog from "@/components/Navigation/NavigationControlDialog.svelte";
   import { customPointsDialogState } from "@/lib/state/customPointsDialogState.svelte.js";
   import { customPointsState } from "@/lib/state/customPointsState.svelte.js";
-  import { exists } from "i18next";
   import CustomPointsMapEditorDialog from "@/components/CustomPoints/CustomPointsMapEditorDialog.svelte";
 
   // Logger
@@ -123,6 +122,28 @@
   const userCustomPointsToggler = createToggle();
   const userCustomDialogState = customPointsDialogState();
 
+  // Custom point opened in the map editor dialog for updating (null while a new point is being created)
+  const editingPoint = $derived(
+    mapEditMode && mapEditMode.editingPointId ? customPointsState.getById(mapEditMode.editingPointId) : null,
+  );
+
+  /**
+   * Map editor mode click handler
+   * A click on an existing custom point opens it for updating, a click on an empty place starts a new point
+   * @param {Object} e - MapLibre click event
+   */
+  function handleEditModeClick(e) {
+    const pointId = customPointsBuilder ? customPointsBuilder.getPointIdAt(e.point) : null;
+    const point = pointId ? customPointsState.getById(pointId) : null;
+
+    if (point) {
+      mapEditMode.startEditing(point);
+      return;
+    }
+
+    mapEditMode.handleMapClick(e);
+  }
+
   /**
    * Unified map click handler
    * Routes clicks to appropriate navigation controller
@@ -165,7 +186,7 @@
     }
 
     if (userCustomPointsToggler.value) {
-      mapEditMode.handleMapClick(e);
+      handleEditModeClick(e);
       return;
     }
 
@@ -394,12 +415,27 @@
   }
 
   /**
-   * Save a custom point from the map editor dialog
+   * Save data from the map editor dialog: update the opened point or create a new one
    * @param {Object} formData - { title, description }
    * @returns {boolean} - true if the point was saved and rendered
    */
   function onCustomPointSave(formData) {
-    if (!customPointsBuilder || !mapEditMode || !mapEditMode.coordinates) return false;
+    if (!customPointsBuilder || !mapEditMode) return false;
+
+    if (mapEditMode.editingPointId) {
+      return updateCustomPoint(mapEditMode.editingPointId, formData);
+    }
+
+    return createCustomPoint(formData);
+  }
+
+  /**
+   * Create a new custom point at the clicked coordinates
+   * @param {Object} formData - { title, description }
+   * @returns {boolean} - true if the point was saved and rendered
+   */
+  function createCustomPoint(formData) {
+    if (!mapEditMode.coordinates) return false;
 
     const point = customPointsState.add({
       coords: mapEditMode.coordinates,
@@ -419,6 +455,27 @@
       customPointsState.remove(point.id);
       return false;
     }
+
+    mapEditMode.closeModal();
+    return true;
+  }
+
+  /**
+   * Update title and text of an existing custom point
+   * @param {string} id - Custom point id
+   * @param {Object} formData - { title, description }
+   * @returns {boolean} - true if the point was updated
+   */
+  function updateCustomPoint(id, formData) {
+    // The builder validates the data first, so the state is not changed if the update is rejected
+    const renderedPoint = customPointsBuilder.updatePoint({ id, title: formData.title });
+
+    if (!renderedPoint) return false;
+
+    customPointsState.update(id, {
+      title: renderedPoint.title,
+      description: formData.description,
+    });
 
     mapEditMode.closeModal();
     return true;
@@ -493,6 +550,7 @@
       {i18n}
       coords={mapEditMode.coordinates}
       opened={mapEditMode.modalDialogState}
+      {editingPoint}
       onCloseModal={mapEditMode.closeModal}
       onSave={onCustomPointSave}
     />

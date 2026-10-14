@@ -109,16 +109,12 @@ export const MARKER_CONFIG = {
 
 /**
  * Configuration for user-created points (CustomPointsBuilder)
- * Fully aligned with MARKER_CONFIG structure.
+ * Same layer structure as MARKER_CONFIG, the ids from mapLayer are also used for click handling.
  */
 export const CUSTOM_POINTS_CONFIG = {
   sourceName: 'custom-points-source',
-  layerId: 'custom-points-layer',
-  labelLayerId: 'custom-points-labels-layer',
   defaultIconName: 'default',
   icons: [{ name: 'default', url: '/map/icons/gpsIcon.png' }],
-  iconSize: 0.38,
-  minzoom: 12.5,
 
   mapLayer: [
     {

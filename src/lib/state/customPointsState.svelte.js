@@ -65,6 +65,37 @@ export const customPointsState = {
   },
 
   /**
+   * Update the editable data of a point (title, article text, preview).
+   * The id and coordinates are not changed.
+   * @param {string} id - Point id
+   * @param {Object} data - { title, description, preview }, all fields are optional
+   * @returns {Object|null} - Updated point or null if not found
+   */
+  update(id, data) {
+    const point = points.find((item) => item.id === id);
+
+    if (!point) {
+      return null;
+    }
+
+    if (typeof data.title === 'string') {
+      point.title = data.title;
+    }
+
+    if (typeof data.description === 'string') {
+      point.description = data.description;
+    }
+
+    if (typeof data.preview === 'string') {
+      point.preview = data.preview;
+    }
+
+    IS_DEBUG && customPointsStateLogger.log(`Point "${id}" updated`);
+
+    return point;
+  },
+
+  /**
    * Remove a point by id
    * @param {string} id - Point id
    */

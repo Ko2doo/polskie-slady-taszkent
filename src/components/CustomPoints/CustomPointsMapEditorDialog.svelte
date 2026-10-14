@@ -1,15 +1,34 @@
 <script>
+  import { untrack } from "svelte";
   import Close from "@/lib/icons/Close.svelte";
   import { errorToast } from "@/store/ui/errorToast";
   import { createLogger, IS_DEBUG } from "@/utils/debugMode";
   import { Block, BlockTitle, Link, List, ListButton, ListInput, Sheet, Toolbar, ToolbarPane } from "konsta/svelte";
 
-  let { i18n, coords, opened, onCloseModal, onSave } = $props();
+  // editingPoint - custom point to update, null/undefined when a new point is being created
+  let { i18n, coords, opened, editingPoint, onCloseModal, onSave } = $props();
 
   const modalLogger = createLogger("CustomPointsMapEditorDialog");
 
+  // TODO: move to translations
+  const EDIT_TITLE = "Обновить данные";
+  const EDIT_SAVE_LABEL = "Обновить";
+
   let title = $state("");
   let description = $state("");
+
+  const isEditing = $derived(Boolean(editingPoint));
+
+  // Fill the form with the data of the point every time the dialog is opened for editing
+  $effect(() => {
+    if (!opened || !editingPoint) return;
+
+    // Only `opened` and `editingPoint` must trigger this effect, not the fields of the point
+    untrack(() => {
+      title = editingPoint.title;
+      description = editingPoint.description;
+    });
+  });
 
   const coordsLabel = $derived.by(() => {
     if (!coords) return "";
@@ -47,12 +66,12 @@
   }
 </script>
 
-<Sheet class="pb-safe" {opened} onBackdropClick={false}>
+<Sheet class="pb-safe" {opened}>
   <Toolbar top innerClass="w-full items-center" class="justify-end ios:pt-4">
     <div class="ios:hidden"></div>
 
     <span class="text-xl font-bold text-stone-600 dark:text-stone-300">
-      {$i18n.t("ui:map:mapEditor:modalWindow")}
+      {isEditing ? $i18n.t("ui:map:mapEditor:modalTitleUpdates") : $i18n.t("ui:map:mapEditor:modalTitleCreate")}
     </span>
 
     <div class="flex flex-row gap-2">
@@ -87,7 +106,7 @@
       />
 
       <ListButton onClick={handleSave}>
-        {$i18n.t("ui:map:mapEditor:save")}
+        {isEditing ? $i18n.t("ui:map:mapEditor:update") : $i18n.t("ui:map:mapEditor:save")}
       </ListButton>
 
       <ListButton onClick={handleClose}>
