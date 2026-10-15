@@ -164,6 +164,7 @@ export default {
       photosTake: 'Take a photo',
       photosChoose: 'Choose from gallery',
       photosCover: 'Cover',
+      photosSetCover: 'Set as cover',
       photosRemove: 'Remove photo',
       save: 'Save',
       cancel: 'Cancel',
@@ -172,6 +173,9 @@ export default {
       deleteMessage: 'The marker and its description will be permanently deleted.',
       delete: 'Delete',
     },
+  },
+  photoViewer: {
+    close: 'Close photo viewer',
   },
   settings: {
     translations: {

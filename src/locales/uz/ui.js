@@ -165,6 +165,7 @@ export default {
       photosTake: 'Suratga olish',
       photosChoose: 'Galereyadan tanlash',
       photosCover: 'Muqova',
+      photosSetCover: 'Muqova sifatida belgilash',
       photosRemove: 'Suratni o‘chirish',
       save: 'Saqlash',
       cancel: 'Bekor qilish',
@@ -173,6 +174,9 @@ export default {
       deleteMessage: 'Belgi va uning tavsifi butunlay o‘chiriladi.',
       delete: 'O‘chirish',
     },
+  },
+  photoViewer: {
+    close: 'Surat ko‘rishni yopish',
   },
   settings: {
     translations: {

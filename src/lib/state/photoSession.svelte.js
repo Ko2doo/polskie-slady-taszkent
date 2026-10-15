@@ -162,6 +162,21 @@ export function createPhotoSession() {
   }
 
   /**
+   * Make a photo the cover (move it to the front of the list). No file is touched, only the order.
+   * A path that is not in the list, or already the cover, is a no-op.
+   * @param {string} path - Photo path
+   */
+  function setCover(path) {
+    const index = photos.indexOf(path);
+
+    if (index <= 0) return;
+
+    const [item] = photos.splice(index, 1);
+
+    photos.unshift(item);
+  }
+
+  /**
    * The point was saved with the current photos: delete the files that are not in the list and end the session.
    * @returns {Promise<void>}
    */
@@ -200,6 +215,7 @@ export function createPhotoSession() {
     begin,
     add,
     remove,
+    setCover,
     commit,
     discard,
     end,

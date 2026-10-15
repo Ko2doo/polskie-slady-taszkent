@@ -248,10 +248,21 @@
                 <div class="mt-2 flex flex-wrap gap-2">
                   {#each photoSession.photos as path, index (path)}
                     <div class="relative size-20 overflow-hidden rounded-lg">
-                      <PhotoThumb {path} class="size-full object-cover" />
+                      <!-- Tap a photo to make it the cover (a no-op on the current cover) -->
+                      <button
+                        type="button"
+                        class="block size-full"
+                        aria-label={$i18n.t("ui:map:mapEditor:photosSetCover")}
+                        onclick={() => photoSession.setCover(path)}
+                      >
+                        <PhotoThumb {path} class="size-full object-cover" />
+                      </button>
 
                       {#if index === 0}
-                        <span class="absolute inset-x-0 bottom-0 bg-black/60 px-1 text-center text-[10px] text-white">
+                        <span
+                          class="pointer-events-none absolute inset-x-0 bottom-0 bg-black/60 px-1
+                                 text-center text-[10px] text-white"
+                        >
                           {$i18n.t("ui:map:mapEditor:photosCover")}
                         </span>
                       {/if}

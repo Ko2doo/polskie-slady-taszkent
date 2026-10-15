@@ -163,6 +163,7 @@ export default {
       photosTake: 'Zrób zdjęcie',
       photosChoose: 'Wybierz z galerii',
       photosCover: 'Okładka',
+      photosSetCover: 'Ustaw jako okładkę',
       photosRemove: 'Usuń zdjęcie',
       save: 'Zapisz',
       cancel: 'Anuluj',
@@ -171,6 +172,9 @@ export default {
       deleteMessage: 'Znacznik i jego opis zostaną trwale usunięte.',
       delete: 'Usuń',
     },
+  },
+  photoViewer: {
+    close: 'Zamknij podgląd zdjęcia',
   },
   settings: {
     translations: {

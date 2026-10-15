@@ -164,6 +164,7 @@ export default {
       photosTake: 'Сделать фото',
       photosChoose: 'Выбрать из галереи',
       photosCover: 'Обложка',
+      photosSetCover: 'Сделать обложкой',
       photosRemove: 'Удалить фото',
       save: 'Сохранить',
       cancel: 'Отмена',
@@ -172,6 +173,9 @@ export default {
       deleteMessage: 'Метка и её описание будут удалены без возможности восстановления.',
       delete: 'Удалить',
     },
+  },
+  photoViewer: {
+    close: 'Закрыть просмотр фото',
   },
   settings: {
     translations: {
