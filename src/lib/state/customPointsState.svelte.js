@@ -1,9 +1,10 @@
 import { App } from '@capacitor/app';
 import { dataFilesDriver } from '@/capacitor/utils/appFiles';
-import { LIMITS } from '@/services/customPointsFormat';
+import { LIMITS, sanitizePhotos } from '@/services/customPointsFormat';
+import { deletePointPhotos, reconcilePhotos } from '@/services/customPointsPhotos';
 import { createCustomPointsStorage } from '@/services/customPointsStorage';
 import { createLogger, IS_DEBUG } from '@/utils/debugMode';
-import { createId } from '@/utils/uuid';
+import { createId, isId } from '@/utils/uuid';
 
 const customPointsStateLogger = createLogger('CustomPointsState');
 
@@ -23,6 +24,8 @@ const customPointsStateLogger = createLogger('CustomPointsState');
  *   - title       - article title
  *   - description - article text (plain text, NOT html)
  *   - preview     - preview image URL, empty string if there is none (local only: never exported)
+ *   - photos      - up to LIMITS.maxPhotos photo paths, the first one is the cover (local only: never exported).
+ *                   The files are managed by customPointsPhotos
  *   - createdAt   - unix time in ms
  *   - updatedAt   - unix time in ms, changes only when the title, the description or the coords change
  */
@@ -44,6 +47,27 @@ function clip(value, maxLength) {
   return typeof value === 'string' ? value.trim().slice(0, maxLength) : '';
 }
 
+/**
+ * The startup check of the photos (see reconcilePhotos). Not awaited by anyone: it must never delay the start.
+ */
+async function cleanUpPhotos() {
+  try {
+    const { pointsWithoutFolder } = await reconcilePhotos($state.snapshot(points));
+
+    // The photos are gone (e.g. a restored backup): do not keep paths that lead nowhere
+    for (const id of pointsWithoutFolder) {
+      const point = points.find((item) => item.id === id);
+
+      if (point) point.photos = [];
+    }
+
+    if (pointsWithoutFolder.length > 0) persist();
+  } catch (error) {
+    // Nothing is deleted or changed if the folder could not be listed
+    IS_DEBUG && customPointsStateLogger.error('Failed to check the photos:', error);
+  }
+}
+
 async function hydrate() {
   const { status, points: loaded } = await storage.load();
 
@@ -56,6 +80,9 @@ async function hydrate() {
   if (early.length > 0) persist();
 
   IS_DEBUG && customPointsStateLogger.log(`Hydrated: ${status}, ${loaded.length} points`);
+
+  // Only with the data loaded completely: with an empty or a partial list every folder would look like an orphan
+  if (status === 'ok') cleanUpPhotos();
 }
 
 export const customPointsState = {
@@ -80,18 +107,23 @@ export const customPointsState = {
 
   /**
    * Add a new point
-   * @param {Object} data - { coords: { lng, lat }, title, description, preview }
-   * @returns {Object} - Created point with generated id
+   * @param {Object} data - { coords: { lng, lat }, title, description, preview, photos, id }
+   *   `id` is optional: a form can create it when it opens, so the photos of a point that is not saved yet
+   *   already have a folder. An invalid or a used id is replaced with a new one.
+   *   `photos` are accepted only if they belong to the id of the point.
+   * @returns {Object} - Created point
    */
   add(data) {
     const now = Date.now();
+    const id = isId(data.id) && !points.some((point) => point.id === data.id) ? data.id : createId();
 
     const point = {
-      id: createId(),
+      id,
       coords: { lng: data.coords.lng, lat: data.coords.lat },
       title: clip(data.title, LIMITS.title),
       description: clip(data.description, LIMITS.description),
       preview: typeof data.preview === 'string' ? data.preview : '',
+      photos: sanitizePhotos(data.photos, id),
       createdAt: now,
       updatedAt: now,
     };
@@ -120,10 +152,10 @@ export const customPointsState = {
   },
 
   /**
-   * Update the editable data of a point (title, article text, preview).
+   * Update the editable data of a point (title, article text, preview, photos).
    * The id and coordinates are not changed.
    * @param {string} id - Point id
-   * @param {Object} data - { title, description, preview }, all fields are optional
+   * @param {Object} data - { title, description, preview, photos }, all fields are optional
    * @returns {Object|null} - Updated point or null if not found
    */
   update(id, data) {
@@ -153,9 +185,13 @@ export const customPointsState = {
       }
     }
 
-    // The preview is local only, it does not make the point "newer"
+    // The preview and the photos are local only, they do not make the point "newer"
     if (typeof data.preview === 'string') {
       point.preview = data.preview;
+    }
+
+    if (Array.isArray(data.photos)) {
+      point.photos = sanitizePhotos(data.photos, id);
     }
 
     if (isChanged) {
@@ -181,6 +217,11 @@ export const customPointsState = {
 
     points.splice(index, 1);
     persist();
+
+    // In the background: if the app is killed before it ends, the startup check removes the folder
+    deletePointPhotos(id).catch((error) => {
+      IS_DEBUG && customPointsStateLogger.error(`Failed to delete the photos of "${id}":`, error);
+    });
 
     IS_DEBUG && customPointsStateLogger.log(`Point "${id}" removed`);
   },

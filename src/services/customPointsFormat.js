@@ -14,11 +14,13 @@
  *   - checksum      - "crc32:<hex>" of the points array. Protects against a damaged file, NOT against a forged one
  *   - points        - array of points
  *
- * Point: { id, title, description, coords: { lng, lat }, preview, createdAt, updatedAt }
+ * Point: { id, title, description, coords: { lng, lat }, preview, photos, createdAt, updatedAt }
  *   - id is a UUID v4, points with the same id are the same point
  *   - createdAt / updatedAt are unix time in ms, updatedAt changes only when the shared data (title, description,
  *     coords) changes
- *   - preview is local only: it is stored on the device, but never exported and never imported
+ *   - preview and photos are local only: they are stored on the device, but never exported and never imported
+ *   - photos is a list of up to LIMITS.maxPhotos relative paths "photos/<point id>/<uuid>.<ext>", the first one is
+ *     the cover. Paths are checked strictly: a path of another point or with ".." is never accepted
  *
  * A file from the outside is untrusted input: everything is validated and rebuilt field by field,
  * unknown fields are dropped.
@@ -34,9 +36,14 @@ export const LIMITS = {
   title: 80,
   description: 10000,
   preview: 2048,
+  maxPhotos: 4,
   maxPoints: 5000, // import only
   maxFileChars: 10 * 1024 * 1024, // import only
 };
+
+// Photos live in the app data directory: photos/<point id>/<uuid>.<ext>
+export const PHOTOS_DIR = 'photos';
+export const PHOTO_EXTENSIONS = ['jpg', 'png', 'webp'];
 
 // An imported updatedAt further in the future than this is treated as "now" (a wrong clock must not win forever)
 const MAX_FUTURE_MS = 24 * 60 * 60 * 1000;
@@ -62,6 +69,55 @@ function toTimestamp(value) {
  */
 export function computeChecksum(points) {
   return `crc32:${crc32Hex(JSON.stringify(points))}`;
+}
+
+/**
+ * @param {string} pointId - Point id (a valid UUID)
+ * @param {string} photoId - Photo id (a UUID)
+ * @param {string} [extension] - One of PHOTO_EXTENSIONS
+ * @returns {string} - Relative path of the photo
+ */
+export function buildPhotoPath(pointId, photoId, extension = 'jpg') {
+  return `${PHOTOS_DIR}/${pointId}/${photoId}.${extension}`;
+}
+
+/**
+ * Strict check that a value is a photo path of this very point
+ * @param {string} pointId - Point id (a valid UUID)
+ * @param {*} value - Value to check
+ * @returns {boolean}
+ */
+export function isPhotoPathOf(pointId, value) {
+  const prefix = `${PHOTOS_DIR}/${pointId}/`;
+
+  if (typeof value !== 'string' || !value.startsWith(prefix)) return false;
+
+  const name = value.slice(prefix.length);
+  const dot = name.lastIndexOf('.');
+
+  // "<uuid>.<ext>": a UUID has 36 characters, so no slashes or ".." can get in
+  return dot === 36 && isId(name.slice(0, dot)) && PHOTO_EXTENSIONS.includes(name.slice(dot + 1));
+}
+
+/**
+ * @param {*} raw - Anything that came from a file
+ * @param {string} pointId - Point id (a valid UUID)
+ * @returns {Array<string>} - Valid, unique photo paths of this point, at most LIMITS.maxPhotos
+ */
+export function sanitizePhotos(raw, pointId) {
+  if (!Array.isArray(raw)) return [];
+
+  const photos = [];
+
+  for (const value of raw) {
+    if (photos.length >= LIMITS.maxPhotos) break;
+
+    if (isPhotoPathOf(pointId, value) && !photos.includes(value)) {
+      photos.push(value);
+    }
+  }
+
+  return photos;
 }
 
 /**
@@ -108,6 +164,7 @@ export function sanitizePoint(raw, { isImport = false, now = Date.now() } = {}) 
     description,
     coords: { lng, lat },
     preview: hasPreview ? raw.preview : '',
+    photos: isImport ? [] : sanitizePhotos(raw.photos, raw.id),
     createdAt,
     updatedAt,
   };
