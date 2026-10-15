@@ -2,7 +2,7 @@
   /**
    * A component with a dynamic router based on the article ID that opens a new screen.
    */
-  import { Popup, Page, Navbar, NavbarBackLink, Block, Link, Button } from "konsta/svelte";
+  import { Popup, Page, Navbar, NavbarBackLink, Block, Button } from "konsta/svelte";
 
   import { routerBack } from "@/services/navigationHistoryHook";
 
@@ -14,6 +14,7 @@
   import { goto } from "@mateothegreat/svelte5-router";
 
   import ArrowRightIcon from "@/lib/icons/ArrowRightIcon.svelte";
+  import PhotoThumb from "./CustomPoints/PhotoThumb.svelte";
 
   let { i18n } = $props();
 
@@ -38,6 +39,8 @@
 
     if (customPoint) {
       return {
+        photos: customPoint.photos[0] || null,
+        photoSource: "custom",
         title: customPoint.title,
         text: customPoint.description,
         isHtml: false,
@@ -50,6 +53,8 @@
     if (!meta) return null;
 
     return {
+      photos: meta.photos[0] || null,
+      photoSource: "asset",
       title: $i18n.t(`articles:${meta.id}:title`),
       text: $i18n.t(`articles:${meta.id}:description`),
       isHtml: true,
@@ -82,6 +87,14 @@
 
     {#if article}
       <Block class="pb-safe-4 text-base leading-relaxed">
+        {#if article.photos}
+          <PhotoThumb
+            path={article.photos}
+            source={article.photoSource}
+            class="h-60 w-full mb-6 rounded-2xl object-cover"
+          />
+        {/if}
+
         <h1 class="mb-4 text-bold text-2xl text-neutral-800 dark:text-neutral-300">
           {article.title}
         </h1>

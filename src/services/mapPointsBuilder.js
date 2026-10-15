@@ -628,7 +628,7 @@ export class MapPointsBuilder {
           properties: {
             id: item.id,
             title: title,
-            preview: item.assets?.preview || '', // Popup location previews
+            preview: item.photos[0] || '', // Popup location previews
           },
         };
       })

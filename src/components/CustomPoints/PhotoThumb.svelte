@@ -6,7 +6,7 @@
 
   import { getPhotoUrl } from "@/services/customPointsPhotos";
 
-  let { path, alt = "", class: className = "" } = $props();
+  let { path, alt = "", class: className = "", source = "custom" } = $props();
 
   let src = $state("");
 
@@ -14,6 +14,11 @@
     let isActual = true;
 
     src = "";
+
+    if (source === "asset") {
+      src = path;
+      return () => (isActual = false);
+    }
 
     getPhotoUrl(path)
       .then((url) => {
