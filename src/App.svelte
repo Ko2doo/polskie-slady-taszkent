@@ -9,6 +9,7 @@
 
   // Capacitor
   import { initBackButtonHandler } from "@/capacitor/backButton";
+  import { errorToast } from "@/store/ui/errorToast";
 
   // i18Next
   import { i18nStores } from "@/capacitor/services/i18n";
@@ -37,6 +38,7 @@
   import { resetTabbar, withTabbar } from "@/lib/state/bottomTabbarNav.svelte";
   import { navbarState } from "@/lib/state/navbar.svelte";
   import { panelState, closePanel } from "@/lib/state/panel.svelte";
+  import { customPointsState, initCustomPointsPersistence } from "@/lib/state/customPointsState.svelte";
 
   // App ready state
   let APP_READY = $state(false);
@@ -71,10 +73,23 @@
       });
   });
 
+  // Problems of the custom points storage (newer data, unreadable or damaged files, failed saves)
+  $effect(() => {
+    if (customPointsState.notices.length === 0) return;
+
+    customPointsState.takeNotices().forEach((code) => {
+      const message = $i18n.t(`errors:customPoints${code}`);
+
+      if (code === "StoreSaveFailed") errorToast.error(message);
+      else errorToast.warn(message);
+    });
+  });
+
   // On mount svelte initialization
   onMount(async () => {
     await initFirstLaunch(); // waiting Capacitor Preferences
     initBackButtonHandler();
+    initCustomPointsPersistence();
     APP_READY = true;
   });
 </script>

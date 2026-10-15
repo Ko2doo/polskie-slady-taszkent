@@ -17,6 +17,12 @@ export default {
   mapThemeFailed: 'Nie udało się zastosować motywu',
   mapPMTilesFetch: 'Nie udało się załadować mapy',
   customPointNearHistorical: 'Nie można utworzyć znacznika obok znacznika historycznego. Wybierz inne miejsce.',
+  customPointsStoreUnsupported:
+    'Znaczniki zostały zapisane przez nowszą wersję aplikacji. Zaktualizuj aplikację: zmiany nie zostaną zapisane.',
+  customPointsStoreUnreadable: 'Nie udało się odczytać zapisanych znaczników. Zmiany z tej sesji nie zostaną zapisane.',
+  customPointsStoreCorrupted:
+    'Plik ze znacznikami jest uszkodzony. Rozpoczęto nową listę, a kopia uszkodzonego pliku została zachowana.',
+  customPointsStoreSaveFailed: 'Nie udało się zapisać znaczników. Sprawdź wolne miejsce na urządzeniu.',
 
   // Capacitor geolocation API error
   OS_PLUG_GLOC_0002: 'Wystąpił błąd podczas próby uzyskania lokalizacji.',

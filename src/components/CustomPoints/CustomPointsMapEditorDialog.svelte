@@ -3,6 +3,7 @@
   import Close from "@/lib/icons/Close.svelte";
   import TrashBinIcon from "@/lib/icons/TrashBinIcon.svelte";
   import { errorToast } from "@/store/ui/errorToast";
+  import { LIMITS } from "@/services/customPointsFormat";
   import { createLogger, IS_DEBUG } from "@/utils/debugMode";
   import {
     Block,
@@ -45,6 +46,10 @@
       description = editingPoint.description;
     });
   });
+
+  // The input is blocked at the limit (maxlength), the counter turns red to show why
+  const isTitleLimitReached = $derived(title.length >= LIMITS.title);
+  const isDescriptionLimitReached = $derived(description.length >= LIMITS.description);
 
   const coordsLabel = $derived.by(() => {
     if (!coords) return "";
@@ -107,6 +112,21 @@
   }
 </script>
 
+<!-- Character counter under a field: Konsta shows `info` normally and `error` (red) when the limit is reached -->
+{#snippet counter(count, max)}
+  <span class="block text-right text-xs" aria-label={$i18n.t("ui:map:mapEditor:charCount", { count, max })}>
+    {count} / {max}
+  </span>
+{/snippet}
+
+{#snippet titleCounter()}
+  {@render counter(title.length, LIMITS.title)}
+{/snippet}
+
+{#snippet descriptionCounter()}
+  {@render counter(description.length, LIMITS.description)}
+{/snippet}
+
 <Sheet class="pb-safe" {opened}>
   <Toolbar top innerClass="w-full items-center" class="justify-end ios:pt-4">
     <div class="ios:hidden"></div>
@@ -141,6 +161,9 @@
         floatingLabel
         type="text"
         placeholder={$i18n.t("ui:map:mapEditor:titlePlaceholder")}
+        maxlength={LIMITS.title}
+        info={titleCounter}
+        error={isTitleLimitReached ? titleCounter : undefined}
         required
       />
       <ListInput
@@ -149,6 +172,9 @@
         floatingLabel
         type="textarea"
         placeholder={$i18n.t("ui:map:mapEditor:descriptionPlaceholder")}
+        maxlength={LIMITS.description}
+        info={descriptionCounter}
+        error={isDescriptionLimitReached ? descriptionCounter : undefined}
         required
       />
 

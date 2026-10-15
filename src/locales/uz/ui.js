@@ -157,6 +157,7 @@ export default {
       preview: 'Joy surati (kamera ochiladi)',
       description: 'Batafsil tavsif',
       descriptionPlaceholder: 'Tavsifni kiriting',
+      charCount: 'Simvollar: {{count}} / {{max}}',
       save: 'Saqlash',
       cancel: 'Bekor qilish',
       update: 'Yangilash',

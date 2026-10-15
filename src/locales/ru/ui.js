@@ -156,6 +156,7 @@ export default {
       preview: 'Фото локации (откроется камера)',
       description: 'Расширенное описание',
       descriptionPlaceholder: 'Введите описание',
+      charCount: 'Символов: {{count}} из {{max}}',
       save: 'Сохранить',
       cancel: 'Отмена',
       update: 'Обновить',

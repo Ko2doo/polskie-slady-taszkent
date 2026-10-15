@@ -17,6 +17,12 @@ export default {
   mapThemeFailed: 'Failed to apply theme',
   mapPMTilesFetch: 'Failed to load map',
   customPointNearHistorical: 'You cannot create a marker next to a historical marker. Choose another place.',
+  customPointsStoreUnsupported:
+    'Your markers were saved by a newer version of the app. Please update the app: changes will not be saved.',
+  customPointsStoreUnreadable: 'Could not read the saved markers. Changes made in this session will not be saved.',
+  customPointsStoreCorrupted:
+    'The markers file is damaged. A new list was started and a copy of the damaged file was kept.',
+  customPointsStoreSaveFailed: 'Could not save your markers. Please check the free space on your device.',
 
   // Capacitor geolocation API error
   OS_PLUG_GLOC_0002: 'There was en error trying to obtain the location.',

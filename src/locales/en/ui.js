@@ -156,6 +156,7 @@ export default {
       preview: 'Location photo (opens the camera)',
       description: 'Extended description',
       descriptionPlaceholder: 'Enter a description',
+      charCount: 'Characters: {{count}} of {{max}}',
       save: 'Save',
       cancel: 'Cancel',
       update: 'Update',

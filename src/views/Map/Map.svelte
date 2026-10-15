@@ -306,7 +306,9 @@
         styleVersion: theme.styleVersion,
       });
 
-      // The state outlives this component, so restore already created points
+      // The state outlives this component, so restore already created points (wait until they are loaded from the file)
+      await customPointsState.ready;
+
       customPointsState.points.forEach((point) => {
         customPointsBuilder.addPoint({
           id: point.id,

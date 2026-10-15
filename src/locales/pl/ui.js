@@ -155,6 +155,7 @@ export default {
       preview: 'Zdjęcie miejsca (otworzy się aparat)',
       description: 'Rozszerzony opis',
       descriptionPlaceholder: 'Wpisz opis',
+      charCount: 'Znaków: {{count}} z {{max}}',
       save: 'Zapisz',
       cancel: 'Anuluj',
       update: 'Zaktualizuj',
