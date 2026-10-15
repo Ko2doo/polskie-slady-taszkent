@@ -22,6 +22,10 @@ export default {
   customPointsStoreUnreadable: 'Не удалось прочитать сохранённые метки. Изменения в этом сеансе не будут сохранены.',
   customPointsStoreCorrupted: 'Файл с метками повреждён. Список начат заново, копия повреждённого файла сохранена.',
   customPointsStoreSaveFailed: 'Не удалось сохранить метки. Проверьте свободное место на устройстве.',
+  customPointsPhotoLimit: 'Можно добавить не более {{max}} фото.',
+  customPointsPhotoDenied: 'Нет доступа к камере или галерее. Разрешите его в настройках устройства.',
+  customPointsPhotoFailed: 'Не удалось добавить фото. Попробуйте ещё раз.',
+  customPointsDeleteFailed: 'Не удалось удалить метку. Попробуйте ещё раз.',
 
   // Capacitor geolocation API error
   OS_PLUG_GLOC_0002: 'Произошла ошибка при попытке получить местоположение.',

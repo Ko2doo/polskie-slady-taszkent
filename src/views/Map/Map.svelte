@@ -47,6 +47,7 @@
 
   // Map modules
   import { createMapPointsBuilder, createCustomPointsBuilder } from "./MapBuilder.svelte.js";
+  import { resolvePreview } from "./MapPreview.js";
   import { createNavigationController } from "./MapNavigation.svelte.js";
   import { createGPSNavigationController } from "./MapNavigationGPS.svelte.js";
   import { createThemeController } from "./MapTheme.svelte.js";
@@ -309,12 +310,16 @@
       // The state outlives this component, so restore already created points (wait until they are loaded from the file)
       await customPointsState.ready;
 
-      customPointsState.points.forEach((point) => {
+      // The previews (the first photo of a point) are resolved all at once, then the points are added
+      const savedPoints = [...customPointsState.points];
+      const previews = await Promise.all(savedPoints.map((point) => resolvePreview(point)));
+
+      savedPoints.forEach((point, index) => {
         customPointsBuilder.addPoint({
           id: point.id,
           coords: point.coords,
           title: point.title,
-          preview: point.preview,
+          preview: previews[index],
         });
       });
 
@@ -483,7 +488,7 @@
 
   /**
    * Save data from the map editor dialog: update the opened point or create a new one
-   * @param {Object} formData - { title, description }
+   * @param {Object} formData - { title, description, photos, pointId }
    * @returns {boolean} - true if the point was saved and rendered
    */
   function onCustomPointSave(formData) {
@@ -497,31 +502,44 @@
   }
 
   /**
+   * Show the first photo of a point in its map popup. It does not block the save: a url is resolved in the background.
+   * @param {Object} point - Custom point
+   */
+  async function refreshPreview(point) {
+    const preview = await resolvePreview(point);
+
+    // The map can be gone by now
+    if (customPointsBuilder) customPointsBuilder.updatePoint({ id: point.id, title: point.title, preview });
+  }
+
+  /**
    * Create a new custom point at the clicked coordinates
-   * @param {Object} formData - { title, description }
+   * @param {Object} formData - { title, description, photos, pointId }
    * @returns {boolean} - true if the point was saved and rendered
    */
   function createCustomPoint(formData) {
     if (!mapEditMode.coordinates) return false;
 
+    // The map goes first: if it rejects the point, nothing is saved and the photos of the form stay untouched.
+    // The id was created when the form opened, the photos of the point already live in the folder of that id
+    const renderedPoint = customPointsBuilder.addPoint({
+      id: formData.pointId,
+      coords: mapEditMode.coordinates,
+      title: formData.title,
+      preview: "",
+    });
+
+    if (!renderedPoint) return false;
+
     const point = customPointsState.add({
+      id: formData.pointId,
       coords: mapEditMode.coordinates,
       title: formData.title,
       description: formData.description,
+      photos: formData.photos,
     });
 
-    const renderedPoint = customPointsBuilder.addPoint({
-      id: point.id,
-      coords: point.coords,
-      title: point.title,
-      preview: point.preview,
-    });
-
-    // Roll back, otherwise the state would keep a point that is not on the map
-    if (!renderedPoint) {
-      customPointsState.remove(point.id);
-      return false;
-    }
+    refreshPreview(point);
 
     mapEditMode.closeModal();
     return true;
@@ -530,7 +548,7 @@
   /**
    * Update title and text of an existing custom point
    * @param {string} id - Custom point id
-   * @param {Object} formData - { title, description }
+   * @param {Object} formData - { title, description, photos }
    * @returns {boolean} - true if the point was updated
    */
   function updateCustomPoint(id, formData) {
@@ -539,10 +557,13 @@
 
     if (!renderedPoint) return false;
 
-    customPointsState.update(id, {
+    const point = customPointsState.update(id, {
       title: renderedPoint.title,
       description: formData.description,
+      photos: formData.photos,
     });
+
+    if (point) refreshPreview(point);
 
     mapEditMode.closeModal();
     return true;

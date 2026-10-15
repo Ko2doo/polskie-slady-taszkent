@@ -23,6 +23,10 @@ export default {
   customPointsStoreCorrupted:
     'The markers file is damaged. A new list was started and a copy of the damaged file was kept.',
   customPointsStoreSaveFailed: 'Could not save your markers. Please check the free space on your device.',
+  customPointsPhotoLimit: 'You can add no more than {{max}} photos.',
+  customPointsPhotoDenied: 'No access to the camera or the gallery. Please allow it in the device settings.',
+  customPointsPhotoFailed: 'Could not add the photo. Please try again.',
+  customPointsDeleteFailed: 'Could not delete the marker. Please try again.',
 
   // Capacitor geolocation API error
   OS_PLUG_GLOC_0002: 'There was en error trying to obtain the location.',

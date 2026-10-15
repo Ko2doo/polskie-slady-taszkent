@@ -9,7 +9,8 @@
  * Performance rules (the app also runs on weak phones):
  *   - A photo is copied by the native side. Its bytes never go through the JS bridge (no base64, no big strings).
  *     Base64 is only the fallback if the copy fails.
- *   - Nothing here decodes or resizes an image
+ *   - On a device nothing here decodes or resizes an image (the Camera plugin does it natively). Only the web
+ *     (development) resizes in JS, because the web version of the plugin can not
  *   - The startup check (reconcilePhotos) is ONE directory listing, no file is opened or measured
  *   - The base uri of the data directory is asked once, a display url is plain string work afterwards
  *   - On the web (development) a display url is a Blob url, kept in a cache until it is released
@@ -37,6 +38,7 @@ import {
   writeBinaryFile,
 } from '@/capacitor/utils/appFiles';
 import { createLogger, IS_DEBUG } from '@/utils/debugMode';
+import { downscaleImage } from '@/utils/imageResize';
 import { createId, isId } from '@/utils/uuid';
 import { PHOTOS_DIR, PHOTO_EXTENSIONS, buildPhotoPath, isPhotoPathOf } from './customPointsFormat';
 
@@ -108,8 +110,10 @@ async function saveOnDevice(pointId, path, source) {
   }
 }
 
-async function saveOnWeb(path, source) {
-  const blob = await readSourceBlob(source);
+async function saveOnWeb(path, source, resize) {
+  let blob = await readSourceBlob(source);
+
+  if (resize) blob = await downscaleImage(blob, resize);
 
   if ((await writeBinaryFile(path, blob)) === null) {
     throw new Error(`Failed to write "${path}"`);
@@ -123,10 +127,12 @@ async function saveOnWeb(path, source) {
  * @param {{ uri?: string, webPath?: string }} options.source - A photo as the Camera plugin returns it:
  *   `uri` is used on a device, `webPath` on the web (and as the fallback on a device)
  * @param {string} [options.extension] - One of PHOTO_EXTENSIONS
+ * @param {{ maxSide: number, quality: number }} [options.resize] - Web only: resize and compress to a JPEG
+ *   (on a device the Camera plugin has already done it)
  * @returns {Promise<string>} - Relative path of the saved photo
  * @throws if the photo could not be saved
  */
-export async function savePhoto({ pointId, source, extension = 'jpg' }) {
+export async function savePhoto({ pointId, source, extension = 'jpg', resize }) {
   if (!isId(pointId)) throw new Error('Invalid point id');
   if (!PHOTO_EXTENSIONS.includes(extension)) throw new Error(`Unsupported photo extension "${extension}"`);
 
@@ -137,7 +143,7 @@ export async function savePhoto({ pointId, source, extension = 'jpg' }) {
   if (Capacitor.isNativePlatform()) {
     await saveOnDevice(pointId, path, source);
   } else {
-    await saveOnWeb(path, source);
+    await saveOnWeb(path, source, resize);
   }
 
   IS_DEBUG && customPointsPhotosLogger.log(`Photo saved: ${path}`);

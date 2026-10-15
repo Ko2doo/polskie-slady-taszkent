@@ -6,15 +6,14 @@
  */
 
 import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
+import { ERROR_CODES } from '@/lib/errors/errorCodes';
 import { createLogger, IS_DEBUG } from '@/utils/debugMode';
 
 const capFilesLogger = createLogger('Files');
 
-// "Operation failed because file does not exist" (Android, iOS). The web implementation throws a plain Error.
-const FILE_NOT_FOUND_CODE = 'OS-PLUG-FILE-0008';
-
 function isNotFoundError(error) {
-  if (error && error.code === FILE_NOT_FOUND_CODE) return true;
+  // "Operation failed because file does not exist" (Android, iOS). The web implementation throws a plain Error.
+  if (error && error.code === ERROR_CODES.OS_PLUG_FILE_0008) return true;
 
   const message = error && typeof error.message === 'string' ? error.message : '';
 
@@ -121,8 +120,8 @@ export async function ensureDirectory(path, directory = Directory.Data) {
     return true;
   } catch (error) {
     // "Directory already exists" is exactly what we want. The wording differs: Android and iOS say
-    // "already exists, cannot be overwritten" (code OS-PLUG-FILE-0010), the web one says "does already exist"
-    if (error && error.code === 'OS-PLUG-FILE-0010') return true;
+    // "already exists, cannot be overwritten" (code OS_PLUG_FILE_0010), the web one says "does already exist"
+    if (error && error.code === ERROR_CODES.OS_PLUG_FILE_0010) return true;
     if (/already exist/i.test(error && typeof error.message === 'string' ? error.message : '')) return true;
 
     IS_DEBUG && capFilesLogger.error(`Filesystem.mkdir("${path}") failed:`, error);
