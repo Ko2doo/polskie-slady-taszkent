@@ -97,12 +97,12 @@
               photos={article.photos}
               source={article.photoSource}
               alt={article.title}
-              class="mb-6 h-60 w-full rounded-2xl object-cover"
+              class="h-60 w-full rounded-2xl object-cover"
             />
           {/key}
         {/if}
 
-        <h1 class="mb-4 text-bold text-2xl text-neutral-800 dark:text-neutral-300">
+        <h1 class="mb-4 mt-6 text-bold text-2xl text-neutral-800 dark:text-neutral-300">
           {article.title}
         </h1>
 

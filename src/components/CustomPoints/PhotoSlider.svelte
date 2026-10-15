@@ -7,15 +7,15 @@
    * (static assets) through PhotoThumb / source.
    */
 
-  import { Pagination } from 'swiper/modules';
-  import 'swiper/css';
-  import 'swiper/css/pagination';
+  import { Pagination } from "swiper/modules";
+  import "swiper/css";
+  import "swiper/css/pagination";
 
-  import PhotoThumb from './PhotoThumb.svelte';
-  import PhotoViewer from './PhotoViewer.svelte';
-  import { swiperInstance } from '@/utils/swiperAction';
+  import PhotoThumb from "./PhotoThumb.svelte";
+  import PhotoViewer from "./PhotoViewer.svelte";
+  import { swiperInstance } from "@/utils/swiperAction";
 
-  let { i18n, photos, source = 'custom', alt = '', class: className = '' } = $props();
+  let { i18n, photos, source = "custom", alt = "", class: className = "" } = $props();
 
   let dotsEl = $state(null);
 
@@ -46,7 +46,7 @@
         {#each photos as path, index (path)}
           <div class="swiper-slide">
             <button type="button" class="block size-full" onclick={() => openViewer(index)}>
-              <PhotoThumb {path} {source} {alt} class="size-full object-cover" />
+              <PhotoThumb {path} {source} {alt} class="size-full rounded-2xl object-cover" />
             </button>
           </div>
         {/each}
