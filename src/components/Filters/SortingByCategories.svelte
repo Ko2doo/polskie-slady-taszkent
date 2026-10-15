@@ -4,6 +4,9 @@
 
   // Safe Capacitor storage helpers (string in / string out)
   import { setStorage, getStorage } from "@/capacitor/utils/appStorage";
+  import { createLogger, IS_DEBUG } from "@/utils/debugMode";
+
+  const sortingByCategoriesLogger = createLogger("SortingByCategories");
 
   // Props (Svelte 5)
   let {
@@ -13,7 +16,6 @@
     i18nPrefix = "ui:sidePanel:handbook:filters:category", // i18n key prefix
     storageKey = "handbook.category", // Capacitor storage key for the single selected category
     onSelectedChange = null, // callback: (id: string) => void
-    // allId = "all", // special id meaning “show all categories”
   } = $props();
 
   // Local state
@@ -72,9 +74,9 @@
       const stored = typeof raw === "string" && raw ? raw : allId;
 
       applySelection(stored);
-      // saveIfChanged(stored);
     } catch (error) {
-      console.error(error);
+      // The stored selection could not be read: falls back to "all categories" (already applied above)
+      IS_DEBUG && sortingByCategoriesLogger.error("Failed to read the stored category:", error);
     }
   });
 

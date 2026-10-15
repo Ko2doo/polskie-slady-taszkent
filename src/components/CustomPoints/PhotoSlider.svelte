@@ -8,23 +8,23 @@
    */
 
   import { Pagination } from "swiper/modules";
-  import "swiper/css";
-  import "swiper/css/pagination";
 
   import PhotoThumb from "./PhotoThumb.svelte";
   import PhotoViewer from "./PhotoViewer.svelte";
+  import { createToggleOverlay } from "@/lib/state/createToggleOverlay";
   import { swiperInstance } from "@/utils/swiperAction";
 
   let { i18n, photos, source = "custom", alt = "", class: className = "" } = $props();
 
   let dotsEl = $state(null);
 
-  let viewerOpened = $state(false);
+  // Owns whether the viewer is open AND its overlay-stack registration (Android back closes it)
+  const viewer = createToggleOverlay();
   let viewerIndex = $state(0);
 
   function openViewer(index) {
     viewerIndex = index;
-    viewerOpened = true;
+    viewer.open();
   }
 </script>
 
@@ -63,5 +63,13 @@
 {/if}
 
 {#if photos.length > 0}
-  <PhotoViewer {i18n} {photos} {source} {alt} initialIndex={viewerIndex} bind:opened={viewerOpened} />
+  <PhotoViewer
+    {i18n}
+    {photos}
+    {source}
+    {alt}
+    initialIndex={viewerIndex}
+    opened={viewer.value}
+    onClose={() => viewer.close()}
+  />
 {/if}

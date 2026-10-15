@@ -22,7 +22,6 @@
  *   - `i18n` provides translation functions:
  *       - `i18n.title(item)`        -> string shown as marker/label title
  *       - `i18n.popupLink()`        -> string shown as popup link text
- *       - `i18n.popupGetOtherMaps()` -> string for external maps link
  *
  * Typical usage (inside a Map.svelte component):
  *
@@ -32,7 +31,6 @@
  *     .withI18n({
  *       title: (item) => i18n.t(`articles:${item.id}:title`),
  *       popupLink: () => i18n.t('ui:buttons:readMore'),
- *       popupGetOtherMaps: () => i18n.t('ui:buttons:popupGetOtherMaps'),
  *     })
  *     .withRouter((id) => goto(`/articles/${id}`))
  *     .withMarkers({
@@ -55,6 +53,7 @@
 import * as maplibreGL from 'maplibre-gl';
 import { createLogger, IS_DEBUG } from '@/utils/debugMode';
 import { getLayerVisibility, setLayersVisibility } from '@/utils/mapLayerVisibility';
+import { createPopupHTML } from './mapPopupHtml';
 
 const pointsBuilderLogger = createLogger('MapPointsBuilder');
 
@@ -70,7 +69,6 @@ export class MapPointsBuilder {
       i18n: {
         title: null,
         popupLink: null,
-        // popupGetOtherMaps: null,
       },
       styleVersion: 0,
       popupTrigger: () => {},
@@ -131,7 +129,6 @@ export class MapPointsBuilder {
    * @param {Object} i18n - Object with translation functions
    * @param {Function} i18n.title - Function to get feature title
    * @param {Function} i18n.popupLink - Function to get popup link text
-   * @param {Function} i18n.popupGetOtherMaps - Function to get external map link text
    * @returns {MapPointsBuilder}
    */
   withI18n(i18n) {
@@ -641,63 +638,15 @@ export class MapPointsBuilder {
   }
 
   /**
-   * HTML escape helper to prevent XSS
-   * @private
-   * @param {string} text - Text to escape
-   * @returns {string} - Escaped HTML
-   */
-  _escapeHtml(text) {
-    if (!text) return '';
-
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-  }
-
-  /**
    * Create popup HTML content
    * @private
    * @param {string} title - Feature title
    * @param {string} id - Feature ID
-   * @param {Array} coords - [lon, lat] coordinates
+   * @param {string} preview - Preview image URL
    * @returns {string} - HTML string
    */
   _createPopupHTML(title, id, preview) {
-    const popupLinkFn = this._config.i18n.popupLink;
-    // const popupGetOtherMapsFn = this._config.i18n.popupGetOtherMaps;
-
-    const popupLinkText = typeof popupLinkFn === 'function' ? popupLinkFn() : 'Read more';
-    // const popupGetOtherMaps = typeof popupGetOtherMapsFn === 'function' ? popupGetOtherMapsFn() : 'Open in Google Maps';
-
-    // const [lon, lat] = coords;
-    // const googleMapsCoords = [lat, lon]; // Google Maps uses lat,lon
-
-    const previewHTML = preview
-      ? `<img
-          src="${this._escapeHtml(preview)}"
-          alt="${this._escapeHtml(title)}"
-          class="map-popup-title w-full h-40 object-bottom object-top rounded-t-3xl"
-          loading="lazy">`
-      : '';
-
-    return `
-      <div class="map-popup-content flex flex-col">
-        ${previewHTML}
-
-        <div class="map-content-wrapper flex flex-col gap-2">
-          <p class="map-popup-title w-full text-gray-900 dark:text-gray-200 mb-2 text-[15px] font-medium sm:font-bold">
-            ${this._escapeHtml(title)}
-          </p>
-
-          <button
-            class="map-popup-title k-button text-center bg-primary active:bg-ios-primary-shade k-color-brand-blue rounded-full text-white dark:text-white pt-[4px] pb-[4px] pl-4 pr-4 cursor-pointer text-[16px]"
-            data-article-id="${this._escapeHtml(id)}">
-
-            ${this._escapeHtml(popupLinkText)}
-          </button>
-        </div>
-      </div>
-    `.trim();
+    return createPopupHTML({ title, id, preview, popupLinkFn: this._config.i18n.popupLink });
   }
 
   /**
@@ -725,14 +674,6 @@ export class MapPointsBuilder {
     const container = document.createElement('div');
     container.className = 'map-popup';
     container.innerHTML = this._createPopupHTML(title, id, preview);
-
-    // Attach close button handler
-    const closeBtn = container.querySelector('.map-popup-close');
-    if (closeBtn) {
-      closeBtn.addEventListener('click', () => {
-        popup.remove();
-      });
-    }
 
     const articlePopup = container.querySelector('button[data-article-id]');
     if (articlePopup) {

@@ -223,8 +223,13 @@ function createErrorToast() {
     kind: 'error', // 'error' | 'warn' | 'info'
     meta: null,
     queue: [],
-    recentMessages: new Map(),
   });
+
+  // Rate-limit bookkeeping: kept OUTSIDE the store on purpose. It has nothing to do with what is
+  // visible on screen, so touching it must not trigger a reactive update of the toast UI.
+  // Entries older than the rate-limit window are dropped on every check, so this never grows
+  // across the app's lifetime the way a Map that is only ever added to would.
+  let recentMessages = new Map();
 
   /**
    * Check if message is rate limited
@@ -235,30 +240,23 @@ function createErrorToast() {
   function isRateLimited(text, kind) {
     const key = `${kind}:${text}`;
     const now = Date.now();
-    let isLimited = false;
 
-    store.update((s) => {
-      const recent = s.recentMessages.get(key);
-
-      if (!recent) {
-        s.recentMessages.set(key, { count: 1, firstSeen: now });
-        return s;
+    for (const [recentKey, recentValue] of recentMessages) {
+      if (now - recentValue.firstSeen > RATE_LIMIT_WINDOW) {
+        recentMessages.delete(recentKey);
       }
+    }
 
-      // Reset if outside window
-      if (now - recent.firstSeen > RATE_LIMIT_WINDOW) {
-        s.recentMessages.set(key, { count: 1, firstSeen: now });
-        return s;
-      }
+    const recent = recentMessages.get(key);
 
-      // Increment count
-      recent.count++;
-      isLimited = recent.count > MAX_SAME_MESSAGE;
+    if (!recent) {
+      recentMessages.set(key, { count: 1, firstSeen: now });
+      return false;
+    }
 
-      return s;
-    });
+    recent.count++;
 
-    return isLimited;
+    return recent.count > MAX_SAME_MESSAGE;
   }
 
   /**
@@ -335,13 +333,14 @@ function createErrorToast() {
    * Clear all toasts including queue
    */
   function clear() {
+    recentMessages = new Map();
+
     store.set({
       opened: false,
       content: '',
       kind: 'error',
       meta: null,
       queue: [],
-      recentMessages: new Map(),
     });
   }
 

@@ -50,7 +50,9 @@ const protectedIds = new Set();
 // Folders already created in this session: one bridge call less for every next photo of a point
 const createdFolders = new Set();
 
-// Web only: display urls (path -> Promise<url|null>)
+// Web only: display urls. Several components can show the very same photo at once (a thumbnail
+// in the slider and, while it is open, the same photo inside the fullscreen viewer), so this is
+// reference-counted rather than released unconditionally: path -> { promise, refs }
 const webUrls = new Map();
 
 function folderOf(pointId) {
@@ -152,18 +154,23 @@ export async function savePhoto({ pointId, source, extension = 'jpg', resize }) 
 }
 
 /**
- * Release a display url (web only, it frees the memory of the Blob)
+ * Release one use of a display url (web only). Matches one earlier getPhotoUrl() call for the
+ * same path; the underlying Blob url is only revoked once every use has been released.
  * @param {string} path - Photo path
  */
 export async function releasePhotoUrl(path) {
-  const pending = webUrls.get(path);
+  const entry = webUrls.get(path);
 
-  if (!pending) return;
+  if (!entry) return;
+
+  entry.refs -= 1;
+
+  if (entry.refs > 0) return;
 
   webUrls.delete(path);
 
   try {
-    const url = await pending;
+    const url = await entry.promise;
 
     if (url) URL.revokeObjectURL(url);
   } catch {
@@ -282,13 +289,19 @@ export async function getPhotoUrl(path) {
     return Capacitor.convertFileSrc(`${await getDataDirectoryUri()}/${path}`);
   }
 
-  if (!webUrls.has(path)) {
-    const pending = readBinaryFile(path).then((data) => (data instanceof Blob ? URL.createObjectURL(data) : null));
+  let entry = webUrls.get(path);
+
+  if (!entry) {
+    const promise = readBinaryFile(path).then((data) => (data instanceof Blob ? URL.createObjectURL(data) : null));
+
+    entry = { promise, refs: 0 };
+    webUrls.set(path, entry);
 
     // Do not remember a failure or a missing file
-    pending.then((url) => url || webUrls.delete(path)).catch(() => webUrls.delete(path));
-    webUrls.set(path, pending);
+    promise.then((url) => url || webUrls.delete(path)).catch(() => webUrls.delete(path));
   }
 
-  return webUrls.get(path);
+  entry.refs += 1;
+
+  return entry.promise;
 }

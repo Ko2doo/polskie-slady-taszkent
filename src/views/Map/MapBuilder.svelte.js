@@ -38,7 +38,6 @@ export function createMapPointsBuilder({ map, data, i18n, popupTrigger, isPopupE
       .withI18n({
         title: (item) => i18n.t(`articles:${item.id}:title`),
         popupLink: () => i18n.t('ui:buttons:readMore'),
-        // popupGetOtherMaps: () => i18n.t('ui:buttons:popupGetOtherMaps'),
       })
 
       // SPA routing integration

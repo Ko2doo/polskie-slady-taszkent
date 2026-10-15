@@ -67,6 +67,7 @@
 import * as maplibreGL from 'maplibre-gl';
 import { createLogger, IS_DEBUG } from '@/utils/debugMode';
 import { getLayerVisibility, setLayersVisibility } from '@/utils/mapLayerVisibility';
+import { createPopupHTML } from './mapPopupHtml';
 
 const customPointsLogger = createLogger('CustomPointsBuilder');
 
@@ -694,21 +695,6 @@ export class CustomPointsBuilder {
   }
 
   /**
-   * HTML escape helper to prevent XSS
-   * (important here: the title is entered by the user)
-   * @private
-   * @param {string} text - Text to escape
-   * @returns {string} - Escaped HTML
-   */
-  _escapeHtml(text) {
-    if (!text) return '';
-
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-  }
-
-  /**
    * Create popup HTML content
    * @private
    * @param {string} title - Point title
@@ -717,35 +703,7 @@ export class CustomPointsBuilder {
    * @returns {string} - HTML string
    */
   _createPopupHTML(title, id, preview) {
-    const popupLinkFn = this._config.i18n.popupLink;
-    const popupLinkText = typeof popupLinkFn === 'function' ? popupLinkFn() : 'Read more';
-
-    const previewHTML = preview
-      ? `<img
-          src="${this._escapeHtml(preview)}"
-          alt="${this._escapeHtml(title)}"
-          class="map-popup-title w-full h-40 object-bottom object-top rounded-t-3xl"
-          loading="lazy">`
-      : '';
-
-    return `
-      <div class="map-popup-content flex flex-col">
-        ${previewHTML}
-
-        <div class="map-content-wrapper flex flex-col gap-2">
-          <p class="map-popup-title w-full text-gray-900 dark:text-gray-200 mb-2 text-[15px] font-medium sm:font-bold">
-            ${this._escapeHtml(title)}
-          </p>
-
-          <button
-            class="map-popup-title k-button text-center bg-primary active:bg-ios-primary-shade k-color-brand-blue rounded-full text-white dark:text-white pt-[4px] pb-[4px] pl-4 pr-4 cursor-pointer text-[16px]"
-            data-article-id="${this._escapeHtml(id)}">
-
-            ${this._escapeHtml(popupLinkText)}
-          </button>
-        </div>
-      </div>
-    `.trim();
+    return createPopupHTML({ title, id, preview, popupLinkFn: this._config.i18n.popupLink });
   }
 
   /**

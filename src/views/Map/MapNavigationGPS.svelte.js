@@ -522,8 +522,8 @@ export function createGPSNavigationController({ map, builder, i18n }) {
 
     IS_DEBUG && navigationGPSLogger.log('Arrived at destination!');
 
-    // TODO: Проверить, не дублируется ли вызов
-    // errorToast.info(i18n.t('ui:map:gps:arrived'), { scope: 'GPSNavigation' });
+    // No toast here: NavigationSheet already shows NavigationArrivalMsg (same "ui:map:gps:arrived"
+    // text) for as long as isArrived is true, a toast would just repeat it
   }
 
   function openDialog() {

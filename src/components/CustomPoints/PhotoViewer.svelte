@@ -4,48 +4,23 @@
    * Universal: works for custom points (photos resolved on-device) and historical articles
    * (static assets), see PhotoThumb / source.
    *
-   * Registers itself with the overlay stack while open, so the Android back button closes it
-   * (and only it, not whatever opened it) first.
+   * Purely presentational: whether it is open and the overlay-stack registration (so the
+   * Android back button closes it first) are owned by the caller, see createToggleOverlay
+   * in PhotoSlider. This component just renders `opened` and asks the caller to close.
    */
 
-  import { Pagination, Zoom } from 'swiper/modules';
-  import 'swiper/css';
-  import 'swiper/css/pagination';
-  import 'swiper/css/zoom';
+  import { Pagination, Zoom } from "swiper/modules";
 
-  import PhotoThumb from './PhotoThumb.svelte';
-  import Close from '@/lib/icons/Close.svelte';
-  import { portal } from '@/utils/portal';
-  import { useOverlay } from '@/services/useOverlay';
-  import { swiperInstance } from '@/utils/swiperAction';
+  import PhotoThumb from "./PhotoThumb.svelte";
+  import Close from "@/lib/icons/Close.svelte";
+  import { portal } from "@/utils/portal";
+  import { swiperInstance } from "@/utils/swiperAction";
 
-  let {
-    i18n,
-    photos,
-    source = 'custom',
-    alt = '',
-    initialIndex = 0,
-    opened = $bindable(false),
-  } = $props();
-
-  const { open: registerOverlay, close: unregisterOverlay } = useOverlay(() => {
-    opened = false;
-  });
+  let { i18n, photos, source = "custom", alt = "", initialIndex = 0, opened = false, onClose } = $props();
 
   // A real element, not a class-name selector: Swiper resolves a string selector against the
   // whole document, which would misbehave if more than one slider/viewer existed at once
   let dotsEl = $state(null);
-
-  // Driven by the prop rather than by the close button alone: the viewer can also be
-  // closed by whoever owns `opened` (e.g. a parent that unmounts it)
-  $effect(() => {
-    if (opened) registerOverlay();
-    else unregisterOverlay();
-  });
-
-  function close() {
-    opened = false;
-  }
 </script>
 
 {#if opened}
@@ -57,7 +32,7 @@
       class="absolute right-4 top-safe-4 z-10 flex size-10 items-center
              justify-center rounded-full bg-black/50 text-white"
       aria-label={$i18n.t("ui:photoViewer:close")}
-      onclick={close}
+      onclick={() => onClose?.()}
     >
       <Close className="size-5" />
     </button>

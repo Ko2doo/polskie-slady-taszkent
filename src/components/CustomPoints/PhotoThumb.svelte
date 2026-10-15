@@ -4,7 +4,7 @@
    * a grey placeholder is shown until it is ready.
    */
 
-  import { getPhotoUrl } from "@/services/customPointsPhotos";
+  import { getPhotoUrl, releasePhotoUrl } from "@/services/customPointsPhotos";
 
   let { path, alt = "", class: className = "", source = "custom" } = $props();
 
@@ -20,7 +20,13 @@
       return () => (isActual = false);
     }
 
-    getPhotoUrl(path)
+    // On the web, getPhotoUrl hands out a Blob url and counts this as one use of it; this
+    // effect's own path (captured here, not re-read from the prop) is released on cleanup -
+    // the same photo can be shown elsewhere at the same time (e.g. a thumbnail and, while open,
+    // the fullscreen viewer), so the url must survive until every such use is done with it
+    const ownPath = path;
+
+    getPhotoUrl(ownPath)
       .then((url) => {
         if (isActual) src = url || "";
       })
@@ -30,6 +36,7 @@
 
     return () => {
       isActual = false;
+      releasePhotoUrl(ownPath);
     };
   });
 </script>
