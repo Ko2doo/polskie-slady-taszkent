@@ -16,6 +16,15 @@ export default {
         },
       },
     },
+    map: {
+      title: 'Filtrlar',
+      filters: {
+        markersTitle: 'Xaritadagi belgilar',
+        all: 'Barchasi',
+        custom: 'Shaxsiy',
+        historical: 'Tarixiy',
+      },
+    },
   },
   navbar: {
     home: {
@@ -26,6 +35,7 @@ export default {
     },
     map: {
       title: 'Xarita',
+      editMode: 'Xaritani tahrirlash rejimi',
     },
     about: {
       title: 'Loyiha haqida',
@@ -132,6 +142,41 @@ export default {
       clear: 'Tozalash',
       footerInfo: "Yangi yo'nalish yaratish uchun yana bosing",
     },
+    userCustomPoints: {
+      message: 'Xaritani tahrirlash rejimiga xush kelibsiz!',
+      instruction:
+        'Bu rejimda xaritada o‘zingizning belgilaringizni yaratishingiz mumkin. Belgi qo‘shish uchun xaritani shunchaki bosing.',
+      dialogButton: 'Tushunarli',
+    },
+    mapEditor: {
+      coords: 'Koordinatalar: {{coords}}',
+      modalTitleCreate: 'Belgi yaratish',
+      modalTitleUpdates: "Ma'lumotlarni yangilash",
+      title: 'Joy nomi',
+      titlePlaceholder: 'Joy nomini kiriting',
+      preview: 'Joy surati (kamera ochiladi)',
+      description: 'Batafsil tavsif',
+      descriptionPlaceholder: 'Tavsifni kiriting',
+      charCount: 'Simvollar: {{count}} / {{max}}',
+      photosTitle: 'Suratlar',
+      photosHint: 'Ko‘pi bilan {{max}} ta surat. Birinchi surat belgining muqovasi bo‘ladi.',
+      photosCount: 'Suratlar: {{count}} / {{max}}',
+      photosAdd: 'Surat qo‘shish',
+      photosTake: 'Suratga olish',
+      photosChoose: 'Galereyadan tanlash',
+      photosCover: 'Muqova',
+      photosSetCover: 'Muqova sifatida belgilash',
+      photosRemove: 'Suratni o‘chirish',
+      save: 'Saqlash',
+      cancel: 'Bekor qilish',
+      update: 'Yangilash',
+      deleteTitle: 'Belgi o‘chirilsinmi?',
+      deleteMessage: 'Belgi va uning tavsifi butunlay o‘chiriladi.',
+      delete: 'O‘chirish',
+    },
+  },
+  photoViewer: {
+    close: 'Surat ko‘rishni yopish',
   },
   settings: {
     translations: {

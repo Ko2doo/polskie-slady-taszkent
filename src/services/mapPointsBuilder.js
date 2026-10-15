@@ -9,7 +9,10 @@
  *     - Creates symbol layers for icons and labels
  *     - Attaches click handlers and renders custom HTML popups
  *     - Integrates with SPA routing via callback (popupTrigger)
+ *     - Lets the app switch popups off (popup guard), e.g. while a navigation mode is active
  *     - Manages navigation routes (add/clear)
+ *     - Shows or hides all markers (the markers filter), the state survives a theme change
+ *     - Tells whether a screen position is close to a marker (also while the markers are hidden)
  *
  * Requirements:
  *   - `currentMap` must be an initialized MapLibre map instance
@@ -19,7 +22,6 @@
  *   - `i18n` provides translation functions:
  *       - `i18n.title(item)`        -> string shown as marker/label title
  *       - `i18n.popupLink()`        -> string shown as popup link text
- *       - `i18n.popupGetOtherMaps()` -> string for external maps link
  *
  * Typical usage (inside a Map.svelte component):
  *
@@ -29,7 +31,6 @@
  *     .withI18n({
  *       title: (item) => i18n.t(`articles:${item.id}:title`),
  *       popupLink: () => i18n.t('ui:buttons:readMore'),
- *       popupGetOtherMaps: () => i18n.t('ui:buttons:popupGetOtherMaps'),
  *     })
  *     .withRouter((id) => goto(`/articles/${id}`))
  *     .withMarkers({
@@ -51,6 +52,8 @@
 
 import * as maplibreGL from 'maplibre-gl';
 import { createLogger, IS_DEBUG } from '@/utils/debugMode';
+import { getLayerVisibility, setLayersVisibility } from '@/utils/mapLayerVisibility';
+import { createPopupHTML } from './mapPopupHtml';
 
 const pointsBuilderLogger = createLogger('MapPointsBuilder');
 
@@ -66,10 +69,10 @@ export class MapPointsBuilder {
       i18n: {
         title: null,
         popupLink: null,
-        // popupGetOtherMaps: null,
       },
       styleVersion: 0,
       popupTrigger: () => {},
+      isPopupEnabled: () => true,
       currentMap: null,
       markers: {
         render: false,
@@ -95,6 +98,7 @@ export class MapPointsBuilder {
     this._onMarkerClick = null;
     this._clickLayerId = null;
     this._iconImage = null;
+    this._isMarkersVisible = true;
     this._isBuilt = false;
   }
 
@@ -125,7 +129,6 @@ export class MapPointsBuilder {
    * @param {Object} i18n - Object with translation functions
    * @param {Function} i18n.title - Function to get feature title
    * @param {Function} i18n.popupLink - Function to get popup link text
-   * @param {Function} i18n.popupGetOtherMaps - Function to get external map link text
    * @returns {MapPointsBuilder}
    */
   withI18n(i18n) {
@@ -153,6 +156,19 @@ export class MapPointsBuilder {
   withPopup(popupTrigger) {
     if (typeof popupTrigger === 'function') {
       this._config.popupTrigger = popupTrigger;
+    }
+    return this;
+  }
+
+  /**
+   * Set the function that decides whether a marker click should open a popup
+   * (for example, popups must be disabled while a navigation mode is active)
+   * @param {Function} isPopupEnabled - Function returning true if the popup may be shown
+   * @returns {MapPointsBuilder}
+   */
+  withPopupGuard(isPopupEnabled) {
+    if (typeof isPopupEnabled === 'function') {
+      this._config.isPopupEnabled = isPopupEnabled;
     }
     return this;
   }
@@ -401,7 +417,10 @@ export class MapPointsBuilder {
           return;
         }
 
-        map.addLayer({ ...layer });
+        map.addLayer({
+          ...layer,
+          layout: { ...layer.layout, visibility: getLayerVisibility(this._isMarkersVisible) },
+        });
       });
 
       // Attach click handler for popups
@@ -427,6 +446,45 @@ export class MapPointsBuilder {
 
     // Trigger image loading
     this._iconImage.src = iconUrl;
+  }
+
+  /**
+   * Show or hide article markers (icons and labels).
+   * The value is kept and applied to the layers that are (re)added later, e.g. after a theme change.
+   * @param {boolean} isVisible - true to show, false to hide
+   */
+  setMarkersVisible(isVisible) {
+    this._isMarkersVisible = isVisible;
+
+    const map = this._config.currentMap;
+    if (!map) return;
+
+    const layerIds = this._config.markers.mapLayer.map((layer) => layer.id);
+    setLayersVisibility(map, layerIds, isVisible);
+
+    IS_DEBUG && pointsBuilderLogger.log(`Markers visibility set to ${isVisible}`);
+  }
+
+  /**
+   * Check whether a screen position is close to any marker.
+   * Works from the data and the map projection, so it also works while the markers are hidden
+   * (a hidden layer has no rendered features to query).
+   * @param {Object} screenPoint - { x, y } position in pixels, e.g. `e.point` of a MapLibre event
+   * @param {number} radius - Max distance to a marker in pixels (inclusive)
+   * @returns {boolean} - true if there is a marker within the radius
+   */
+  isMarkerNear(screenPoint, radius) {
+    const map = this._config.currentMap;
+    if (!map) return false;
+
+    return this._config.data.some((item) => {
+      const coordinates = this._transformCoords(item.coords);
+      if (!coordinates) return false;
+
+      const projected = map.project(coordinates);
+
+      return Math.hypot(projected.x - screenPoint.x, projected.y - screenPoint.y) <= radius;
+    });
   }
 
   /**
@@ -567,7 +625,7 @@ export class MapPointsBuilder {
           properties: {
             id: item.id,
             title: title,
-            preview: item.assets?.preview || '', // Popup location previews
+            preview: item.photos[0] || '', // Popup location previews
           },
         };
       })
@@ -580,63 +638,15 @@ export class MapPointsBuilder {
   }
 
   /**
-   * HTML escape helper to prevent XSS
-   * @private
-   * @param {string} text - Text to escape
-   * @returns {string} - Escaped HTML
-   */
-  _escapeHtml(text) {
-    if (!text) return '';
-
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-  }
-
-  /**
    * Create popup HTML content
    * @private
    * @param {string} title - Feature title
    * @param {string} id - Feature ID
-   * @param {Array} coords - [lon, lat] coordinates
+   * @param {string} preview - Preview image URL
    * @returns {string} - HTML string
    */
   _createPopupHTML(title, id, preview) {
-    const popupLinkFn = this._config.i18n.popupLink;
-    // const popupGetOtherMapsFn = this._config.i18n.popupGetOtherMaps;
-
-    const popupLinkText = typeof popupLinkFn === 'function' ? popupLinkFn() : 'Read more';
-    // const popupGetOtherMaps = typeof popupGetOtherMapsFn === 'function' ? popupGetOtherMapsFn() : 'Open in Google Maps';
-
-    // const [lon, lat] = coords;
-    // const googleMapsCoords = [lat, lon]; // Google Maps uses lat,lon
-
-    const previewHTML = preview
-      ? `<img
-          src="${this._escapeHtml(preview)}"
-          alt="${this._escapeHtml(title)}"
-          class="map-popup-title w-full h-40 object-bottom object-top rounded-t-3xl"
-          loading="lazy">`
-      : '';
-
-    return `
-      <div class="map-popup-content flex flex-col">
-        ${previewHTML}
-
-        <div class="map-content-wrapper flex flex-col gap-2">
-          <p class="map-popup-title w-full text-gray-900 dark:text-gray-200 mb-2 text-[15px] font-medium sm:font-bold">
-            ${this._escapeHtml(title)}
-          </p>
-
-          <button
-            class="map-popup-title k-button text-center bg-primary active:bg-ios-primary-shade k-color-brand-blue rounded-full text-white dark:text-white pt-[4px] pb-[4px] pl-4 pr-4 cursor-pointer text-[16px]"
-            data-article-id="${this._escapeHtml(id)}">
-
-            ${this._escapeHtml(popupLinkText)}
-          </button>
-        </div>
-      </div>
-    `.trim();
+    return createPopupHTML({ title, id, preview, popupLinkFn: this._config.i18n.popupLink });
   }
 
   /**
@@ -645,6 +655,9 @@ export class MapPointsBuilder {
    * @param {Object} e - MapLibre click event
    */
   _handleMarkerClick(e) {
+    // Popups are disabled, for example while a navigation mode is active
+    if (!this._config.isPopupEnabled()) return;
+
     if (!e?.features?.length) return;
 
     const feature = e.features[0];
@@ -661,14 +674,6 @@ export class MapPointsBuilder {
     const container = document.createElement('div');
     container.className = 'map-popup';
     container.innerHTML = this._createPopupHTML(title, id, preview);
-
-    // Attach close button handler
-    const closeBtn = container.querySelector('.map-popup-close');
-    if (closeBtn) {
-      closeBtn.addEventListener('click', () => {
-        popup.remove();
-      });
-    }
 
     const articlePopup = container.querySelector('button[data-article-id]');
     if (articlePopup) {

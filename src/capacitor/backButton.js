@@ -155,5 +155,6 @@ export function initBackButtonHandler() {
     // Second press within the active exit window -> minimize app.
     lastBackTime = 0;
     App.minimizeApp();
+    toastController.hide();
   });
 }

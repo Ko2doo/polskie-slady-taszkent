@@ -16,6 +16,17 @@ export default {
   mapInitFailed: 'Xarita ishga tushirilmadi',
   mapThemeFailed: "Mavzu qo'llanilmadi",
   mapPMTilesFetch: 'Xarita yuklanmadi',
+  customPointNearHistorical: 'Tarixiy belgi yonida belgi yaratib bo‘lmaydi. Boshqa joyni tanlang.',
+  customPointsStoreUnsupported:
+    'Belgilar ilovaning yangiroq versiyasida saqlangan. Ilovani yangilang: o‘zgarishlar saqlanmaydi.',
+  customPointsStoreUnreadable: 'Saqlangan belgilarni o‘qib bo‘lmadi. Ushbu seansdagi o‘zgarishlar saqlanmaydi.',
+  customPointsStoreCorrupted:
+    'Belgilar fayli shikastlangan. Yangi ro‘yxat boshlandi, shikastlangan fayl nusxasi saqlab qolindi.',
+  customPointsStoreSaveFailed: 'Belgilarni saqlab bo‘lmadi. Qurilmadagi bo‘sh joyni tekshiring.',
+  customPointsPhotoLimit: 'Ko‘pi bilan {{max}} ta surat qo‘shish mumkin.',
+  customPointsPhotoDenied: 'Kamera yoki galereyaga ruxsat yo‘q. Qurilma sozlamalarida ruxsat bering.',
+  customPointsPhotoFailed: 'Suratni qo‘shib bo‘lmadi. Qayta urinib ko‘ring.',
+  customPointsDeleteFailed: 'Belgini o‘chirib bo‘lmadi. Qayta urinib ko‘ring.',
 
   // Capacitor geolocation API error
   OS_PLUG_GLOC_0002: 'Joylashuvni olishga urinishda xatolik yuz berdi.',

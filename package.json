@@ -42,8 +42,10 @@
   "dependencies": {
     "@capacitor/android": "^8.5.2",
     "@capacitor/app": "^8.1.2",
+    "@capacitor/camera": "^8.2.5",
     "@capacitor/core": "^8.5.2",
     "@capacitor/device": "^8.0.3",
+    "@capacitor/filesystem": "^8.1.4",
     "@capacitor/geolocation": "^8.2.3",
     "@capacitor/ios": "^8.5.2",
     "@capacitor/preferences": "^8.0.1",
@@ -54,6 +56,7 @@
     "i18next": "^26.4.2",
     "konsta": "^5.5.0",
     "maplibre-gl": "^6.12.0",
-    "pmtiles": "^4.5.0"
+    "pmtiles": "^4.5.0",
+    "swiper": "^14.3.0"
   }
 }

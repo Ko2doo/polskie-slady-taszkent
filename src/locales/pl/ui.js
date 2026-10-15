@@ -16,6 +16,15 @@ export default {
         },
       },
     },
+    map: {
+      title: 'Filtry',
+      filters: {
+        markersTitle: 'Znaczniki na mapie',
+        all: 'Wszystkie',
+        custom: 'Własne',
+        historical: 'Historyczne',
+      },
+    },
   },
   navbar: {
     home: {
@@ -26,6 +35,7 @@ export default {
     },
     map: {
       title: 'Mapa',
+      editMode: 'Tryb edycji mapy',
     },
     about: {
       title: 'O projekcie',
@@ -131,6 +141,40 @@ export default {
       clear: 'Wyczyść',
       footerInfo: 'Dotknij ponownie, aby utworzyć nową trasę',
     },
+    userCustomPoints: {
+      message: 'Witamy w trybie edycji mapy!',
+      instruction: 'W tym trybie możesz dodawać własne znaczniki na mapie. Aby dodać znacznik, wystarczy kliknąć mapę.',
+      dialogButton: 'Rozumiem',
+    },
+    mapEditor: {
+      coords: 'Współrzędne: {{coords}}',
+      modalTitleCreate: 'Tworzenie znacznika',
+      modalTitleUpdates: 'Aktualizacja danych',
+      title: 'Nazwa miejsca',
+      titlePlaceholder: 'Wpisz nazwę miejsca',
+      preview: 'Zdjęcie miejsca (otworzy się aparat)',
+      description: 'Rozszerzony opis',
+      descriptionPlaceholder: 'Wpisz opis',
+      charCount: 'Znaków: {{count}} z {{max}}',
+      photosTitle: 'Zdjęcia',
+      photosHint: 'Do {{max}} zdjęć. Pierwsze zdjęcie zostanie okładką znacznika.',
+      photosCount: 'Zdjęć: {{count}} z {{max}}',
+      photosAdd: 'Dodaj zdjęcie',
+      photosTake: 'Zrób zdjęcie',
+      photosChoose: 'Wybierz z galerii',
+      photosCover: 'Okładka',
+      photosSetCover: 'Ustaw jako okładkę',
+      photosRemove: 'Usuń zdjęcie',
+      save: 'Zapisz',
+      cancel: 'Anuluj',
+      update: 'Zaktualizuj',
+      deleteTitle: 'Usunąć znacznik?',
+      deleteMessage: 'Znacznik i jego opis zostaną trwale usunięte.',
+      delete: 'Usuń',
+    },
+  },
+  photoViewer: {
+    close: 'Zamknij podgląd zdjęcia',
   },
   settings: {
     translations: {

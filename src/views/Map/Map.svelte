@@ -22,14 +22,15 @@
    * - MapLifecycle.svelte.js - Initialization and cleanup
    */
 
-  import { onMount, onDestroy } from "svelte";
-  import { Progressbar, Dialog, DialogButton, Link } from "konsta/svelte";
+  import { onMount, onDestroy, setContext } from "svelte";
+  import { Progressbar, Link } from "konsta/svelte";
   import RoutingNavigationIcon from "@/lib/icons/RoutingNavigationIcon.svelte";
   // import { goto } from "@mateothegreat/svelte5-router";
 
   // Navbar
   import { resolvePageKeyFromRouteResult } from "@/utils/routerUtils";
   import { patchNavbar, withNavbar } from "@/lib/state/navbar.svelte";
+  import { openPanel, patchPanel, withPanel } from "@/lib/state/panel.svelte";
 
   // Data
   import { articlesMeta } from "@/data/articles";
@@ -45,7 +46,8 @@
   import { articlePopupState } from "@/lib/state/article.svelte.js";
 
   // Map modules
-  import { createMapPointsBuilder } from "./MapBuilder.svelte.js";
+  import { createMapPointsBuilder, createCustomPointsBuilder } from "./MapBuilder.svelte.js";
+  import { resolvePreview } from "./MapPreview.js";
   import { createNavigationController } from "./MapNavigation.svelte.js";
   import { createGPSNavigationController } from "./MapNavigationGPS.svelte.js";
   import { createThemeController } from "./MapTheme.svelte.js";
@@ -56,9 +58,22 @@
     cleanupMap,
     resolveTargetCoords,
   } from "./MapLifecycle.svelte.js";
+  import { createEditModeController } from "./MapEditMode.svelte.js";
+  import { EDIT_MODE_CONFIG } from "./MapConstants.js";
   import { createMapLoadTracker } from "./MapLoadTracker.js";
 
   import { createLogger, IS_DEBUG } from "@/utils/debugMode.js";
+  import MapEditor from "@/lib/icons/MapEditor.svelte";
+  import FilterIcon from "@/lib/icons/FilterIcon.svelte";
+  import Close from "@/lib/icons/Close.svelte";
+  import { withTabbar } from "@/lib/state/bottomTabbarNav.svelte.js";
+  import CustomPointsDialog from "@/components/CustomPoints/CustomPointsDialog.svelte";
+  import NavigationControlDialog from "@/components/Navigation/NavigationControlDialog.svelte";
+  import { customPointsDialogState } from "@/lib/state/customPointsDialogState.svelte.js";
+  import { customPointsState } from "@/lib/state/customPointsState.svelte.js";
+  import { MARKER_FILTER, mapMarkerFilter } from "@/lib/state/mapMarkerFilter.svelte.js";
+  import MapMarkersFilter from "@/components/Filters/MapMarkersFilter.svelte";
+  import CustomPointsMapEditorDialog from "@/components/CustomPoints/CustomPointsMapEditorDialog.svelte";
 
   // Logger
   const mapLogger = createLogger("Map");
@@ -77,8 +92,10 @@
   let map = null;
   let protocol = null;
   let builder = null;
+  let customPointsBuilder = null; // User-created points
   let navigation = $state(null); // Point-to-point navigation
   let gpsNavigation = $state(null); // GPS navigation
+  let mapEditMode = $state(null);
   let theme = null;
 
   // Progressbar state
@@ -108,6 +125,79 @@
 
   // sheet toggler
   const sheetToggler = createToggle();
+  const userCustomPointsToggler = createToggle();
+  const userCustomDialogState = customPointsDialogState();
+
+  // Custom point opened in the map editor dialog for updating (null while a new point is being created)
+  const editingPoint = $derived(
+    mapEditMode && mapEditMode.editingPointId ? customPointsState.getById(mapEditMode.editingPointId) : null,
+  );
+
+  /**
+   * Marker popups (article markers and custom points) are disabled while the map editor mode
+   * or a navigation mode is active: a click on a marker must only be handled by that mode
+   */
+  function isPopupEnabled() {
+    return !userCustomPointsToggler.value && !activeNav;
+  }
+
+  // The markers filter is available only while custom points exist
+  const hasCustomPoints = $derived(customPointsState.points.length > 0);
+
+  // Markers filter applied to the map:
+  //  - the map editor mode always shows custom points only (the filter saved by the user stays untouched)
+  //  - without custom points there is nothing to filter
+  const markerFilter = $derived.by(() => {
+    if (userCustomPointsToggler.value) return MARKER_FILTER.CUSTOM;
+
+    if (!hasCustomPoints) return MARKER_FILTER.ALL;
+
+    return mapMarkerFilter.selected;
+  });
+
+  /**
+   * Push the applied markers filter to the builders.
+   * The builders keep the value for the layers that are (re)added later, e.g. after a theme change.
+   */
+  function syncMarkerFilter() {
+    // Read it first and unconditionally: while the builders do not exist yet the effect below would otherwise
+    // track nothing and would never run again
+    const filter = markerFilter;
+
+    if (builder) builder.setMarkersVisible(filter !== MARKER_FILTER.CUSTOM);
+
+    if (customPointsBuilder) customPointsBuilder.setVisible(filter !== MARKER_FILTER.HISTORICAL);
+  }
+
+  $effect(() => {
+    syncMarkerFilter();
+  });
+
+  /**
+   * Map editor mode click handler
+   * A click on an existing custom point opens it for updating, a click on an empty place starts a new point,
+   * a click on (or next to) an article marker is refused with a warning
+   * @param {Object} e - MapLibre click event
+   */
+  function handleEditModeClick(e) {
+    const pointId = customPointsBuilder ? customPointsBuilder.getPointIdAt(e.point) : null;
+    const point = pointId ? customPointsState.getById(pointId) : null;
+
+    if (point) {
+      mapEditMode.startEditing(point);
+      return;
+    }
+
+    // Article markers are hidden in the editor mode, so their places must be protected from accidental new points
+    if (builder && builder.isMarkerNear(e.point, EDIT_MODE_CONFIG.historicalMarkerGuardRadius)) {
+      IS_DEBUG && mapLogger.log("Click ignored: too close to a historical marker");
+
+      errorToast.warn($i18n.t("errors:customPointNearHistorical"));
+      return;
+    }
+
+    mapEditMode.handleMapClick(e);
+  }
 
   /**
    * Unified map click handler
@@ -131,6 +221,11 @@
         ready: navigation?.navigationReady,
       });
 
+    IS_DEBUG &&
+      mapLogger.log("Edit mode state:", {
+        exists: !!mapEditMode,
+      });
+
     // Check GPS mode first (priority)
     // GPS requires ready state because it needs permissions and tracker
     if (gpsNavigation && gpsNavigation.gpsMode && gpsNavigation.gpsReady) {
@@ -142,6 +237,11 @@
     // Point-to-Point doesn't need ready check - it initializes on first click
     if (navigation && navigation.navigationMode) {
       navigation.handleMapClick(e);
+      return;
+    }
+
+    if (userCustomPointsToggler.value) {
+      handleEditModeClick(e);
       return;
     }
 
@@ -194,8 +294,37 @@
         data: articlesMeta,
         i18n: $i18n,
         popupTrigger: (id) => articlePopupState.open(id),
+        isPopupEnabled,
         styleVersion: theme.styleVersion,
       });
+
+      // 5.1 Create CustomPointsBuilder (user-created points)
+      customPointsBuilder = createCustomPointsBuilder({
+        map,
+        i18n: $i18n,
+        popupTrigger: (id) => articlePopupState.open(id),
+        isPopupEnabled,
+        styleVersion: theme.styleVersion,
+      });
+
+      // The state outlives this component, so restore already created points (wait until they are loaded from the file)
+      await customPointsState.ready;
+
+      // The previews (the first photo of a point) are resolved all at once, then the points are added
+      const savedPoints = [...customPointsState.points];
+      const previews = await Promise.all(savedPoints.map((point) => resolvePreview(point)));
+
+      savedPoints.forEach((point, index) => {
+        customPointsBuilder.addPoint({
+          id: point.id,
+          coords: point.coords,
+          title: point.title,
+          preview: previews[index],
+        });
+      });
+
+      // The filter could be restored from the storage before the builders were created
+      syncMarkerFilter();
 
       // 6. Create Point-to-Point navigation controller
       navigation = createNavigationController({
@@ -215,16 +344,21 @@
       theme = createThemeController({
         map,
         builder,
+        customPointsBuilder,
         navigation,
         i18n: $i18n,
       });
       theme.init();
 
-      // 9. Setup map handlers when map loads
+      // 9. Create map editor controller
+      mapEditMode = createEditModeController();
+
+      // 10. Setup map handlers when map loads
       map.on("load", () => {
         setupMapHandlers({
           map,
           builder,
+          customPointsBuilder,
           navigation,
           targetCoords,
         });
@@ -245,18 +379,29 @@
     }
   });
 
-  // Navbar
+  // Navbar and Panel
   onMount(() => {
     const disposeNavbar = withNavbar({
       title: "",
-      leftSnippet: null, // right slot: (unused for now)
-      rightSnippet: NavigationSheetBtn, // left slot: open navigation modal button
+      leftSnippet: MarkersFilterBtn, // left slot: open markers filter panel button
+      rightSnippet: NavigationSheetBtn, // right slot: open navigation modal button
       subnavSnippet: null, // subnavbar: null
+    });
+
+    const disposePanel = withPanel({
+      title: "",
+      contentSnippet: PanelContent, // panel body content (markers filter)
+      side: "left", // open from the left
     });
 
     onDestroy(() => {
       disposeNavbar();
+      disposePanel();
     });
+  });
+
+  onMount(() => {
+    userCustomDialogState.hasSeen();
   });
 
   // ========================================
@@ -275,6 +420,7 @@
       map,
       protocol,
       builder,
+      customPointsBuilder,
       navigation,
       theme,
     });
@@ -288,29 +434,199 @@
     map = null;
     protocol = null;
     builder = null;
+    customPointsBuilder = null;
     navigation = null;
     gpsNavigation = null;
     theme = null;
+    mapEditMode = null;
   });
 
   // ========================================
-  // NAVBAR CONFIGURATION
+  // Effects
   // ========================================
 
   $effect(() => {
     const result = route?.result;
     const pageKey = resolvePageKeyFromRouteResult(result);
-    const title = pageKey ? $i18n.t(`ui:navbar:${pageKey}:title`) : "";
+    // const title = pageKey ? $i18n.t(`ui:navbar:${pageKey}:title`) : "";
 
-    patchNavbar({ title: title || pageKey });
+    const isCustomPointsMode = userCustomPointsToggler.value
+      ? $i18n.t(`ui:navbar:${pageKey}:editMode`)
+      : $i18n.t(`ui:navbar:${pageKey}:title`);
+
+    patchNavbar({ title: isCustomPointsMode || pageKey });
+    patchPanel({ title: $i18n.t("ui:sidePanel:map:title") });
   });
+
+  $effect(() => {
+    if (userCustomPointsToggler.value) {
+      withTabbar({
+        isVisible: false,
+        duration: 120,
+        delay: 40,
+      });
+    } else {
+      withTabbar({
+        isVisible: true,
+        duration: 120,
+        delay: 90,
+      });
+    }
+  });
+
+  async function customPointsDialogTrigger() {
+    userCustomPointsToggler.open();
+
+    const alreadySeen = await userCustomDialogState.hasSeen();
+    if (alreadySeen === false) userCustomDialogState.open();
+  }
+
+  async function onDialogConfirm() {
+    await userCustomDialogState.markCompleted();
+    userCustomDialogState.close();
+  }
+
+  /**
+   * Save data from the map editor dialog: update the opened point or create a new one
+   * @param {Object} formData - { title, description, photos, pointId }
+   * @returns {boolean} - true if the point was saved and rendered
+   */
+  function onCustomPointSave(formData) {
+    if (!customPointsBuilder || !mapEditMode) return false;
+
+    if (mapEditMode.editingPointId) {
+      return updateCustomPoint(mapEditMode.editingPointId, formData);
+    }
+
+    return createCustomPoint(formData);
+  }
+
+  /**
+   * Show the first photo of a point in its map popup. It does not block the save: a url is resolved in the background.
+   * @param {Object} point - Custom point
+   */
+  async function refreshPreview(point) {
+    const preview = await resolvePreview(point);
+
+    // The map can be gone by now
+    if (customPointsBuilder) customPointsBuilder.updatePoint({ id: point.id, title: point.title, preview });
+  }
+
+  /**
+   * Create a new custom point at the clicked coordinates
+   * @param {Object} formData - { title, description, photos, pointId }
+   * @returns {boolean} - true if the point was saved and rendered
+   */
+  function createCustomPoint(formData) {
+    if (!mapEditMode.coordinates) return false;
+
+    // The map goes first: if it rejects the point, nothing is saved and the photos of the form stay untouched.
+    // The id was created when the form opened, the photos of the point already live in the folder of that id
+    const renderedPoint = customPointsBuilder.addPoint({
+      id: formData.pointId,
+      coords: mapEditMode.coordinates,
+      title: formData.title,
+      preview: "",
+    });
+
+    if (!renderedPoint) return false;
+
+    const point = customPointsState.add({
+      id: formData.pointId,
+      coords: mapEditMode.coordinates,
+      title: formData.title,
+      description: formData.description,
+      photos: formData.photos,
+    });
+
+    refreshPreview(point);
+
+    mapEditMode.closeModal();
+    return true;
+  }
+
+  /**
+   * Update title and text of an existing custom point
+   * @param {string} id - Custom point id
+   * @param {Object} formData - { title, description, photos }
+   * @returns {boolean} - true if the point was updated
+   */
+  function updateCustomPoint(id, formData) {
+    // The builder validates the data first, so the state is not changed if the update is rejected
+    const renderedPoint = customPointsBuilder.updatePoint({ id, title: formData.title });
+
+    if (!renderedPoint) return false;
+
+    const point = customPointsState.update(id, {
+      title: renderedPoint.title,
+      description: formData.description,
+      photos: formData.photos,
+    });
+
+    if (point) refreshPreview(point);
+
+    mapEditMode.closeModal();
+    return true;
+  }
+
+  /**
+   * Delete the custom point opened in the map editor dialog
+   * @returns {boolean} - true if the point was deleted
+   */
+  function onCustomPointDelete() {
+    if (!customPointsBuilder || !mapEditMode) return false;
+
+    const id = mapEditMode.editingPointId;
+
+    if (!id) return false;
+
+    // Remove from the map first: if the builder does not know the point, the state stays untouched
+    const isRemoved = customPointsBuilder.removePoint(id);
+
+    if (!isRemoved) return false;
+
+    customPointsState.remove(id);
+
+    // Without custom points the filter button disappears, so the filter must not stay on a mode that hides markers
+    if (!hasCustomPoints) mapMarkerFilter.select(MARKER_FILTER.ALL);
+
+    mapEditMode.closeModal();
+    return true;
+  }
 </script>
 
-<!-- Navigation modal sheet button trigger -->
+<!-- Markers filter panel button trigger (only when custom points exist, hidden in the map editor mode) -->
+{#snippet MarkersFilterBtn()}
+  {#if hasCustomPoints && !userCustomPointsToggler.value}
+    <Link iconOnly onClick={() => openPanel()}>
+      <FilterIcon />
+    </Link>
+  {/if}
+{/snippet}
+
+{#snippet PanelContent()}
+  <MapMarkersFilter {i18n} />
+{/snippet}
+
+<!-- Navigation modal sheet button trigger and User custom points button trigger -->
 {#snippet NavigationSheetBtn()}
-  <Link iconOnly onClick={sheetToggler.open}>
-    <RoutingNavigationIcon />
-  </Link>
+  {#if userCustomPointsToggler.value}
+    <Link iconOnly onClick={userCustomPointsToggler.close}>
+      <Close />
+    </Link>
+  {:else if !userCustomPointsToggler.value && sheetToggler.value}
+    <Link iconOnly onClick={sheetToggler.open}>
+      <RoutingNavigationIcon />
+    </Link>
+  {:else if !userCustomPointsToggler.value}
+    <Link iconOnly onClick={customPointsDialogTrigger}>
+      <MapEditor />
+    </Link>
+
+    <Link iconOnly onClick={sheetToggler.open}>
+      <RoutingNavigationIcon />
+    </Link>
+  {/if}
 {/snippet}
 
 <section class="map-section">
@@ -355,23 +671,30 @@
     />
   {/if}
 
+  {#if mapEditMode}
+    <CustomPointsMapEditorDialog
+      {i18n}
+      coords={mapEditMode.coordinates}
+      opened={mapEditMode.modalDialogState}
+      {editingPoint}
+      onCloseModal={mapEditMode.closeModal}
+      onSave={onCustomPointSave}
+      onDelete={onCustomPointDelete}
+    />
+  {/if}
+
+  {#if userCustomDialogState.triggerValue}
+    <CustomPointsDialog {i18n} openedDialog={userCustomDialogState.triggerValue} onConfirm={onDialogConfirm} />
+  {/if}
+
   <!-- Navigation control Dialog -->
   {#if activeNav}
-    <Dialog opened={activeNav.dialogState}>
-      {#snippet title()}
-        {$i18n.t("ui:dialog:map:newRoute:title")}
-      {/snippet}
-
-      {#snippet buttons()}
-        <DialogButton strong onClick={activeNav.closeDialog}>
-          {$i18n.t("ui:dialog:map:newRoute:no")}
-        </DialogButton>
-
-        <DialogButton onClick={activeNav.confirmNewDestination}>
-          {$i18n.t("ui:dialog:map:newRoute:yes")}
-        </DialogButton>
-      {/snippet}
-    </Dialog>
+    <NavigationControlDialog
+      {i18n}
+      openedDialog={activeNav.dialogState}
+      closeDialog={activeNav.closeDialog}
+      confirmDialog={activeNav.confirmNewDestination}
+    />
   {/if}
 </section>
 

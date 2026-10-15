@@ -108,6 +108,58 @@ export const MARKER_CONFIG = {
 };
 
 /**
+ * Configuration for user-created points (CustomPointsBuilder)
+ * Same layer structure as MARKER_CONFIG, the ids from mapLayer are also used for click handling.
+ */
+export const CUSTOM_POINTS_CONFIG = {
+  sourceName: 'custom-points-source',
+  defaultIconName: 'default',
+  icons: [{ name: 'default', url: '/map/icons/gpsIcon.png' }],
+
+  mapLayer: [
+    {
+      id: 'custom-points-layer',
+      type: 'symbol',
+      source: 'custom-points-source',
+      layout: {
+        'icon-image': ['get', 'icon'],
+        'icon-size': 0.38,
+        'icon-allow-overlap': true,
+      },
+    },
+    {
+      id: 'custom-points-labels-layer',
+      type: 'symbol',
+      source: 'custom-points-source',
+      minzoom: 12.5,
+      layout: {
+        'text-field': ['get', 'title'],
+        'text-size': 12,
+        'text-offset': [0, 1.2],
+        'text-anchor': 'top',
+        'text-allow-overlap': false,
+        'icon-optional': true,
+      },
+      paint: {
+        'text-color': '#111111',
+        'text-halo-color': '#ffffff',
+        'text-halo-width': 1.5,
+      },
+    },
+  ],
+};
+
+/**
+ * Configuration for the map editor mode
+ *
+ * Article markers are hidden in this mode, so a new point is not allowed closer than `historicalMarkerGuardRadius`
+ * (in screen pixels) to an article marker. It is about the size of the marker icon plus the finger inaccuracy.
+ */
+export const EDIT_MODE_CONFIG = {
+  historicalMarkerGuardRadius: 40,
+};
+
+/**
  * CSS styles for navigation markers
  */
 export const MARKER_STYLE = {

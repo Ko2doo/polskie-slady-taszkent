@@ -16,6 +16,15 @@ export default {
         },
       },
     },
+    map: {
+      title: 'Filters',
+      filters: {
+        markersTitle: 'Markers on the map',
+        all: 'All',
+        custom: 'Custom',
+        historical: 'Historical',
+      },
+    },
   },
   navbar: {
     home: {
@@ -26,6 +35,7 @@ export default {
     },
     map: {
       title: 'Map',
+      editMode: 'Map Editing Mode',
     },
     about: {
       title: 'About the project',
@@ -131,6 +141,41 @@ export default {
       clear: 'Clear',
       footerInfo: 'Tap again to build a new route',
     },
+    userCustomPoints: {
+      message: 'Welcome to Map Editing Mode!',
+      instruction:
+        'In this mode, you can create your own markers on the map. To add a marker, simply click on the map.',
+      dialogButton: 'Go it',
+    },
+    mapEditor: {
+      coords: 'Coordinates: {{coords}}',
+      modalTitleCreate: 'Create marker',
+      modalTitleUpdates: 'Update data',
+      title: 'Location name',
+      titlePlaceholder: 'Enter the location name',
+      preview: 'Location photo (opens the camera)',
+      description: 'Extended description',
+      descriptionPlaceholder: 'Enter a description',
+      charCount: 'Characters: {{count}} of {{max}}',
+      photosTitle: 'Photos',
+      photosHint: 'Up to {{max}} photos. The first photo becomes the cover of the marker.',
+      photosCount: 'Photos: {{count}} of {{max}}',
+      photosAdd: 'Add photo',
+      photosTake: 'Take a photo',
+      photosChoose: 'Choose from gallery',
+      photosCover: 'Cover',
+      photosSetCover: 'Set as cover',
+      photosRemove: 'Remove photo',
+      save: 'Save',
+      cancel: 'Cancel',
+      update: 'Update',
+      deleteTitle: 'Delete marker?',
+      deleteMessage: 'The marker and its description will be permanently deleted.',
+      delete: 'Delete',
+    },
+  },
+  photoViewer: {
+    close: 'Close photo viewer',
   },
   settings: {
     translations: {

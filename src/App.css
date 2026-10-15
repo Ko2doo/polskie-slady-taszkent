@@ -29,5 +29,10 @@
 /* MapLibre Map */
 @import 'maplibre-gl/dist/maplibre-gl.css';
 
+/* Swiper (photo slider / fullscreen viewer) */
+@import 'swiper/css';
+@import 'swiper/css/pagination';
+@import 'swiper/css/zoom';
+
 /* My rules */
 @import './assets/styles/typography.css';

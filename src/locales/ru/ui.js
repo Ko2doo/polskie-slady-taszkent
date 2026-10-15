@@ -16,6 +16,15 @@ export default {
         },
       },
     },
+    map: {
+      title: 'Фильтры',
+      filters: {
+        markersTitle: 'Метки на карте',
+        all: 'Все',
+        custom: 'Пользовательские',
+        historical: 'Исторические',
+      },
+    },
   },
   navbar: {
     home: {
@@ -26,6 +35,7 @@ export default {
     },
     map: {
       title: 'Карта',
+      editMode: 'Режим редактирования карты',
     },
     about: {
       title: 'О проекте',
@@ -131,6 +141,41 @@ export default {
       clear: 'Очистить',
       footerInfo: 'Нажмите снова, чтобы построить новый маршрут',
     },
+    userCustomPoints: {
+      message: 'Добро пожаловать в режим редактирования карты!',
+      instruction:
+        'В этом режиме вы можете создавать собственные метки на карте. Чтобы добавить метку просто кликните на карту.',
+      dialogButton: 'Понятно',
+    },
+    mapEditor: {
+      coords: 'Координаты: {{coords}}',
+      modalTitleCreate: 'Создание метки',
+      modalTitleUpdates: 'Обновить данные',
+      title: 'Название локации',
+      titlePlaceholder: 'Введите название локации',
+      preview: 'Фото локации (откроется камера)',
+      description: 'Расширенное описание',
+      descriptionPlaceholder: 'Введите описание',
+      charCount: 'Символов: {{count}} из {{max}}',
+      photosTitle: 'Фотографии',
+      photosHint: 'До {{max}} фото. Первое фото станет обложкой метки.',
+      photosCount: 'Фото: {{count}} из {{max}}',
+      photosAdd: 'Добавить фото',
+      photosTake: 'Сделать фото',
+      photosChoose: 'Выбрать из галереи',
+      photosCover: 'Обложка',
+      photosSetCover: 'Сделать обложкой',
+      photosRemove: 'Удалить фото',
+      save: 'Сохранить',
+      cancel: 'Отмена',
+      update: 'Обновить',
+      deleteTitle: 'Удалить метку?',
+      deleteMessage: 'Метка и её описание будут удалены без возможности восстановления.',
+      delete: 'Удалить',
+    },
+  },
+  photoViewer: {
+    close: 'Закрыть просмотр фото',
   },
   settings: {
     translations: {

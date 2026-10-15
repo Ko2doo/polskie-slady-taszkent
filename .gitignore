@@ -35,3 +35,4 @@ appstore/metadata/review_information/
 *.njsproj
 *.sln
 *.sw?
+*.patch

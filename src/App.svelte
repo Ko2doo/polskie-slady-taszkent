@@ -9,6 +9,7 @@
 
   // Capacitor
   import { initBackButtonHandler } from "@/capacitor/backButton";
+  import { errorToast } from "@/store/ui/errorToast";
 
   // i18Next
   import { i18nStores } from "@/capacitor/services/i18n";
@@ -34,9 +35,10 @@
   import { initFirstLaunch, APP_FIRST_LAUNCH_STORAGE_VAL, markFirstLaunchCompleted } from "@/store/appStartInitialize";
 
   // States import
-  import { bottomTabbarState, resetTabbar } from "@/lib/state/bottomTabbarNav.svelte";
+  import { resetTabbar, withTabbar } from "@/lib/state/bottomTabbarNav.svelte";
   import { navbarState } from "@/lib/state/navbar.svelte";
   import { panelState, closePanel } from "@/lib/state/panel.svelte";
+  import { customPointsState, initCustomPointsPersistence } from "@/lib/state/customPointsState.svelte";
 
   // App ready state
   let APP_READY = $state(false);
@@ -63,13 +65,31 @@
   }
 
   $effect(() => {
-    if (APP_READY) resetTabbar();
+    if (APP_READY)
+      withTabbar({
+        isVisible: true,
+        duration: 400,
+        delay: 350,
+      });
+  });
+
+  // Problems of the custom points storage (newer data, unreadable or damaged files, failed saves)
+  $effect(() => {
+    if (customPointsState.notices.length === 0) return;
+
+    customPointsState.takeNotices().forEach((code) => {
+      const message = $i18n.t(`errors:customPoints${code}`);
+
+      if (code === "StoreSaveFailed") errorToast.error(message);
+      else errorToast.warn(message);
+    });
   });
 
   // On mount svelte initialization
   onMount(async () => {
     await initFirstLaunch(); // waiting Capacitor Preferences
     initBackButtonHandler();
+    initCustomPointsPersistence();
     APP_READY = true;
   });
 </script>
@@ -172,10 +192,8 @@
         <!-- Error toast init -->
         <ErrorHandlerToast {i18n} />
 
-        {#if bottomTabbarState.isVisible}
-          <!-- Fixed bottom navigation -->
-          <BottomTabbarNav {i18n} duration={bottomTabbarState.duration} delay={bottomTabbarState.delay} />
-        {/if}
+        <!-- Fixed bottom navigation -->
+        <BottomTabbarNav {i18n} />
       </div>
     </Page>
   </App>
