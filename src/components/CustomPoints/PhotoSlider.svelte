@@ -39,8 +39,15 @@
     <div bind:this={dotsEl} class="order-2 mt-2 flex justify-center"></div>
 
     <div
-      use:swiperInstance={{ modules: [Pagination], pagination: dotsEl ? { el: dotsEl, clickable: true } : false }}
-      class="order-1 {className}"
+      use:swiperInstance={{
+        modules: [Pagination],
+        slidesPerView: 1,
+        slidesPerGroup: 1,
+        spaceBetween: 0,
+        centeredSlides: false,
+        pagination: dotsEl ? { el: dotsEl, clickable: true } : false,
+      }}
+      class="swiper order-1 {className}"
     >
       <div class="swiper-wrapper">
         {#each photos as path, index (path)}
