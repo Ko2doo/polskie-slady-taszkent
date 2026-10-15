@@ -1,5 +1,40 @@
 # Changelog
 
+## v1.2.0-rc.1 — 2026-10-15
+
+### 🆕 Updates
+- Update release script
+- Part 11
+- Part 10
+- Part 10
+- user point icon up
+- Part 9
+- Part 8
+- Deleted old file
+- Part 7
+- Part 6
+- Part 5
+- Part 4
+- Part 3.
+- Sync iOS platform with Capacitor 8.5.3 from master.
+- Removed duplicate App Store screenshots, unified naming.
+- 2026-10-14: Part 2
+- 2026-10-14: Custom points starting
+- New component
+
+### 🐛 Fixes
+- Slides fixed
+- fixes
+- preview fixes
+
+### 📝 Other Changes
+- Merge branch 'features'
+- Add custom map markers with photos, slider, and code cleanup
+- Merge pull request #23 from Ko2doo/feature/ios-appstore
+- FEAT:2026-07-13:: Add dark mode splash screen images for iOS.
+- FEAT:2026-06-30:: Add Capacitor iOS platform and App Store submission tooling.
+- DOC:2026-06-21:: Add privacy policy for App Store submission.
+
 ## v1.1.2-rc.3 — 2026-10-08
 
 ### 🐛 Fixes
