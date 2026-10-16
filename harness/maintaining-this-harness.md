@@ -43,19 +43,21 @@ module plus supporting state/components, not just one new file in an existing ar
 4. If it introduces a new top-level directory or meaningfully changes what goes where,
    update the directory-layout section and the "deciding where a new file goes" list in
    `harness/architecture.md` too — those must stay a complete, accurate map of `src/`, not
-   just a map of the subsystems that happened to get written up.
+   just a map of the subsystems that happened to get written up. The same goes for the repo
+   root: a new top-level directory, config file, or script gets an entry in
+   `harness/repository-layout.md` in the change that adds it.
 
 A smaller addition (a new component in an existing feature area, a new method on an
 existing service) does **not** need a new file — update the existing relevant
-`harness/*.md` file's content directly, in the same patch as the code change. Documentation
+`harness/*.md` file's content directly, in the same change as the code. Documentation
 drift (code that changed but the harness still describing the old shape) is exactly the
 failure mode this file exists to prevent — treat an out-of-date harness file as a bug in
-the patch, not a follow-up.
+the change, not a follow-up.
 
 ## Keeping `architecture.md` itself honest
 
 `harness/architecture.md`'s directory-layout section and "deciding where a new file goes"
 list are meant to describe **100% of `src/`**, not just the parts covered by a subsystem
-deep-dive. If a patch adds a new top-level directory, a new kind of file, or changes what
-belongs where, update `architecture.md` in that same patch — don't let it only reflect
+deep-dive. If a change adds a new top-level directory, a new kind of file, or changes what
+belongs where, update `architecture.md` in that same change — don't let it only reflect
 whichever features happened to get a dedicated subsystem file.

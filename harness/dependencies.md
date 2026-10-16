@@ -48,9 +48,14 @@ yes.** This applies even to a tiny, obviously-safe-looking package. The flow:
    **short reason** — what it's for, why writing it directly isn't reasonable, and why this
    one over alternatives if more than one was considered. Then wait for an explicit
    **yes / no / later** answer before writing any code that imports it.
-   - **Yes** → add it to `package.json` and the lockfile as part of the feature's patch, and
-     continue the feature.
-   - **No** → go back to writing it directly, or drop that part of the feature and say so.
+   - **Yes** → install it yourself (`npm i <pkg>@<version>`, or `npm i -D` for dev-only
+     tooling) — that updates `package.json` and the lockfile — and continue the feature.
+     For this project this overrides the global "don't touch `package.json`, don't run
+     installs" rule from the user's `~/.claude/CLAUDE.md`; it applies only after an
+     explicit yes for that specific package.
+   - **No** → don't install anything; keep going — write it directly or drop that part of
+     the feature and say so — and **at the end of the step**, list what you'd still
+     recommend installing (package, version, one-line reason).
    - **Later** → park that part of the feature clearly and keep going on whatever doesn't
      depend on it.
 5. Once approved, keep the footprint minimal: import only the specific modules/submodules

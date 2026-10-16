@@ -15,12 +15,68 @@
   function's inputs/outputs around the *job*, not around today's one call site — but it
   doesn't mean adding parameters or branches for jobs nothing actually needs yet (that's
   YAGNI again).
+  **Extensible when it's actually needed:** when a new call site needs the same job done
+  slightly differently, extend the existing function instead of writing a near-copy — an
+  optional parameter (or options-object field) whose default keeps the old behavior, so
+  every existing caller works unchanged. `customPointsState.add()` growing an optional `id`
+  is the reference case (see `harness/svelte-rules.md`). Once the "extension" would make it
+  a *different* job (a mode flag switching between two behaviors), it's a new function
+  instead. A function that was extended gets a test for the new parameter **and** keeps
+  its existing tests green — that's the proof the old behavior didn't move.
 - **Reuse what's in `lib/state/` and `utils/` before writing something new.** A needed
   toggle, overlay, or formatting helper may already exist and just not be wired up yet.
 - **No dead code left "just in case".** A commented-out block, an unused export, an unused
   import, a file nothing imports — remove it in the same change that makes it dead, not
   "later." Exception: a commented-out `console.log`/`console.error` left for local debugging
   is fine to leave if genuinely useful, but don't add new ones as part of shipped code.
+
+## Readability and splitting into modules
+
+- **Code must read easily for a human.** Someone opening a file for the first time should
+  follow it top to bottom without decoding it. That means: descriptive names over short
+  ones, early returns over deep nesting, plain loops/conditions over clever one-liners
+  (chained ternaries, dense `reduce`s, bit tricks without a comment), and one level of
+  abstraction per function — a function either coordinates steps or does one step, not
+  both. If a piece of code needs a long comment to be understood, first try to make the
+  code itself simpler; keep the comment for the *why* that code can't express.
+- **Split into modules/submodules where it makes the code easier to read.** A file or
+  component that mixes several independent concerns gets split by concern — the way
+  `views/Map/` is split into `MapLifecycle`, `MapTheme`, `MapNavigation`, `MapEditMode`
+  and so on instead of one giant `Map.svelte`. A long function gets broken into named
+  helpers. Don't split for the sake of it: a 30-line module that does one thing is fine
+  as is, and a split that forces the reader to jump across five files to follow one flow
+  made things worse, not better.
+- **Builder classes are the exception** (`services/mapPointsBuilder.js`,
+  `services/customPointsBuilder.js`, and any future builder of that kind). They stay
+  whole: their methods share the builder's internal state and its fluent
+  `.withX(...).build()` chain, and splitting them into separate files only scatters that.
+  From a builder, extract **only what is (or would be) repeated across builders of the same
+  kind** into a shared module — the way `services/mapPopupHtml.js` holds
+  `escapeHtml`/`createPopupHTML` that both map builders need. Logic specific to one builder
+  stays inside it, even if it's long — and stays readable by the rules above (named private
+  methods, clear sections, a class-level JSDoc example per the JSDoc rule below).
+
+## No magic numbers (or magic strings)
+
+A bare literal whose meaning isn't obvious from the line itself — a timeout, a limit, a
+distance, a size, a storage key, an event name — gets a named constant:
+
+- `UPPER_SNAKE_CASE`, declared at the top of the module, with the unit in the name or a
+  short comment: `RECALC_THROTTLE_MS = 10000`, `MAX_ROUTE_DISTANCE = 50000; // meters`,
+  `const THEME_KEY = 'ui.theme'`. A derived value shows its derivation:
+  `MAX_FUTURE_MS = 24 * 60 * 60 * 1000`, not `86400000`.
+- Where it lives depends on who uses it: one module → top of that module; one screen →
+  that screen's constants file (`views/Map/MapConstants.js`); a domain limit several modules
+  rely on → exported from the module that owns the rule (`LIMITS`/`SCHEMA_VERSION` in
+  `customPointsFormat.js`). Never define the same number twice in two places.
+- Native-plugin error codes are their own case: `lib/errors/errorCodes.js` only (see
+  `harness/architecture.md`).
+- Not magic, leave inline: `0`, `1`, `-1`, `2` for halving/pairs, array indexes, `100` in
+  a percentage conversion, and values whose meaning the code right next to them already
+  states (`padStart(2, '0')`, `toString(16)`). Also fine inline: CSS values in `<style>`/
+  Tailwind classes, and literal inputs/expectations in tests (a test reads better with
+  `1280` than with an imported constant — except when the test is *about* the constant's
+  limit, then import it so the test follows the rule if it changes).
 
 ## Logging
 
