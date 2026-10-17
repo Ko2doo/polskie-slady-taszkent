@@ -27,9 +27,13 @@ Everything in `harness/` is imported below and loaded as part of this file.
 
 ## The rules that override everything else
 
-1. **All work happens on the `features` branch. Never `master`.** There is no per-feature
-   branch — everything lands on `features`, one step at a time. If `features` isn't the
-   current branch, switch to it (or ask) before doing anything.
+1. **Work on `features` or on a contributor branch made from it. Never `master`.** An admin
+   (the lead developer) works on `features` directly, one step at a time. Anyone else works
+   on their own `feature/<name>` / `fix/<name>` branch made from `features` and opens a PR
+   into `features` — they can't push to `features`. Never start work on `master`; if the
+   current branch is `master`, or is `features` for someone who isn't an admin, stop and say
+   so, giving the human the command to switch or to create their branch — the agent itself
+   never creates or switches branches, and never pushes. See `harness/git-workflow.md`.
 2. **No patches, no commits: write changes straight into the working tree.** The human
    reviews with `git diff` and commits themselves. Never run `git commit`, never `git push`,
    never run a release/publish script. New features, tests, extensions and refactoring —

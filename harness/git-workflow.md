@@ -1,11 +1,22 @@
 # Git workflow
 
-## One branch, changes straight into the working tree
+## Which branch, changes straight into the working tree
 
-- **All work happens on the `features` branch.** There is no per-feature sub-branch
-  (`features/<name>`) — that earlier scheme is retired. Confirm you're on `features`
-  (not `master`) before starting; if the repo is on `master`, switch to `features` or ask,
-  don't start work on `master`.
+- **Work on `features`, or on a contributor branch made from it — never on `master`.**
+  Which one depends on who the human is:
+  - **An admin** (the lead developer) works on `features` itself and pushes it directly.
+  - **Anyone else** — a maintainer without admin rights, an outside contributor — works on
+    their own `feature/<short-name>` / `fix/<short-name>` branch made from `features`, and
+    opens a PR into `features` (the ruleset blocks their direct pushes to `features`). With
+    write access the branch lives in this repository; without it, in their fork.
+    `CONTRIBUTING.md` → "Opening a pull request" has both, command by command.
+
+  Check the current branch before starting. On `master` — stop. On `features` while the
+  human says they aren't an admin (or that they can't push / need a PR) — stop and give them
+  the command to create their branch (`git checkout -b feature/<name> origin/features`, or
+  `upstream/features` from a fork). When unsure who the human is, ask once. The agent never
+  creates or switches branches, or pushes, itself — it says which command to run. The old
+  `features/<name>` sub-branch scheme is retired; contributor branches are `feature/`/`fix/`.
 - **No patch files.** The agent writes code, tests and harness changes directly into the
   working tree. The human reviews with `git diff` / `git status` and commits when they
   decide to. Nothing is lost by this: the agent never commits, so every change stays
@@ -29,11 +40,12 @@
   checked out to release from. After tagging, `features` is fast-forwarded to `master`, so
   the two never diverge.
 - **`features`** — integration branch. **Admins push to it directly** (this is the lead
-  developer's day-to-day flow, and the agent's working branch). **Everyone else** creates
-  their own branch from `features` (`feature/<short-name>`, `fix/<short-name>`), pushes
-  it, and opens a PR **into `features`** — which must pass CI. When an admin opens a PR
+  developer's day-to-day flow, and the agent's working branch when working with an admin).
+  **Everyone else** creates their own branch from `features` (`feature/<short-name>`,
+  `fix/<short-name>`), pushes it, and opens a PR **into `features`** — which must pass CI. When an admin opens a PR
   (instead of pushing directly), it must pass CI too.
-- The agent never pushes or opens PRs; it works on `features` locally (see above).
+- The agent never pushes or opens PRs; it works on the branch the human is on (see above)
+  and, when asked, explains the PR steps from `CONTRIBUTING.md` → "Opening a pull request".
 - The GitHub-side setup that enforces this is in `CONTRIBUTING.md` → "Repository setup";
   if the branch model changes, update that section, this one, and the CI triggers in
   `.github/workflows/ci.yml` together.
@@ -58,7 +70,8 @@
   - `git commit` — the human commits.
   - `git push` (to any branch, any remote).
   - Run a release/publish/deploy script, or anything that tags and ships a version.
-  - Create a new branch, merge a branch, or touch `master` at all.
+  - Create, switch to or merge a branch, or touch `master` at all — it gives the human the
+    command instead (see "Which branch" above).
   - Force-push or rewrite history.
 
 ## Merge gate (pull requests, and every step the agent reports as done)

@@ -70,7 +70,8 @@ place.
   (`bottomTabbarNav.svelte.test.js`).
   Two tests are about the harness itself: `src/architectureTree.test.js` checks the `src/`
   tree in `harness/architecture.md` against the real directories, `src/repositoryTree.test.js`
-  checks the repo-root tree in `harness/repository-layout.md` against `git ls-files`. Both
+  checks the repo-root tree in `harness/repository-layout.md` against the working tree minus
+  git-ignored files (so a temporary file left in the root fails it too). Both
   read the trees through `src/test/harnessTree.js` (`readTreeBlock`, `parseTree`).
 - `vitest.config.js` merges `vite.config.js`, so tests get the same `@` alias, Svelte plugin
   and `__APP_VERSION__`/`__APP_NAME__` globals as the app. It also adds the `browser`

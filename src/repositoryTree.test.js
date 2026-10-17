@@ -1,11 +1,17 @@
 import { describe, it, expect } from 'vitest';
 import { execFileSync } from 'node:child_process';
+import { existsSync } from 'node:fs';
 import { parseTree, readTreeBlock } from '@/test/harnessTree';
 
 // harness/repository-layout.md describes the repo root as a tree; this keeps that tree from
-// silently going stale. It compares against git, not the disk, so ignored local folders
-// (node_modules/, dist/, coverage/) don't count.
-const trackedFiles = execFileSync('git', ['ls-files', '-z'], { encoding: 'utf8' }).split('\0').filter(Boolean);
+// silently going stale. It asks git for the working tree minus ignored files: ignored local
+// folders (node_modules/, dist/, coverage/) don't count, but a new file counts before it is
+// committed — the tree is updated in the same change that adds it.
+const trackedFiles = execFileSync('git', ['ls-files', '-z', '--cached', '--others', '--exclude-standard'], {
+  encoding: 'utf8',
+})
+  .split('\0')
+  .filter((path) => path && existsSync(path));
 
 /**
  * The names directly inside `dir` ('' for the root) among tracked files.
@@ -58,7 +64,7 @@ describe('the repo root tree in harness/repository-layout.md', () => {
     }
   });
 
-  it('lists only files that are tracked', () => {
+  it('lists only files that exist (and are not ignored)', () => {
     const listedFiles = entries.filter((entry) => !entry.isDirectory).map((entry) => entry.path);
 
     expect(listedFiles.filter((path) => !trackedFiles.includes(path))).toEqual([]);

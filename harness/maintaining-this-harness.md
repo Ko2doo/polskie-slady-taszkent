@@ -70,6 +70,7 @@ of its own, a bullet under "Rules per directory". Don't add individual files ins
 directories to the tree — that's what the prose and the subsystem files are for.
 
 The repo root works the same way: the tree at the top of `harness/repository-layout.md` lists
-every tracked root entry, and `src/repositoryTree.test.js` checks it against `git ls-files` —
-a new root file or directory (or a new subdirectory of one the tree expands) needs its line
+every root entry git doesn't ignore, and `src/repositoryTree.test.js` checks it against the
+working tree (`git ls-files --cached --others --exclude-standard`) — a new root file or
+directory, committed or not, (or a new subdirectory of one the tree expands) needs its line
 there, plus a prose entry further down that file if it has rules of its own.
