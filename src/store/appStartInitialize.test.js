@@ -62,6 +62,18 @@ describe('initFirstLaunch', () => {
   });
 });
 
+// BUG-1: a stored value other than true/false/null (e.g. written by another version) leaves the
+// state null, so the onboarding is never shown (see BUGS.md). Remove `.fails` once fixed.
+describe('an unexpected stored value', () => {
+  it.fails('shows the onboarding', async () => {
+    await Preferences.set({ key: KEY, value: '"yes"' });
+
+    await firstLaunch.initFirstLaunch();
+
+    expect(showWizard()).toBe(true);
+  });
+});
+
 describe('markFirstLaunchCompleted', () => {
   it('hides the onboarding and remembers it for the next launch', async () => {
     await firstLaunch.initFirstLaunch();

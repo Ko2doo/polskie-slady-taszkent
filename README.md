@@ -56,6 +56,27 @@ Core technologies used in the project:
 - **PMTiles + Protomaps** -- offline vector map tiles
 - **i18next** -- internationalization
 
+## How this project is developed
+
+Since **v1.2.0-rc.1** the repository carries an **agent harness**: `CLAUDE.md` plus the
+`harness/` folder describe the architecture, the rules of the code base (state, styling,
+i18n, performance, dependencies), the testing and non-regression rules and the git
+workflow — written for an AI coding agent as much as for a human contributor. Together with
+it came a full test suite and **strict pull-request rules**: `master` only changes through a
+PR from `features`, and every PR must pass CI (the whole suite and a clean build).
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the rules and the release flow.
+
+From that release on, new features — and most changes after them — are written mainly
+through **harness engineering**: an AI agent (Claude Code) works inside these rules, and the
+maintainer reviews every diff, tests it on devices, commits and releases. There are two
+reasons for this: the maintainer has little free time for the project, and it is a
+deliberate experiment with a new way of programming — AI-assisted, agent-driven development,
+where the human's job shifts toward defining the rules, the architecture and the checks, and
+reviewing the result.
+
+What doesn't change: every change still has to keep the whole test suite green and the build
+clean, and nothing reaches the app stores without a human review.
+
 ---
 
 # Installation
