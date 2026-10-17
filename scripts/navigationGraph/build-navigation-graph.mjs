@@ -39,6 +39,20 @@ function getOrCreateNode(lon, lat) {
   return nodeId;
 }
 
+// Дороги, где oneway относится и к пешеходу (тротуар/дорожка задаёт направление сама)
+const FOOT_WAYS = new Set(['footway', 'path', 'steps', 'pedestrian']);
+
+// В OSM oneway=yes на проезжей части ограничивает транспорт, а не пешехода: пешеход идёт в обе
+// стороны, если нет oneway:foot. Возвращает 'both' | 'forward' (по линии) | 'backward' (против)
+function pedestrianDirection(properties = {}) {
+  const footTag = properties['oneway:foot'];
+  const tag = footTag ?? (FOOT_WAYS.has(properties.highway) ? properties.oneway : undefined);
+
+  if (tag === 'yes' || tag === '1' || tag === 'true') return 'forward';
+  if (tag === '-1' || tag === 'reverse') return 'backward';
+  return 'both';
+}
+
 // Функция расчёта расстояния (Haversine formula)
 function distance(lon1, lat1, lon2, lat2) {
   const R = 6371000; // Радиус Земли в метрах
@@ -67,8 +81,8 @@ geojson.features.forEach((feature, index) => {
   const coords = feature.geometry.coordinates;
   const highway = feature.properties?.highway || 'unknown';
 
-  // Определяем двунаправленность (по умолчанию да для пешеходов)
-  const oneway = feature.properties?.oneway === 'yes' ? true : false;
+  // Направление для пешехода (по умолчанию в обе стороны)
+  const direction = pedestrianDirection(feature.properties);
 
   // Создаём узлы и рёбра для каждого сегмента
   for (let i = 0; i < coords.length - 1; i++) {
@@ -80,16 +94,18 @@ geojson.features.forEach((feature, index) => {
 
     const dist = distance(lon1, lat1, lon2, lat2);
 
-    // Добавляем ребро
-    graph.edges.push({
-      from: fromNode,
-      to: toNode,
-      distance: Math.round(dist * 10) / 10, // Округляем до 0.1м
-      type: highway,
-    });
+    // Ребро по направлению линии
+    if (direction !== 'backward') {
+      graph.edges.push({
+        from: fromNode,
+        to: toNode,
+        distance: Math.round(dist * 10) / 10, // Округляем до 0.1м
+        type: highway,
+      });
+    }
 
-    // Если не односторонняя - добавляем обратное ребро
-    if (!oneway) {
+    // Обратное ребро
+    if (direction !== 'forward') {
       graph.edges.push({
         from: toNode,
         to: fromNode,

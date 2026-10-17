@@ -5,8 +5,10 @@
   // Use permission service
   import { requestLocationPermission, openAppSettings } from "@/capacitor/services/locationPermission";
   import { errorToast } from "@/store/ui/errorToast";
+  import { ERROR_CODES } from "@/lib/errors/errorCodes";
 
   import { createToggle } from "@/lib/state/createToggler.svelte";
+  import { hideTabbar } from "@/lib/state/bottomTabbarNav.svelte";
   import LangSwitcher from "@/components/LangSwitcher.svelte";
   import DarkModeToggler from "@/components/DarkModeToggler.svelte";
 
@@ -21,6 +23,11 @@
 
   // Toggler
   const welcomeDialogToggler = createToggle();
+
+  // No tab bar under the wizard; it comes back as soon as the wizard closes
+  $effect(() => {
+    if (welcomeDialogToggler.value) return hideTabbar({ duration: 120, delay: 40 });
+  });
 
   let activeStep = $state(1);
 
@@ -48,9 +55,9 @@
           IS_DEBUG && onboardingLogger.log("Location permission denied");
 
           // Show toast with "Open Settings" action button
-          errorToast.error($i18n.t("errors:OS_PLUG_GLOC_0003"), {
+          errorToast.error($i18n.t(`errors:${ERROR_CODES.OS_PLUG_GLOC_0003}`), {
             scope: "WelcomeDialog",
-            code: "OS_PLUG_GLOC_0003",
+            code: ERROR_CODES.OS_PLUG_GLOC_0003,
             action: {
               type: "openSettings",
               label: $i18n.t("ui:buttons:openSettings"),
@@ -68,7 +75,7 @@
           IS_DEBUG && onboardingLogger.error("Location permission error:", err);
 
           // Ignore web platform error - not relevant for onboarding in dev mode
-          if (err.code === "WEB_PLATFORM_NOT_SUPPORTED") {
+          if (err.code === ERROR_CODES.WEB_PLATFORM_NOT_SUPPORTED) {
             IS_DEBUG && onboardingLogger.log("Web platform detected, skipping permission request");
             // Don't show error, just complete onboarding
             completeOnboarding();
@@ -76,7 +83,7 @@
           }
 
           // Show error via toast with action button for permission errors
-          const isPermissionError = err.code === "OS_PLUG_GLOC_0003";
+          const isPermissionError = err.code === ERROR_CODES.OS_PLUG_GLOC_0003;
 
           errorToast.error($i18n.t(`errors:${err.code}`), {
             scope: "WelcomeDialog",
@@ -99,7 +106,7 @@
       IS_DEBUG && onboardingLogger.error("Failed to request location permission:", error);
 
       // Show generic error
-      errorToast.error("Failed to request location permission", {
+      errorToast.error($i18n.t("errors:locationPermissionRequestFailed"), {
         scope: "WelcomeDialog",
       });
     } finally {
@@ -115,7 +122,7 @@
     } catch (error) {
       IS_DEBUG && onboardingLogger.error("Failed to complete onboarding:", error);
 
-      errorToast.error("Failed to save settings. Please try again.", {
+      errorToast.error($i18n.t("errors:settingsSaveFailed"), {
         scope: "WelcomeDialog",
       });
     }
@@ -155,7 +162,7 @@
         {#if activeStep === 1}
           <div class="mt-6 space-y-4" in:fly={{ duration: 120, x: 20 }}>
             <div class="flex flex-col items-center text-center space-y-2">
-              <img src={appLogo} alt="App logotype" class="w-[120px] h-[120px] mb-6" />
+              <img src={appLogo} alt={$i18n.t("ui:dialog:onboarding:logoAlt")} class="w-[120px] h-[120px] mb-6" />
               <h3 class="text-lg font-semibold">
                 {$i18n.t("ui:dialog:onboarding:welcomeDialog")}
               </h3>

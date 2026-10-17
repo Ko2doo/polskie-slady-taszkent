@@ -3,8 +3,6 @@
   import { fly } from "svelte/transition";
 
   import { withNavbar } from "@/lib/state/navbar.svelte";
-  import { withTabbar } from "@/lib/state/bottomTabbarNav.svelte";
-  import { resolvePageKeyFromRouteResult } from "@/utils/routerUtils";
 
   import { goto } from "@mateothegreat/svelte5-router";
 
@@ -26,15 +24,6 @@
     });
 
     return dispose;
-  });
-
-  $effect(() => {
-    // Default tabbar state
-    withTabbar({
-      isVisible: true,
-      duration: 120,
-      delay: 40,
-    });
   });
 
   const menu = [
@@ -59,7 +48,7 @@
 <section class="more-view flex flex-col min-h-[100%] pb-safe-24" in:fly={{ duration: 120, y: -20 }}>
   <Block nested>
     <article class="logo-wrapper flex flex-col items-center">
-      <img src={appLogo} alt="Project logo" class="size-24" />
+      <img src={appLogo} alt={$i18n.t("ui:more:logoAlt")} class="size-24" />
 
       <p class="mt-4 text-base text-center">
         {@html $i18n.t("about:shortInfo")}
@@ -94,11 +83,11 @@
 
   <div class="flex items-center justify-center flex-col gap-[4px] mt-auto">
     <p class="text-xs text-gray-900 dark:text-stone-300">
-      App Version: {version}
+      {$i18n.t("ui:more:appVersion", { version })}
     </p>
 
     <div class="flex items-center text-xs text-gray-900 dark:text-stone-300">
-      <p class="mr-1">Powered by</p>
+      <p class="mr-1">{$i18n.t("ui:more:poweredBy")}</p>
       <SvelteIcon className="size-4" /> Svelte
     </div>
 

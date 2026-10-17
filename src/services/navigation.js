@@ -78,29 +78,7 @@ class NavigationEngine {
     this.nodes = graphData.nodes;
     this.edges = graphData.edges;
 
-    // // Build adjacency list for fast lookup
-    // this.adjacency = {};
-    // this.edges.forEach((edge) => {
-    //   if (!this.adjacency[edge.from]) {
-    //     this.adjacency[edge.from] = [];
-    //   }
-    //   this.adjacency[edge.from].push({
-    //     to: edge.to,
-    //     distance: edge.distance,
-    //   });
-    // });
-
-    // this.buildSpatialIndex();
-
-    // // Check graph integrity
-    // let invalidEdges = 0;
-    // this.edges.forEach((edge) => {
-    //   if (!this.nodes[edge.from] || !this.nodes[edge.to]) {
-    //     invalidEdges++;
-    //   }
-    // });
-
-    // Build adjacency list + validate in on pass.
+    // Build adjacency list + validate in one pass.
     // Invalid edges are counted but NOT added to the graph.
     this.adjacency = {};
     let invalidEdges = 0;

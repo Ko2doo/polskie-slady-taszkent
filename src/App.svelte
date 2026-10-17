@@ -35,7 +35,6 @@
   import { initFirstLaunch, APP_FIRST_LAUNCH_STORAGE_VAL, markFirstLaunchCompleted } from "@/store/appStartInitialize";
 
   // States import
-  import { resetTabbar, withTabbar } from "@/lib/state/bottomTabbarNav.svelte";
   import { navbarState } from "@/lib/state/navbar.svelte";
   import { panelState, closePanel } from "@/lib/state/panel.svelte";
   import { customPointsState, initCustomPointsPersistence } from "@/lib/state/customPointsState.svelte";
@@ -64,15 +63,6 @@
     scrollState.y = e.currentTarget.scrollTop;
   }
 
-  $effect(() => {
-    if (APP_READY)
-      withTabbar({
-        isVisible: true,
-        duration: 400,
-        delay: 350,
-      });
-  });
-
   // Problems of the custom points storage (newer data, unreadable or damaged files, failed saves)
   $effect(() => {
     if (customPointsState.notices.length === 0) return;
@@ -95,7 +85,7 @@
 </script>
 
 {#if !APP_READY}
-  <AppSplash {appName} {version} {appLogo} />
+  <AppSplash {i18n} {appName} {version} {appLogo} />
 {:else}
   <App safeAreas theme="ios">
     <Page class="flex flex-col">

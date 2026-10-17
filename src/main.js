@@ -11,34 +11,61 @@ import appLogo from '@/assets/icons/app-icon.png';
 import './App.css';
 import App from './App.svelte';
 
+import { createLogger, IS_DEBUG } from '@/utils/debugMode';
+
+const mainLogger = createLogger('Main');
+
+/**
+ * Apply the stored/system theme before the first paint. A failure is not fatal: the app starts
+ * in the default theme rather than not at all.
+ */
+async function initTheme() {
+  try {
+    await getThemeManager().init();
+  } catch (error) {
+    IS_DEBUG && mainLogger.error('Theme init failed, starting with the default theme:', error);
+  }
+}
+
+/**
+ * Name and version shown in the app: the installed app's on a device (one bridge call), the
+ * build's on the web — and the build's as a fallback if the device can't tell.
+ * @returns {Promise<{ name: string, version: string }>}
+ */
+async function resolveAppInfo() {
+  const buildInfo = { name: __APP_NAME__ ?? 'dev', version: __APP_VERSION__ ?? 'dev' };
+  if (!Capacitor.isNativePlatform()) return buildInfo;
+
+  try {
+    const { name, version } = await CapApp.getInfo();
+    return { name, version };
+  } catch (error) {
+    IS_DEBUG && mainLogger.error('App info unavailable, using the build values:', error);
+    return buildInfo;
+  }
+}
+
 async function bootstrap() {
-  // Theme init
-  await getThemeManager().init();
+  try {
+    await initTheme();
+    const { name: appName, version } = await resolveAppInfo();
 
-  /* prettier-ignore */
-  const version = Capacitor.isNativePlatform()
-    ? (await CapApp.getInfo()).version
-    : __APP_VERSION__ ?? "dev";
-
-  /* prettier-ignore */
-  const appName = Capacitor.isNativePlatform()
-    ? (await CapApp.getInfo()).name
-    : __APP_NAME__ ?? 'dev';
-
-  // Svelte app mount
-  const app = mount(App, {
-    target: document.getElementById('app'),
-    props: {
-      version,
-      appName,
-      appLogo,
-    },
-  });
-
-  // hide system splash
-  await SplashScreen.hide();
-
-  return app;
+    // Svelte app mount
+    return mount(App, {
+      target: document.getElementById('app'),
+      props: {
+        version,
+        appName,
+        appLogo,
+      },
+    });
+  } catch (error) {
+    IS_DEBUG && mainLogger.error('Bootstrap failed:', error);
+  } finally {
+    // capacitor.config.json has launchAutoHide: false — nothing else hides the native splash, so it
+    // is hidden whatever happened above, or the user would be stuck on it for good
+    await SplashScreen.hide().catch((error) => IS_DEBUG && mainLogger.error('Splash hide failed:', error));
+  }
 }
 
 bootstrap();

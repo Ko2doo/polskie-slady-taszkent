@@ -15,6 +15,8 @@ export const ERROR_CODES = {
 
   // Capacitor geolocation API code
   // https://capacitorjs.com/docs/apis/geolocation#errors
+  // The plugin reports them hyphenated (OS-PLUG-GLOC-0007); the app keeps them underscored —
+  // mapGeolocationError (capacitor/services/locationPermission.js) normalizes one to the other.
   OS_PLUG_GLOC_0002: 'OS_PLUG_GLOC_0002',
   OS_PLUG_GLOC_0003: 'OS_PLUG_GLOC_0003',
   OS_PLUG_GLOC_0004: 'OS_PLUG_GLOC_0004',
@@ -44,3 +46,6 @@ export const ERROR_CODES = {
   OS_PLUG_CAMR_0006: 'OS-PLUG-CAMR-0006', // Take photo was canceled
   OS_PLUG_CAMR_0020: 'OS-PLUG-CAMR-0020', // Choose from gallery was canceled
 };
+
+// Prefix of every app-side (normalized) geolocation code in ERROR_CODES
+export const GEOLOCATION_CODE_PREFIX = 'OS_PLUG_GLOC_';

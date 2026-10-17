@@ -1,5 +1,17 @@
 # Changelog
 
+## v1.2.0-rc.2 — 2026-10-17
+
+### 🆕 Updates
+- Describe the harness-driven workflow in the README; new bug log
+- Fix the logged bugs, tab bar and pedestrian graph; harness checks
+- Add test suite, CI and contributor harness; log found bugs
+- Minimal harness instructions added
+
+### 🐛 Fixes
+- Fix the logged bugs, tab bar and pedestrian graph; harness checks
+- Add test suite, CI and contributor harness; log found bugs
+
 ## v1.2.0-rc.1 — 2026-10-15
 
 ### 🆕 Updates

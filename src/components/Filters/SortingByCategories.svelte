@@ -24,6 +24,8 @@
   let categoryIds = $state([]); // available category ids (excluding "all")
   let lastEmitted = $state(""); // last value sent to parent (prevents duplicate emits)
   let lastSaved = $state("");
+  // Set once the user changes the category: the restore in onMount arrives later and must not undo it
+  let isPickedByUser = false;
 
   // Build unique, sorted category list from items
   function getCategoryIds(list) {
@@ -64,6 +66,8 @@
 
   // User selection (radio)
   function select(id) {
+    // A radio fires only when it becomes checked, so this is always a real change
+    isPickedByUser = true;
     applySelection(id);
   }
 
@@ -71,6 +75,11 @@
   onMount(async () => {
     try {
       const raw = await getStorage(storageKey);
+      if (isPickedByUser) {
+        IS_DEBUG && sortingByCategoriesLogger.log("Category already picked by the user, restore skipped");
+        return;
+      }
+
       const stored = typeof raw === "string" && raw ? raw : allId;
 
       applySelection(stored);

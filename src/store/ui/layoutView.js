@@ -24,6 +24,8 @@ const ROWS = {
 
 // Always-valid default
 let value = GRID;
+// Set once the user changes the layout: a restore that arrives later must not undo their pick
+let isPickedByUser = false;
 
 const subscribers = new Set();
 
@@ -35,6 +37,11 @@ function notify() {
 (async function hydrate() {
   try {
     const stored = await getStorage(STORAGE_KEY);
+
+    if (isPickedByUser) {
+      IS_DEBUG && layoutLogger.log('Layout already picked by the user, restore skipped');
+      return;
+    }
 
     const next = stored === 'layoutRows' ? ROWS : GRID;
 
@@ -61,6 +68,7 @@ export const layoutView = {
     if (next.mode === value.mode) return;
 
     value = next;
+    isPickedByUser = true;
     setStorage(STORAGE_KEY, value.mode);
     notify();
   },

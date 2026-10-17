@@ -31,7 +31,6 @@ export class I18NextTranslationStore {
 
     i18n.on('initialized', setupI18n);
     i18n.on('loaded', setupI18n);
-    i18n.on('added', setupI18n);
     i18n.on('languageChanged', setupI18n);
   }
 

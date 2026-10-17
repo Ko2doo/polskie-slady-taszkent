@@ -4,7 +4,7 @@
  * We carefully try all options.
  */
 export function getRawPathFromRoute(result) {
-  if (!result) '';
+  if (!result) return '';
 
   // 1 variant if path type string
   if (typeof result.path === 'string') {

@@ -1,4 +1,3 @@
-// import * as mapllibreGl from 'maplibre-gl';
 import { createLogger, IS_DEBUG } from '@/utils/debugMode';
 
 const mapEditModeLogger = createLogger('MapEditMode');

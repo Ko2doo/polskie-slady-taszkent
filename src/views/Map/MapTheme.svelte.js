@@ -24,10 +24,20 @@ const mapThemeLogger = createLogger('MapTheme');
  * @param {MapPointsBuilder} params.builder - MapPointsBuilder instance
  * @param {CustomPointsBuilder} params.customPointsBuilder - CustomPointsBuilder instance
  * @param {Object} params.navigation - Navigation controller
+ * @param {() => Object|null} [params.getCurrentRoute] - The route to redraw after a style switch
+ *   (`map.setStyle()` drops every app layer). Defaults to the manual navigation's route; the map
+ *   screen passes one that also covers GPS navigation, which this controller doesn't know.
  * @param {Object} params.i18n - i18n store
  * @returns {Object} - Theme controller API
  */
-export function createThemeController({ map, builder, customPointsBuilder, navigation, i18n }) {
+export function createThemeController({
+  map,
+  builder,
+  customPointsBuilder,
+  navigation,
+  getCurrentRoute = () => navigation?.currentRoute,
+  i18n,
+}) {
   const themeManager = getThemeManager();
 
   let uiThemeStyle = $state('light');
@@ -106,13 +116,14 @@ export function createThemeController({ map, builder, customPointsBuilder, navig
 
       // Wait for style to load
       const onIdle = () => {
+        // One-shot either way: an outdated handler must go too, or every quick switch leaves one
+        map.off('idle', onIdle);
+
         // Check if style version is still current
         if (myVersion !== styleVersion) {
           IS_DEBUG && mapThemeLogger.log('Style version changed, aborting restoration');
           return;
         }
-
-        map.off('idle', onIdle);
 
         // Update builder style version
         builder.setStyleVersion(myVersion);
@@ -122,7 +133,7 @@ export function createThemeController({ map, builder, customPointsBuilder, navig
         }
 
         // Restore all overlays
-        reapplyOverlays(navigation.currentRoute);
+        reapplyOverlays(getCurrentRoute());
       };
 
       map.on('idle', onIdle);

@@ -193,7 +193,7 @@ export const navigationHistoryPostHook = (route) => {
  * two routes.
  */
 export function routerBack(fallback = '/') {
-  const { stack, current } = get(navigationHistory);
+  const { stack } = get(navigationHistory);
   const history = stack ?? [];
 
   // There is a previous route in the stack -> go back to it.

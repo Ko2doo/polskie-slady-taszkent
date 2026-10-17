@@ -108,6 +108,7 @@ export default {
       step2Alert: 'Uprawnienie zostało odrzucone. Możesz włączyć je później w ustawieniach aplikacji.',
       step: 'Krok',
       stepOf: 'z',
+      logoAlt: 'Logo aplikacji',
     },
   },
   map: {
@@ -192,7 +193,14 @@ export default {
       hint: 'Otwiera ustawienia uprawnień przyznanych aplikacji.',
     },
   },
+  splash: {
+    version: 'Wersja: {{version}}',
+    logoAlt: 'Logo aplikacji',
+  },
   more: {
+    appVersion: 'Wersja aplikacji: {{version}}',
+    poweredBy: 'Zrobione w',
+    logoAlt: 'Logo projektu',
     menuListItem: {
       settingsTitle: 'Ustawienia',
       aboutTitle: 'O projekcie',

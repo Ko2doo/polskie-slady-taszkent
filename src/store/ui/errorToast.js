@@ -30,7 +30,7 @@
  *   scope: 'GPSNavigation',
  *   code: ERROR_CODES.OS_PLUG_GLOC_0003,
  *   action: {
- *     label: 'Open Settings',
+ *     label: i18n.t('ui:buttons:openSettings'),
  *     handler: () => openAppSettings()
  *   }
  * });
@@ -61,7 +61,7 @@ const errorToastLogger = createLogger('ErrorToast');
  * @typedef {'error' | 'warn' | 'info'} ToastKind
  *
  * @typedef {Object} ToastAction
- * @property {string} [label] - Button label (auto-generated for common types)
+ * @property {string} label - Button label, already translated (an action without one is dropped)
  * @property {'openSettings' | 'retry' | 'custom'} [type] - Action type
  * @property {Function} handler - Action callback
  *
@@ -80,12 +80,6 @@ const errorToastLogger = createLogger('ErrorToast');
 const VALID_KINDS = ['error', 'warn', 'info'];
 const RATE_LIMIT_WINDOW = 1000; // 1 second
 const MAX_SAME_MESSAGE = 3; // Max same message per window
-
-// Default action labels for common types
-const ACTION_LABELS = {
-  openSettings: 'Open Settings',
-  retry: 'Retry',
-};
 
 /**
  * Normalize various error types to string message
@@ -162,19 +156,15 @@ function sanitizeAction(action) {
     return null;
   }
 
-  // Auto-generate label for known types
-  let label = action.label;
-  if (!label && action.type && ACTION_LABELS[action.type]) {
-    label = ACTION_LABELS[action.type];
-  }
-
-  // Default label
-  if (!label) {
-    label = 'Action';
+  // The label is user-visible text: it must come translated from the caller (harness/i18n.md),
+  // a made-up English fallback would show in every language
+  if (typeof action.label !== 'string' || !action.label.trim()) {
+    IS_DEBUG && errorToastLogger.warn('Action label is required (a translated string), action dropped');
+    return null;
   }
 
   return {
-    label,
+    label: action.label,
     type: action.type || 'custom',
     handler: action.handler,
   };

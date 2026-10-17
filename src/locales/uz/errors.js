@@ -3,6 +3,8 @@ export default {
   articleNotFound: 'Maqola topilmadi!',
   notFound: 'Hech narsa topilmadi',
   toastBtn: 'Yopish',
+  settingsSaveFailed: 'Sozlamalarni saqlab bo‘lmadi. Qayta urinib ko‘ring.',
+  locationPermissionRequestFailed: 'Joylashuvga ruxsat so‘rab bo‘lmadi',
   gpsInitFailed: 'GPS ishga tushirilmadi',
   gpsError: 'GPS xatosi',
   gpsPositionNotAvailable: 'GPS joylashuvi mavjud emas',

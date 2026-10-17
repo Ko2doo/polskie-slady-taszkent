@@ -1,0 +1,21 @@
+# Merge gate, automated part: the whole test suite and a clean build (see CONTRIBUTING.md).
+name: CI
+
+on:
+  pull_request:
+    branches: [features, master]
+  push:
+    branches: [features, master]
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run build

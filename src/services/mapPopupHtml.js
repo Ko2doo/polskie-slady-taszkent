@@ -9,8 +9,10 @@
  */
 
 /**
- * Escape text for safe use inside the HTML template below
- * (important: article/marker titles can be entered by the user)
+ * Escape text for safe use inside the HTML template below, both as element text and as a
+ * quoted attribute value (important: article/marker titles can be entered by the user).
+ * `textContent` → `innerHTML` only escapes `<`, `>`, `&`, so quotes are escaped on top of it —
+ * otherwise a `"` in a title would close `alt="…"` and add its own attributes (event handlers).
  * @param {string} text - Text to escape
  * @returns {string} - Escaped HTML
  */
@@ -21,7 +23,7 @@ export function escapeHtml(text) {
 
   div.textContent = text;
 
-  return div.innerHTML;
+  return div.innerHTML.replaceAll('"', '&quot;').replaceAll("'", '&#39;');
 }
 
 /**

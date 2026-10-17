@@ -1,5 +1,4 @@
 <script>
-  import { customPointsDialogState } from "@/lib/state/customPointsDialogState.svelte";
   import { errorToast } from "@/store/ui/errorToast";
   import { createLogger, IS_DEBUG } from "@/utils/debugMode";
   import { Dialog, DialogButton } from "konsta/svelte";
@@ -7,7 +6,6 @@
   let { i18n, openedDialog, onConfirm } = $props();
 
   const dialogLogger = createLogger("CustomPointsDialog");
-  const dialogState = customPointsDialogState();
 
   async function dialogCompleted() {
     try {
@@ -17,7 +15,7 @@
     } catch (error) {
       IS_DEBUG && dialogLogger.error("Failed to complete dialog:", error);
 
-      errorToast.error("Failed to save settings. Please try again.", {
+      errorToast.error($i18n.t("errors:settingsSaveFailed"), {
         scope: "CustomPointsDialog",
       });
     }

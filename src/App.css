@@ -1,14 +1,12 @@
 /* Libraries import */
 @import 'tailwindcss';
+@config '../tailwind.config.js';
 @import 'konsta/svelte/theme.css';
 
-/* Tailwind */
+/* Tailwind (black/white are remapped in tailwind.config.js) */
 :root {
-  --color-black: var(--color-stone-800);
-  --color-white: var(--color-stone-100);
-
-  --k-color-text: var(--color-black);
-  --k-color-bg: var(--color-white);
+  --k-color-text: --theme(--color-black);
+  --k-color-bg: --theme(--color-white);
 }
 
 /* more info: https://konstaui.com/svelte/colors */
@@ -20,10 +18,10 @@
 }
 
 .dark {
-  --k-color-text: var(--color-black);
-  --k-color-bg: var(--color-white);
+  --k-color-text: --theme(--color-black);
+  --k-color-bg: --theme(--color-white);
 
-  color: var(--color-white);
+  color: --theme(--color-white);
 }
 
 /* MapLibre Map */
