@@ -14,7 +14,7 @@ the short version plus the merge gate.
   (plugins, permissions, `android/`, `ios/`), say in the PR what the iOS side needs.
 - Create your own branch from `features` (`feature/<short-name>` or `fix/<short-name>`),
   push it, and open the pull request **into `features`**. Direct pushes to `features` are
-  for admins only.
+  for admins only. Step by step — see [Opening a pull request](#opening-a-pull-request).
 - `master` is the release branch: nobody pushes to it, it only receives PRs from
   `features`, and releases are cut from it manually by the maintainer.
 - Keep a pull request to one logical change. A big feature is a series of smaller PRs.
@@ -24,6 +24,52 @@ the short version plus the merge gate.
   [`harness/git-workflow.md`](harness/git-workflow.md).
 - Never bump versions, tag, or run `npm run release` / `appstore/` scripts in a PR —
   releases are done by the maintainer.
+
+## Opening a pull request
+
+Which way depends on whether you can push to this repository.
+
+**With write access** (a maintainer — e.g. the iOS maintainer):
+
+```bash
+git fetch origin
+git checkout -b feature/<short-name> origin/features   # or fix/<short-name>
+# ...work, commit with the UPD:/FIX: prefix...
+git push -u origin feature/<short-name>
+```
+
+Then open a PR on GitHub: **base `features` ← compare `feature/<short-name>`**.
+
+**Without write access** (anyone else) — through a fork:
+
+```bash
+# once: fork the repository on GitHub, then
+git clone https://github.com/<you>/polskie-slady-taszkent.git
+cd polskie-slady-taszkent
+git remote add upstream https://github.com/Ko2doo/polskie-slady-taszkent.git
+
+# for each change
+git fetch upstream
+git checkout -b feature/<short-name> upstream/features
+# ...work, commit...
+git push -u origin feature/<short-name>
+```
+
+Then open a PR from your fork: **base repository `Ko2doo/polskie-slady-taszkent`, base
+`features` ← your fork, `feature/<short-name>`**. GitHub may hold CI on a first-time
+contributor's PR until a maintainer approves the run — that's expected.
+
+Either way:
+
+- Start from the current `features`, never from `master`, and never target `master` — it
+  only receives the release PR.
+- If `features` moved on while you worked, bring it in before asking for the merge:
+  `git fetch upstream` (or `origin`), then `git merge upstream/features` into your branch.
+- CI (`test-and-build`) must be green; fix it on your branch and push — the PR updates.
+- Working with an AI agent (Claude Code reads [`CLAUDE.md`](CLAUDE.md) and `harness/`;
+  other agents get pointed there by [`AGENTS.md`](AGENTS.md)): the agent writes code on your
+  branch and tells you the git commands; creating the branch, committing, pushing and
+  opening the PR are yours.
 
 ## The merge gate
 
