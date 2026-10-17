@@ -61,13 +61,12 @@ describe('CustomPointsDialog', () => {
     expect(errorToast.error).toHaveBeenCalledTimes(1);
   });
 
-  // BUG: the message is hard-coded English, outside i18next (see BUGS.md). Remove `.fails` once fixed.
-  it.fails('the failure message is translated', async () => {
+  it('the failure message is translated', async () => {
     render({ onConfirm: vi.fn(async () => Promise.reject(new Error('storage down'))) });
 
     confirmButton().click();
     await settle();
 
-    expect(errorToast.error.mock.lastCall[0]).toMatch(/^errors:/);
+    expect(errorToast.error.mock.lastCall[0]).toBe('errors:settingsSaveFailed');
   });
 });

@@ -3,10 +3,13 @@ import { flushSync, mount, unmount } from 'svelte';
 import { openAppSettings } from '@/capacitor/services/locationPermission';
 import { bottomTabbarState, resetTabbar } from '@/lib/state/bottomTabbarNav.svelte.js';
 import { navbarState, resetNavbar } from '@/lib/state/navbar.svelte.js';
+import { routerBack } from '@/services/navigationHistoryHook';
+import RenderSnippet from '@/test/RenderSnippet.svelte';
 import { i18nStub } from '@/test/i18nStub';
 import Settings from '@/views/Settings/Settings.svelte';
 
 vi.mock('@/capacitor/services/locationPermission', () => ({ openAppSettings: vi.fn(async () => true) }));
+vi.mock('@/services/navigationHistoryHook', () => ({ routerBack: vi.fn() }));
 vi.mock('@/lib/theme/themeManager', () => ({
   getThemeManager: () => ({
     subscribe: (listener) => {
@@ -69,8 +72,19 @@ describe('Settings', () => {
     expect(navbarState.leftSnippet).toBeNull();
   });
 
-  // BUG-23: the tabbar config is never reset when the screen goes away. Remove `.fails` once fixed.
-  it.fails('gives the tabbar back when it goes away', () => {
+  // A screen inside More: back goes to More, even after a reload (empty in-memory history)
+  it('the navbar back link goes back to More', () => {
+    const host = document.createElement('div');
+    const back = mount(RenderSnippet, { target: host, props: { snippet: navbarState.leftSnippet } });
+    flushSync();
+
+    host.querySelector('a').click();
+
+    expect(routerBack).toHaveBeenCalledWith('/more');
+    unmount(back);
+  });
+
+  it('gives the tabbar back when it goes away', () => {
     unmount(component);
     component = null;
 

@@ -11,9 +11,16 @@ function render(options) {
 const HOSTILE = '<img src=x onerror="alert(1)"><script>alert(2)</script>';
 
 describe('escapeHtml', () => {
-  // Quotes are covered by the pinned attribute test below
   it('escapes tags and ampersands', () => {
     expect(escapeHtml('<b>Tom & Jerry</b>')).toBe('&lt;b&gt;Tom &amp; Jerry&lt;/b&gt;');
+  });
+
+  it('escapes double and single quotes', () => {
+    expect(escapeHtml(`" onclick='alert(1)'`)).toBe('&quot; onclick=&#39;alert(1)&#39;');
+  });
+
+  it('escapes an ampersand once, not the entities it produces', () => {
+    expect(escapeHtml('"&"')).toBe('&quot;&amp;&quot;');
   });
 
   it('empty and missing text becomes an empty string', () => {
@@ -55,9 +62,16 @@ describe('createPopupHTML', () => {
     expect(popup.querySelector('p').textContent.trim()).toBe(HOSTILE);
   });
 
-  // BUG: escapeHtml leaves quotes as they are, and the attributes are quoted with ": a quote in a
-  // title (or an id) closes the attribute and adds its own handlers (see BUGS.md). Remove `.fails` once fixed.
-  it.fails('a quote cannot break out of an attribute', () => {
+  it('an ordinary title with quotes shows unchanged, as text and as alt', () => {
+    const title = `O'rda "Polonia" & co`;
+    const popup = render({ title, id: 'l01', preview: 'p.jpg' });
+
+    expect(popup.querySelector('p.map-popup-title').textContent.trim()).toBe(title);
+    expect(popup.querySelector('img').getAttribute('alt')).toBe(title);
+    expect(popup.querySelector('button').dataset.articleId).toBe('l01');
+  });
+
+  it('a quote cannot break out of an attribute', () => {
     const title = '" onmouseover="alert(1)';
     const popup = render({ title, id: '" onclick="alert(1)', preview: 'p.jpg' });
 

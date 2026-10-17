@@ -10,23 +10,28 @@ pattern is rarely justified.
 codebase (see `harness/svelte-rules.md` for what that term means) — a generic, reusable
 reactive UI profile: a flat object of view-scoped fields that a screen can fully replace
 (`set`), partially update (`patch`), or reset to defaults (`reset`). It's the base that
-three different state modules specialize:
+these state modules specialize:
 
 - `navbar.svelte.js` — the navbar's title/snippets, defaults `{ title, leftSnippet,
   rightSnippet, subnavSnippet }`.
 - `panel.svelte.js` — the side panel's open state/content, defaults `{ isOpen, side,
   backdrop, floating, title, contentSnippet }`, plus `openPanel`/`closePanel` convenience
   functions on top.
-- `bottomTabbarNav.svelte.js` — the bottom tab bar's visibility/animation, defaults
-  `{ isVisible, duration, delay }`.
+- `bottomTabbarNav.svelte.js` — the bottom tab bar. Visibility is **not** a profile field
+  but a count of hide requests: `hideTabbar(slide)` returns a release, the tab bar shows
+  when none is held (a shared "last writer wins" field made its return depend on the order
+  screens mounted/unmounted in). The profile only holds the slide animation
+  `{ duration, delay }`. The count is read under `untrack`: screens call it from `$effect`s,
+  which would otherwise subscribe to — and loop on — each other's requests.
 
 Each of these wraps `createUIProfile(defaults)` and exposes only the getters/functions that
 make sense for its own domain — `createUIProfile` itself is deliberately generic and knows
 nothing about navbars or panels. **If a new screen-level, replace-or-patch UI concern comes
 up (a new piece of shared chrome, a new overlay with a similar open/configure/reset shape),
 build it the same way: specialize `createUIProfile`, don't write a new state shape from
-scratch.** Every one of these exposes a `withProfile(cfg)` method (`set` + return a `reset`
-closure) specifically so a screen's `$effect` can do
+scratch.** The navbar and the panel expose a `withProfile(cfg)`-style method (`set` + return
+a `reset` closure; the tab bar's equivalent is `hideTabbar`) specifically so a screen's
+`$effect` can do
 `$effect(() => withNavbar({...}))` and get the right cleanup for free — see
 `harness/screens.md` for how every screen actually uses this.
 
@@ -42,6 +47,14 @@ closure) specifically so a screen's `$effect` can do
   reference usage: the component that decides to open something owns the toggle; the thing
   being opened (`PhotoViewer.svelte`) stays presentational, driven by plain props, not by
   owning its own open state.
+- When the open state isn't a toggle the overlay owns — it lives in shared state, or arrives
+  as an `opened` prop — register with `overlayController` directly, tied to that state:
+  `panel.svelte.js` syncs on every change of `isOpen` (including the `withPanel` reset when a
+  screen unmounts); `CustomPointsMapEditorDialog.svelte` registers in an `$effect` on `opened`
+  whose cleanup unregisters, so leaving the screen with it open leaves nothing on the stack.
+  What's on the stack today: the side panel, the marker editor (its back = cancel, inner
+  menu/question first), the article popup (`article.svelte.js`), the photo viewer. Deliberately
+  not: the onboarding wizard and `NavigationSheet`.
 - The onboarding wizard deliberately uses plain `createToggle()`, not
   `createToggleOverlay` — it should *not* be dismissible by the back button mid-flow. Don't
   "fix" this to use the overlay variant without checking that's actually wanted.

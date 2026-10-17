@@ -4,19 +4,23 @@
 
 Every route component (`src/Routes.js`) receives `{ route, i18n }` as props (some also take
 `appName`/`appLogo`/`version`/`appState` from `App.svelte`) and, in an `$effect`, configures
-the shared chrome it needs by calling `withNavbar({...})` and/or `withTabbar({...})` from
-`lib/state/navbar.svelte.js` / `lib/state/bottomTabbarNav.svelte.js`. Both return a dispose
-function from the effect, so the chrome resets when the screen unmounts or the config
-changes — **always return that dispose function from the `$effect`**, don't just call
-`withNavbar(...)` and drop the result. Use `resolvePageKeyFromRouteResult(route?.result)`
-(`utils/routerUtils.js`) to map the current path to a page key for localization/navbar
+the shared chrome it needs: `withNavbar({...})` (`lib/state/navbar.svelte.js`) and, only if
+the screen has **no** tab bar, `hideTabbar({...})` (`lib/state/bottomTabbarNav.svelte.js`).
+Both return a dispose/release function — **always return it from the `$effect`**, so the
+chrome is given back when the screen unmounts or the config changes. The tab bar is visible
+unless some request holds it hidden, so a tab screen (Map, Handbook, More) does nothing about
+it, and its return after Settings/About/Technical Info, the onboarding, the splash or the
+map's edit mode doesn't depend on the order screens mount and unmount in. Use
+`resolvePageKeyFromRouteResult(route?.result)` (`utils/routerUtils.js`) to map the current path to a page key for localization/navbar
 logic rather than hand-parsing `route.result` yourself. Back navigation goes through
 `routerBack()` (`services/navigationHistoryHook.js`), not a raw router call, so it
-integrates with the app's own back-button/history stack (`capacitor/backButton.js`).
+integrates with the app's own back-button/history stack (`capacitor/backButton.js`). Its
+fallback is the screen's parent: `routerBack('/more')` from a screen opened in More — after a
+reload the in-memory history is empty and the fallback is where back goes.
 
 A new screen: add its component to `src/Routes.js`, give it this same `$effect` +
-`withNavbar`/`withTabbar` setup, and add a page key to `resolvePageKeyFromRouteResult` if it
-needs one.
+`withNavbar` (and `hideTabbar` if it has no tab bar) setup, and add a page key to
+`resolvePageKeyFromRouteResult` if it needs one.
 
 ## The routes
 
@@ -32,7 +36,9 @@ needs one.
   - `MapNavigation.svelte.js` / `MapNavigationGPS.svelte.js` — turn-by-turn routing and GPS
     tracking UI glue; see `harness/navigation-subsystem.md` for the actual engine.
   - `MapLoadTracker.js` — tracks MapLibre source-loading progress for the loading screen.
-  - `MapPreview.js` — resolves a custom point's cover photo for the map popup.
+  - `MapPreview.js` — resolves a custom point's cover photo for the map popup;
+    `createPreviewTracker()` holds one photo-url reference per point and gives it back when the
+    cover changes, the point is deleted or the screen goes away (Blob urls on the web).
   - `MapConstants.js` — shared magic numbers/config for the screen.
 - **`/handbook` → `Handbook`** (`views/Handbook/Handbook.svelte`). The browsable list of
   historical places (`data/articles.js` via `articlesMeta`), with layout switching (grid/

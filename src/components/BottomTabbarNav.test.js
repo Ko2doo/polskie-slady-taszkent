@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { flushSync, mount, unmount } from 'svelte';
-import { bottomTabbarState, resetTabbar, setTabbar } from '@/lib/state/bottomTabbarNav.svelte.js';
+import { bottomTabbarState, hideTabbar, resetTabbar } from '@/lib/state/bottomTabbarNav.svelte.js';
 import { i18nStub } from '@/test/i18nStub';
 import HandbookIcon from '@/lib/icons/HandbookIcon.svelte';
 import PaperMapIcon from '@/lib/icons/PaperMapIcon.svelte';
@@ -77,7 +77,7 @@ describe('BottomTabbarNav', () => {
   });
 
   it('is hidden when a screen hides it', () => {
-    setTabbar({ isVisible: false });
+    hideTabbar();
     render('/settings');
 
     expect(target.querySelector('nav')).toBeNull();

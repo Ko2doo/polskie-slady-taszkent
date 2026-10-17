@@ -407,4 +407,27 @@ describe('the shipped navigation graph', () => {
     expect(result.success).toBe(true);
     expect(result.route.properties.distance).toBeGreaterThan(engine.distance(fromLon, fromLat, toLon, toLat));
   });
+
+  // A pedestrian may walk both ways along a one-way street: only a footway/path/steps/pedestrian
+  // way tagged one-way (or oneway:foot) is one-way in the graph (scripts/navigationGraph)
+  it('is walkable both ways: almost every edge has its reverse', () => {
+    const edgeKeys = new Set(graph.edges.map((edge) => `${edge.from}>${edge.to}`));
+    const oneWay = graph.edges.filter((edge) => !edgeKeys.has(`${edge.to}>${edge.from}`));
+
+    expect(oneWay.length / graph.edges.length).toBeLessThan(0.001);
+  });
+
+  it('connects every historical place with every other one, both ways', () => {
+    const unreachable = [];
+    for (const from of articlesMeta) {
+      for (const to of articlesMeta) {
+        if (from === to) continue;
+        const [fromLat, fromLon] = from.coords;
+        const [toLat, toLon] = to.coords;
+        if (!engine.findRoute(fromLon, fromLat, toLon, toLat).success) unreachable.push(`${from.id}→${to.id}`);
+      }
+    }
+
+    expect(unreachable).toEqual([]);
+  });
 });

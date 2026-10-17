@@ -109,6 +109,7 @@ export default {
       step2Alert: 'Ruxsat rad etildi. Uni keyinroq ilova sozlamalarida yoqishingiz mumkin.',
       step: 'Bosqich',
       stepOf: 'dan',
+      logoAlt: 'Ilova logotipi',
     },
   },
   map: {
@@ -194,7 +195,14 @@ export default {
       hint: 'Ilovaga berilgan ruxsatlar sozlamalarini ochadi.',
     },
   },
+  splash: {
+    version: 'Versiya: {{version}}',
+    logoAlt: 'Ilova logotipi',
+  },
   more: {
+    appVersion: 'Ilova versiyasi: {{version}}',
+    poweredBy: 'Ishlab chiqilgan:',
+    logoAlt: 'Loyiha logotipi',
     menuListItem: {
       settingsTitle: 'Sozlamalar',
       aboutTitle: 'Loyiha haqida',

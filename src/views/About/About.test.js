@@ -55,7 +55,8 @@ describe('About', () => {
 
     host.querySelector('a').click();
 
-    expect(routerBack).toHaveBeenCalledWith('/');
+    // A screen inside More: back goes to More, even after a reload (empty in-memory history)
+    expect(routerBack).toHaveBeenCalledWith('/more');
     expect(bottomTabbarState.isVisible).toBe(false);
     unmount(back);
   });

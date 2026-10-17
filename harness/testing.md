@@ -12,9 +12,10 @@ change to existing code is expected to keep the suite green, and new code arrive
 ## What gets tested (and what doesn't)
 
 Tests are for **logic**. Not tested: files with no logic — static data (`data/`,
-`locales/`), route tables (`Routes.js`), constant files (`views/Map/MapConstants.js`),
+`locales/` — apart from the cross-locale parity check), route tables (`Routes.js`),
+constant files (`views/Map/MapConstants.js`),
 icons, and components that are pure markup (they only render props/translations, no
-branching, state or event handling — `AppSplash.svelte`, `About.svelte`,
+branching, state or event handling — `About.svelte`,
 `TechnicalInfo.svelte` and the like). A component *is* tested as soon as it has logic:
 conditional rendering driven by state, event handlers, derived values, side effects.
 Heavy UI glue around third-party engines (MapLibre in `views/Map/`, the builders) is
@@ -33,11 +34,12 @@ about bugs (or before adding to it, to avoid duplicates).
    Create the file from the existing header if it doesn't exist.
 2. **Asked to fix the bugs** (that request is the go-ahead bug fixes otherwise need): for
    each entry — apply the fix, remove `.fails` (or add the missing test), run the full
-   suite, set the status to `fixed`.
+   suite, set the status to `fixed` and add a **Fixed:** line (date + what actually changed,
+   one or two lines) — the wrap-up commit message is assembled from those lines.
 3. **Asked to wrap up:** produce the commit message for the fixes (format in
    `harness/git-workflow.md`, `FIX:` prefix, one bullet per `BUG-N`), hand it over, then
-   delete `BUGS.md` — only once every entry is `fixed`; otherwise list what's still open
-   and keep the file.
+   delete `BUGS.md` (and its line in the root tree of `harness/repository-layout.md`) — only
+   once every entry is `fixed`; otherwise list what's still open and keep the file.
 
 ## The non-negotiable rule
 
@@ -63,7 +65,13 @@ place.
 ## Layout and config
 
 - Tests live **next to the code they test**: `src/utils/crc32.js` →
-  `src/utils/crc32.test.js`. Only `src/**/*.test.js` is collected.
+  `src/utils/crc32.test.js`. Only `src/**/*.test.js` is collected. A test that uses runes itself
+  (`$effect.root`, `$state`) is named `*.svelte.test.js` so Svelte compiles it
+  (`bottomTabbarNav.svelte.test.js`).
+  Two tests are about the harness itself: `src/architectureTree.test.js` checks the `src/`
+  tree in `harness/architecture.md` against the real directories, `src/repositoryTree.test.js`
+  checks the repo-root tree in `harness/repository-layout.md` against `git ls-files`. Both
+  read the trees through `src/test/harnessTree.js` (`readTreeBlock`, `parseTree`).
 - `vitest.config.js` merges `vite.config.js`, so tests get the same `@` alias, Svelte plugin
   and `__APP_VERSION__`/`__APP_NAME__` globals as the app. It also adds the `browser`
   resolve condition **only under Vitest** — without it `svelte` resolves to its server

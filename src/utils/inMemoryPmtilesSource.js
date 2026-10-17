@@ -22,11 +22,13 @@ export class InMemoryPMTilesSource {
   constructor(key, data) {
     this._key = key;
 
-    // Internally we always keep an ArrayBuffer
+    // Internally always a byte view, never a copy (the archive is megabytes, kept in RAM): a
+    // Uint8Array is used as is — with its own byteOffset/byteLength, it may be a view into a
+    // larger buffer — and an ArrayBuffer gets a view over the whole of it
     if (data instanceof ArrayBuffer) {
-      this._data = data;
+      this._bytes = new Uint8Array(data);
     } else if (data instanceof Uint8Array) {
-      this._data = data.buffer;
+      this._bytes = data;
     } else {
       throw new Error('InMemoryPmtilesSource: data must be ArrayBuffer or Uint8Array');
     }
@@ -52,8 +54,9 @@ export class InMemoryPMTilesSource {
    * @returns {Promise<{ data: ArrayBuffer }>}
    *   An object containing the requested byte range as an ArrayBuffer.
    */
-  async getBytes(offset, lenght) {
-    const slice = this._data.slice(offset, offset + lenght);
+  async getBytes(offset, length) {
+    // Copies only the requested range, relative to the view (not to its underlying buffer)
+    const slice = this._bytes.slice(offset, offset + length).buffer;
 
     return {
       data: slice,

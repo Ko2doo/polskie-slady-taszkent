@@ -108,6 +108,7 @@ export default {
       step2Alert: 'Permission was denied. You can enable it later in the app settings.',
       step: 'Step',
       stepOf: 'of',
+      logoAlt: 'App logo',
     },
   },
   map: {
@@ -193,7 +194,14 @@ export default {
       hint: 'Opens the settings of permissions granted to the application.',
     },
   },
+  splash: {
+    version: 'Version: {{version}}',
+    logoAlt: 'App logo',
+  },
   more: {
+    appVersion: 'App Version: {{version}}',
+    poweredBy: 'Powered by',
+    logoAlt: 'Project logo',
     menuListItem: {
       settingsTitle: 'Settings',
       aboutTitle: 'About the project',

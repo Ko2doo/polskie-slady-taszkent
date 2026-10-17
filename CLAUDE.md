@@ -58,7 +58,8 @@ Everything in `harness/` is imported below and loaded as part of this file.
    bug in the change that altered the code it describes, not a separate follow-up task.
 8. **Mind the session's context budget.** Past ~80% context usage: warn the human, and don't
    start a new task — warn and stop instead, unless told to go ahead anyway. Applies to
-   every kind of task. See `harness/agent-session.md`.
+   every kind of task. Keep tool output small (read files by range, filter command output with
+   `grep`/`tail`) — it all stays in the context. See `harness/agent-session.md`.
 
 ## Quick orientation
 
@@ -69,6 +70,10 @@ Everything in `harness/` is imported below and loaded as part of this file.
 - Merge gate for PRs (and for any step reported as done): whole suite green, clean build,
   architecture and code style followed — full list in `harness/git-workflow.md` /
   `CONTRIBUTING.md`, enforced in part by `.github/workflows/ci.yml`.
+- Legacy zones: a handful of older files (`Map.svelte`, `MapNavigationGPS`, `MapTheme`,
+  `LangSwitcher`, …) don't follow the harness — don't copy patterns from them; the list and the
+  reference implementations to copy from instead are in `harness/code-style.md` →
+  "Leave old code alone".
 - Tests: `npm test` (Vitest). Every area with logic is covered; known bugs are pinned with
   `it.fails` and logged in `BUGS.md` — see `harness/testing.md`.
 - **Offline app, single local user, no backend.** A lot of standard production-app

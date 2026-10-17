@@ -93,10 +93,8 @@ describe('mapMarkerFilter', () => {
     expect(Preferences.set).not.toHaveBeenCalled();
   });
 
-  // BUG: the background restore overwrites a filter the user picked before it finished
-  // (see BUGS.md). Remove `.fails` once fixed.
   // On a device the read is a bridge round-trip: the slow read is simulated with a promise the test resolves
-  it.fails('a filter picked before the restore finished is kept', async () => {
+  it('a filter picked before the restore finished is kept', async () => {
     let finishRead;
     Preferences.get.mockReturnValueOnce(
       new Promise((resolve) => {
@@ -111,5 +109,22 @@ describe('mapMarkerFilter', () => {
 
     expect(mapMarkerFilter.selected).toBe('custom');
     expect(await saved()).toBe('custom');
+  });
+
+  // Re-picking the current filter saves nothing, so the saved one must still be restored
+  it('re-picking the current filter before the restore does not block it', async () => {
+    let finishRead;
+    Preferences.get.mockReturnValueOnce(
+      new Promise((resolve) => {
+        finishRead = () => resolve({ value: 'historical' });
+      }),
+    );
+
+    const { mapMarkerFilter } = await load();
+    mapMarkerFilter.select('all');
+    finishRead();
+    await settle();
+
+    expect(mapMarkerFilter.selected).toBe('historical');
   });
 });

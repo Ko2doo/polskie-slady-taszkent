@@ -42,4 +42,18 @@ describe('More', () => {
   it('shows the tabbar (it is a tab)', () => {
     expect(bottomTabbarState.isVisible).toBe(true);
   });
+
+  // Real locales: the footer and the logo follow the language, the version is interpolated
+  it('the version line, the credits and the logo are translated', async () => {
+    unmount(component);
+    component = mount(More, {
+      target,
+      props: { i18n: await realI18n('pl'), version: '1.2.0', route: { result: { path: { original: '/more' } } } },
+    });
+    flushSync();
+
+    expect(target.textContent).toContain('Wersja aplikacji: 1.2.0');
+    expect(target.textContent).toContain('Zrobione w');
+    expect(target.querySelector('img').getAttribute('alt')).toBe('Logo projektu');
+  });
 });

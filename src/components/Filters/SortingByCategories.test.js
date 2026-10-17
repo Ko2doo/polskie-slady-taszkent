@@ -112,9 +112,8 @@ describe('SortingByCategories', () => {
     expect(onSelectedChange).toHaveBeenLastCalledWith('all');
   });
 
-  // BUG: the saved category is restored in the background; a pick made before that finished is
-  // overwritten — with "all" when nothing was saved (see BUGS.md). Remove `.fails` once fixed.
-  it.fails('a category picked before the restore finished is kept', async () => {
+  // The saved category is restored in the background; it used to overwrite an earlier pick
+  it('a category picked before the restore finished is kept', async () => {
     const props = reactiveProps({ i18n: i18nStub, items: ITEMS, storageKey: 'test.category', onSelectedChange });
     component = mount(SortingByCategories, { target, props });
     flushSync();

@@ -19,9 +19,14 @@ import { Geolocation } from '@capacitor/geolocation';
 import { NativeSettings, AndroidSettings, IOSSettings } from 'capacitor-native-settings';
 import { createLogger, IS_DEBUG } from '@/utils/debugMode';
 
-import { ERROR_CODES } from '@/lib/errors/errorCodes';
+import { ERROR_CODES, GEOLOCATION_CODE_PREFIX } from '@/lib/errors/errorCodes';
 
 const locationPermissionLogger = createLogger('LocationPermissions');
+
+// Every geolocation code the app knows (and has a translation for), in its normalized form
+const KNOWN_GEOLOCATION_CODES = new Set(
+  Object.values(ERROR_CODES).filter((code) => code.startsWith(GEOLOCATION_CODE_PREFIX)),
+);
 
 /**
  * Permission status types
@@ -318,13 +323,18 @@ export async function openLocationSettings() {
  * Maps Capacitor Geolocation errors to ERROR_CODES
  * Reuses logic from gpsTracker.js
  *
+ * A string code is accepted in both forms — the plugin's hyphenated `OS-PLUG-GLOC-0007` and the
+ * app's own `OS_PLUG_GLOC_0007` — but only if it is a code ERROR_CODES knows: an unknown one
+ * (e.g. the plugin's 0018, a manifest misconfiguration) has no translation, so it falls through
+ * to the message rules and, at worst, the generic 0002.
+ *
  * @param {Object} error - Error object from Capacitor
  * @returns {string} - Error code from ERROR_CODES
  */
 export function mapGeolocationError(error) {
-  // If it's already our custom code
-  if (error.code && typeof error.code === 'string' && error.code.startsWith('OS_PLUG_GLOC_')) {
-    return error.code;
+  if (typeof error.code === 'string') {
+    const normalizedCode = error.code.replaceAll('-', '_');
+    if (KNOWN_GEOLOCATION_CODES.has(normalizedCode)) return normalizedCode;
   }
 
   // Map Capacitor numeric error codes
@@ -350,22 +360,17 @@ export function mapGeolocationError(error) {
       return ERROR_CODES.OS_PLUG_GLOC_0007;
     }
 
-    // Priority 2: Both network and location off
-    if (msg.includes('location') && msg.includes('off')) {
-      return ERROR_CODES.OS_PLUG_GLOC_0017;
-    }
-
-    // Priority 3: Permission denied
+    // Priority 2: Permission denied
     if (msg.includes('permission') || msg.includes('denied')) {
       return ERROR_CODES.OS_PLUG_GLOC_0003;
     }
 
-    // Priority 4: Timeout
+    // Priority 3: Timeout
     if (msg.includes('timeout')) {
       return ERROR_CODES.OS_PLUG_GLOC_0010;
     }
 
-    // Priority 5: General unavailability
+    // Priority 4: General unavailability
     if (msg.includes('location')) {
       return ERROR_CODES.OS_PLUG_GLOC_0002;
     }

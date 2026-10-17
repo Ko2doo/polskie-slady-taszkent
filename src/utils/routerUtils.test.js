@@ -18,10 +18,8 @@ describe('getRawPathFromRoute', () => {
     expect(getRawPathFromRoute({ path: { after: 42 } })).toBe('');
   });
 
-  // BUG: `if (!result) '';` is missing `return`, so a missing result throws a TypeError.
-  // Every screen calls this with `route?.result`, which can be undefined.
-  // Remove `.fails` once the guard is fixed.
-  it.fails('returns an empty string for a missing result', () => {
+  // Every screen calls this with `route?.result`, which can be undefined
+  it('returns an empty string for a missing result', () => {
     expect(getRawPathFromRoute(undefined)).toBe('');
     expect(getRawPathFromRoute(null)).toBe('');
   });

@@ -31,20 +31,35 @@ describe('setStorage / getStorage', () => {
     expect(await getStorage('key')).toEqual(value);
   });
 
-  it('stores objects as JSON and the rest as text', async () => {
+  it('stores every value as JSON', async () => {
     await setStorage('object', { a: 1 });
     await setStorage('flag', true);
+    await setStorage('word', 'en');
 
     expect(Preferences.set).toHaveBeenCalledWith({ key: 'object', value: '{"a":1}' });
     expect(Preferences.set).toHaveBeenCalledWith({ key: 'flag', value: 'true' });
+    expect(Preferences.set).toHaveBeenCalledWith({ key: 'word', value: '"en"' });
   });
 
-  // BUG: a string that looks like JSON comes back as another type ('42' -> 42, 'true' -> true)
-  // (see BUGS.md). Remove `.fails` once fixed.
-  it.fails('a string that looks like JSON comes back as a string', async () => {
-    await setStorage('key', '42');
+  it.each(['42', 'true', 'null', '{"a":1}'])('the string %s comes back as a string', async (text) => {
+    await setStorage('key', text);
 
-    expect(await getStorage('key')).toBe('42');
+    expect(await getStorage('key')).toBe(text);
+  });
+
+  // Values saved by the versions that stored strings as raw text
+  it.each([
+    ['en', 'en'],
+    ['layoutRows', 'layoutRows'],
+    ['true', true],
+  ])('a value saved by an older version as %s still reads back as before', async (raw, expected) => {
+    await Preferences.set({ key: 'old', value: raw });
+
+    expect(await getStorage('old')).toEqual(expected);
+  });
+
+  it('a successful write reports true', async () => {
+    await expect(setStorage('key', 'x')).resolves.toBe(true);
   });
 
   it('a missing key returns the fallback (null by default)', async () => {
@@ -65,17 +80,17 @@ describe('setStorage / getStorage', () => {
     expect(await getStorage('key', 'fallback')).toBe('fallback');
   });
 
-  it('a failed write does not throw', async () => {
+  it('a failed write does not throw, it reports false', async () => {
     Preferences.set.mockRejectedValueOnce(new Error('storage full'));
 
-    await expect(setStorage('key', 'x')).resolves.toBeUndefined();
+    await expect(setStorage('key', 'x')).resolves.toBe(false);
   });
 
-  it('an object that can not be serialized does not throw', async () => {
+  it('an object that can not be serialized does not throw, it reports false', async () => {
     const circular = {};
     circular.self = circular;
 
-    await expect(setStorage('key', circular)).resolves.toBeUndefined();
+    await expect(setStorage('key', circular)).resolves.toBe(false);
     expect(Preferences.set).not.toHaveBeenCalled();
   });
 });

@@ -3,6 +3,8 @@ export default {
   articleNotFound: 'Artykuł nie został znaleziony!',
   notFound: 'Nic nie znaleziono',
   toastBtn: 'Zamknij',
+  settingsSaveFailed: 'Nie udało się zapisać ustawień. Spróbuj ponownie.',
+  locationPermissionRequestFailed: 'Nie udało się poprosić o dostęp do lokalizacji',
   gpsInitFailed: 'Nie udało się zainicjować GPS',
   gpsError: 'Błąd GPS',
   gpsPositionNotAvailable: 'Pozycja GPS niedostępna',

@@ -127,6 +127,26 @@ describe('a theme switch', () => {
     expect(navigation.restoreMarkers).toHaveBeenCalled();
   });
 
+  it('restores the route given by getCurrentRoute instead of the manual one', async () => {
+    const gpsRoute = { type: 'Feature', gps: true };
+    navigation.currentRoute = null;
+    const controller = createThemeController({
+      map,
+      builder,
+      customPointsBuilder,
+      navigation,
+      getCurrentRoute: () => gpsRoute,
+      i18n: { language: 'pl', t: (k) => k },
+    });
+    controller.init();
+    switchTo(true);
+    await settle();
+
+    map.fireIdle();
+
+    expect(builder.addNavigationRoute).toHaveBeenCalledWith(gpsRoute);
+  });
+
   it('restores once, not on every later idle', async () => {
     const controller = createController();
     controller.init();
@@ -162,9 +182,7 @@ describe('a theme switch', () => {
     expect(builder.setStyleVersion).toHaveBeenCalledWith(2);
   });
 
-  // BUG: the outdated idle handler returns early without unsubscribing, so every quick switch
-  // leaves one listener on the map for good (see BUGS.md). Remove `.fails` once fixed.
-  it.fails('two quick switches leave no idle listener behind', async () => {
+  it('two quick switches leave no idle listener behind', async () => {
     const controller = createController();
     controller.init();
     switchTo(true);

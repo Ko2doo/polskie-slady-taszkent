@@ -106,19 +106,20 @@ describe('findRoute', () => {
     expect(loader.getCacheStats().size).toBe(1);
   });
 
-  it('serves the opposite direction from the same cache entry', async () => {
+  // The graph has one-way edges, so the way back is searched, then cached for that direction
+  it('searches the opposite direction once, then serves it from the cache', async () => {
     const engine = await loader.initNavigation();
     const search = vi.spyOn(engine, 'findRoute');
 
     loader.findRoute(...FROM, ...TO);
     loader.findRoute(...TO, ...FROM);
+    loader.findRoute(...TO, ...FROM);
 
-    expect(search).toHaveBeenCalledTimes(1);
+    expect(search).toHaveBeenCalledTimes(2);
+    expect(search).toHaveBeenLastCalledWith(...TO, ...FROM);
   });
 
-  // BUG: the cache key is direction-free, so B→A gets the cached A→B line, which starts at A
-  // (see BUGS.md). Remove `.fails` once fixed.
-  it.fails('a route from the cache starts at the requested origin', async () => {
+  it('a route back starts at the requested origin', async () => {
     await loader.initNavigation();
 
     loader.findRoute(...FROM, ...TO);
@@ -155,20 +156,30 @@ describe('route cache', () => {
   const destination = (index) => [69 + index / 1000, 41];
   const route = (index) => ({ success: true, id: index });
 
-  it('stores and finds a route in both directions', () => {
+  // One-way edges: the way back is the engine's own answer, not the way there reversed
+  it('stores a route for its direction only', () => {
     loader.cacheRoute(1, 2, 3, 4, route(1));
 
     expect(loader.findCachedRoute(1, 2, 3, 4)).toEqual(route(1));
-    expect(loader.findCachedRoute(3, 4, 1, 2)).toEqual(route(1));
+    expect(loader.findCachedRoute(3, 4, 1, 2)).toBeNull();
     expect(loader.findCachedRoute(1, 2, 3, 5)).toBeNull();
   });
 
-  it('caching the same pair again replaces it without growing', () => {
+  it('caching the same direction again replaces it without growing', () => {
     loader.cacheRoute(1, 2, 3, 4, route(1));
-    loader.cacheRoute(3, 4, 1, 2, route(2));
+    loader.cacheRoute(1, 2, 3, 4, route(2));
 
     expect(loader.getCacheStats().size).toBe(1);
     expect(loader.findCachedRoute(1, 2, 3, 4)).toEqual(route(2));
+  });
+
+  it('the two directions of a pair are two entries', () => {
+    loader.cacheRoute(1, 2, 3, 4, route(1));
+    loader.cacheRoute(3, 4, 1, 2, route(2));
+
+    expect(loader.getCacheStats().size).toBe(2);
+    expect(loader.findCachedRoute(1, 2, 3, 4)).toEqual(route(1));
+    expect(loader.findCachedRoute(3, 4, 1, 2)).toEqual(route(2));
   });
 
   it('evicts the least recently used route when full', () => {

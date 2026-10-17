@@ -37,7 +37,9 @@ the time this was written. Read this before touching anything marker- or photo-r
   `services/mapPointsBuilder.js` for historical places; shared popup HTML/escaping lives in
   `services/mapPopupHtml.js`).
 - `components/CustomPoints/CustomPointsMapEditorDialog.svelte` — the actual marker editor
-  (title, description, photos, delete). Not to be confused with
+  (title, description, photos, delete). Android back closes its photo-source menu or delete
+  question first, then the editor itself as its cancel does (`photoSession.discard()`).
+  Not to be confused with
   `components/CustomPoints/CustomPointsDialog.svelte`, a one-time intro dialog shown before
   a user's first marker (state in `lib/state/customPointsDialogState.svelte.js`).
 - `PhotoThumb.svelte` resolves one photo and shows a placeholder while loading;

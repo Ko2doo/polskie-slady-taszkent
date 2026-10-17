@@ -8,6 +8,8 @@ import {
   setPanel,
   withPanel,
 } from '@/lib/state/panel.svelte.js';
+import { get } from 'svelte/store';
+import { overlayController, overlayState } from '@/store/ui/overlayController';
 
 const content = () => {};
 
@@ -87,5 +89,44 @@ describe('panelState', () => {
 
     expect(panelState.side).toBe('right');
     expect(panelState.title).toBe('B');
+  });
+});
+
+describe('the Android back button', () => {
+  const stack = () => get(overlayState).stack;
+
+  it('closes the open panel and leaves the stack empty', () => {
+    openPanel();
+    expect(stack()).toHaveLength(1);
+
+    expect(overlayController.tryClose()).toBe(true);
+
+    expect(panelState.isOpen).toBe(false);
+    expect(stack()).toHaveLength(0);
+  });
+
+  it('the panel registers once, however it is opened, and every way of closing unregisters', () => {
+    openPanel();
+    openPanel({ title: 'Filters' });
+    patchPanel({ isOpen: true });
+    expect(stack()).toHaveLength(1);
+
+    closePanel();
+    expect(stack()).toHaveLength(0);
+
+    setPanel({ isOpen: true });
+    patchPanel({ isOpen: false });
+    expect(stack()).toHaveLength(0);
+  });
+
+  // e.g. leaving the map screen through the tab bar while the filters panel is open
+  it("a screen's withPanel cleanup with the panel open unregisters it", () => {
+    const dispose = withPanel({ title: 'Filters' });
+    openPanel();
+
+    dispose();
+
+    expect(panelState.isOpen).toBe(false);
+    expect(stack()).toHaveLength(0);
   });
 });

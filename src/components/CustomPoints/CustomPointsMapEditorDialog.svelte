@@ -5,6 +5,7 @@
   import PhotoThumb from "@/components/CustomPoints/PhotoThumb.svelte";
   import { createPhotoSession } from "@/lib/state/photoSession.svelte";
   import { errorToast } from "@/store/ui/errorToast";
+  import { overlayController } from "@/store/ui/overlayController";
   import { LIMITS } from "@/services/customPointsFormat";
   import { createLogger, IS_DEBUG } from "@/utils/debugMode";
   import { createId } from "@/utils/uuid";
@@ -112,6 +113,30 @@
     resetForm();
     onCloseModal();
   }
+
+  // Android back closes the top-most layer first: the photo source menu, then the delete
+  // confirmation, then the editor itself — which then behaves like its cancel button (the photos
+  // of a new point are discarded)
+  function handleBack() {
+    if (isActionsOpened) {
+      isActionsOpened = false;
+      return;
+    }
+    if (isDeleteDialogOpened) {
+      isDeleteDialogOpened = false;
+      return;
+    }
+    handleClose();
+  }
+
+  // On the back-button overlay stack while open; the cleanup runs on close and also when the map
+  // screen goes away with the editor still open, so no dead overlay is left behind
+  $effect(() => {
+    if (!opened) return;
+
+    const overlayId = overlayController.register(handleBack);
+    return () => overlayController.unregister(overlayId);
+  });
 
   async function handlePick(kind) {
     isActionsOpened = false;

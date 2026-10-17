@@ -75,4 +75,14 @@ describe('markFirstLaunchCompleted', () => {
 
     expect(get(nextLaunch.APP_FIRST_LAUNCH_STORAGE_VAL)).toBe(false);
   });
+
+  // The wizard shows an error and stays open so the user can try again
+  it('a failed save throws and keeps the onboarding shown', async () => {
+    await firstLaunch.initFirstLaunch();
+    Preferences.set.mockRejectedValueOnce(new Error('storage full'));
+
+    await expect(firstLaunch.markFirstLaunchCompleted()).rejects.toThrow();
+
+    expect(showWizard()).toBe(true);
+  });
 });

@@ -108,6 +108,7 @@ export default {
       step2Alert: 'Разрешение отклонено. Вы можете включить его позже в настройках приложения.',
       step: 'Шаг',
       stepOf: 'из',
+      logoAlt: 'Логотип приложения',
     },
   },
   map: {
@@ -193,7 +194,14 @@ export default {
       hint: 'Открывает настройки разрешений выданных приложению.',
     },
   },
+  splash: {
+    version: 'Версия: {{version}}',
+    logoAlt: 'Логотип приложения',
+  },
   more: {
+    appVersion: 'Версия приложения: {{version}}',
+    poweredBy: 'Сделано на',
+    logoAlt: 'Логотип проекта',
     menuListItem: {
       settingsTitle: 'Настройки',
       aboutTitle: 'О проекте',

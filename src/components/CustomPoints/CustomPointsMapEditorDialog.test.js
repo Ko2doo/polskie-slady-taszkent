@@ -4,6 +4,8 @@ import { chooseFromGallery, PhotoPickerError, takePhoto } from '@/capacitor/serv
 import { LIMITS } from '@/services/customPointsFormat';
 import { deletePhotoFiles, deletePointPhotos, pruneUnreferenced, savePhoto } from '@/services/customPointsPhotos';
 import { errorToast } from '@/store/ui/errorToast';
+import { get } from 'svelte/store';
+import { overlayController, overlayState } from '@/store/ui/overlayController';
 import { i18nStub } from '@/test/i18nStub';
 import { reactiveProps } from '@/test/reactiveProps.svelte.js';
 import { isId } from '@/utils/uuid';
@@ -328,5 +330,74 @@ describe('adding photos', () => {
     await settle();
 
     expect(button('ui:map:mapEditor:photosAdd').disabled).toBe(true);
+  });
+});
+
+describe('the Android back button', () => {
+  const stack = () => get(overlayState).stack;
+  const back = () => {
+    overlayController.tryClose();
+    flushSync();
+  };
+  // Closes the editor by turning `opened` off, the way Map.svelte's edit-mode controller does
+  const renderClosable = (overrides = {}) =>
+    render({ onCloseModal: vi.fn(() => (props.opened = false)), ...overrides });
+
+  it('is on the overlay stack only while the editor is open', () => {
+    render({ opened: false });
+    expect(stack()).toHaveLength(0);
+
+    props.opened = true;
+    flushSync();
+    expect(stack()).toHaveLength(1);
+
+    props.opened = false;
+    flushSync();
+    expect(stack()).toHaveLength(0);
+  });
+
+  // Same as cancel: the photos taken for a point that was never saved must not stay on the disk
+  it('works like cancel: the unsaved point loses its photos and the editor closes', async () => {
+    renderClosable();
+    type(titleInput(), 'Dom');
+
+    back();
+    await settle();
+
+    expect(deletePointPhotos).toHaveBeenCalledWith(expect.any(String));
+    expect(props.onCloseModal).toHaveBeenCalled();
+    expect(stack()).toHaveLength(0);
+  });
+
+  it('closes the photo source menu first, the editor on the next press', () => {
+    renderClosable();
+    click(button('ui:map:mapEditor:photosAdd'));
+
+    back();
+    expect(props.onCloseModal).not.toHaveBeenCalled();
+    expect(stack()).toHaveLength(1);
+
+    back();
+    expect(props.onCloseModal).toHaveBeenCalled();
+  });
+
+  it('closes the delete question first, without deleting', () => {
+    renderClosable({ editingPoint: POINT });
+    click(toolbarLinks()[0]);
+
+    back();
+
+    expect(props.onDelete).not.toHaveBeenCalled();
+    expect(props.onCloseModal).not.toHaveBeenCalled();
+    expect(stack()).toHaveLength(1);
+  });
+
+  it('leaving the screen with the editor open leaves no overlay behind', () => {
+    render();
+
+    unmount(component);
+    component = null;
+
+    expect(stack()).toHaveLength(0);
   });
 });

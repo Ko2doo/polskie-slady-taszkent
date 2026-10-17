@@ -10,6 +10,7 @@ vi.mock('svelte', async (importOriginal) => {
   return {
     ...actual,
     mount: vi.fn((component, options) => {
+      if (deps.mountFails) throw new Error('mount failed');
       deps.mounts.push(options);
       deps.order.push('mount');
       return {};
@@ -17,7 +18,12 @@ vi.mock('svelte', async (importOriginal) => {
   };
 });
 vi.mock('@/lib/theme/themeManager', () => ({
-  getThemeManager: () => ({ init: vi.fn(async () => deps.order.push('theme')) }),
+  getThemeManager: () => ({
+    init: vi.fn(async () => {
+      if (deps.themeFails) throw new Error('theme init failed');
+      deps.order.push('theme');
+    }),
+  }),
 }));
 vi.mock('@capacitor/splash-screen', () => ({
   SplashScreen: { hide: vi.fn(async () => deps.order.push('splash')) },
@@ -35,6 +41,8 @@ async function boot() {
 beforeEach(() => {
   deps.mounts.length = 0;
   deps.order = [];
+  deps.themeFails = false;
+  deps.mountFails = false;
   CapApp.getInfo.mockReset().mockResolvedValue({ version: '1.2.3', name: 'Polskie Ślady (native)' });
   document.body.innerHTML = '<div id="app"></div>';
 });
@@ -70,5 +78,44 @@ describe('main.js', () => {
     await boot();
 
     expect(deps.mounts[0].props).toMatchObject({ version: '1.2.3', appName: 'Polskie Ślady (native)' });
+  });
+
+  it('on a device: asks the native side once for both name and version', async () => {
+    vi.spyOn(Capacitor, 'isNativePlatform').mockReturnValue(true);
+
+    await boot();
+
+    expect(CapApp.getInfo).toHaveBeenCalledTimes(1);
+  });
+});
+
+// launchAutoHide is off: if bootstrap stopped half-way, the native splash would never go away
+describe('main.js when a step fails', () => {
+  it('the app info failing: starts with the build name and version', async () => {
+    vi.spyOn(Capacitor, 'isNativePlatform').mockReturnValue(true);
+    CapApp.getInfo.mockRejectedValue(new Error('bridge down'));
+
+    await boot();
+
+    expect(deps.mounts[0].props).toMatchObject({ version: __APP_VERSION__, appName: __APP_NAME__ });
+    expect(deps.order).toEqual(['theme', 'mount', 'splash']);
+  });
+
+  it('the theme failing: still mounts and hides the splash', async () => {
+    vi.spyOn(Capacitor, 'isNativePlatform').mockReturnValue(false);
+    deps.themeFails = true;
+
+    await boot();
+
+    expect(deps.order).toEqual(['mount', 'splash']);
+  });
+
+  it('mounting failing: the splash is hidden anyway', async () => {
+    vi.spyOn(Capacitor, 'isNativePlatform').mockReturnValue(false);
+    deps.mountFails = true;
+
+    await boot();
+
+    expect(deps.order).toEqual(['theme', 'splash']);
   });
 });

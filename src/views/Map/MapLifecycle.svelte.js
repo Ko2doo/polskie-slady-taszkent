@@ -22,6 +22,13 @@ import { PMTILES_PATH, PMTILES_KEY, INITIAL_VIEW, MAP_BOUNDS } from './MapConsta
 
 const lifecycleLogger = createLogger('MapLifecycle');
 
+// The 'pmtiles' protocol is global to MapLibre, but two map screens can briefly overlap: one
+// still loading after the user left it, the next one already mounted. Each registration counts
+// as a user, and the protocol is only removed when the last one is cleaned up — otherwise the
+// late cleanup of the old screen would pull the protocol out from under the new map. Any
+// registered instance serves the same bundled file, so whichever registered last is fine.
+let protocolUsers = 0;
+
 /**
  * Initialize PMTiles source
  *
@@ -45,6 +52,7 @@ export async function initializePMTiles(i18n) {
     const protocol = new Protocol();
     maplibreGL.addProtocol('pmtiles', protocol.tile);
     protocol.add(pmtiles);
+    protocolUsers += 1;
 
     IS_DEBUG && lifecycleLogger.log('PMTiles loaded successfully');
     return protocol;
@@ -172,9 +180,10 @@ export function cleanupMap({ map, protocol, builder, customPointsBuilder, naviga
     map.remove();
   }
 
-  // 3. Remove PMTiles protocol
+  // 3. Remove PMTiles protocol, once no other map screen still uses it
   if (protocol) {
-    maplibreGL.removeProtocol('pmtiles');
+    protocolUsers = Math.max(0, protocolUsers - 1);
+    if (protocolUsers === 0) maplibreGL.removeProtocol('pmtiles');
   }
 
   IS_DEBUG && lifecycleLogger.log('Cleanup complete');

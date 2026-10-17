@@ -49,15 +49,22 @@ describe('InMemoryPMTilesSource', () => {
     });
   });
 
-  // BUG: a Uint8Array view is stored as `data.buffer`, ignoring its byteOffset/byteLength, so a
-  // subarray (e.g. a slice of a larger download) serves bytes from the wrong position.
-  // The app currently passes an ArrayBuffer, so this is latent. Remove `.fails` once fixed.
-  it.fails('respects the byteOffset of a Uint8Array view', async () => {
+  // e.g. a slice of a larger download
+  it('respects the byteOffset of a Uint8Array view', async () => {
     const view = bytes(0, 0, 10, 11, 12).subarray(2);
     const source = new InMemoryPMTilesSource('k', view);
 
     const { data } = await source.getBytes(0, 2);
 
     expect([...new Uint8Array(data)]).toEqual([10, 11]);
+  });
+
+  it('a range never reaches past the end of a view into a larger buffer', async () => {
+    const view = bytes(1, 2, 3, 4, 5).subarray(1, 3);
+    const source = new InMemoryPMTilesSource('k', view);
+
+    const { data } = await source.getBytes(1, 10);
+
+    expect([...new Uint8Array(data)]).toEqual([3]);
   });
 });

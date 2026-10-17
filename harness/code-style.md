@@ -128,3 +128,46 @@ fields are local-only vs. exported) — the example is what actually teaches a f
 A short inline comment explaining a non-obvious *why* directly above the code it explains is
 expected everywhere, independent of the JSDoc-example rule above — see the comment about
 Konsta's `Popup` transform forcing `PhotoViewer` to use a portal.
+
+## Leave old code alone: legacy zones
+
+The code base has two layers. The newer one (custom markers, storage, photos, the builders,
+`createUIProfile`) follows this harness; an older layer predates it and doesn't. "Write code
+that reads like the surrounding code" is the right default **only for formatting and naming**
+(quote style, indentation, comment density) — in a legacy file, *patterns* still come from the
+harness and the reference implementations below, never from the file's own neighbours.
+
+### The legacy zones
+
+Don't copy a pattern from these files into new code. Each line says what's wrong there, so you
+know what *not* to repeat; the `BUG-N` ids are in `BUGS.md` while it exists.
+
+| File | Don't copy |
+| --- | --- |
+| `views/Map/Map.svelte` | fat async `onMount` glue wiring modules through closures, a throw-away theme controller created just to pick the first style |
+| `views/Map/MapNavigationGPS.svelte.js` | one 700+-line module mixing GPS tracking, routing, map markers and toasts |
+| `views/Map/MapTheme.svelte.js` | commented-out code left in `init`/`reapplyOverlays`; restores overlays by calling into every builder/controller directly |
+| `components/LangSwitcher.svelte` | reads the deprecated global `event` (`window.event`) instead of the handler's own argument; commented-out `console.log`s |
+| `store/ui/errorToast.js` | English fallback texts in `normalizeError` (`'Unknown error'`), a 400-line store mixing queueing, dedup and rate limiting — *use* it as the one error channel; just don't copy its internals |
+
+### Where to copy patterns from instead
+
+- Data integrity, file I/O, bridge-cost discipline: `services/customPointsFormat.js`,
+  `customPointsStorage.js`, `customPointsPhotos.js`, `capacitor/utils/appFiles.js`.
+- Reactive state: `lib/state/createUIProfile.svelte.js` and its three specializations,
+  `photoSession.svelte.js`, `createToggleOverlay.js` as used by `PhotoSlider.svelte`.
+- Resource lifecycle (urls, listeners released, ref-counting): `customPointsPhotos.js`,
+  `PhotoSlider.svelte` / `PhotoViewer.svelte`.
+- Builders: `services/mapPointsBuilder.js`, `customPointsBuilder.js`.
+
+### What touching a legacy file means
+
+- Agreed strategy (2026-10-17): bug fixes from `BUGS.md` first, then **every file in the
+  table is brought up to the harness** in separate, explicitly-scoped refactoring steps —
+  the most fragile places first (`Map.svelte`'s mount/teardown, the navigation ↔ theme
+  wiring, `MapNavigationGPS`). The goal is an empty table.
+- Until then, a change in a legacy file stays scoped to its task: fix the bug or add the
+  feature with harness-conforming code, and don't rewrite the surrounding old code as a
+  drive-by (see the non-regression rule in `harness/testing.md`).
+- A file leaves the table in the change that removes its last listed problem — update the
+  row (or delete it) in that same change, like any other harness drift.

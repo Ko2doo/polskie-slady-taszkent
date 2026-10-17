@@ -61,3 +61,15 @@ list are meant to describe **100% of `src/`**, not just the parts covered by a s
 deep-dive. If a change adds a new top-level directory, a new kind of file, or changes what
 belongs where, update `architecture.md` in that same change — don't let it only reflect
 whichever features happened to get a dedicated subsystem file.
+
+The tree at the top of that section lists every directory of `src/` and the entry-point
+files at its root — nothing else. `src/architectureTree.test.js` compares it with the real
+`src/`, so a new, renamed or removed directory (or a new root file) fails the suite until
+the tree is updated; add a one-line `# comment` for a new directory and, if it brings rules
+of its own, a bullet under "Rules per directory". Don't add individual files inside
+directories to the tree — that's what the prose and the subsystem files are for.
+
+The repo root works the same way: the tree at the top of `harness/repository-layout.md` lists
+every tracked root entry, and `src/repositoryTree.test.js` checks it against `git ls-files` —
+a new root file or directory (or a new subdirectory of one the tree expands) needs its line
+there, plus a prose entry further down that file if it has rules of its own.

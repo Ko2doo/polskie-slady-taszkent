@@ -170,17 +170,36 @@ describe('mapGeolocationError', () => {
     expect(mapGeolocationError({})).toBe(ERROR_CODES.OS_PLUG_GLOC_0002);
   });
 
-  // BUG: the plugin's codes are hyphenated ('OS-PLUG-GLOC-0007'), the mapper only recognizes
-  // 'OS_PLUG_GLOC_*', so real native codes fall through to message guessing (see BUGS.md).
-  // Remove `.fails` once fixed.
-  it.fails('maps the native plugin code OS-PLUG-GLOC-0007', () => {
+  // The plugin's codes are hyphenated ('OS-PLUG-GLOC-0007'), the app's are underscored
+  it('maps the native plugin code OS-PLUG-GLOC-0007', () => {
     expect(mapGeolocationError(pluginError('OS-PLUG-GLOC-0007', 'Location services are not enabled.'))).toBe(
       ERROR_CODES.OS_PLUG_GLOC_0007,
     );
   });
 
-  // The message of the plugin's timeout happens to contain "timeout", so it is mapped right by luck
-  it('maps the native timeout by its message', () => {
+  it('maps the native code even when its message would say otherwise', () => {
+    expect(mapGeolocationError(pluginError('OS-PLUG-GLOC-0017', 'Unrelated text'))).toBe(ERROR_CODES.OS_PLUG_GLOC_0017);
+  });
+
+  // 0018 (permissions not declared in the manifest) is not in ERROR_CODES and has no translation
+  it('an unknown native code falls back to the message rules, not passed through', () => {
+    expect(mapGeolocationError(pluginError('OS-PLUG-GLOC-0018', 'Location permissions are not declared'))).toBe(
+      ERROR_CODES.OS_PLUG_GLOC_0003,
+    );
+    expect(mapGeolocationError(pluginError('OS-PLUG-GLOC-0018', 'Something else'))).toBe(
+      ERROR_CODES.OS_PLUG_GLOC_0002,
+    );
+  });
+
+  it('an unknown app-style code is not passed through either', () => {
+    expect(mapGeolocationError({ code: 'OS_PLUG_GLOC_9999' })).toBe(ERROR_CODES.OS_PLUG_GLOC_0002);
+  });
+
+  it("another plugin's code is not taken for a geolocation one", () => {
+    expect(mapGeolocationError({ code: ERROR_CODES.OS_PLUG_FILE_0008 })).toBe(ERROR_CODES.OS_PLUG_GLOC_0002);
+  });
+
+  it('maps the native timeout by its code', () => {
     expect(
       mapGeolocationError(
         pluginError('OS-PLUG-GLOC-0010', 'Could not obtain location in time. Try with a higher timeout.'),
@@ -208,12 +227,16 @@ describe('isLocationServicesEnabled', () => {
     expect(await isLocationServicesEnabled()).toBe(true);
   });
 
-  // BUG: same as mapGeolocationError above — the device says the services are off, the app thinks
-  // they are on. Remove `.fails` once fixed.
-  it.fails('the native "services not enabled" error means off', async () => {
+  it('the native "services not enabled" error means off', async () => {
     Geolocation.getCurrentPosition.mockRejectedValueOnce(
       pluginError('OS-PLUG-GLOC-0007', 'Location services are not enabled.'),
     );
+
+    expect(await isLocationServicesEnabled()).toBe(false);
+  });
+
+  it('the native "network and location off" error means off', async () => {
+    Geolocation.getCurrentPosition.mockRejectedValueOnce(pluginError('OS-PLUG-GLOC-0017', 'Both turned off'));
 
     expect(await isLocationServicesEnabled()).toBe(false);
   });

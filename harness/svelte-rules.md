@@ -5,8 +5,8 @@
 Use Svelte 5 runes throughout: `$state`, `$derived`/`$derived.by`, `$effect`, `$props`,
 `$bindable`. Don't write the Svelte 4 style (`export let`, top-level reactive `$:`
 statements, `on:click` instead of `onclick`) in new or substantially-rewritten code, even if
-an older file nearby still uses it — see "Leave old code alone" below for what "old file"
-means in practice. Before writing non-trivial Svelte code, confirm against the currently
+an older file nearby still uses it — see "Leave old code alone" in `harness/code-style.md`
+for what "old file" means in practice. Before writing non-trivial Svelte code, confirm against the currently
 installed Svelte version (`package.json`, per the root rule) that the API you're about to
 use hasn't moved — Svelte ships changes often, and a remembered API from an older or newer
 version can be subtly wrong.
@@ -40,7 +40,7 @@ them as a template for reactive state.
 The project's own reference example of this pattern, generalized properly, is
 `lib/state/createUIProfile.svelte.js` — one small reusable "profile" (`set`/`patch`/`reset`/
 `withProfile`) that `navbar.svelte.js`, `panel.svelte.js`, and `bottomTabbarNav.svelte.js`
-each specialize for their own domain instead of three independent, slightly-different
+(for its animation) each specialize for their own domain instead of three independent, slightly-different
 reimplementations of the same shape. See `harness/state-management.md` for the full catalog
 of `lib/state/` and the singleton-vs-factory-vs-local-`$state` decision in detail — that
 file is the authority on *which* existing piece to reuse or extend; this file is about the

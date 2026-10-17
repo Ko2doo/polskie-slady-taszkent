@@ -28,9 +28,16 @@ const filterIds = Object.values(MARKER_FILTER);
  * (the same approach as the Handbook layout store).
  */
 let selected = $state(MARKER_FILTER.ALL);
+// Set once the user changes the filter: a restore that arrives later must not undo their pick
+let isPickedByUser = false;
 
 (async function hydrate() {
   const stored = await getStorage(STORAGE_KEY);
+
+  if (isPickedByUser) {
+    IS_DEBUG && mapMarkerFilterLogger.log('Filter already picked by the user, restore skipped');
+    return;
+  }
 
   // Ignore anything unknown (e.g. a value saved by another app version)
   if (!filterIds.includes(stored)) return;
@@ -53,6 +60,7 @@ export const mapMarkerFilter = {
     if (!filterIds.includes(id) || id === selected) return;
 
     selected = id;
+    isPickedByUser = true;
     setStorage(STORAGE_KEY, id);
 
     IS_DEBUG && mapMarkerFilterLogger.log('Filter selected:', id);

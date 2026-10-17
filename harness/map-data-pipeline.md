@@ -25,7 +25,10 @@ Capacitor's local web server / `file://` doesn't reliably support HTTP Range req
 the default pmtiles `FetchSource` relies on. The trade-off is RAM — the archive lives in
 memory for the map's lifetime — so **keep the `.pmtiles` file small** (city bbox only, sane
 max zoom). Any new or larger extract is a performance change, see `harness/performance.md`.
-The protocol is registered as `pmtiles://` with key `PMTILES_KEY` and removed on teardown.
+The protocol is registered as `pmtiles://` with key `PMTILES_KEY` and removed on teardown —
+reference-counted in `MapLifecycle.svelte.js`, because a map screen left while still loading
+is cleaned up late, possibly after the next screen registered its own; only the last cleanup
+removes it.
 
 ### How the style is built
 
@@ -48,7 +51,12 @@ Steps (also in `scripts/navigationGraph/instructions.txt`), run from the repo ro
    CLI tool, not a project dependency; don't add it to `package.json`).
 3. **Build** — `node scripts/navigationGraph/build-navigation-graph.mjs` →
    `scripts/navigationGraph/dist/navigation-graph.json` and `navigation-graph-compact.json`
-   (`{ nodes, edges }`, nodes deduplicated by coordinates rounded to 6 decimals).
+   (`{ nodes, edges }`, nodes deduplicated by coordinates rounded to 6 decimals). Edges are
+   directed; every way gets both directions **for a pedestrian**: OSM `oneway=yes` on a road
+   restricts vehicles, not people on foot, so a way is one-way only with `oneway:foot`, or
+   when it is itself a `footway`/`path`/`steps`/`pedestrian` tagged `oneway` (`-1` reverses
+   it). `navigation.test.js` checks the shipped graph stays walkable both ways and connects
+   every pair of historical places.
 4. **Optimize** — `optimize-graph.mjs` → `dist/optimized/navigation-graph-optimized.json`.
 5. *(Optional)* `compress-coordinates.mjs` → `dist/navigation-graph-final.json`. The app
    does **not** currently load this variant.

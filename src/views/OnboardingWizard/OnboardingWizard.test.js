@@ -3,6 +3,7 @@ import { flushSync, mount, unmount } from 'svelte';
 import { writable } from 'svelte/store';
 import { openAppSettings, requestLocationPermission } from '@/capacitor/services/locationPermission';
 import { ERROR_CODES } from '@/lib/errors/errorCodes';
+import { bottomTabbarState, resetTabbar } from '@/lib/state/bottomTabbarNav.svelte.js';
 import { errorToast } from '@/store/ui/errorToast';
 import { i18nStub } from '@/test/i18nStub';
 import OnboardingWizard from '@/views/OnboardingWizard/OnboardingWizard.svelte';
@@ -58,6 +59,7 @@ async function toPermissionStep() {
 }
 
 beforeEach(() => {
+  resetTabbar();
   requestLocationPermission.mockReset();
   openAppSettings.mockClear();
   errorToast.error.mockClear();
@@ -218,8 +220,7 @@ describe('failures', () => {
     expect(text()).toContain('ui:dialog:onboarding:step2Title');
   });
 
-  // BUG: the two fallback messages are hard-coded English (see BUGS.md). Remove `.fails` once fixed.
-  it.fails('the failure messages are translated', async () => {
+  it('the failure messages are translated', async () => {
     makeCompleted.mockRejectedValueOnce(new Error('storage down'));
     requestLocationPermission.mockRejectedValueOnce(new Error('bridge down'));
     await toPermissionStep();
@@ -227,8 +228,38 @@ describe('failures', () => {
     await click(button('ui:buttons:skip'));
     await click(button('ui:buttons:allow'));
 
-    for (const [message] of errorToast.error.mock.calls) {
-      expect(message).toMatch(/^errors:/);
-    }
+    expect(errorToast.error.mock.calls.map(([message]) => message)).toEqual([
+      'errors:settingsSaveFailed',
+      'errors:locationPermissionRequestFailed',
+    ]);
+  });
+
+  it('the logo has a translated alt text', async () => {
+    appState.set(true);
+    render();
+    await settle();
+
+    expect(document.body.querySelector('img[src="/logo.png"]').getAttribute('alt')).toBe(
+      'ui:dialog:onboarding:logoAlt',
+    );
+  });
+});
+
+describe('the tab bar', () => {
+  it('is hidden while the wizard is open and comes back once it is done', async () => {
+    await toPermissionStep();
+    expect(bottomTabbarState.isVisible).toBe(false);
+
+    await click(button('ui:buttons:skip'));
+
+    expect(makeCompleted).toHaveBeenCalled();
+    expect(bottomTabbarState.isVisible).toBe(true);
+  });
+
+  it('is left alone for a returning user (no wizard)', () => {
+    appState.set(false);
+    render();
+
+    expect(bottomTabbarState.isVisible).toBe(true);
   });
 });

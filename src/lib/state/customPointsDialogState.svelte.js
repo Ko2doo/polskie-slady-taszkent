@@ -12,25 +12,12 @@ export function customPointsDialogState() {
   let seen = $state(null);
   const trigger = createToggle();
 
+  // Only a stored `true` counts as seen. getStorage never throws: an unreadable storage
+  // returns null, so the dialog is shown
   async function load() {
-    try {
-      const isDialogCompleted = await getStorage(DIALOG_KEY);
+    seen = (await getStorage(DIALOG_KEY)) === true;
 
-      if (isDialogCompleted === true) {
-        seen = true;
-        IS_DEBUG && dialogInitLogger.log('Dialog start detected - showing dialog');
-
-        return;
-      } else {
-        seen = false;
-        IS_DEBUG && dialogInitLogger.log('Dialog already seen - hiding dialog');
-
-        return;
-      }
-    } catch (error) {
-      IS_DEBUG && dialogInitLogger.error('Failed to initialize dialog frist start state:', error);
-      seen = false;
-    }
+    IS_DEBUG && dialogInitLogger.log(seen ? 'Dialog already seen - hiding dialog' : 'First time - showing dialog');
   }
 
   async function hasSeen() {
@@ -39,16 +26,18 @@ export function customPointsDialogState() {
     return seen;
   }
 
+  // Seen only once it is really saved, or the dialog would silently show again on the next launch.
+  // Throws on failure: the caller tells the user and keeps the dialog open to try again.
   async function markCompleted() {
-    try {
-      await setStorage(DIALOG_KEY, true);
-      seen = true;
+    const isSaved = await setStorage(DIALOG_KEY, true);
 
-      IS_DEBUG && dialogInitLogger.log('Dialog marked as seen');
-    } catch (error) {
-      IS_DEBUG && dialogInitLogger.error('Failed to mark dialog as seen:', error);
-      throw error;
+    if (!isSaved) {
+      IS_DEBUG && dialogInitLogger.error('Failed to mark dialog as seen');
+      throw new Error('The "custom points dialog seen" flag was not saved');
     }
+
+    seen = true;
+    IS_DEBUG && dialogInitLogger.log('Dialog marked as seen');
   }
 
   function open() {

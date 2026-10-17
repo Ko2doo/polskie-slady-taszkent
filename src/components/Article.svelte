@@ -4,7 +4,6 @@
    */
   import { Popup, Page, Navbar, NavbarBackLink, Block, Button } from "konsta/svelte";
 
-  import { routerBack } from "@/services/navigationHistoryHook";
 
   import { articlesMeta } from "@/data/articles";
   import { articlePopupState } from "@/lib/state/article.svelte";
@@ -17,11 +16,6 @@
   import PhotoSlider from "./CustomPoints/PhotoSlider.svelte";
 
   let { i18n } = $props();
-
-  // svelte-ignore state_referenced_locally
-  // check this: https://github.com/sveltejs/svelte/issues/12877
-  // let articleId = route?.result?.path.params;
-  // const meta = articlesMeta.find((a) => a.id === articleId);
 
   /**
    * Normalized article for the popup.
@@ -72,17 +66,13 @@
 
     goto(`/?${search.toString()}`);
   }
-
-  function handleBack() {
-    routerBack("/");
-  }
 </script>
 
 <Popup opened={articlePopupState.isOpen}>
   <Page>
     <Navbar>
       {#snippet left()}
-        <NavbarBackLink text="Back" onClick={articlePopupState.close} />
+        <NavbarBackLink onClick={articlePopupState.close} />
       {/snippet}
     </Navbar>
 

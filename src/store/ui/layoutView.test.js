@@ -117,9 +117,8 @@ describe('layoutView', () => {
     expect(subscriber).not.toHaveBeenCalled();
   });
 
-  // BUG: the background restore reverts a layout picked before it finished — even with nothing
-  // saved, it resets the pick to grid (see BUGS.md). Remove `.fails` once fixed.
-  it.fails('a layout picked before the restore finished is kept', async () => {
+  // Even with nothing saved, the restore used to reset the pick to grid
+  it('a layout picked before the restore finished is kept', async () => {
     let finishRead;
     Preferences.get.mockReturnValueOnce(
       new Promise((resolve) => {
@@ -129,6 +128,22 @@ describe('layoutView', () => {
 
     const layoutView = await load();
     layoutView.set('layoutRows');
+    finishRead();
+    await settle();
+
+    expect(read(layoutView).mode).toBe('layoutRows');
+  });
+
+  it('re-picking the current layout before the restore does not block it', async () => {
+    let finishRead;
+    Preferences.get.mockReturnValueOnce(
+      new Promise((resolve) => {
+        finishRead = () => resolve({ value: 'layoutRows' });
+      }),
+    );
+
+    const layoutView = await load();
+    layoutView.set('layoutGrid');
     finishRead();
     await settle();
 

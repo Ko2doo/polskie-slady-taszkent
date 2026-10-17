@@ -42,6 +42,17 @@ describe('customPointsDialogState', () => {
     expect((await Preferences.get({ key: DIALOG_KEY })).value).toBe('true');
   });
 
+  // The caller (CustomPointsDialog) shows an error and keeps the dialog open to retry
+  it('a failed save throws and does not count as seen', async () => {
+    const dialog = customPointsDialogState();
+    await dialog.hasSeen();
+    Preferences.set.mockRejectedValueOnce(new Error('storage full'));
+
+    await expect(dialog.markCompleted()).rejects.toThrow();
+
+    expect(dialog.seen).toBe(false);
+  });
+
   it('markCompleted updates the state at once', async () => {
     const dialog = customPointsDialogState();
     await dialog.hasSeen();

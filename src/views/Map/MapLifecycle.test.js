@@ -124,6 +124,26 @@ describe('cleanupMap', () => {
     expect(maplibreGL.removeProtocol).toHaveBeenCalledWith('pmtiles');
   });
 
+  // A screen left while loading is cleaned up late, after the next screen registered its own
+  it('keeps the protocol while another map screen still uses it', async () => {
+    // A fresh module: the protocol count is module state, other tests here leave it non-zero
+    vi.resetModules();
+    const lifecycle = await import('@/views/Map/MapLifecycle.svelte.js');
+    const freshMaplibre = await import('maplibre-gl');
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => ({ ok: true, arrayBuffer: async () => new ArrayBuffer(16) })),
+    );
+    const leftScreen = await lifecycle.initializePMTiles(i18n);
+    const nextScreen = await lifecycle.initializePMTiles(i18n);
+
+    lifecycle.cleanupMap({ protocol: leftScreen });
+    expect(freshMaplibre.removeProtocol).not.toHaveBeenCalled();
+
+    lifecycle.cleanupMap({ protocol: nextScreen });
+    expect(freshMaplibre.removeProtocol).toHaveBeenCalledTimes(1);
+  });
+
   it('tolerates parts that were never created (the map failed to start)', () => {
     expect(() => cleanupMap({})).not.toThrow();
     expect(maplibreGL.removeProtocol).not.toHaveBeenCalled();

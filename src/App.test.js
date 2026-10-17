@@ -98,11 +98,13 @@ describe('start', () => {
     expect(initCustomPointsPersistence).toHaveBeenCalledTimes(1);
   });
 
-  it('shows the tabbar with its entrance animation once ready', async () => {
+  // The splash holds the tab bar hidden (AppSplash.test.js); the shell itself never does, so
+  // nothing is left holding it once the app is ready
+  it('leaves the tabbar visible once ready', async () => {
     finishFirstLaunch();
     await settle();
 
-    expect(bottomTabbarState).toMatchObject({ isVisible: true, duration: 400, delay: 350 });
+    expect(bottomTabbarState.isVisible).toBe(true);
   });
 });
 

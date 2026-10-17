@@ -3,6 +3,7 @@
  */
 
 import { createUIProfile } from './createUIProfile.svelte';
+import { overlayController } from '@/store/ui/overlayController';
 
 const defaults = {
   isOpen: false,
@@ -16,22 +17,47 @@ const defaults = {
 function createPanelState() {
   const profile = createUIProfile(defaults);
 
+  // While open, the panel is on the back-button overlay stack, so Android back closes it first.
+  // Every change of isOpen goes through syncOverlay — a screen resetting the panel on unmount
+  // (withPanel) must not leave a closed panel on the stack.
+  let overlayId = null;
+
+  function syncOverlay() {
+    if (profile.isOpen && !overlayId) {
+      overlayId = overlayController.register(closePanel);
+    } else if (!profile.isOpen && overlayId) {
+      overlayController.unregister(overlayId);
+      overlayId = null;
+    }
+  }
+
   function setPanel(cfg = {}) {
     profile.set({ ...cfg, isOpen: !!cfg.isOpen });
+    syncOverlay();
+  }
+
+  function patchPanel(cfg) {
+    profile.patch(cfg);
+    syncOverlay();
   }
 
   function openPanel(cfg) {
     if (cfg) setPanel({ ...cfg, isOpen: true });
-    else profile.patch({ isOpen: true });
+    else patchPanel({ isOpen: true });
   }
 
   function closePanel() {
-    profile.patch({ isOpen: false });
+    patchPanel({ isOpen: false });
+  }
+
+  function resetPanel() {
+    profile.reset();
+    syncOverlay();
   }
 
   function withPanel(cfg = {}) {
     setPanel({ ...cfg, isOpen: false });
-    return () => profile.reset();
+    return resetPanel;
   }
 
   return {
@@ -60,10 +86,10 @@ function createPanelState() {
     },
 
     setPanel,
-    patchPanel: profile.patch,
+    patchPanel,
     openPanel,
     closePanel,
-    resetPanel: profile.reset,
+    resetPanel,
     withPanel,
   };
 }

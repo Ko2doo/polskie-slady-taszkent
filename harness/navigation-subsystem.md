@@ -12,8 +12,9 @@ they are to a place on the map, on foot.
   tested with nothing but coordinate fixtures.
 - `services/navigationLoader.js` — `NavigationLoader`: lazy-loads the navigation graph and
   constructs a `NavigationEngine` from it, with an **LRU-cached route lookup** on top
-  (routes are cached bidirectionally — an A→B lookup also serves B→A — with a bounded
-  cache size and least-recently-used eviction). Don't call `NavigationEngine` directly from
+  (routes are cached per direction — A→B and B→A are separate entries, because the graph
+  has one-way edges and the engine routes along them — with a bounded cache size and
+  least-recently-used eviction). Don't call `NavigationEngine` directly from
   UI code; go through the loader so the graph is loaded once and routes are reused.
 
 ## GPS and permissions

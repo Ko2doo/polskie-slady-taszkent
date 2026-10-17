@@ -15,7 +15,7 @@ import * as maplibreGL from 'maplibre-gl';
 import { createGPSTracker, calculateDistance } from '@/capacitor/services/gpsTracker';
 import { initNavigation, findRoute } from '@/services/navigationLoader';
 import { errorToast } from '@/store/ui/errorToast';
-import { ERROR_CODES } from '@/lib/errors/errorCodes';
+import { ERROR_CODES, GEOLOCATION_CODE_PREFIX } from '@/lib/errors/errorCodes';
 import { ROUTE_FIT_PADDING } from './MapConstants';
 // import { openAppSettings, openLocationSettings } from '@/capacitor/services/locationPermission';
 import { createLogger, IS_DEBUG } from '@/utils/debugMode';
@@ -57,6 +57,8 @@ export function createGPSNavigationController({ map, builder, i18n }) {
   let isCalculatingRoute = false;
 
   let dialogState = $state(false);
+  // A place clicked while navigating, waiting for the "new destination?" dialog's answer
+  let pendingDestination = null;
   let isFirstPosition = true;
 
   // Track shown error codes to prevent duplicates
@@ -92,20 +94,23 @@ export function createGPSNavigationController({ map, builder, i18n }) {
       await initNavigation();
 
       // Create GPS tracker
-      gpsTracker = createGPSTracker({
+      const tracker = createGPSTracker({
         onPositionUpdate: handlePositionUpdate,
         onError: handleGPSError,
       });
+      gpsTracker = tracker;
 
       // Start tracking
-      const started = await gpsTracker.start();
+      const started = await tracker.start();
       if (!started) {
         gpsMode = false;
         return false;
       }
+      if (stopIfSwitchedOff(tracker)) return false;
 
       // Get initial position to check bounds
-      const initialPosition = await gpsTracker.getCurrentPosition();
+      const initialPosition = await tracker.getCurrentPosition();
+      if (stopIfSwitchedOff(tracker)) return false;
 
       if (initialPosition && !initialPosition.isWithinBounds) {
         isOutOfBounds = true;
@@ -142,6 +147,34 @@ export function createGPSNavigationController({ map, builder, i18n }) {
     } finally {
       gpsLoading = false;
     }
+  }
+
+  /**
+   * Called by initGPS after each await: if GPS mode was switched off meanwhile, stop the tracker
+   * it started. toggleGPSMode doesn't stop it itself while initGPS is running — a quick off → on
+   * would otherwise leave initGPS finishing with a stopped tracker and GPS silently dead.
+   * @param {object} tracker - the tracker this initGPS call created
+   * @returns {boolean} true if the mode is off and the tracker was stopped
+   */
+  function stopIfSwitchedOff(tracker) {
+    if (gpsMode) return false;
+
+    tracker.stop();
+    if (gpsTracker === tracker) gpsTracker = null;
+    IS_DEBUG && navigationGPSLogger.log('GPS mode switched off while starting, tracker stopped');
+    return true;
+  }
+
+  /**
+   * Stop the position watch and forget the tracker, so the next GPS mode starts a fresh one
+   * through initGPS. Stops the battery drain and the system "location in use" indicator.
+   */
+  function stopGPSTracking() {
+    if (gpsTracker) {
+      gpsTracker.stop();
+      gpsTracker = null;
+    }
+    gpsReady = false;
   }
 
   // ========================================
@@ -352,7 +385,7 @@ export function createGPSNavigationController({ map, builder, i18n }) {
     }
 
     // Generic error with translation if available
-    if (errorCode && errorCode.startsWith('OS_PLUG_GLOC_')) {
+    if (errorCode && errorCode.startsWith(GEOLOCATION_CODE_PREFIX)) {
       errorToast.error(i18n.t(`errors:${errorCode}`), {
         scope: 'GPSNavigation',
         code: errorCode,
@@ -462,6 +495,9 @@ export function createGPSNavigationController({ map, builder, i18n }) {
    */
   function displayRoute(result) {
     currentRoute = result.route;
+    // Every new route starts at the user: restart the tracker's progress on it, otherwise its
+    // windowed search looks around the old route's progress and reports "off route" again
+    gpsTracker?.resetRoute();
     routeInfo = {
       distance: result.route.properties.distance,
       nodes: result.route.properties.nodes,
@@ -530,14 +566,20 @@ export function createGPSNavigationController({ map, builder, i18n }) {
     dialogState = true;
   }
 
+  /**
+   * Close the "new destination?" dialog; without a confirmation the clicked place is dropped and
+   * navigation keeps heading to the current destination
+   */
   function closeDialog() {
     dialogState = false;
+    pendingDestination = null;
   }
 
   /**
    * Confirm new destination (from dialog)
    */
   function confirmNewDestination() {
+    if (pendingDestination) destinationPoint = pendingDestination;
     closeDialog();
 
     currentRoute = null;
@@ -584,7 +626,7 @@ export function createGPSNavigationController({ map, builder, i18n }) {
     const newDestination = { lon: lng, lat };
 
     if (destinationPoint && currentRoute && !isArrived) {
-      destinationPoint = newDestination;
+      pendingDestination = newDestination;
       openDialog();
       return;
     }
@@ -618,6 +660,8 @@ export function createGPSNavigationController({ map, builder, i18n }) {
     }
 
     if (!gpsMode) {
+      // While initGPS is still starting, it stops its own tracker (see stopIfSwitchedOff)
+      if (!gpsLoading) stopGPSTracking();
       clearGPSNavigation();
       shownErrorCodes.clear();
     }
@@ -640,6 +684,7 @@ export function createGPSNavigationController({ map, builder, i18n }) {
     didShowWaitingToast = false;
 
     dialogState = false;
+    pendingDestination = null;
     isFirstPosition = true;
 
     if (gpsTracker) {
@@ -663,16 +708,12 @@ export function createGPSNavigationController({ map, builder, i18n }) {
    * Dispose GPS navigation controller
    */
   function dispose() {
-    if (gpsTracker) {
-      gpsTracker.stop();
-      gpsTracker = null;
-    }
+    stopGPSTracking();
 
     clearGPSNavigation();
     shownErrorCodes.clear();
 
-    // Reset ready/mode flags so the controller can be re-initialized cleanly
-    gpsReady = false;
+    // Reset mode flags so the controller can be re-initialized cleanly
     gpsMode = false;
     gpsLoading = false;
     isOutOfBounds = false;

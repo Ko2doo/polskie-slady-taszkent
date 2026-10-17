@@ -63,7 +63,8 @@ describe('TechnicalInfo', () => {
 
     host.querySelector('a').click();
 
-    expect(routerBack).toHaveBeenCalledWith('/');
+    // A screen inside More: back goes to More, even after a reload (empty in-memory history)
+    expect(routerBack).toHaveBeenCalledWith('/more');
     unmount(back);
   });
 });

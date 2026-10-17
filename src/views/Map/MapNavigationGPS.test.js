@@ -287,10 +287,9 @@ describe('on the way', () => {
     expect(findRoute).not.toHaveBeenCalled();
   });
 
-  // BUG-14: the new route starts at the user, but the tracker keeps searching it around the old
-  // progress — on a long route the user is "off route" again and again (see BUGS.md).
-  // Remove `.fails` once fixed.
-  it.fails('a recalculated route resets the route progress', async () => {
+  // The new route starts at the user; searching it around the old progress would report
+  // "off route" again and again on a long route
+  it('a recalculated route resets the route progress', async () => {
     vi.spyOn(Date, 'now').mockReturnValue(100000);
     const tracker = await navigating();
     tracker.checkOffRoute.mockReturnValue({ isOffRoute: true });
@@ -299,7 +298,22 @@ describe('on the way', () => {
     tracker.move({ ...HOME, lat: 41.302 });
 
     expect(findRoute).toHaveBeenCalledTimes(2);
-    expect(tracker.resetRoute).toHaveBeenCalled();
+    expect(tracker.resetRoute).toHaveBeenCalledTimes(1);
+    // Reset for the new route, not before calculating it
+    const [secondRouteCall] = findRoute.mock.invocationCallOrder.slice(-1);
+    expect(tracker.resetRoute.mock.invocationCallOrder[0]).toBeGreaterThan(secondRouteCall);
+  });
+
+  it('a failed recalculation keeps the progress on the current route', async () => {
+    vi.spyOn(Date, 'now').mockReturnValue(100000);
+    const tracker = await navigating();
+    tracker.checkOffRoute.mockReturnValue({ isOffRoute: true });
+    tracker.resetRoute.mockClear();
+    findRoute.mockReturnValueOnce({ success: false, message: 'No path found' });
+
+    tracker.move({ ...HOME, lat: 41.302 });
+
+    expect(tracker.resetRoute).not.toHaveBeenCalled();
   });
 
   it('leaving the map area drops the route; coming back says so', async () => {
@@ -336,10 +350,7 @@ describe('a new destination while navigating', () => {
     expect(findRoute).toHaveBeenLastCalledWith(HOME.lon, HOME.lat, OTHER_DESTINATION.lng, OTHER_DESTINATION.lat);
   });
 
-  // BUG: the click stores the new destination before the dialog, and cancelling does not put the
-  // old one back — the old route stays on screen, but recalculation already heads to the new
-  // place (see BUGS.md). Remove `.fails` once fixed.
-  it.fails('cancelling keeps heading to the old destination', async () => {
+  it('cancelling keeps heading to the old destination', async () => {
     vi.spyOn(Date, 'now').mockReturnValue(100000);
     const tracker = await navigating();
     gps.handleMapClick(click(OTHER_DESTINATION));
@@ -349,6 +360,29 @@ describe('a new destination while navigating', () => {
     tracker.move({ ...HOME, lat: 41.302 });
 
     expect(findRoute).toHaveBeenLastCalledWith(HOME.lon, 41.302, DESTINATION.lng, DESTINATION.lat);
+  });
+
+  it('cancelling keeps arrival tied to the old destination', async () => {
+    const tracker = await navigating();
+    gps.handleMapClick(click(OTHER_DESTINATION));
+    gps.closeDialog();
+
+    tracker.move({ lat: OTHER_DESTINATION.lat, lon: OTHER_DESTINATION.lng, isWithinBounds: true });
+    expect(gps.isArrived).toBe(false);
+
+    tracker.move({ lat: DESTINATION.lat, lon: DESTINATION.lng, isWithinBounds: true });
+    expect(gps.isArrived).toBe(true);
+  });
+
+  it('a cancelled place is not used by a later confirmation', async () => {
+    const tracker = await navigating();
+    gps.handleMapClick(click(OTHER_DESTINATION));
+    gps.closeDialog();
+    tracker.resetRoute.mockClear();
+
+    gps.confirmNewDestination();
+
+    expect(findRoute).toHaveBeenLastCalledWith(HOME.lon, HOME.lat, DESTINATION.lng, DESTINATION.lat);
   });
 });
 
@@ -414,10 +448,7 @@ describe('turning GPS mode off', () => {
     expect(markersOnMap()).toHaveLength(0);
   });
 
-  // BUG: turning the mode off only clears the state — the position watch keeps running (battery,
-  // the system location indicator) and the next update puts the marker back (see BUGS.md).
-  // Remove `.fails` once fixed.
-  it.fails('stops tracking: the next position does not bring the marker back', async () => {
+  it('stops tracking: the next position does not bring the marker back', async () => {
     const tracker = await navigating();
 
     await gps.toggleGPSMode();
@@ -425,6 +456,94 @@ describe('turning GPS mode off', () => {
 
     expect(markersOnMap()).toHaveLength(0);
     expect(tracker.stop).toHaveBeenCalled();
+  });
+
+  it('turning it on again starts a fresh watch that tracks', async () => {
+    const first = await navigating();
+    await gps.toggleGPSMode();
+
+    const second = await readyController();
+    second.move(HOME);
+
+    expect(second).not.toBe(first);
+    expect(second.start).toHaveBeenCalledTimes(1);
+    expect(markersOnMap()).toHaveLength(1);
+  });
+
+  it('clearing the destination keeps tracking', async () => {
+    const tracker = await navigating();
+
+    gps.clearGPSNavigation();
+    tracker.move({ ...HOME, lat: 41.302 });
+
+    expect(tracker.stop).not.toHaveBeenCalled();
+    expect(gps.gpsMode).toBe(true);
+    expect(markersOnMap()).toHaveLength(1);
+  });
+
+  describe('while the watch is still starting', () => {
+    let finishStart;
+
+    beforeEach(() => {
+      finishStart = undefined;
+      deps.createTracker = (callbacks) => {
+        const tracker = createTrackerRecorder(callbacks);
+        tracker.start = vi.fn(() => new Promise((resolve) => (finishStart = () => resolve(true))));
+        return tracker;
+      };
+    });
+
+    it('switching off stops the tracker once it has started', async () => {
+      const turningOn = gps.toggleGPSMode();
+      await vi.waitFor(() => expect(finishStart).toBeTypeOf('function'));
+      const tracker = deps.tracker;
+
+      await gps.toggleGPSMode();
+      finishStart();
+      await turningOn;
+      tracker.move(HOME);
+
+      expect(tracker.stop).toHaveBeenCalled();
+      expect(gps.gpsMode).toBe(false);
+      expect(gps.gpsReady).toBe(false);
+      expect(markersOnMap()).toHaveLength(0);
+    });
+
+    it('leaving the map screen stops the watch once it has started', async () => {
+      const turningOn = gps.toggleGPSMode();
+      await vi.waitFor(() => expect(finishStart).toBeTypeOf('function'));
+      const tracker = deps.tracker;
+      tracker.stop.mockImplementation(async () => {
+        // Like the real tracker: stopping a watch that hasn't started yet does nothing
+        if (tracker.started) tracker.stopped = true;
+      });
+
+      gps.dispose();
+      tracker.started = true;
+      finishStart();
+      await turningOn;
+      tracker.move(HOME);
+
+      expect(tracker.stopped).toBe(true);
+      expect(markersOnMap()).toHaveLength(0);
+    });
+
+    it('a quick off → on leaves GPS working', async () => {
+      const turningOn = gps.toggleGPSMode();
+      await vi.waitFor(() => expect(finishStart).toBeTypeOf('function'));
+      const tracker = deps.tracker;
+
+      await gps.toggleGPSMode();
+      await gps.toggleGPSMode();
+      finishStart();
+      await turningOn;
+      tracker.move(HOME);
+
+      expect(tracker.stop).not.toHaveBeenCalled();
+      expect(gps.gpsMode).toBe(true);
+      expect(gps.gpsReady).toBe(true);
+      expect(markersOnMap()).toHaveLength(1);
+    });
   });
 
   it('dispose stops tracking and resets everything', async () => {

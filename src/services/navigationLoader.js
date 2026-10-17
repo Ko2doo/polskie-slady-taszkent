@@ -5,9 +5,9 @@
  * Includes LRU route caching for better performance.
  *
  * Cache behaviour:
- * - Routes are cached bidirectionally (A→B lookup also covers B→A)
+ * - Routes are cached per direction (A→B and B→A are separate entries, see getCacheKey)
  * - LRU eviction: least recently used entry is removed when cache is full
- * - Cache size: MAX_CACHE_SIZE unique origin-destination pairs
+ * - Cache size: MAX_CACHE_SIZE routes (each origin → destination direction counts once)
  */
 
 import NavigationEngine from './navigation';
@@ -23,15 +23,15 @@ const routeCache = new Map();
 const MAX_CACHE_SIZE = 50;
 
 /**
- * Generate a canonical cache key from coordinates.
- * Keys are sorted so A→B and B→A map to the same entry.
- * Rounded to 5 decimal places (~1 meter precision).
+ * Generate a cache key from coordinates, rounded to 5 decimal places (~1 meter precision).
+ * The key keeps the direction: A→B and B→A are separate entries. The graph has one-way edges
+ * and the engine routes along them, so B→A is not always A→B reversed — and a reused A→B line
+ * would also start at the wrong end (anything reading the line's order would break).
  */
 function getCacheKey(fromLon, fromLat, toLon, toLat) {
-  const a = `${fromLon.toFixed(5)},${fromLat.toFixed(5)}`;
-  const b = `${toLon.toFixed(5)},${toLat.toFixed(5)}`;
-  // Lexicographic sort gives a stable key regardless of direction
-  return a < b ? `${a}-${b}` : `${b}-${a}`;
+  const from = `${fromLon.toFixed(5)},${fromLat.toFixed(5)}`;
+  const to = `${toLon.toFixed(5)},${toLat.toFixed(5)}`;
+  return `${from}-${to}`;
 }
 
 /**
@@ -46,7 +46,7 @@ function touchKey(key) {
 }
 
 /**
- * Find cached route (checks both directions via canonical key)
+ * Find a cached route for exactly this direction
  */
 export function findCachedRoute(fromLon, fromLat, toLon, toLat) {
   const key = getCacheKey(fromLon, fromLat, toLon, toLat);
@@ -169,8 +169,7 @@ export function isNavigationReady() {
 }
 
 /**
- * Find route with LRU caching.
- * Cache is bidirectional — A→B and B→A share the same cached result.
+ * Find route with LRU caching (per direction — see getCacheKey).
  */
 export function findRoute(fromLon, fromLat, toLon, toLat) {
   const cached = findCachedRoute(fromLon, fromLat, toLon, toLat);

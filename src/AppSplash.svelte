@@ -1,22 +1,21 @@
 <script>
   import { fly } from "svelte/transition";
-  import { setTabbar } from "@/lib/state/bottomTabbarNav.svelte";
+  import { hideTabbar } from "@/lib/state/bottomTabbarNav.svelte";
 
-  let { appName = "", version = "", appLogo } = $props();
+  let { i18n, appName = "", version = "", appLogo } = $props();
 
-  $effect(() => {
-    setTabbar({ isVisible: false });
-  });
+  // No tab bar behind the splash; it slides in (slowly, as the app's entrance) once the splash goes
+  $effect(() => hideTabbar({ duration: 400, delay: 350 }));
 </script>
 
 <article class="app-splash-screen" out:fly={{ duration: 500, y: 20, delay: 200 }}>
   <div class="app-logo-wrapper">
-    <img class="app-logo" src={appLogo} alt="App logo" />
+    <img class="app-logo" src={appLogo} alt={$i18n.t("ui:splash:logoAlt")} />
     <h1 class="app-name">
       {appName}
     </h1>
   </div>
-  <p class="app-version">Version: {version}</p>
+  <p class="app-version">{$i18n.t("ui:splash:version", { version })}</p>
 </article>
 
 <style>

@@ -47,7 +47,7 @@
 
   // Map modules
   import { createMapPointsBuilder, createCustomPointsBuilder } from "./MapBuilder.svelte.js";
-  import { resolvePreview } from "./MapPreview.js";
+  import { createPreviewTracker } from "./MapPreview.js";
   import { createNavigationController } from "./MapNavigation.svelte.js";
   import { createGPSNavigationController } from "./MapNavigationGPS.svelte.js";
   import { createThemeController } from "./MapTheme.svelte.js";
@@ -66,7 +66,7 @@
   import MapEditor from "@/lib/icons/MapEditor.svelte";
   import FilterIcon from "@/lib/icons/FilterIcon.svelte";
   import Close from "@/lib/icons/Close.svelte";
-  import { withTabbar } from "@/lib/state/bottomTabbarNav.svelte.js";
+  import { hideTabbar } from "@/lib/state/bottomTabbarNav.svelte.js";
   import CustomPointsDialog from "@/components/CustomPoints/CustomPointsDialog.svelte";
   import NavigationControlDialog from "@/components/Navigation/NavigationControlDialog.svelte";
   import { customPointsDialogState } from "@/lib/state/customPointsDialogState.svelte.js";
@@ -97,6 +97,10 @@
   let gpsNavigation = $state(null); // GPS navigation
   let mapEditMode = $state(null);
   let theme = null;
+  // Set by onDestroy; the async onMount checks it before creating the map and before building on it
+  let isDestroyed = false;
+  // The photo urls the custom points' popups hold (released on change, delete and unmount)
+  const previewTracker = createPreviewTracker();
 
   // Progressbar state
   let mapLoadingProgress = $state(0);
@@ -273,6 +277,8 @@
 
       // 3. Build initial style
       const style = await theme.buildStyleForTheme(initialTheme);
+      // Left during the tiles/style load: don't create a map (a WebGL context) on a detached container
+      if (isDestroyed) return releaseMapResources();
 
       // 4. Create map instance
       map = initializeMap({
@@ -312,7 +318,9 @@
 
       // The previews (the first photo of a point) are resolved all at once, then the points are added
       const savedPoints = [...customPointsState.points];
-      const previews = await Promise.all(savedPoints.map((point) => resolvePreview(point)));
+      const previews = await Promise.all(savedPoints.map((point) => previewTracker.resolve(point)));
+      // Left while the points loaded: onDestroy released the map, don't build on top of it
+      if (isDestroyed) return releaseMapResources();
 
       savedPoints.forEach((point, index) => {
         customPointsBuilder.addPoint({
@@ -340,12 +348,16 @@
         i18n: $i18n,
       });
 
-      // 8. Update theme controller with instances
+      // 8. Update theme controller with instances (the map-less one from step 2 must let go of
+      // its themeManager subscription first, or it stays subscribed for the app's lifetime)
+      theme.dispose();
       theme = createThemeController({
         map,
         builder,
         customPointsBuilder,
         navigation,
+        // GPS navigation draws its route through the same builder, so it must survive a theme switch too
+        getCurrentRoute: () => navigation?.currentRoute ?? gpsNavigation?.currentRoute,
         i18n: $i18n,
       });
       theme.init();
@@ -411,6 +423,19 @@
   onDestroy(() => {
     IS_DEBUG && mapLogger.log("Unmounting...");
 
+    isDestroyed = true;
+    releaseMapResources();
+  });
+
+  /**
+   * Release everything the map screen has created so far. Runs on unmount, and again from onMount
+   * when the screen was left while it was still loading: onDestroy then ran before the map, the
+   * builders or the controllers existed, so whatever onMount created after its await is released
+   * here instead of being left alive on a detached container (a WebGL context each time).
+   */
+  function releaseMapResources() {
+    previewTracker.releaseAll();
+
     // Remove unified click handler
     if (map) {
       map.off("click", handleUnifiedMapClick);
@@ -439,7 +464,7 @@
     gpsNavigation = null;
     theme = null;
     mapEditMode = null;
-  });
+  }
 
   // ========================================
   // Effects
@@ -458,20 +483,9 @@
     patchPanel({ title: $i18n.t("ui:sidePanel:map:title") });
   });
 
+  // The tab bar is hidden while editing the custom points; leaving edit mode (or the screen) releases it
   $effect(() => {
-    if (userCustomPointsToggler.value) {
-      withTabbar({
-        isVisible: false,
-        duration: 120,
-        delay: 40,
-      });
-    } else {
-      withTabbar({
-        isVisible: true,
-        duration: 120,
-        delay: 90,
-      });
-    }
+    if (userCustomPointsToggler.value) return hideTabbar({ duration: 120, delay: 40 });
   });
 
   async function customPointsDialogTrigger() {
@@ -506,7 +520,7 @@
    * @param {Object} point - Custom point
    */
   async function refreshPreview(point) {
-    const preview = await resolvePreview(point);
+    const preview = await previewTracker.resolve(point);
 
     // The map can be gone by now
     if (customPointsBuilder) customPointsBuilder.updatePoint({ id: point.id, title: point.title, preview });
@@ -586,6 +600,7 @@
     if (!isRemoved) return false;
 
     customPointsState.remove(id);
+    previewTracker.release(id);
 
     // Without custom points the filter button disappears, so the filter must not stay on a mode that hides markers
     if (!hasCustomPoints) mapMarkerFilter.select(MARKER_FILTER.ALL);

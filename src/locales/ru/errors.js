@@ -3,6 +3,8 @@ export default {
   articleNotFound: 'Статья не найдена!',
   notFound: 'Ничего не найдено',
   toastBtn: 'Закрыть',
+  settingsSaveFailed: 'Не удалось сохранить настройки. Попробуйте ещё раз.',
+  locationPermissionRequestFailed: 'Не удалось запросить доступ к геолокации',
   gpsInitFailed: 'Не удалось инициализировать GPS',
   gpsError: 'Ошибка GPS',
   gpsPositionNotAvailable: 'GPS позиция недоступна',

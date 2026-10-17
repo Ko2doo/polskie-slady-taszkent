@@ -101,11 +101,18 @@ describe('action', () => {
     expect(current().meta.action).toEqual({ label: 'Open', type: 'openSettings', handler });
   });
 
-  it('an action without a label still gets a non-empty one, type defaults to custom', () => {
-    errorToast.show('x', 'error', { action: { handler } });
+  it('type defaults to custom', () => {
+    errorToast.show('x', 'error', { action: { label: 'Open', handler } });
 
-    expect(current().meta.action.label).toBeTruthy();
     expect(current().meta.action.type).toBe('custom');
+  });
+
+  // No English fallback: the label must come translated from the caller; the toast itself stays
+  it.each([undefined, '', '   ', 42])('an action without a usable label (%s) is dropped', (label) => {
+    errorToast.show('x', 'error', { action: { label, type: 'openSettings', handler } });
+
+    expect(current().content).toBe('x');
+    expect(current().meta.action).toBeNull();
   });
 
   it('an action without a handler is dropped', () => {

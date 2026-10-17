@@ -3,7 +3,7 @@
   import { fly } from "svelte/transition";
 
   import { withNavbar } from "@/lib/state/navbar.svelte";
-  import { withTabbar } from "@/lib/state/bottomTabbarNav.svelte";
+  import { hideTabbar } from "@/lib/state/bottomTabbarNav.svelte";
 
   // Icons
   import Close from "@/lib/icons/Close.svelte";
@@ -25,21 +25,16 @@
     return dispose;
   });
 
-  $effect(() => {
-    withTabbar({
-      isVisible: false,
-      duration: 120,
-      delay: 40,
-    });
-  });
+  // No tab bar on this screen; the request is released when the screen goes away
+  $effect(() => hideTabbar({ duration: 120, delay: 40 }));
 
   function handleBack() {
-    routerBack("/");
+    routerBack("/more");
   }
 </script>
 
 {#snippet BackButton()}
-  <NavbarBackLink text="Back" onClick={handleBack} />
+  <NavbarBackLink onClick={handleBack} />
 {/snippet}
 
 <section class="about-view flex flex-col" in:fly={{ duration: 120, x: 20 }}>

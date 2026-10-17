@@ -3,6 +3,7 @@ import { flushSync, mount, unmount } from 'svelte';
 import { Preferences } from '@capacitor/preferences';
 import { navbarState } from '@/lib/state/navbar.svelte.js';
 import { panelState, resetPanel } from '@/lib/state/panel.svelte.js';
+import { bottomTabbarState, resetTabbar } from '@/lib/state/bottomTabbarNav.svelte.js';
 import { resetNavbar } from '@/lib/state/navbar.svelte.js';
 import { errorToast } from '@/store/ui/errorToast';
 import { i18nStub } from '@/test/i18nStub';
@@ -103,8 +104,16 @@ vi.mock('@/views/Map/MapLoadTracker.js', () => ({
   createMapLoadTracker: vi.fn(() => (deps.tracker = { markSourcesAdded: vi.fn() })),
 }));
 
+// The preview tracker (MapPreview.test.js covers the real one) records what the screen gives back
 vi.mock('@/views/Map/MapPreview.js', () => ({
-  resolvePreview: vi.fn(async (point) => (point.photos?.length ? 'blob:cover' : '')),
+  createPreviewTracker: vi.fn(() => {
+    deps.previews = {
+      resolve: vi.fn(async (point) => (point.photos?.length ? 'blob:cover' : '')),
+      release: vi.fn(),
+      releaseAll: vi.fn(),
+    };
+    return deps.previews;
+  }),
 }));
 
 // The saved points (customPointsState.test.js covers the real state)
@@ -210,6 +219,7 @@ beforeEach(async () => {
   Object.values(errorToast).forEach((fn) => fn.mockClear());
   resetNavbar();
   resetPanel();
+  resetTabbar();
   target = document.createElement('div');
   document.body.append(target);
 });
@@ -275,30 +285,76 @@ describe('start', () => {
     expect(errorToast.error).toHaveBeenCalledWith('errors:mapInitFailed', expect.anything());
   });
 
-  // BUG: leaving the screen while it is still loading: onDestroy runs before the map exists, then
-  // the rest of onMount creates a map (a WebGL context) nobody removes (see BUGS.md).
-  // Remove `.fails` once fixed.
-  it.fails('leaving while the tiles load does not create a map afterwards', async () => {
-    let finishTiles;
-    deps.pmtiles = () => new Promise((resolve) => (finishTiles = () => resolve({ tile: () => {} })));
+  const mountMap = () => {
     component = mount(Map, { target, props: { i18n: i18nStub, route: { result: { path: { original: '/' } } } } });
     flushSync();
-
+  };
+  const leave = () => {
     unmount(component);
     component = null;
+  };
+
+  it('leaving while the tiles load does not create a map afterwards', async () => {
+    let finishTiles;
+    const protocol = { tile: () => {} };
+    deps.pmtiles = () => new Promise((resolve) => (finishTiles = () => resolve(protocol)));
+    mountMap();
+
+    leave();
     finishTiles();
     await settle();
 
     expect(initializeMap).not.toHaveBeenCalled();
+    expect(cleanupMap).toHaveBeenLastCalledWith(expect.objectContaining({ protocol }));
   });
 
-  // BUG-21: a first, map-less theme controller is created and initialized, then replaced without
-  // dispose() — its theme subscription stays for good. Remove `.fails` once fixed.
-  it.fails('no theme controller is left subscribed', async () => {
+  // The map exists by then, so onDestroy releases it; what must not happen is the rest of onMount
+  // running on the removed map (new controllers, a theme subscription, a 'load' handler)
+  it('leaving while the saved points load stops the start there', async () => {
+    const ready = customPointsState.ready;
+    let finishPoints;
+    customPointsState.ready = new Promise((resolve) => (finishPoints = resolve));
+    try {
+      mountMap();
+      await vi.waitFor(() => expect(initializeMap).toHaveBeenCalled());
+
+      leave();
+      finishPoints();
+      await settle();
+
+      expect(cleanupMap).toHaveBeenCalledWith(expect.objectContaining({ map: deps.map, builder: deps.builder }));
+      expect(deps.map.on).not.toHaveBeenCalledWith('load', expect.any(Function));
+      expect(deps.themes).toHaveLength(1);
+    } finally {
+      customPointsState.ready = ready;
+    }
+  });
+
+  // The first, map-less controller (step 2) only picks the initial style; it is replaced later
+  it('no theme controller is left subscribed', async () => {
     await render();
 
     const replaced = deps.themes.slice(0, -1);
+    expect(replaced.length).toBeGreaterThan(0);
     expect(replaced.every((theme) => theme.dispose.mock.calls.length > 0)).toBe(true);
+    expect(deps.themes.at(-1).dispose).not.toHaveBeenCalled();
+  });
+
+  // map.setStyle() drops every app layer; the theme controller redraws the route it is given
+  it('a theme switch redraws the GPS route as well as the manual one', async () => {
+    await render();
+    const { getCurrentRoute } = deps.themes.at(-1).options;
+    const manualRoute = { type: 'Feature', manual: true };
+    const gpsRoute = { type: 'Feature', gps: true };
+
+    expect(getCurrentRoute()).toBeFalsy();
+
+    deps.gps.currentRoute = gpsRoute;
+    expect(getCurrentRoute()).toBe(gpsRoute);
+
+    deps.gps.currentRoute = null;
+    deps.navigation.currentRoute = manualRoute;
+    expect(getCurrentRoute()).toBe(manualRoute);
   });
 });
 
@@ -355,6 +411,19 @@ describe('edit mode', () => {
     deps.map.fire('load');
     await enterEditMode();
   }
+
+  it('hides the tabbar while editing; leaving the screen gives it back', async () => {
+    await render();
+    expect(bottomTabbarState.isVisible).toBe(true);
+
+    deps.map.fire('load');
+    await enterEditMode();
+    expect(bottomTabbarState.isVisible).toBe(false);
+
+    unmount(component);
+    component = null;
+    expect(bottomTabbarState.isVisible).toBe(true);
+  });
 
   it('shows only the custom points while editing', async () => {
     await editing();
@@ -413,6 +482,8 @@ describe('edit mode', () => {
 
     expect(deps.customBuilder.removePoint).toHaveBeenCalledWith('p1');
     expect(customPointsState.remove).toHaveBeenCalledWith('p1');
+    // The popup's photo url (a Blob url on the web) is given back with the point
+    expect(deps.previews.release).toHaveBeenCalledWith('p1');
   });
 });
 
@@ -427,6 +498,7 @@ describe('leaving the screen', () => {
     expect(deps.map.off).toHaveBeenCalledWith('click', expect.any(Function));
     expect(cleanupMap).toHaveBeenCalledWith(expect.objectContaining({ map: deps.map, builder: deps.builder }));
     expect(deps.gps.dispose).toHaveBeenCalled();
+    expect(deps.previews.releaseAll).toHaveBeenCalled();
   });
 
   it('gives the navbar and the side panel back', async () => {
