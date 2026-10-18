@@ -5,7 +5,7 @@ paths:
   - "scripts/**"
   - "src/services/mapStyle.js"
   - "src/services/navigationLoader.js"
-  - "src/views/Map/MapLifecycle.svelte.js"
+  - "src/views/Map/Session/MapLifecycle.svelte.js"
   - "src/views/Map/MapConstants.js"
   - "src/utils/inMemoryPmtilesSource.js"
 ---
@@ -21,7 +21,7 @@ behavior of the router itself is in `.claude/rules/navigation-subsystem.md`.
 
 | Asset | Consumed by | Produced by |
 | --- | --- | --- |
-| `public/map/tashkent_<YYYYMMDD>.pmtiles` | `views/Map/MapLifecycle.svelte.js` (`initializePMTiles`), path in `MapConstants.js` `PMTILES_PATH` | Not scripted in this repo (a Protomaps/PMTiles extract of Tashkent) |
+| `public/map/tashkent_<YYYYMMDD>.pmtiles` | `views/Map/Session/MapLifecycle.svelte.js` (`initializePMTiles`), path in `MapConstants.js` `PMTILES_PATH` | Not scripted in this repo (a Protomaps/PMTiles extract of Tashkent) |
 | `public/map/navigation-graph-optimized.json` | `services/navigationLoader.js` (lazy `fetch`) | `scripts/navigationGraph/` (below) |
 | `public/map/tashkent_boundaries.geojson` | `MapConstants.js` `CITY_BOUNDARIES` (city-boundary layer) | Not scripted |
 | `public/map/sprites/{light,dark}/*` | `services/mapStyle.js` (`sprite` url) | `npm run map:download-sprites` |

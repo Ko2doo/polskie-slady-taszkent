@@ -88,9 +88,13 @@ src/
 │   ├── services/
 │   └── utils/
 ├── components/                 # reusable components; shared ones at the top level
-│   ├── CustomPoints/           #   user-marker editor, photos, slider, viewer
+│   ├── CustomPoints/           #   user-marker intro and editor dialogs
+│   │   └── Photos/             #     photo thumb, slider, fullscreen viewer
 │   ├── Filters/                #   Handbook layout/category, map marker filter
-│   └── Navigation/             #   turn-by-turn sheet and its parts
+│   ├── Navigation/             #   turn-by-turn sheet, mode picker, stop dialog
+│   │   └── RouteStatus/        #     what the sheet shows on the way: instruction, info, arrival
+│   ├── Preferences/            #   language and dark-mode switches (Settings, onboarding)
+│   └── Toasts/                 #   the error toast and the "press back to exit" toast
 ├── data/                       # static content: articles, technical-info meta
 ├── lib/
 │   ├── errors/                 # errorCodes.js — the only home of native error-code literals
@@ -108,7 +112,11 @@ src/
 └── views/                      # one folder per screen
     ├── About/
     ├── Handbook/
-    ├── Map/                    #   split into supporting modules, see screens.md
+    ├── Map/                    #   split by concern, see screens.md
+    │   ├── Navigation/         #     point-to-point routing, user marker, route fit
+    │   │   └── GPS/            #       GPS navigation controller and its messages
+    │   ├── Points/             #     points on the map, covers, the marker editor
+    │   └── Session/            #     map start/release, tiles, theme, load progress
     ├── More/
     ├── OnboardingWizard/
     ├── Settings/
@@ -123,15 +131,19 @@ src/
   and error-code translation live, so the rest of the app only ever sees a clean function.
   Storage of small values/preferences goes through `utils/appStorage.js`
   (`setStorage`/`getStorage`); location permission through
-  `services/locationPermission.js` — reuse those, don't call the plugin again.
-- `components/` — grouped by feature area once there's more than one related component.
+  `services/locationPermission.js`; the app going to the background through
+  `services/appLifecycle.js` (`onAppBackground`) — reuse those, don't call the plugin again.
+- `components/` — grouped by feature area once there's more than one related component; a
+  folder past 4 modules gets subdirectories ("When a folder grows" below).
   A component used by more than one feature area goes at the top level, not duplicated into
   each area's folder (`Article.svelte` — the one article/marker popup, universal across
-  historical and custom points — is the example). `ErrorHandlerToast.svelte` /
+  historical and custom points — is the example); a group of such shared components gets a
+  folder named after what they are (`Toasts/`, `Preferences/`). `ErrorHandlerToast.svelte` /
   `ExitToast.svelte` render the `errorToast` / `toastController` stores respectively.
 - `data/` — static content only, no logic. Article ids look like `l01`..`l13`, `photos`
   paths are relative to `public/`. `about.js` feeds Technical Info, not About (see
-  `.claude/rules/screens.md`).
+  `.claude/rules/screens.md`). `mapArea.js` is the area the offline map covers
+  (`MAP_BOUNDS`) — the one definition the map screen and GPS tracking both read.
 - `lib/errors/errorCodes.js` — the **only** place a literal native-plugin error-code string
   is allowed. A new plugin's error code gets added here first (with a comment citing the
   plugin's own docs), imported from there — never `error.code === 'OS-PLUG-XXXX-0000'`
@@ -156,16 +168,18 @@ src/
   Trap: `services/toastController.js` is a single-purpose "press back again to exit"
   countdown toast — despite the similar name, not the same system as `store/ui/errorToast.js`.
 - `store/` — `ui/errorToast.js` is the single user-facing error/warning/info channel (use
-  it, don't invent a new one); `ui/overlayController.js` is the back-button overlay stack
-  (LIFO); `i18nextSvelte/` genuinely needs the store contract; `appStartInitialize.js`
+  it, don't invent a new one), its input normalized by `ui/toastInput.js`;
+  `ui/overlayController.js` is the back-button overlay stack (LIFO); `i18nextSvelte/` genuinely needs the store contract; `appStartInitialize.js`
   tracks first launch. No new `writable` stores — see `.claude/rules/svelte-rules.md`.
 - `utils/` — small, dependency-free, pure functions. If it needs Svelte runes, it belongs in
   `lib/state/` instead. `debugMode.js` is the logger (`harness/code-style.md`),
-  `inMemoryPmtilesSource.js` serves the map archive from RAM
+  `inMemoryPmtilesSource.js` serves the map archive from RAM, `rateLimiter.js` counts
+  repeats per time window (the error toast's limit)
   (`.claude/rules/map-data-pipeline.md`).
 - `views/` — one folder per screen, wired in `Routes.js`. `views/Map/` is the one screen big
-  enough to be split into supporting modules (the map session, builder wiring, lifecycle,
-  theme, navigation, edit mode, load progress) — see `.claude/rules/screens.md`.
+  enough to be split into supporting modules, grouped by concern into `Session/`, `Points/`
+  and `Navigation/` — see `.claude/rules/screens.md`. A screen folder past 4 modules gets
+  subdirectories ("When a folder grows" below).
 - `locales/` — `collections.js` is the language picker's code → name list. See
   `.claude/rules/i18n.md`.
 - `assets/` vs. root `public/` — `assets/` is for files imported from code; static files that
@@ -191,6 +205,29 @@ src/
    `src/test/`.
 7. Needs a literal native error-code string? → the string goes in `lib/errors/errorCodes.js`
    first, always.
+
+### When a folder grows: more than 4 modules → subdirectories
+
+Applies to every screen folder (`views/<Screen>/`) and to `components/` — its top level and
+every `components/<Area>/` — at any depth, so a subdirectory that grows past the limit is
+split the same way.
+
+- **The limit: 4 modules per folder.** A module is a source file directly in the folder —
+  `.svelte`, `.js`, `.svelte.js`. Tests don't count: a test always sits next to its module and
+  moves with it. The 5th module is the moment to group, in that same change — not "later".
+- **Group by what the files are about**, one subdirectory per concern, and name it after its
+  contents: Navigation, GPS, Photos, Toasts. Never a catch-all name (helpers, utils, misc,
+  common, parts) — if no honest name fits, the grouping is wrong.
+  Subdirectories are PascalCase, like `views/` and `components/` themselves.
+- **What stays at the folder's root:** its entry point (the screen component, the area's main
+  component) and whatever spans several groups (the screen's constants, `MapClickRouter.js`
+  for the map's modes) — within the same limit of 4.
+- **A move is not a rename.** Files keep their names (the `Map…` prefix included — it keeps
+  them unique and greppable); no `index.js` re-export files. Imports inside one folder are
+  relative (`./<Module>`), across folders they go through the @ alias (`@/<path>`).
+- **Same change, all of it:** the tree above (`src/architectureTree.test.js` fails
+  otherwise), paths in the area's `.claude/rules/` file and its `paths:` globs, the
+  `vi.mock(...)` paths in tests that mock a moved module.
 
 ## Subsystem deep dives
 
@@ -221,6 +258,8 @@ Geolocation codes are normalized through a mapper function, `mapGeolocationError
 web's numeric codes and, as a last resort, the error message all become one of the
 underscored `ERROR_CODES.OS_PLUG_GLOC_*` (prefix `GEOLOCATION_CODE_PREFIX`) — only codes
 `ERROR_CODES` knows, since each needs a translation in `errors.js`; Filesystem/Camera codes are stored as the literal string the plugin returns, compared
-directly. `store/ui/errorToast.js` is the single user-facing channel: dedup, queueing, rate
-limiting, with rate-limit bookkeeping kept out of the reactive store on purpose (see
-`harness/performance.md`).
+directly. `store/ui/errorToast.js` is the single user-facing channel: dedup and queueing in
+the store, rate limiting in `utils/rateLimiter.js` — kept out of the reactive store on purpose
+(see `harness/performance.md`). `store/ui/toastInput.js` turns any input (a string, an Error, a
+plugin's error object) into the stored text, kind and meta; it adds no text of its own — an
+error with nothing usable in it is shown as the translated `errors:unknownError`.

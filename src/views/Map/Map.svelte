@@ -13,14 +13,11 @@
    * 2. GPS Navigation - From current location (new feature)
    * - Deep linking support (?lon=X&lat=Y)
    *
-   * Architecture:
-   * - MapSession.svelte.js - Builds the map and everything on it, releases it all on unmount
-   * - MapConstants.js - Configuration constants
-   * - MapBuilder.svelte.js - MapPointsBuilder configuration
-   * - MapNavigation.svelte.js - Point-to-point (A>B) navigation logic
-   * - MapNavigationGPS.svelte.js - GPS navigation logic
-   * - MapTheme.svelte.js - Theme management
-   * - MapLifecycle.svelte.js - Map instance, tiles protocol and their cleanup (used by MapSession)
+   * Architecture (module by module: .claude/rules/screens.md):
+   * - Session/ - builds the map and everything on it, releases it all on unmount; tiles, theme
+   * - Points/ - historical and custom points on the map, their covers, the marker editor
+   * - Navigation/ - point-to-point routing; Navigation/GPS/ - navigation from the live position
+   * - MapClickRouter.js - which mode takes a map tap; MapConstants.js - configuration constants
    */
 
   import { onMount, onDestroy } from "svelte";
@@ -37,16 +34,16 @@
   import { createToggle } from "@/lib/state/createToggler.svelte";
 
   // Map modules
-  import { createMapSession } from "./MapSession.svelte.js";
-  import { resolveTargetCoords } from "./MapLifecycle.svelte.js";
-  import { createCustomPointsEditor } from "./MapCustomPointsEditor.svelte.js";
+  import { createMapSession } from "@/views/Map/Session/MapSession.svelte.js";
+  import { resolveTargetCoords } from "@/views/Map/Session/MapLifecycle.svelte.js";
+  import { createCustomPointsEditor } from "@/views/Map/Points/MapCustomPointsEditor.svelte.js";
   import { routeMapClick } from "./MapClickRouter.js";
 
   import { createLogger, IS_DEBUG } from "@/utils/debugMode.js";
   import MapEditor from "@/lib/icons/MapEditor.svelte";
   import FilterIcon from "@/lib/icons/FilterIcon.svelte";
   import Close from "@/lib/icons/Close.svelte";
-  import { hideTabbar } from "@/lib/state/bottomTabbarNav.svelte.js";
+  import { hideTabbar, QUICK_TABBAR_SLIDE } from "@/lib/state/bottomTabbarNav.svelte.js";
   import CustomPointsDialog from "@/components/CustomPoints/CustomPointsDialog.svelte";
   import NavigationControlDialog from "@/components/Navigation/NavigationControlDialog.svelte";
   import { customPointsDialogState } from "@/lib/state/customPointsDialogState.svelte.js";
@@ -220,7 +217,7 @@
 
   // The tab bar is hidden while editing the custom points; leaving edit mode (or the screen) releases it
   $effect(() => {
-    if (userCustomPointsToggler.value) return hideTabbar({ duration: 120, delay: 40 });
+    if (userCustomPointsToggler.value) return hideTabbar(QUICK_TABBAR_SLIDE);
   });
 
   async function customPointsDialogTrigger() {

@@ -20,14 +20,8 @@ export const CITY_BOUNDARIES = '/map/tashkent_boundaries.geojson';
 // MAP BOUNDS & INITIAL VIEW
 // ========================================
 
-/**
- * Geographic bounds fro Tashkent city
- * Format: [[west, south], [east, north]]
- */
-export const MAP_BOUNDS = [
-  [69.1038931009432, 41.144224013212],
-  [69.5436061519978, 41.4359965669526],
-];
+// The area the offline map covers, shared with GPS tracking (defined in data/mapArea.js)
+export { MAP_BOUNDS } from '@/data/mapArea';
 
 /**
  * Initial map view configuration

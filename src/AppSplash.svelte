@@ -5,7 +5,7 @@
   let { i18n, appName = "", version = "", appLogo } = $props();
 
   // No tab bar behind the splash; it slides in (slowly, as the app's entrance) once the splash goes
-  $effect(() => hideTabbar({ duration: 400, delay: 350 }));
+  $effect(() => hideTabbar());
 </script>
 
 <article class="app-splash-screen" out:fly={{ duration: 500, y: 20, delay: 200 }}>

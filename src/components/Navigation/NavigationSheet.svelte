@@ -5,9 +5,9 @@
   // Icons
   import Close from "@/lib/icons/Close.svelte";
   import ModeSelection from "./NavigationModeSelection.svelte";
-  import NavigationInstruction from "./NavigationInstruction.svelte";
-  import RouteInfo from "./NavigationRouteInfo.svelte";
-  import NavigationArrivalMsg from "./NavigationArrivalMsg.svelte";
+  import NavigationInstruction from "@/components/Navigation/RouteStatus/NavigationInstruction.svelte";
+  import RouteInfo from "@/components/Navigation/RouteStatus/NavigationRouteInfo.svelte";
+  import NavigationArrivalMsg from "@/components/Navigation/RouteStatus/NavigationArrivalMsg.svelte";
 
   let {
     i18n, // Point-to-Point mode

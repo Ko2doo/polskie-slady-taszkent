@@ -14,7 +14,7 @@ import Map from '@/views/Map/Map.svelte';
 // screen wires them together. `deps` holds what each factory created, for the assertions.
 const deps = vi.hoisted(() => ({ themes: [] }));
 
-vi.mock('@/views/Map/MapLifecycle.svelte.js', () => ({
+vi.mock('@/views/Map/Session/MapLifecycle.svelte.js', () => ({
   initializePMTiles: vi.fn(() => deps.pmtiles()),
   initializeMap: vi.fn(({ container }) => {
     const handlers = {};
@@ -31,7 +31,7 @@ vi.mock('@/views/Map/MapLifecycle.svelte.js', () => ({
   resolveTargetCoords: () => null,
 }));
 
-vi.mock('@/views/Map/MapBuilder.svelte.js', () => ({
+vi.mock('@/views/Map/Points/MapBuilder.svelte.js', () => ({
   createMapPointsBuilder: vi.fn((options) => {
     deps.builderOptions = options;
     deps.builder = {
@@ -59,7 +59,7 @@ vi.mock('@/views/Map/MapBuilder.svelte.js', () => ({
   }),
 }));
 
-vi.mock('@/views/Map/MapTheme.svelte.js', () => ({
+vi.mock('@/views/Map/Session/MapTheme.svelte.js', () => ({
   INITIAL_STYLE_VERSION: 0,
   getCurrentMapTheme: () => 'light',
   buildMapStyle: vi.fn(async () => ({})),
@@ -75,7 +75,7 @@ vi.mock('@/views/Map/MapTheme.svelte.js', () => ({
   }),
 }));
 
-vi.mock('@/views/Map/MapNavigation.svelte.js', () => ({
+vi.mock('@/views/Map/Navigation/MapNavigation.svelte.js', () => ({
   // A class instance, not a plain object: Svelte's $state would deep-copy a plain object into a
   // proxy, and the test could no longer flip the mode flags the screen reads
   createNavigationController: vi.fn(() => {
@@ -90,7 +90,7 @@ vi.mock('@/views/Map/MapNavigation.svelte.js', () => ({
   }),
 }));
 
-vi.mock('@/views/Map/MapNavigationGPS.svelte.js', () => ({
+vi.mock('@/views/Map/Navigation/GPS/MapNavigationGPS.svelte.js', () => ({
   createGPSNavigationController: vi.fn(() => {
     deps.gps = new (class {
       gpsMode = false;
@@ -102,12 +102,12 @@ vi.mock('@/views/Map/MapNavigationGPS.svelte.js', () => ({
   }),
 }));
 
-vi.mock('@/views/Map/MapLoadTracker.js', () => ({
+vi.mock('@/views/Map/Session/MapLoadTracker.js', () => ({
   createMapLoadTracker: vi.fn(() => (deps.tracker = { markSourcesAdded: vi.fn() })),
 }));
 
 // The preview tracker (MapPreview.test.js covers the real one) records what the screen gives back
-vi.mock('@/views/Map/MapPreview.js', () => ({
+vi.mock('@/views/Map/Points/MapPreview.js', () => ({
   createPreviewTracker: vi.fn(() => {
     deps.previews = {
       resolve: vi.fn(async (point) => (point.photos?.length ? 'blob:cover' : '')),
@@ -170,8 +170,13 @@ vi.mock('@/services/customPointsPhotos', () => ({
 
 vi.mock('@/store/ui/errorToast', () => ({ errorToast: { error: vi.fn(), warn: vi.fn(), info: vi.fn() } }));
 
-import { cleanupMap, initializeMap, initializePMTiles, setupMapHandlers } from '@/views/Map/MapLifecycle.svelte.js';
-import { createThemeController } from '@/views/Map/MapTheme.svelte.js';
+import {
+  cleanupMap,
+  initializeMap,
+  initializePMTiles,
+  setupMapHandlers,
+} from '@/views/Map/Session/MapLifecycle.svelte.js';
+import { createThemeController } from '@/views/Map/Session/MapTheme.svelte.js';
 import { customPointsState } from '@/lib/state/customPointsState.svelte.js';
 
 let target;

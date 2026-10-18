@@ -1,4 +1,4 @@
-import { App } from '@capacitor/app';
+import { onAppBackground } from '@/capacitor/services/appLifecycle';
 import { dataFilesDriver } from '@/capacitor/utils/appFiles';
 import { LIMITS, sanitizePhotos } from '@/services/customPointsFormat';
 import { deletePointPhotos, reconcilePhotos } from '@/services/customPointsPhotos';
@@ -247,9 +247,6 @@ export function initCustomPointsPersistence() {
 
   isPersistenceBound = true;
 
-  App.addListener('appStateChange', ({ isActive }) => {
-    if (!isActive) {
-      customPointsState.flush();
-    }
-  });
+  // App-lifetime listener: never removed
+  onAppBackground(() => customPointsState.flush());
 }

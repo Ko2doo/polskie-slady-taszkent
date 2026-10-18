@@ -54,7 +54,7 @@ synchronous decode, or a few hundred KB to the initial bundle is not small on a 
 
 - Don't let bookkeeping that has nothing to do with what's rendered live inside a reactive
   store — it will trigger wasted re-renders of whatever's subscribed to that store
-  (`errorToast.js` keeps its rate-limit bookkeeping in a plain closure variable for this).
+  (`errorToast.js` keeps its rate limit in `utils/rateLimiter.js`, a plain closure, for this).
 - Prefer resolving data (a photo url, a preview) in the background without blocking the
   thing that depends on it from rendering — show a placeholder, swap in the real content
   once it resolves, rather than awaiting it before the parent can render at all. See

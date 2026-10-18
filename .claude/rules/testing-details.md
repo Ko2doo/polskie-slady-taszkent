@@ -35,6 +35,8 @@ file is *how*.
   builders — `Marker`/`Popup`/`LngLatBounds`, a style recorder (sources, layers, images, layer
   taps, `resetStyle()` for a theme switch), `stubImageLoading()` (jsdom never loads images),
   `routeResult` — reuse it there.
+  `src/test/gpsTrackerRecorder.js` — `createTrackerRecorder()`, a `createGPSTracker()` the test
+  drives (`move(position)`, `fail(error)`) for the GPS navigation modules.
   For component tests: `src/test/i18nStub.js` (`$i18n.t` returning the key, plus the
   interpolation values as JSON) and `src/test/reactiveProps.svelte.js` (reactive props, to
   change a prop of a mounted component the way a parent would). Konsta components mount fine in

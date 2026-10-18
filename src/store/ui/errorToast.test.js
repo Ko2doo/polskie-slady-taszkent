@@ -20,7 +20,7 @@ describe('show', () => {
     });
   });
 
-  it('error, warn, info and fromError set the kind', () => {
+  it('error, warn and info set the kind', () => {
     errorToast.error('e');
     expect(current().kind).toBe('error');
 
@@ -43,17 +43,20 @@ describe('show', () => {
 describe('message normalization', () => {
   it.each([
     ['  trimmed  ', 'trimmed'],
-    ['   ', 'Unknown error'],
-    [null, 'Unknown error'],
-    [undefined, 'Unknown error'],
+    // Nothing usable: an empty text, the toast component shows the translated "unknown error"
+    ['   ', ''],
+    [null, ''],
+    [undefined, ''],
     [new Error('Boom'), 'Boom'],
     [Object.assign(new Error(''), { name: 'QuotaError' }), 'QuotaError'],
-    [new Error(''), 'Unknown error'],
+    [new Error(''), ''],
+    [new DOMException('', 'QuotaExceededError'), 'QuotaExceededError'],
+    [new DOMException('Quota exceeded', 'QuotaExceededError'), 'Quota exceeded'],
     [{ message: ' from message ' }, 'from message'],
     [{ error: 'from error' }, 'from error'],
     [{ detail: 'from detail' }, 'from detail'],
     [{ status: 500 }, '{"status":500}'],
-    [{}, 'Unknown error'],
+    [{}, ''],
     [42, '42'],
   ])('%o → %s', (input, expected) => {
     errorToast.show(input);
@@ -67,7 +70,16 @@ describe('message normalization', () => {
 
     errorToast.show(circular);
 
-    expect(current().content).toBe('Unknown error');
+    expect(current().content).toBe('');
+  });
+
+  it('no English text of its own, ever', () => {
+    for (const input of [null, '', new Error(''), {}, new DOMException('', 'Error')]) {
+      errorToast.clear();
+      errorToast.show(input);
+
+      expect(current().content).not.toMatch(/unknown|exception/i);
+    }
   });
 });
 
@@ -82,13 +94,6 @@ describe('meta', () => {
     errorToast.show('x', 'error', { html: 'x' });
 
     expect(current().meta).toBeNull();
-  });
-
-  it('fromError takes the code of the error', () => {
-    errorToast.fromError(Object.assign(new Error('Denied'), { code: 'OS-PLUG-GLOC-0003' }), 'GPS');
-
-    expect(current().content).toBe('Denied');
-    expect(current().meta).toEqual({ scope: 'GPS', code: 'OS-PLUG-GLOC-0003' });
   });
 });
 

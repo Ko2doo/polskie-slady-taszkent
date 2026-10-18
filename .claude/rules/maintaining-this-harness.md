@@ -45,7 +45,7 @@ of slowly going stale.
   removed", "at the time this was written", which session did what — that's git history and
   it goes stale. An example from the code is fine in the present tense
   (`customPointsState.add()` takes an optional `id`), and so is a plan still in progress
-  (the legacy-zone strategy in `harness/code-style.md`).
+  (a refactoring agreed and under way).
 - **A path in `inline code` must exist.** `src/harnessPaths.test.js` checks every
   path-shaped span in `CLAUDE.md`, `harness/`, `.claude/rules/`, `AGENTS.md` and
   `CONTRIBUTING.md` against the working tree; write paths in full enough to be found, and

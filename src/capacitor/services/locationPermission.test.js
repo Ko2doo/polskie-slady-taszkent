@@ -5,8 +5,6 @@ import { AndroidSettings, IOSSettings, NativeSettings } from 'capacitor-native-s
 import { ERROR_CODES } from '@/lib/errors/errorCodes';
 import {
   checkLocationPermission,
-  checkLocationReadiness,
-  isLocationServicesEnabled,
   mapGeolocationError,
   openAppSettings,
   openLocationSettings,
@@ -203,62 +201,5 @@ describe('mapGeolocationError', () => {
         pluginError('OS-PLUG-GLOC-0010', 'Could not obtain location in time. Try with a higher timeout.'),
       ),
     ).toBe(ERROR_CODES.OS_PLUG_GLOC_0010);
-  });
-});
-
-describe('isLocationServicesEnabled', () => {
-  it('a position means the services are on', async () => {
-    Geolocation.getCurrentPosition.mockResolvedValueOnce({ coords: {} });
-
-    expect(await isLocationServicesEnabled()).toBe(true);
-  });
-
-  it('a "services disabled" error means off', async () => {
-    Geolocation.getCurrentPosition.mockRejectedValueOnce(new Error('Location services are disabled'));
-
-    expect(await isLocationServicesEnabled()).toBe(false);
-  });
-
-  it('a timeout does not mean off', async () => {
-    Geolocation.getCurrentPosition.mockRejectedValueOnce(Object.assign(new Error('timeout'), { code: 3 }));
-
-    expect(await isLocationServicesEnabled()).toBe(true);
-  });
-
-  it('the native "services not enabled" error means off', async () => {
-    Geolocation.getCurrentPosition.mockRejectedValueOnce(
-      pluginError('OS-PLUG-GLOC-0007', 'Location services are not enabled.'),
-    );
-
-    expect(await isLocationServicesEnabled()).toBe(false);
-  });
-
-  it('the native "network and location off" error means off', async () => {
-    Geolocation.getCurrentPosition.mockRejectedValueOnce(pluginError('OS-PLUG-GLOC-0017', 'Both turned off'));
-
-    expect(await isLocationServicesEnabled()).toBe(false);
-  });
-});
-
-describe('checkLocationReadiness', () => {
-  it('no permission: not ready, the services are not even checked', async () => {
-    Geolocation.checkPermissions.mockResolvedValueOnce({ location: 'denied' });
-
-    expect(await checkLocationReadiness()).toMatchObject({ ready: false, issue: 'permission', servicesEnabled: null });
-    expect(Geolocation.getCurrentPosition).not.toHaveBeenCalled();
-  });
-
-  it('permission but services off: not ready', async () => {
-    Geolocation.checkPermissions.mockResolvedValueOnce({ location: 'granted' });
-    Geolocation.getCurrentPosition.mockRejectedValueOnce(new Error('Location services are disabled'));
-
-    expect(await checkLocationReadiness()).toMatchObject({ ready: false, issue: 'services', servicesEnabled: false });
-  });
-
-  it('both: ready', async () => {
-    Geolocation.checkPermissions.mockResolvedValueOnce({ location: 'granted' });
-    Geolocation.getCurrentPosition.mockResolvedValueOnce({ coords: {} });
-
-    expect(await checkLocationReadiness()).toMatchObject({ ready: true, issue: null, servicesEnabled: true });
   });
 });

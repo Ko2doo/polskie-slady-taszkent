@@ -4,7 +4,7 @@ paths:
   - "src/services/navigationLoader.js"
   - "src/capacitor/services/gpsTracker.js"
   - "src/capacitor/services/locationPermission.js"
-  - "src/views/Map/MapNavigation*"
+  - "src/views/Map/Navigation/**"
   - "src/components/Navigation/**"
   - "public/map/navigation-graph-optimized.json"
 ---
@@ -40,14 +40,20 @@ they are to a place on the map, on foot.
 
 ## UI glue and components
 
-- `views/Map/MapNavigation.svelte.js`, `views/Map/MapNavigationGPS.svelte.js` — wire the
-  engine/loader/tracker above into the map screen's own state and MapLibre layers (drawing
-  the route line, moving the user-position marker).
+- `views/Map/Navigation/` — wires the engine/loader/tracker above into the map screen's own
+  state and MapLibre layers: `MapNavigation.svelte.js` (point-to-point),
+  `GPS/MapNavigationGPS.svelte.js` (from the live position) wiring
+  `GPS/MapGPSTracking.svelte.js` (the live position itself), `GPS/MapGPSRoute.svelte.js`
+  (destination, route, arrival) and `GPS/MapGPSMessages.js` (every toast the GPS mode shows);
+  `MapUserMarker.js` (the GPS user-position dot); shared by both: `MapRouteFit.js` (the camera
+  fit to a route), `MapRouteMessages.js` (the routing toasts). Module by module:
+  `.claude/rules/screens.md`.
 - `components/Navigation/` — `NavigationSheet.svelte` (the bottom sheet shell, uses a plain
   `createToggle()` for its own open state — not an overlay-registered toggle, since it's
   driven by the map screen's navigation mode rather than needing independent back-button
-  dismissal), `NavigationModeSelection.svelte` (manual vs. GPS mode picker),
-  `NavigationInstruction.svelte` (turn-by-turn text for the active mode),
+  dismissal), `NavigationModeSelection.svelte` (manual vs. GPS mode picker); in
+  `RouteStatus/`, what the sheet shows on the way: `NavigationInstruction.svelte`
+  (turn-by-turn text for the active mode),
   `NavigationRouteInfo.svelte` (distance/duration summary), `NavigationArrivalMsg.svelte`
   (shown while `isArrived` is true — the one arrival message; don't add a second one via a
   toast), `NavigationControlDialog.svelte`
@@ -61,6 +67,6 @@ they are to a place on the map, on foot.
 - A change to live GPS behavior (tracking frequency, deviation detection, distance math) →
   `capacitor/services/gpsTracker.js`.
 - A change to how navigation state drives the map (drawing, markers, mode switching) →
-  `views/Map/MapNavigation*.svelte.js`.
+  `views/Map/Navigation/`.
 - A change to the navigation sheet's UI/text → the relevant `components/Navigation/*`
   component, with translations in all four locales per `.claude/rules/i18n.md`.

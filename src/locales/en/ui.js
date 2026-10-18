@@ -72,6 +72,8 @@ export default {
   },
   toasts: {
     exitApp: 'Press Back again to exit',
+    errorScope: 'Module: {{scope}}',
+    errorCode: 'Code: {{code}}',
   },
   dialogue: {
     hello: 'Hello, World!',

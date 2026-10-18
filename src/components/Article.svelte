@@ -12,7 +12,7 @@
   import { goto } from "@mateothegreat/svelte5-router";
 
   import ArrowRightIcon from "@/lib/icons/ArrowRightIcon.svelte";
-  import PhotoSlider from "./CustomPoints/PhotoSlider.svelte";
+  import PhotoSlider from "@/components/CustomPoints/Photos/PhotoSlider.svelte";
 
   let { i18n } = $props();
 

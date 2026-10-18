@@ -1,61 +1,43 @@
 /**
- * Global Error Toast Store
+ * Global Error Toast Store — the app's one user-facing error/warning/info channel, rendered by
+ * `components/Toasts/ErrorHandlerToast.svelte`.
  *
- * A centralized error notification system with queue management,
- * deduplication, rate limiting, type-safe error handling, and action support.
+ * - One toast at a time; messages arriving while it's open wait in a queue, shown one by one as
+ *   each is closed (`hide()`).
+ * - Dedup: the message already on screen, or the last one queued, isn't added again.
+ * - Rate limit: the same message (text + kind) at most MAX_SAME_MESSAGE times per
+ *   RATE_LIMIT_WINDOW_MS (`utils/rateLimiter.js`, kept out of the store — it renders nothing).
+ * - Any input is accepted (string, Error, a plugin's error object); `store/ui/toastInput.js` turns
+ *   it into the stored text, kind and meta. A value with nothing usable in it is stored as an empty
+ *   text; the toast component shows the translated "unknown error" for it.
  *
- * NEW FEATURES (v2):
- * - Action buttons support (e.g., "Open Settings", "Retry")
- * - Custom action handlers
- * - Built-in common actions (openSettings, retry)
+ * Texts and action labels come translated from the caller — the store adds no text of its own.
  *
- * FEATURES:
- * - Accepts string | Error | unknown input types
- * - Automatic error normalization and sanitization
- * - Message deduplication while toast is open
- * - Queue management for multiple errors
- * - Rate limiting to prevent spam (max 3 same messages per second)
- * - Type validation with automatic fallback
- * - Helper methods for different severity levels
- * - Metadata support (scope, code, data)
- * - Action buttons with callbacks
+ * @example
+ * errorToast.error(i18n.t('errors:mapInitFailed'), { scope: 'Map', code: ERROR_CODES.MAP_INIT_FAILED });
  *
- * USAGE EXAMPLES:
+ * // With an action button instead of "Close"
+ * import { openAppSettings } from '@/capacitor/services/locationPermission';
  *
- * // Basic usage
- * errorToast.show('Something went wrong');
- *
- * // With action button
- * errorToast.error('Permission denied', {
+ * errorToast.error(i18n.t(`errors:${ERROR_CODES.OS_PLUG_GLOC_0003}`), {
  *   scope: 'GPSNavigation',
  *   code: ERROR_CODES.OS_PLUG_GLOC_0003,
- *   action: {
- *     label: i18n.t('ui:buttons:openSettings'),
- *     handler: () => openAppSettings()
- *   }
+ *   action: { type: 'openSettings', label: i18n.t('ui:buttons:openSettings'), handler: openAppSettings },
  * });
  *
- * // With built-in openSettings action
- * import { openAppSettings } from '@/services/locationPermissions';
- *
- * errorToast.error('Location permission required', {
- *   scope: 'GPSNavigation',
- *   code: ERROR_CODES.OS_PLUG_GLOC_0003,
- *   action: {
- *     type: 'openSettings',
- *     handler: openAppSettings
- *   }
- * });
- *
- * // Manual control
- * errorToast.hide();  // Hide current toast, show next in queue
- * errorToast.clear(); // Clear everything including queue
+ * errorToast.hide(); // close the current toast, show the next queued one
+ * errorToast.clear(); // drop everything, the queue and the rate limit included
  */
 
 import { writable } from 'svelte/store';
+import { createRateLimiter } from '@/utils/rateLimiter';
+import { normalizeToastKind, normalizeToastText, sanitizeToastMeta } from './toastInput';
 import { createLogger, IS_DEBUG } from '@/utils/debugMode';
 
 const errorToastLogger = createLogger('ErrorToast');
+
+const RATE_LIMIT_WINDOW_MS = 1000;
+const MAX_SAME_MESSAGE = 3; // per RATE_LIMIT_WINDOW_MS
 
 /**
  * @typedef {'error' | 'warn' | 'info'} ToastKind
@@ -72,309 +54,115 @@ const errorToastLogger = createLogger('ErrorToast');
  * @property {ToastAction} [action] - Optional action button
  *
  * @typedef {Object} ToastQueueItem
- * @property {string} content
- * @property {ToastKind} kind
- * @property {ToastMeta|null} meta
+ * @property {string} content - the text to show ('' — the translated "unknown error")
+ * @property {ToastKind} kind - its severity
+ * @property {ToastMeta|null} meta - its sanitized meta
  */
 
-const VALID_KINDS = ['error', 'warn', 'info'];
-const RATE_LIMIT_WINDOW = 1000; // 1 second
-const MAX_SAME_MESSAGE = 3; // Max same message per window
+const closedState = () => ({ opened: false, content: '', kind: 'error', meta: null, queue: [] });
+
+const isSameMessage = (message, content, kind) => message.content === content && message.kind === kind;
 
 /**
- * Normalize various error types to string message
- * @param {string | Error | unknown} input
- * @returns {string}
+ * The toast state after a new message: shown at once when nothing is open, queued otherwise,
+ * dropped when it repeats what's on screen or the last queued message
+ * @param {Object} state - the store's current state
+ * @param {ToastQueueItem} message - the normalized message
+ * @returns {Object} the next state (the same object when nothing changes)
  */
-function normalizeError(input) {
-  if (input == null) return 'Unknown error';
-
-  if (typeof input === 'string') {
-    const trimmed = input.trim();
-    return trimmed || 'Unknown error';
+function withMessage(state, message) {
+  if (!state.opened) {
+    return { ...state, opened: true, content: message.content, kind: message.kind, meta: message.meta };
   }
 
-  if (input instanceof Error) {
-    const msg = input.message?.trim();
-    if (msg) return msg;
+  const lastQueued = state.queue.at(-1);
+  if (isSameMessage(state, message.content, message.kind)) return state;
+  if (lastQueued && isSameMessage(lastQueued, message.content, message.kind)) return state;
 
-    const name = input.name?.trim();
-    if (name && name !== 'Error') return name;
-
-    return 'Unknown error';
-  }
-
-  if (typeof DOMException !== 'undefined' && input instanceof DOMException) {
-    return input.message || input.name || 'DOM Exception';
-  }
-
-  if (typeof input === 'object') {
-    const candidates = [input.message, input.error, input.msg, input.description, input.detail];
-
-    for (const candidate of candidates) {
-      if (typeof candidate === 'string' && candidate.trim()) {
-        return candidate.trim();
-      }
-    }
-
-    try {
-      const str = JSON.stringify(input);
-      return str !== '{}' ? str : 'Unknown error';
-    } catch {
-      return 'Unknown error';
-    }
-  }
-
-  return String(input);
+  return { ...state, queue: [...state.queue, message] };
 }
 
 /**
- * Validate and normalize toast kind
- * @param {ToastKind} kind
- * @returns {ToastKind}
+ * The toast state after the current toast is closed: the next queued message, or nothing
+ * @param {Object} state - the store's current state
+ * @returns {Object} the next state (the same object when nothing changes)
  */
-function validateKind(kind) {
-  if (VALID_KINDS.includes(kind)) {
-    return kind;
+function withoutCurrent(state) {
+  if (!state.opened && state.queue.length === 0) return state;
+
+  if (state.queue.length === 0) {
+    return { ...state, opened: false, content: '', meta: null };
   }
 
-  IS_DEBUG && errorToastLogger.warn(`Invalid kind "${kind}", defaulting to "error"`);
-  return 'error';
+  const [next, ...rest] = state.queue;
+  return { ...state, opened: true, content: next.content, kind: next.kind, meta: next.meta, queue: rest };
 }
 
-/**
- * Sanitize and normalize action
- * @param {ToastAction} action
- * @returns {ToastAction|null}
- */
-function sanitizeAction(action) {
-  if (!action || typeof action !== 'object') return null;
-
-  // Validate handler
-  if (typeof action.handler !== 'function') {
-    IS_DEBUG && errorToastLogger.warn('Action handler must be a function');
-    return null;
-  }
-
-  // The label is user-visible text: it must come translated from the caller (.claude/rules/i18n.md),
-  // a made-up English fallback would show in every language
-  if (typeof action.label !== 'string' || !action.label.trim()) {
-    IS_DEBUG && errorToastLogger.warn('Action label is required (a translated string), action dropped');
-    return null;
-  }
-
-  return {
-    label: action.label,
-    type: action.type || 'custom',
-    handler: action.handler,
-  };
-}
-
-/**
- * Sanitize meta object to prevent XSS or large payloads
- * @param {ToastMeta|null} meta
- * @returns {ToastMeta|null}
- */
-function sanitizeMeta(meta) {
-  if (!meta || typeof meta !== 'object') return null;
-
-  const sanitized = {};
-  const allowedKeys = ['scope', 'code', 'data', 'action'];
-
-  for (const key of allowedKeys) {
-    if (key in meta) {
-      const value = meta[key];
-
-      // Handle action separately
-      if (key === 'action') {
-        sanitized.action = sanitizeAction(value);
-        continue;
-      }
-
-      // Ensure strings aren't too long (prevent UI overflow)
-      if (typeof value === 'string') {
-        sanitized[key] = value.slice(0, 200);
-      } else {
-        sanitized[key] = value;
-      }
-    }
-  }
-
-  return Object.keys(sanitized).length > 0 ? sanitized : null;
-}
-
-/**
- * Create error toast store with queue management and rate limiting
- */
 function createErrorToast() {
-  const store = writable({
-    opened: false,
-    content: '',
-    kind: 'error', // 'error' | 'warn' | 'info'
-    meta: null,
-    queue: [],
-  });
-
-  // Rate-limit bookkeeping: kept OUTSIDE the store on purpose. It has nothing to do with what is
-  // visible on screen, so touching it must not trigger a reactive update of the toast UI.
-  // Entries older than the rate-limit window are dropped on every check, so this never grows
-  // across the app's lifetime the way a Map that is only ever added to would.
-  let recentMessages = new Map();
+  const store = writable(closedState());
+  const rateLimiter = createRateLimiter({ windowMs: RATE_LIMIT_WINDOW_MS, maxPerWindow: MAX_SAME_MESSAGE });
 
   /**
-   * Check if message is rate limited
-   * @param {string} text
-   * @param {ToastKind} kind
-   * @returns {boolean}
-   */
-  function isRateLimited(text, kind) {
-    const key = `${kind}:${text}`;
-    const now = Date.now();
-
-    for (const [recentKey, recentValue] of recentMessages) {
-      if (now - recentValue.firstSeen > RATE_LIMIT_WINDOW) {
-        recentMessages.delete(recentKey);
-      }
-    }
-
-    const recent = recentMessages.get(key);
-
-    if (!recent) {
-      recentMessages.set(key, { count: 1, firstSeen: now });
-      return false;
-    }
-
-    recent.count++;
-
-    return recent.count > MAX_SAME_MESSAGE;
-  }
-
-  /**
-   * Show toast message
-   * @param {string | Error | unknown} content - Error content
-   * @param {ToastKind} [kind='error'] - Toast severity
-   * @param {ToastMeta} [meta=null] - Additional metadata
+   * Show a toast message (or queue it while another one is open)
+   * @param {string | Error | unknown} content - the message: translated text, or an error
+   * @param {ToastKind} [kind='error'] - toast severity; anything else becomes 'error'
+   * @param {ToastMeta} [meta=null] - scope, code, data and an optional action button
    */
   function show(content, kind = 'error', meta = null) {
-    const text = normalizeError(content);
-    const validKind = validateKind(kind);
-    const safeMeta = sanitizeMeta(meta);
+    const message = {
+      content: normalizeToastText(content),
+      kind: normalizeToastKind(kind),
+      meta: sanitizeToastMeta(meta),
+    };
 
-    // Rate limit check
-    if (isRateLimited(text, validKind)) {
-      IS_DEBUG && errorToastLogger.warn('Rate limited:', text);
+    if (rateLimiter.isLimited(`${message.kind}:${message.content}`)) {
+      IS_DEBUG && errorToastLogger.warn('Rate limited:', message.content);
       return;
     }
 
-    store.update((s) => {
-      // Dedup: same visible message + kind
-      if (s.opened && s.content === text && s.kind === validKind) {
-        return s;
-      }
-
-      // If already open, enqueue
-      if (s.opened) {
-        const last = s.queue.length ? s.queue[s.queue.length - 1] : null;
-        if (last && last.content === text && last.kind === validKind) {
-          return s;
-        }
-
-        return {
-          ...s,
-          queue: [...s.queue, { content: text, kind: validKind, meta: safeMeta }],
-        };
-      }
-
-      return {
-        ...s,
-        opened: true,
-        content: text,
-        kind: validKind,
-        meta: safeMeta,
-      };
-    });
+    store.update((state) => withMessage(state, message));
   }
 
   /**
-   * Hide current toast and show next in queue
+   * Hide the current toast and show the next queued one
    */
   function hide() {
-    store.update((s) => {
-      if (!s.opened && s.queue.length === 0) return s;
-
-      if (s.queue.length === 0) {
-        return { ...s, opened: false, content: '', meta: null };
-      }
-
-      const [next, ...rest] = s.queue;
-
-      return {
-        ...s,
-        opened: true,
-        content: next.content,
-        kind: next.kind,
-        meta: next.meta,
-        queue: rest,
-      };
-    });
+    store.update(withoutCurrent);
   }
 
   /**
-   * Clear all toasts including queue
+   * Drop the open toast, the queue and the rate limit
    */
   function clear() {
-    recentMessages = new Map();
-
-    store.set({
-      opened: false,
-      content: '',
-      kind: 'error',
-      meta: null,
-      queue: [],
-    });
+    rateLimiter.reset();
+    store.set(closedState());
   }
 
   /**
-   * Show error toast
-   * @param {string | Error | unknown} content
-   * @param {ToastMeta} [meta=null]
+   * Show an error toast
+   * @param {string | Error | unknown} content - the message
+   * @param {ToastMeta} [meta=null] - see show()
    */
   function error(content, meta = null) {
-    return show(content, 'error', meta);
+    show(content, 'error', meta);
   }
 
   /**
-   * Show warning toast
-   * @param {string | Error | unknown} content
-   * @param {ToastMeta} [meta=null]
+   * Show a warning toast
+   * @param {string | Error | unknown} content - the message
+   * @param {ToastMeta} [meta=null] - see show()
    */
   function warn(content, meta = null) {
-    return show(content, 'warn', meta);
+    show(content, 'warn', meta);
   }
 
   /**
-   * Show info toast
-   * @param {string | Error | unknown} content
-   * @param {ToastMeta} [meta=null]
+   * Show an info toast
+   * @param {string | Error | unknown} content - the message
+   * @param {ToastMeta} [meta=null] - see show()
    */
   function info(content, meta = null) {
-    return show(content, 'info', meta);
-  }
-
-  /**
-   * Show error from Error object with automatic code extraction
-   * @param {Error | unknown} error
-   * @param {string} [scope=null] - Component/module name
-   */
-  function fromError(error, scope = null) {
-    const meta = { scope };
-
-    // Try to extract error code from error object
-    if (error?.code) {
-      meta.code = error.code;
-    }
-
-    return show(error, 'error', meta);
+    show(content, 'info', meta);
   }
 
   return {
@@ -385,7 +173,6 @@ function createErrorToast() {
     error,
     warn,
     info,
-    fromError,
   };
 }
 

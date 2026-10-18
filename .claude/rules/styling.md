@@ -5,7 +5,7 @@ paths:
   - "tailwind.config.js"
   - "src/lib/theme/**"
   - "src/services/mapStyle.js"
-  - "src/views/Map/MapTheme.svelte.js"
+  - "src/views/Map/Session/MapTheme.svelte.js"
 ---
 
 # Styling and UI components (Konsta UI first, Tailwind second)
@@ -71,7 +71,7 @@ props/`class`/`colors` first.
   `capacitor/utils/appStorage.js`. It toggles the `dark` class on `<html>`, which both
   Konsta and Tailwind's `dark:` variant key off. Initialized once in `main.js` before mount;
   `DarkModeToggler.svelte` is the UI for it.
-- The map has its own light/dark *style* (`views/Map/MapTheme.svelte.js` +
+- The map has its own light/dark *style* (`views/Map/Session/MapTheme.svelte.js` +
   `services/mapStyle.js`) driven by the same theme state — a CSS dark class alone doesn't
   restyle a MapLibre canvas.
 - Every new UI piece must look right in both themes. Prefer Konsta components and

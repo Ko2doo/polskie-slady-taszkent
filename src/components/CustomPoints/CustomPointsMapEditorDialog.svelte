@@ -2,7 +2,7 @@
   import { untrack } from "svelte";
   import Close from "@/lib/icons/Close.svelte";
   import TrashBinIcon from "@/lib/icons/TrashBinIcon.svelte";
-  import PhotoThumb from "@/components/CustomPoints/PhotoThumb.svelte";
+  import PhotoThumb from "@/components/CustomPoints/Photos/PhotoThumb.svelte";
   import { createPhotoSession } from "@/lib/state/photoSession.svelte";
   import { errorToast } from "@/store/ui/errorToast";
   import { overlayController } from "@/store/ui/overlayController";

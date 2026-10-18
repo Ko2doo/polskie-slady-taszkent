@@ -23,8 +23,8 @@
 
   // Components
   import BottomTabbarNav from "@/components/BottomTabbarNav.svelte";
-  import ErrorHandlerToast from "@/components/ErrorHandlerToast.svelte";
-  import ExitToast from "@/components/ExitToast.svelte";
+  import ErrorHandlerToast from "@/components/Toasts/ErrorHandlerToast.svelte";
+  import ExitToast from "@/components/Toasts/ExitToast.svelte";
   import Article from "@/components/Article.svelte";
   import OnboardingWizard from "@/views/OnboardingWizard/OnboardingWizard.svelte";
 

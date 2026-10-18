@@ -53,7 +53,8 @@
   and so on instead of one giant `Map.svelte`. A long function gets broken into named
   helpers. Don't split for the sake of it: a 30-line module that does one thing is fine
   as is, and a split that forces the reader to jump across five files to follow one flow
-  made things worse, not better.
+  made things worse, not better. Once a screen or component folder holds more than 4
+  modules, they go into subdirectories — `harness/architecture.md` → "When a folder grows".
 - **Builder classes are the exception** (`services/mapPointsBuilder.js`,
   `services/customPointsBuilder.js`, and any future builder of that kind). They stay
   whole: their methods share the builder's internal state and its fluent
@@ -148,22 +149,18 @@ Konsta's `Popup` transform forcing `PhotoViewer` to use a portal.
 
 ## Leave old code alone: legacy zones
 
-The code base has two layers. The newer one (custom markers, storage, photos, the builders,
-`createUIProfile`) follows this harness; an older layer predates it and doesn't. "Write code
-that reads like the surrounding code" is the right default **only for formatting and naming**
-(quote style, indentation, comment density) — in a legacy file, *patterns* still come from the
-harness and the reference implementations below, never from the file's own neighbours.
+A legacy zone is a file that predates this harness and doesn't follow it. **There is none at the
+moment** — every file in `src/` follows the harness. "Write code that reads like the surrounding
+code" is the right default **only for formatting and naming** (quote style, indentation, comment
+density); *patterns* always come from the harness and the reference implementations below.
 
 ### The legacy zones
 
-Don't copy a pattern from these files into new code. Each line says what's wrong there, so you
-know what *not* to repeat.
+Empty. A file found not to follow the harness gets a row here — the file and what *not* to copy
+from it — so nobody copies it while it waits:
 
 | File | Don't copy |
 | --- | --- |
-| `views/Map/MapNavigationGPS.svelte.js` | one 700+-line module mixing GPS tracking, routing, map markers and toasts |
-| `components/LangSwitcher.svelte` | reads the deprecated global `event` (`window.event`) instead of the handler's own argument; commented-out `console.log`s |
-| `store/ui/errorToast.js` | English fallback texts in `normalizeError` (`'Unknown error'`), a 400-line store mixing queueing, dedup and rate limiting — *use* it as the one error channel; just don't copy its internals |
 
 ### Where to copy patterns from instead
 
@@ -173,14 +170,16 @@ know what *not* to repeat.
   `photoSession.svelte.js`, `createToggleOverlay.js` as used by `PhotoSlider.svelte`.
 - Resource lifecycle (urls, listeners released, ref-counting): `customPointsPhotos.js`,
   `PhotoSlider.svelte` / `PhotoViewer.svelte`; an async start that can be cancelled midway
-  (a checkpoint after every wait, one idempotent `release()`): `views/Map/MapSession.svelte.js`.
+  (a checkpoint after every wait, one idempotent `release()`):
+  `views/Map/Session/MapSession.svelte.js`, `views/Map/Navigation/GPS/MapGPSTracking.svelte.js`.
+- A controller wiring small focused parts together (state of its own only for what it
+  decides): `views/Map/Navigation/GPS/MapNavigationGPS.svelte.js`.
 - Builders: `services/mapPointsBuilder.js`, `customPointsBuilder.js`.
 
 ### What touching a legacy file means
 
-- Agreed strategy (2026-10-17): **every file in the table is brought up to the harness** in
-  separate, explicitly-scoped refactoring steps (an open bug in `BUGS.md`, if any, first) —
-  the most fragile places first (`MapNavigationGPS`). The goal is an empty table.
+- A listed file is brought up to the harness in separate, explicitly-scoped refactoring steps
+  (an open bug in `BUGS.md` for it, if any, first) — the most fragile places first.
 - Until then, a change in a legacy file stays scoped to its task: fix the bug or add the
   feature with harness-conforming code, and don't rewrite the surrounding old code as a
   drive-by (see the non-regression rule in `harness/testing.md`).

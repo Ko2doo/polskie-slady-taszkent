@@ -12,6 +12,7 @@ const navEngineLogger = createLogger('NavigationEngine');
 const MAX_ITERATIONS = 100000;
 const MAX_ROUTE_DISTANCE = 50000; // meters
 const MAX_NODE_SNAP_DISTANCE = 1000; // meters — point must be within 1km of road network
+const DEBUG_LOG_EVERY_ITERATIONS = 10000; // a progress line in debug builds on long searches
 
 // Spatial index cell size in degrees (~1km)
 const GRID_CELL_SIZE = 0.01;
@@ -246,7 +247,7 @@ class NavigationEngine {
         };
       }
 
-      if (iterations % 10000 === 0) {
+      if (iterations % DEBUG_LOG_EVERY_ITERATIONS === 0) {
         IS_DEBUG && navEngineLogger.log(`Iteration ${iterations}, open set size: ${openHeap.size}`);
       }
 

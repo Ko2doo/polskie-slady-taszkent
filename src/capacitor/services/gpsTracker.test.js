@@ -230,6 +230,18 @@ describe('position updates', () => {
     expect(onPositionUpdate.mock.lastCall[0].isWithinBounds).toBe(false);
   });
 
+  // Just past each side of the map area, the other coordinate inside it
+  it.each([
+    ['west', { lat: 41.3, lon: 69.1 }],
+    ['east', { lat: 41.3, lon: 69.55 }],
+    ['south', { lat: 41.14, lon: 69.3 }],
+    ['north', { lat: 41.44, lon: 69.3 }],
+  ])('flags a position just past the %s edge', (_side, point) => {
+    update(capacitorPosition(point));
+
+    expect(onPositionUpdate.mock.lastCall[0].isWithinBounds).toBe(false);
+  });
+
   it('skips a reading worse than 30 m', () => {
     update(capacitorPosition(at(0, 0), 31));
 
