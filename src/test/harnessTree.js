@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 
 // The harness describes directory layouts as `tree`-style blocks (harness/architecture.md for src/,
-// harness/repository-layout.md for the repo root); these helpers read them back for the tests that
+// .claude/rules/repository-layout.md for the repo root); these helpers read them back for the tests that
 // keep them in sync with the real directories.
 const INDENT_WIDTH = 4; // "│   " or "    " per tree level
 const TREE_ENTRY = /^((?:│ {3}| {4})*)(?:├── |└── )(\S+)/;

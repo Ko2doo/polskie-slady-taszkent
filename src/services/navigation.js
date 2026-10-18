@@ -73,6 +73,10 @@ class MinHeap {
 }
 // ─────────────────────────────────────────────────────────────────────────────
 
+/**
+ * A* pedestrian router over the navigation graph (`public/map/navigation-graph-optimized.json`).
+ * Don't construct it in UI code — NavigationLoader loads the graph once and caches routes.
+ */
 class NavigationEngine {
   constructor(graphData) {
     this.nodes = graphData.nodes;

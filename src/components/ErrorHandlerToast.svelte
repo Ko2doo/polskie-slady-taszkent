@@ -8,10 +8,6 @@
 
   const ErrHandlerToastLogger = createLogger("ErrorHandlerToast");
 
-  function onButton() {
-    errorToast.hide();
-  }
-
   async function onActionButton() {
     const action = $errorToast.meta?.action;
 

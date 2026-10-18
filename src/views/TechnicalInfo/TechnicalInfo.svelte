@@ -6,7 +6,6 @@
   import { hideTabbar } from "@/lib/state/bottomTabbarNav.svelte";
 
   // Icons
-  import Close from "@/lib/icons/Close.svelte";
 
   import { routerBack } from "@/services/navigationHistoryHook";
 
@@ -50,7 +49,7 @@
 
           {#if info && "links" in info}
             <ul class="block w-full text-[16px]">
-              {#each info.links as link}
+              {#each info.links as link, index (index)}
                 <li class="list-item list-none pb-[2px] text-stone-700 dark:text-stone-200">
                   <span>{link.title}:</span>
                   <a href={link.href} target="_blank" class="text-blue-500 font-bold">{link.label}</a>
@@ -58,7 +57,7 @@
               {/each}
             </ul>
           {:else if Array.isArray(itemData.description)}
-            {#each itemData.description as item}
+            {#each itemData.description as item, index (index)}
               <p class="text-[16px] font-normal text-stone-700 dark:text-stone-200">
                 {item}
               </p>

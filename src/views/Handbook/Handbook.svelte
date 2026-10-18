@@ -196,6 +196,7 @@
 
           {#if layout?.mode === "layoutRows"}
             <p class="text-gray-900 dark:text-stone-200 mb-4 line-clamp-3 text-sm sm:text-base">
+              <!-- eslint-disable-next-line svelte/no-at-html-tags -- markup from our own locale files -->
               {@html $i18n.t(`articles:${article.id}:description`)}
             </p>
           {/if}

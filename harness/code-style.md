@@ -18,13 +18,21 @@
   **Extensible when it's actually needed:** when a new call site needs the same job done
   slightly differently, extend the existing function instead of writing a near-copy — an
   optional parameter (or options-object field) whose default keeps the old behavior, so
-  every existing caller works unchanged. `customPointsState.add()` growing an optional `id`
-  is the reference case (see `harness/svelte-rules.md`). Once the "extension" would make it
-  a *different* job (a mode flag switching between two behaviors), it's a new function
-  instead. A function that was extended gets a test for the new parameter **and** keeps
-  its existing tests green — that's the proof the old behavior didn't move.
-- **Reuse what's in `lib/state/` and `utils/` before writing something new.** A needed
-  toggle, overlay, or formatting helper may already exist and just not be wired up yet.
+  every existing caller works unchanged — `customPointsState.add()`'s optional `id` (a
+  point's id created up front for its photo folder) is the reference case. Once the
+  "extension" would make it a *different* job (a mode flag switching between two
+  behaviors), it's a new function instead. A function that was extended gets a test for
+  the new parameter **and** keeps its existing tests green — that's the proof the old
+  behavior didn't move.
+- **Reuse what's in `lib/state/`, `services/` and `utils/` before writing something new.**
+  A needed toggle, overlay or formatting helper may already exist and just not be wired up
+  where it's needed — wire it up (`PhotoSlider` uses `createToggleOverlay` rather than a
+  hand-rolled `$effect`). Real duplication — the *same* logic in two places, not
+  similar-looking code with different behavior — gets extracted into a shared module, only
+  the genuinely identical parts (the builders' case: "Builder classes" below). Sharing must
+  not make the call site more complicated than the problem: a config object, a mode flag
+  and three branches for a case used in one place means a small function of its own
+  instead.
 - **No dead code left "just in case".** A commented-out block, an unused export, an unused
   import, a file nothing imports — remove it in the same change that makes it dead, not
   "later." Exception: a commented-out `console.log`/`console.error` left for local debugging
@@ -88,14 +96,23 @@ distance, a size, a storage key, an event name — gets a named constant:
 - A caught error that's silently swallowed without at least a debug-log line is a bug —
   even if falling back to a default is the right user-facing behavior, log why.
 
-## Quoting and formatting
+## Linting and formatting
 
-- `.prettierrc` sets `semi: true` and nothing about quote style, so Prettier's default
-  (double quotes) applies. In practice: `.js` service/util files in this project use
-  **single** quotes by established convention; `.svelte` files (both markup and the
-  `<script>` block) use **double** quotes. Match whichever convention the file you're
-  editing already uses — don't mix within one file, and don't "fix" a whole file's quote
-  style as a side effect of an unrelated change.
+- **ESLint** (`eslint.config.js`, `npm run lint`) enforces the parts of this file a tool can
+  check: no `console.*` outside `utils/debugMode.js`, no unused variables/imports/parameters
+  (`_name` marks a parameter kept for its position), `const` where nothing reassigns, JSDoc
+  on every exported function and class, plus the recommended Svelte 5 and Vitest rules.
+  JSDoc *contents* (`@param`/`@returns` and their descriptions) are warnings.
+- **Prettier** (`.prettierrc`, `npm run format` / `npm run format:check`) owns formatting:
+  semicolons, **single** quotes in `.js`, **double** quotes in `.svelte` (markup and
+  `<script>`), and the 120-character width from `.editorconfig`. Markdown, `public/`,
+  `scripts/`, `appstore/` and native projects are excluded (`.prettierignore`).
+- `npm run lint` has no errors and `npm run format:check` passes — `npm run build` runs both
+  first (`prebuild`) and CI runs them too, so neither can be skipped. Warnings (JSDoc
+  contents) don't fail anything; don't add new ones in code you write.
+  Silence a rule only on the line that needs it, with the reason:
+  `// eslint-disable-next-line svelte/no-at-html-tags -- markup from our own locale files`.
+  Existing violations in code you're not otherwise touching aren't a drive-by job.
 - Keep lines at or under 120 characters. Where a single string/attribute pushes a line over
   that, wrap the way the codebase already does it: for a JS object value that's too long,
   put the key on one line and the value indented on the next; for a long `class="..."`

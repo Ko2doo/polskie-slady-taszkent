@@ -1,3 +1,15 @@
+---
+paths:
+  - "src/views/**"
+  - "src/Routes.js"
+  - "src/App.svelte"
+  - "src/AppSplash.svelte"
+  - "src/utils/routerUtils.js"
+  - "src/services/navigationHistoryHook.js"
+  - "src/lib/state/navbar.svelte.js"
+  - "src/lib/state/bottomTabbarNav.svelte.js"
+---
+
 # Screens
 
 ## The shared pattern every screen follows
@@ -34,7 +46,7 @@ A new screen: add its component to `src/Routes.js`, give it this same `$effect` 
     which point is being edited, dialog open/closed) via `createEditModeController()`, a
     `.svelte.js` factory, not a singleton — one controller per `Map.svelte` instance.
   - `MapNavigation.svelte.js` / `MapNavigationGPS.svelte.js` — turn-by-turn routing and GPS
-    tracking UI glue; see `harness/navigation-subsystem.md` for the actual engine.
+    tracking UI glue; see `.claude/rules/navigation-subsystem.md` for the actual engine.
   - `MapLoadTracker.js` — tracks MapLibre source-loading progress for the loading screen.
   - `MapPreview.js` — resolves a custom point's cover photo for the map popup;
     `createPreviewTracker()` holds one photo-url reference per point and gives it back when the

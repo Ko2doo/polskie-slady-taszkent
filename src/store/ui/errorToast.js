@@ -156,7 +156,7 @@ function sanitizeAction(action) {
     return null;
   }
 
-  // The label is user-visible text: it must come translated from the caller (harness/i18n.md),
+  // The label is user-visible text: it must come translated from the caller (.claude/rules/i18n.md),
   // a made-up English fallback would show in every language
   if (typeof action.label !== 'string' || !action.label.trim()) {
     IS_DEBUG && errorToastLogger.warn('Action label is required (a translated string), action dropped');

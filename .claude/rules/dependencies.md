@@ -1,3 +1,9 @@
+---
+paths:
+  - "package.json"
+  - "package-lock.json"
+---
+
 # Dependencies
 
 ## Default answer: write it yourself
@@ -61,13 +67,3 @@ yes.** This applies even to a tiny, obviously-safe-looking package. The flow:
 5. Once approved, keep the footprint minimal: import only the specific modules/submodules
    needed (Swiper's `swiper/modules` for just `Pagination`/`Zoom`, not the whole kitchen
    sink), and route its CSS through `src/App.css` per `harness/performance.md`.
-
-## Re-checking before writing code against a library
-
-Right before implementing the part of a feature that touches an existing dependency —
-especially Svelte itself, which changes often — check `package.json` for the currently
-installed version and, if anything about the API feels like it might have moved, check that
-version's own docs/changelog rather than relying on a possibly-stale memory of an older or
-newer version's behavior. This is a quick check, not a research project, but skipping it is
-how code ends up calling an API that doesn't exist in the installed version, or missing a
-better API that does.

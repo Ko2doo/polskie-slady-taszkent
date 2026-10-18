@@ -25,7 +25,7 @@
   // console.log(locales);
 
   const i18nClickHandler = () => {
-    let eventTarget = event.target.value;
+    const eventTarget = event.target.value;
     // console.log(`Changed: ${eventTarget}`);
 
     if (eventTarget !== undefined) {
@@ -50,7 +50,7 @@
 
 <Popover opened={popoverState} target={popoverTargetEl} backdrop={true} onBackdropClick={backdropClickHandler}>
   <List nested>
-    {#each locales as [code, label]}
+    {#each locales as [code, label] (code)}
       <ListButton
         colors={{ bgIos: "active:bg-neutral-600/10", textIos: "text-stone-500 dark:text-stone-200" }}
         value={code}

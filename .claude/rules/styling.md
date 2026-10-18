@@ -1,3 +1,13 @@
+---
+paths:
+  - "src/**/*.svelte"
+  - "src/**/*.css"
+  - "tailwind.config.js"
+  - "src/lib/theme/**"
+  - "src/services/mapStyle.js"
+  - "src/views/Map/MapTheme.svelte.js"
+---
+
 # Styling and UI components (Konsta UI first, Tailwind second)
 
 ## The order of preference

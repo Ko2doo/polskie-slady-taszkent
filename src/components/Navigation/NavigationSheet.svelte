@@ -1,5 +1,5 @@
 <script>
-  import { Sheet, Toolbar, ToolbarPane, Block, Link, Button, Dialog, DialogButton, Progressbar } from "konsta/svelte";
+  import { Sheet, Toolbar, ToolbarPane, Block, Link, Dialog, DialogButton, Progressbar } from "konsta/svelte";
   import { createToggle } from "@/lib/state/createToggler.svelte";
 
   // Icons
@@ -100,7 +100,7 @@
   <Block nested class="mt-2 mb-4">
     <!-- Mode Selection Buttons -->
     {#if !isAnyModeActive}
-      <ModeSelection {i18n} {isAnyModeActive} {onToggle} {navigationLoading} {onGPSToggle} {gpsLoading} />
+      <ModeSelection {i18n} {onToggle} {navigationLoading} {onGPSToggle} {gpsLoading} />
     {/if}
 
     <!-- Info Panel -->

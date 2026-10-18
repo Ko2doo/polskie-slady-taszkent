@@ -1,5 +1,13 @@
 {
-  "title": "Project code style formatting schema for .prettierrc",
   "semi": true,
-  "editorconfig": true
+  "singleQuote": true,
+  "plugins": ["prettier-plugin-svelte"],
+  "overrides": [
+    {
+      "files": "*.svelte",
+      "options": {
+        "singleQuote": false
+      }
+    }
+  ]
 }

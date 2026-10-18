@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { createStyleMapRecorder, flushImageLoads, openedPopups, stubImageLoading } from '@/test/mapRecorders';
+import { createStyleMapRecorder, openedPopups, stubImageLoading } from '@/test/mapRecorders';
 import { CustomPointsBuilder } from '@/services/customPointsBuilder';
 
 vi.mock('maplibre-gl', async () => (await import('@/test/mapRecorders')).maplibreRecorder);

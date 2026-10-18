@@ -61,8 +61,10 @@ export function createGPSNavigationController({ map, builder, i18n }) {
   let pendingDestination = null;
   let isFirstPosition = true;
 
-  // Track shown error codes to prevent duplicates
-  let shownErrorCodes = new Set();
+  // Track shown error codes to prevent duplicates — bookkeeping, deliberately not reactive
+  // (harness/performance.md → "Reactivity")
+  // eslint-disable-next-line svelte/prefer-svelte-reactivity
+  const shownErrorCodes = new Set();
 
   function showWaitingForFixOnce() {
     if (didShowWaitingToast) return;
@@ -293,7 +295,7 @@ export function createGPSNavigationController({ map, builder, i18n }) {
 
       // Check if off route and recalculate — only when not arrived
       if (currentRoute) {
-        checkAndRecalculateRoute(position);
+        checkAndRecalculateRoute();
       }
     }
   }
@@ -471,7 +473,7 @@ export function createGPSNavigationController({ map, builder, i18n }) {
   /**
    * Check if user is off route and recalculate if needed
    */
-  function checkAndRecalculateRoute(position) {
+  function checkAndRecalculateRoute() {
     if (!currentRoute || !destinationPoint) return;
 
     // Throttle recalculation

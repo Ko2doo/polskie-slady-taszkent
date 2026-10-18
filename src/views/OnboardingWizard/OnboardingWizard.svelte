@@ -1,5 +1,5 @@
 <script>
-  import { Popup, Navbar, Block, Button, Page } from "konsta/svelte";
+  import { Navbar, Block, Button, Page } from "konsta/svelte";
   import { fly } from "svelte/transition";
 
   // Use permission service
@@ -45,7 +45,7 @@
     isRequestingPermission = true;
 
     try {
-      const result = await requestLocationPermission({
+      await requestLocationPermission({
         onSuccess: async () => {
           IS_DEBUG && onboardingLogger.log("Location permission granted");
           // Complete onboarding immediately

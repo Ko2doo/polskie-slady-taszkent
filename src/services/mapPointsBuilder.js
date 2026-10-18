@@ -57,6 +57,10 @@ import { createPopupHTML } from './mapPopupHtml';
 
 const pointsBuilderLogger = createLogger('MapPointsBuilder');
 
+/**
+ * Renders historical places (and the city boundary) on a MapLibre map — purpose, lifecycle and
+ * the full builder-chain example are in the module header above.
+ */
 export class MapPointsBuilder {
   /**
    * Private constructor - use MapPointsBuilder.create() instead
@@ -563,7 +567,7 @@ export class MapPointsBuilder {
       }
 
       IS_DEBUG && pointsBuilderLogger.log('Navigation route cleared');
-    } catch (error) {
+    } catch {
       // Map is already removed/destroyed, which is fine during cleanup
       IS_DEBUG && pointsBuilderLogger.log('Map already removed, skipping route cleanup');
     }

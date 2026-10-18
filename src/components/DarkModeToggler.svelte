@@ -9,7 +9,6 @@
    *   is implemented in the singleton theme manager.
    */
 
-  import { onMount, onDestroy } from "svelte";
   import { fly } from "svelte/transition";
   import { List, ListItem, Toggle } from "konsta/svelte";
 

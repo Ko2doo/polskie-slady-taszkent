@@ -37,7 +37,7 @@ export default {
   OS_PLUG_GLOC_0005: 'The "watchPosition" input parameters aren\'\t valid.',
   OS_PLUG_GLOC_0006: 'The "clearWatch" input parameters aren\'\t valid.',
   OS_PLUG_GLOC_0007: 'Location services are not enabled.',
-  OS_PLUG_GLOC_0008: 'Application\'\s use of location services was restricted.', // prettier-ignore
+  OS_PLUG_GLOC_0008: "Application's use of location services was restricted.",
   OS_PLUG_GLOC_0009: 'Request to enable location was denied.',
   OS_PLUG_GLOC_0010: 'Could not obtain location in time. Try with a higher timeout.',
   OS_PLUG_GLOC_0011: 'Timeout needs to be a positive value.',

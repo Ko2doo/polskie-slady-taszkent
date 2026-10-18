@@ -1,5 +1,5 @@
 <script>
-  import { App, Page, Navbar, Panel, Link, Block } from "konsta/svelte";
+  import { App, Page, Navbar, Panel, Link } from "konsta/svelte";
 
   // Svelte
   import { onMount, setContext } from "svelte";

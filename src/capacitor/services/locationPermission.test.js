@@ -186,9 +186,7 @@ describe('mapGeolocationError', () => {
     expect(mapGeolocationError(pluginError('OS-PLUG-GLOC-0018', 'Location permissions are not declared'))).toBe(
       ERROR_CODES.OS_PLUG_GLOC_0003,
     );
-    expect(mapGeolocationError(pluginError('OS-PLUG-GLOC-0018', 'Something else'))).toBe(
-      ERROR_CODES.OS_PLUG_GLOC_0002,
-    );
+    expect(mapGeolocationError(pluginError('OS-PLUG-GLOC-0018', 'Something else'))).toBe(ERROR_CODES.OS_PLUG_GLOC_0002);
   });
 
   it('an unknown app-style code is not passed through either', () => {

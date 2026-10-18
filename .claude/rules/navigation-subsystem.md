@@ -1,3 +1,14 @@
+---
+paths:
+  - "src/services/navigation.js"
+  - "src/services/navigationLoader.js"
+  - "src/capacitor/services/gpsTracker.js"
+  - "src/capacitor/services/locationPermission.js"
+  - "src/views/Map/MapNavigation*"
+  - "src/components/Navigation/**"
+  - "public/map/navigation-graph-optimized.json"
+---
+
 # Navigation subsystem (turn-by-turn, GPS)
 
 Entirely separate from the custom-markers subsystem — this is what gets a user from where
@@ -38,9 +49,8 @@ they are to a place on the map, on foot.
   dismissal), `NavigationModeSelection.svelte` (manual vs. GPS mode picker),
   `NavigationInstruction.svelte` (turn-by-turn text for the active mode),
   `NavigationRouteInfo.svelte` (distance/duration summary), `NavigationArrivalMsg.svelte`
-  (shown while `isArrived` is true — this is the canonical arrival message; don't add a
-  second one via a toast, see the note in `harness/performance.md`/the error-toast rate-
-  limiting discussion for why a duplicate was removed), `NavigationControlDialog.svelte`
+  (shown while `isArrived` is true — the one arrival message; don't add a second one via a
+  toast), `NavigationControlDialog.svelte`
   (confirm-before-stopping-navigation dialog).
 
 ## Where a navigation-related addition goes
@@ -53,4 +63,4 @@ they are to a place on the map, on foot.
 - A change to how navigation state drives the map (drawing, markers, mode switching) →
   `views/Map/MapNavigation*.svelte.js`.
 - A change to the navigation sheet's UI/text → the relevant `components/Navigation/*`
-  component, with translations in all four locales per `harness/i18n.md`.
+  component, with translations in all four locales per `.claude/rules/i18n.md`.

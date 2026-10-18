@@ -6,7 +6,6 @@
  * or reset to defaults on unmount. Base for navbar/panel/tabbar-like stores
  * that share this exact shape but differ in fields.
  */
-
 export function createUIProfile(defaults) {
   let state = $state({ ...defaults });
 

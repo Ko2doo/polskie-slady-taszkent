@@ -8,7 +8,6 @@
 import { MapPointsBuilder } from '@/services/mapPointsBuilder';
 import { CustomPointsBuilder } from '@/services/customPointsBuilder';
 import { MARKER_CONFIG, BOUNDARY_CONFIG, CUSTOM_POINTS_CONFIG } from './MapConstants';
-import { articlePopupState } from '@/lib/state/article.svelte';
 
 /**
  * Create and configure MapPointsBuilder instance

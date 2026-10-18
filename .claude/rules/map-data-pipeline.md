@@ -1,9 +1,21 @@
+---
+paths:
+  - "public/map/**"
+  - "public/fonts/map/**"
+  - "scripts/**"
+  - "src/services/mapStyle.js"
+  - "src/services/navigationLoader.js"
+  - "src/views/Map/MapLifecycle.svelte.js"
+  - "src/views/Map/MapConstants.js"
+  - "src/utils/inMemoryPmtilesSource.js"
+---
+
 # Offline map and navigation data pipeline
 
 The app works fully offline, so everything the map and the router need ships inside the app
 bundle under `public/`. None of it is fetched from the internet at runtime. This file covers
 what those assets are, which code consumes them, and how each one is (re)produced. Runtime
-behavior of the router itself is in `harness/navigation-subsystem.md`.
+behavior of the router itself is in `.claude/rules/navigation-subsystem.md`.
 
 ## Runtime assets (`public/`, all tracked in git)
 
@@ -37,7 +49,7 @@ The MapLibre style JSON is **built at runtime** by `services/mapStyle.js` from
 glyphs and sprites above. There is no static style file in `public/`.
 `scripts/generateMaplibreBaseStyle.mjs` (writes to `public/map/styles/`, which doesn't
 exist) is an older alternative to that runtime approach and is not part of the current
-pipeline. Leave it as is — `scripts/` is hands-off (see `harness/repository-layout.md`).
+pipeline. Leave it as is — `scripts/` is hands-off (see `.claude/rules/repository-layout.md`).
 
 ## The navigation graph pipeline (`scripts/overpass/` → `scripts/navigationGraph/`)
 
@@ -50,7 +62,8 @@ Steps (also in `scripts/navigationGraph/instructions.txt`), run from the repo ro
 2. **Convert** — `npx osmtogeojson tashkent_roads.json > tashkent_roads.geojson` (a global
    CLI tool, not a project dependency; don't add it to `package.json`).
 3. **Build** — `node scripts/navigationGraph/build-navigation-graph.mjs` →
-   `scripts/navigationGraph/dist/navigation-graph.json` and `navigation-graph-compact.json`
+   `scripts/navigationGraph/dist/navigation-graph.json` and
+   `scripts/navigationGraph/dist/navigation-graph-compact.json`
    (`{ nodes, edges }`, nodes deduplicated by coordinates rounded to 6 decimals). Edges are
    directed; every way gets both directions **for a pedestrian**: OSM `oneway=yes` on a road
    restricts vehicles, not people on foot, so a way is one-way only with `oneway:foot`, or
@@ -69,7 +82,7 @@ Steps (also in `scripts/navigationGraph/instructions.txt`), run from the repo ro
 ### Rules for touching this pipeline
 
 The scripts themselves are hands-off unless explicitly asked (see
-`harness/repository-layout.md`); the rules below apply when that happens.
+`.claude/rules/repository-layout.md`); the rules below apply when that happens.
 
 - The graph's JSON shape is a contract between `build`/`optimize-graph.mjs` and
   `services/navigation.js`/`navigationLoader.js`. Changing one side means changing (and

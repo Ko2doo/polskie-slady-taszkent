@@ -1,7 +1,25 @@
+---
+paths:
+  - "src/services/customPoints*"
+  - "src/services/mapPopupHtml.js"
+  - "src/components/CustomPoints/**"
+  - "src/components/Article.svelte"
+  - "src/lib/state/customPoints*"
+  - "src/lib/state/photoSession.svelte.js"
+  - "src/lib/state/mapMarkerFilter.svelte.js"
+  - "src/views/Map/MapEditMode.svelte.js"
+  - "src/views/Map/MapPreview.js"
+  - "src/capacitor/utils/appFiles.js"
+  - "src/capacitor/services/photoPicker.js"
+  - "src/utils/imageResize.js"
+  - "src/utils/crc32.js"
+  - "src/utils/uuid.js"
+---
+
 # Custom markers subsystem
 
-The user-created-markers feature — the newest, most actively developed part of the app at
-the time this was written. Read this before touching anything marker- or photo-related.
+The user-created-markers feature. Read this before touching anything marker- or
+photo-related.
 
 ## Format and storage
 
@@ -16,7 +34,7 @@ the time this was written. Read this before touching anything marker- or photo-r
   revision.
 - **Points state** (`lib/state/customPointsState.svelte.js`): a deliberate module-level
   singleton — the map and the article popup must read the exact same reactive object (see
-  `harness/state-management.md` for when a singleton is/isn't the right call). Debounces
+  `.claude/rules/state-management.md` for when a singleton is/isn't the right call). Debounces
   writes to storage, flushes on `appStateChange` going to background.
 
 ## Photos
@@ -47,7 +65,7 @@ the time this was written. Read this before touching anything marker- or photo-r
   `PhotoViewer.svelte` (fullscreen, pinch/double-tap zoom, portaled to `<body>` because
   Konsta's `Popup` is a transformed, overflow-hidden ancestor that would otherwise break a
   `position: fixed` descendant). `PhotoSlider` owns the viewer's open state via
-  `createToggleOverlay` — see `harness/state-management.md`.
+  `createToggleOverlay` — see `.claude/rules/state-management.md`.
 - `views/Map/MapEditMode.svelte.js`'s `createEditModeController()` holds the map screen's
   own editing-mode state (tap coordinates, which point id is being edited, dialog open/
   closed) — one instance per `Map.svelte`, not a singleton, since only one map screen ever

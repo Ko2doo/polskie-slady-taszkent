@@ -59,7 +59,7 @@ Core technologies used in the project:
 ## How this project is developed
 
 Since **v1.2.0-rc.1** the repository carries an **agent harness**: `CLAUDE.md` plus the
-`harness/` folder describe the architecture, the rules of the code base (state, styling,
+`harness/` and `.claude/rules/` folders describe the architecture, the rules of the code base (state, styling,
 i18n, performance, dependencies), the testing and non-regression rules and the git
 workflow — written for an AI coding agent as much as for a human contributor. Together with
 it came a full test suite and **strict pull-request rules**: `master` only changes through a

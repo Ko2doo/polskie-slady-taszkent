@@ -25,7 +25,7 @@ message).
 - **Where:** `NavbarBackLink` in `src/views/Settings/Settings.svelte`, `About.svelte`,
   `TechnicalInfo.svelte`, `src/components/Article.svelte`
 - **What:** an icon-only link (Konsta's `showText` is `false`), no `aria-label`: a screen reader
-  announces nothing (`harness/i18n.md` counts `aria-label`s as user-visible text).
+  announces nothing (`.claude/rules/i18n.md` counts `aria-label`s as user-visible text).
 - **Test:** `src/views/Settings/Settings.test.js` → "the back link has an accessible name"
   (`it.fails`); the other three have no test yet.
 - **Fix:** `aria-label={$i18n.t("ui:buttons:back")}` on all four (Konsta passes it through to the

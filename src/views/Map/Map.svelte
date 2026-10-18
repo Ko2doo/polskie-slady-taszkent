@@ -22,7 +22,7 @@
    * - MapLifecycle.svelte.js - Initialization and cleanup
    */
 
-  import { onMount, onDestroy, setContext } from "svelte";
+  import { onMount, onDestroy } from "svelte";
   import { Progressbar, Link } from "konsta/svelte";
   import RoutingNavigationIcon from "@/lib/icons/RoutingNavigationIcon.svelte";
   // import { goto } from "@mateothegreat/svelte5-router";
@@ -107,7 +107,7 @@
   let mapReady = $state(false);
 
   // Target coordinates from URL params (?lon=X&lat=Y)
-  let targetCoords = $state(null);
+  const targetCoords = $derived(resolveTargetCoords(route));
 
   // ========================================
   // DERIVED STATE
@@ -121,11 +121,6 @@
         ? gpsNavigation
         : null
   );
-
-  // Resolve target coordinates from route
-  $effect(() => {
-    targetCoords = resolveTargetCoords(route);
-  });
 
   // sheet toggler
   const sheetToggler = createToggle();

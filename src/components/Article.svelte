@@ -4,7 +4,6 @@
    */
   import { Popup, Page, Navbar, NavbarBackLink, Block, Button } from "konsta/svelte";
 
-
   import { articlesMeta } from "@/data/articles";
   import { articlePopupState } from "@/lib/state/article.svelte";
   import { customPointsState } from "@/lib/state/customPointsState.svelte";
@@ -98,6 +97,7 @@
 
         <p class="text-neutral-800 dark:text-neutral-300" class:whitespace-pre-line={!article.isHtml}>
           {#if article.isHtml}
+            <!-- eslint-disable-next-line svelte/no-at-html-tags -- isHtml: our own translation markup, never user text -->
             {@html article.text}
           {:else}
             {article.text}

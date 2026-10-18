@@ -1,3 +1,12 @@
+---
+paths:
+  - "src/lib/state/**"
+  - "src/store/**"
+  - "src/services/useOverlay.js"
+  - "src/**/*.svelte"
+  - "src/**/*.svelte.js"
+---
+
 # State management (`lib/state/`)
 
 Read this before writing any new reactive state — there is almost always an existing
@@ -7,7 +16,7 @@ pattern is rarely justified.
 ## The base pattern: `createUIProfile`
 
 `createUIProfile.svelte.js` is the headline example of "universal reactivity" in this
-codebase (see `harness/svelte-rules.md` for what that term means) — a generic, reusable
+codebase (see `.claude/rules/svelte-rules.md` for what that term means) — a generic, reusable
 reactive UI profile: a flat object of view-scoped fields that a screen can fully replace
 (`set`), partially update (`patch`), or reset to defaults (`reset`). It's the base that
 these state modules specialize:
@@ -33,7 +42,7 @@ scratch.** The navbar and the panel expose a `withProfile(cfg)`-style method (`s
 a `reset` closure; the tab bar's equivalent is `hideTabbar`) specifically so a screen's
 `$effect` can do
 `$effect(() => withNavbar({...}))` and get the right cleanup for free — see
-`harness/screens.md` for how every screen actually uses this.
+`.claude/rules/screens.md` for how every screen actually uses this.
 
 ## Toggles and overlays
 
@@ -43,7 +52,7 @@ a `reset` closure; the tab bar's equivalent is `hideTabbar`) specifically so a s
 - `createToggleOverlay.js` — the same API, plus registering with the back-button overlay
   stack (`useOverlay.js`/`overlayController.js`) on open and unregistering on close. **Use
   this whenever the thing being toggled is a modal/overlay that should close on Android
-  back** — `PhotoSlider.svelte` (see `harness/custom-markers-subsystem.md`) is the
+  back** — `PhotoSlider.svelte` (see `.claude/rules/custom-markers-subsystem.md`) is the
   reference usage: the component that decides to open something owns the toggle; the thing
   being opened (`PhotoViewer.svelte`) stays presentational, driven by plain props, not by
   owning its own open state.
@@ -62,7 +71,7 @@ a `reset` closure; the tab bar's equivalent is `hideTabbar`) specifically so a s
 ## Feature-specific state modules
 
 - `customPointsState.svelte.js`, `photoSession.svelte.js` — see
-  `harness/custom-markers-subsystem.md`.
+  `.claude/rules/custom-markers-subsystem.md`.
 - `article.svelte.js` — the shared article/marker popup's open state (module singleton —
   both `Handbook` and the map popup open the same instance).
 - `mapMarkerFilter.svelte.js` — the map's all/custom/historical marker filter, persisted via
@@ -88,4 +97,4 @@ a `reset` closure; the tab bar's equivalent is `hideTabbar`) specifically so a s
    an article) are the two examples. This is a deliberate, narrow pattern — don't reach for
    it as the default just because "global" feels simpler than threading props.
 4. **A plain `writable` store** — only for genuine store-contract interop (see
-   `harness/svelte-rules.md`). Don't introduce a new one.
+   `.claude/rules/svelte-rules.md`). Don't introduce a new one.

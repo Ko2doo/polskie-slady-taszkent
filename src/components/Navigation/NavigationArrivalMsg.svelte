@@ -1,5 +1,4 @@
 <script>
-  import { Button } from "konsta/svelte";
   let { i18n } = $props();
 </script>
 
