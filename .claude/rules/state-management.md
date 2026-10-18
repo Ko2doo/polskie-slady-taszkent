@@ -89,7 +89,7 @@ a `reset` closure; the tab bar's equivalent is `hideTabbar`) specifically so a s
 2. **A factory (`createX()`, called fresh by each consumer)** — when the *shape* of state
    is reusable but each user of it needs their *own independent instance*. `createToggle`,
    `createToggleOverlay`, `createPhotoSession`, `createUIProfile` and everything built on
-   it, `createEditModeController` (one per `Map.svelte` instance) are all this.
+   it, `createEditModeController` (one per map screen) are all this.
 3. **A module-level singleton** — only when state genuinely must be the *same object*
    everywhere it's used, because independent screens need to observe/drive the exact same
    state. `customPointsState.svelte.js` (map + article popup must see the same points) and

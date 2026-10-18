@@ -8,6 +8,7 @@ paths:
   - "src/lib/state/photoSession.svelte.js"
   - "src/lib/state/mapMarkerFilter.svelte.js"
   - "src/views/Map/MapEditMode.svelte.js"
+  - "src/views/Map/MapCustomPointsEditor.svelte.js"
   - "src/views/Map/MapPreview.js"
   - "src/capacitor/utils/appFiles.js"
   - "src/capacitor/services/photoPicker.js"
@@ -66,10 +67,15 @@ photo-related.
   Konsta's `Popup` is a transformed, overflow-hidden ancestor that would otherwise break a
   `position: fixed` descendant). `PhotoSlider` owns the viewer's open state via
   `createToggleOverlay` — see `.claude/rules/state-management.md`.
-- `views/Map/MapEditMode.svelte.js`'s `createEditModeController()` holds the map screen's
-  own editing-mode state (tap coordinates, which point id is being edited, dialog open/
-  closed) — one instance per `Map.svelte`, not a singleton, since only one map screen ever
-  exists at a time anyway.
+- `views/Map/MapCustomPointsEditor.svelte.js` — `createCustomPointsEditor({ session, i18n })`:
+  the map screen's editing logic — what a tap in the edit mode does (open a point, start a new
+  one, refuse a place next to an article marker), saving and deleting the point open in the
+  dialog. The map goes first everywhere: a point the builder rejects leaves the state and its
+  photos untouched. It reads the builders from the map session on every call, so it never
+  holds a released map. Created by `Map.svelte` once the session has started.
+- `views/Map/MapEditMode.svelte.js`'s `createEditModeController()` holds the editing mode's own
+  state (tap coordinates, which point id is being edited, dialog open/closed); the editor
+  above owns the one instance — not a singleton, since only one map screen ever exists.
 - `views/Map/MapPreview.js` resolves a custom point's cover photo for the map popup, and
   `lib/state/mapMarkerFilter.svelte.js` is the all/custom/historical marker filter (UI
   preference, persisted separately from the points themselves).

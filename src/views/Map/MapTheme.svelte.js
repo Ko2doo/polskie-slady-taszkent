@@ -16,6 +16,39 @@ import { createLogger, IS_DEBUG } from '@/utils/debugMode';
 
 const mapThemeLogger = createLogger('MapTheme');
 
+// The version of the first style; every theme switch counts up from it. The builders are created
+// with it before the theme controller exists (the controller needs the builders)
+export const INITIAL_STYLE_VERSION = 0;
+
+/**
+ * The map theme for the app's current light/dark state. Read once to build the first style,
+ * before the map (and its theme controller) exists.
+ * @returns {'light'|'dark'} the theme to build the map style with
+ */
+export function getCurrentMapTheme() {
+  return getThemeManager().getState().isDark ? 'dark' : 'light';
+}
+
+/**
+ * Builds the MapLibre style for a theme: the bundled tiles, glyphs and sprites, labels in the
+ * app language.
+ * @param {'light'|'dark'} theme - which style flavor to build
+ * @param {string} lang - i18next language code, e.g. 'ru'
+ * @returns {Promise<Object>} the MapLibre style
+ * @example
+ * const style = await buildMapStyle(getCurrentMapTheme(), i18n.language);
+ * const map = initializeMap({ container, style });
+ */
+export async function buildMapStyle(theme, lang) {
+  return buildBaseMapStyle({
+    origin: window.location.origin,
+    pmtilesKey: PMTILES_KEY,
+    theme,
+    lang,
+    fontstack: 'Roboto Regular',
+  });
+}
+
 /**
  * Create theme controller
  *
@@ -41,24 +74,8 @@ export function createThemeController({
   const themeManager = getThemeManager();
 
   let uiThemeStyle = $state('light');
-  let styleVersion = $state(0);
+  let styleVersion = $state(INITIAL_STYLE_VERSION);
   let unsubscribeTheme = null;
-
-  /**
-   * Build map style for given theme
-   * @private
-   */
-  async function buildStyleForTheme(theme) {
-    const origin = window.location.origin;
-
-    return buildBaseMapStyle({
-      origin,
-      pmtilesKey: PMTILES_KEY,
-      theme,
-      lang: i18n.language,
-      fontstack: 'Roboto Regular',
-    });
-  }
 
   /**
    * Reapply all map overlays after style change
@@ -107,7 +124,7 @@ export function createThemeController({
       const myVersion = styleVersion;
 
       // Build new style
-      const style = await buildStyleForTheme(theme);
+      const style = await buildMapStyle(theme, i18n.language);
       map.setStyle(style);
 
       // Wait for style to load
@@ -146,13 +163,16 @@ export function createThemeController({
   }
 
   /**
-   * Initialize theme controller
+   * Start following the app theme.
+   * @param {'light'|'dark'} [builtWith] - the theme the map's current style was built with. The
+   *   app theme may have changed since (the style is built before the map loads); the subscription
+   *   reports the current theme right away, so a difference is applied at once
+   * @returns {'light'|'dark'} the theme the map has now, or is switching to
    */
-  function init() {
-    // Get initial theme
-    uiThemeStyle = themeManager.getState().isDark ? 'dark' : 'light';
+  function init(builtWith = getCurrentMapTheme()) {
+    uiThemeStyle = builtWith;
 
-    // Subscribe to theme changes
+    // Subscribe to theme changes; called right away with the current theme
     unsubscribeTheme = themeManager.subscribe(({ isDark }) => {
       const nextTheme = isDark ? 'dark' : 'light';
 
@@ -194,7 +214,6 @@ export function createThemeController({
     // Actions
     init,
     applyTheme,
-    buildStyleForTheme,
     dispose,
   };
 }

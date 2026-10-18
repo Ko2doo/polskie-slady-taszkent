@@ -161,7 +161,6 @@ know what *not* to repeat.
 
 | File | Don't copy |
 | --- | --- |
-| `views/Map/Map.svelte` | fat async `onMount` glue wiring modules through closures, a throw-away theme controller created just to pick the first style |
 | `views/Map/MapNavigationGPS.svelte.js` | one 700+-line module mixing GPS tracking, routing, map markers and toasts |
 | `views/Map/MapTheme.svelte.js` | restores overlays by calling into every builder/controller directly |
 | `components/LangSwitcher.svelte` | reads the deprecated global `event` (`window.event`) instead of the handler's own argument; commented-out `console.log`s |
@@ -174,15 +173,16 @@ know what *not* to repeat.
 - Reactive state: `lib/state/createUIProfile.svelte.js` and its three specializations,
   `photoSession.svelte.js`, `createToggleOverlay.js` as used by `PhotoSlider.svelte`.
 - Resource lifecycle (urls, listeners released, ref-counting): `customPointsPhotos.js`,
-  `PhotoSlider.svelte` / `PhotoViewer.svelte`.
+  `PhotoSlider.svelte` / `PhotoViewer.svelte`; an async start that can be cancelled midway
+  (a checkpoint after every wait, one idempotent `release()`): `views/Map/MapSession.svelte.js`.
 - Builders: `services/mapPointsBuilder.js`, `customPointsBuilder.js`.
 
 ### What touching a legacy file means
 
 - Agreed strategy (2026-10-17): **every file in the table is brought up to the harness** in
   separate, explicitly-scoped refactoring steps (an open bug in `BUGS.md`, if any, first) —
-  the most fragile places first (`Map.svelte`'s mount/teardown, the navigation ↔ theme
-  wiring, `MapNavigationGPS`). The goal is an empty table.
+  the most fragile places first (the navigation ↔ theme wiring, `MapNavigationGPS`). The
+  goal is an empty table.
 - Until then, a change in a legacy file stays scoped to its task: fix the bug or add the
   feature with harness-conforming code, and don't rewrite the surrounding old code as a
   drive-by (see the non-regression rule in `harness/testing.md`).

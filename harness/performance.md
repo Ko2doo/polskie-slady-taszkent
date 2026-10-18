@@ -58,7 +58,10 @@ synchronous decode, or a few hundred KB to the initial bundle is not small on a 
 - Prefer resolving data (a photo url, a preview) in the background without blocking the
   thing that depends on it from rendering — show a placeholder, swap in the real content
   once it resolves, rather than awaiting it before the parent can render at all. See
-  `resolvePreview()` / `refreshPreview()` in `MapPreview.js` and `Map.svelte`.
+  `resolvePreview()` in `MapPreview.js` and `showPreview()` in `MapSession.svelte.js`: the saved
+  points go on the map at once, each cover follows as it resolves.
+- Independent startup work runs side by side, not one after another — the map tiles load
+  while the style is built (`MapSession.svelte.js`).
 
 ## Before shipping a feature, ask yourself
 

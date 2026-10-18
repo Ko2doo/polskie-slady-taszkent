@@ -60,11 +60,13 @@ vi.mock('@/views/Map/MapBuilder.svelte.js', () => ({
 }));
 
 vi.mock('@/views/Map/MapTheme.svelte.js', () => ({
+  INITIAL_STYLE_VERSION: 0,
+  getCurrentMapTheme: () => 'light',
+  buildMapStyle: vi.fn(async () => ({})),
   createThemeController: vi.fn((options) => {
     const theme = {
       options,
       init: vi.fn(() => 'light'),
-      buildStyleForTheme: vi.fn(async () => ({})),
       dispose: vi.fn(),
       styleVersion: 0,
     };
@@ -253,7 +255,7 @@ describe('start', () => {
     expect(deps.tracker.markSourcesAdded).toHaveBeenCalled();
   });
 
-  it('puts the saved custom points on the map, with their cover as preview', async () => {
+  it('puts the saved custom points on the map at once, their cover follows as preview', async () => {
     customPointsState.points.push(
       { id: 'a', coords: { lng: 1, lat: 2 }, title: 'A', photos: ['photos/a/1.jpg'] },
       { id: 'b', coords: { lng: 3, lat: 4 }, title: 'B', photos: [] },
@@ -265,7 +267,7 @@ describe('start', () => {
       id: 'a',
       coords: { lng: 1, lat: 2 },
       title: 'A',
-      preview: 'blob:cover',
+      preview: '',
     });
     expect(deps.customBuilder.addPoint).toHaveBeenCalledWith({
       id: 'b',
@@ -273,6 +275,7 @@ describe('start', () => {
       title: 'B',
       preview: '',
     });
+    expect(deps.customBuilder.updatePoint).toHaveBeenCalledWith({ id: 'a', title: 'A', preview: 'blob:cover' });
   });
 
   it('a failed start tells the user', async () => {
@@ -305,7 +308,7 @@ describe('start', () => {
     await settle();
 
     expect(initializeMap).not.toHaveBeenCalled();
-    expect(cleanupMap).toHaveBeenLastCalledWith(expect.objectContaining({ protocol }));
+    expect(cleanupMap).toHaveBeenCalledWith(expect.objectContaining({ protocol }));
   });
 
   // The map exists by then, so onDestroy releases it; what must not happen is the rest of onMount
@@ -324,20 +327,23 @@ describe('start', () => {
 
       expect(cleanupMap).toHaveBeenCalledWith(expect.objectContaining({ map: deps.map, builder: deps.builder }));
       expect(deps.map.on).not.toHaveBeenCalledWith('load', expect.any(Function));
-      expect(deps.themes).toHaveLength(1);
+      expect(deps.themes).toHaveLength(0);
     } finally {
       customPointsState.ready = ready;
     }
   });
 
-  // The first, map-less controller (step 2) only picks the initial style; it is replaced later
-  it('no theme controller is left subscribed', async () => {
+  // The first style is built without a controller; the one that follows the theme is created
+  // once, with the map, so no subscription exists without a map to restyle
+  it('creates one theme controller, with the map, and hands it to the cleanup', async () => {
     await render();
 
-    const replaced = deps.themes.slice(0, -1);
-    expect(replaced.length).toBeGreaterThan(0);
-    expect(replaced.every((theme) => theme.dispose.mock.calls.length > 0)).toBe(true);
-    expect(deps.themes.at(-1).dispose).not.toHaveBeenCalled();
+    expect(deps.themes).toHaveLength(1);
+    expect(deps.themes[0].options.map).toBe(deps.map);
+
+    leave();
+
+    expect(cleanupMap).toHaveBeenLastCalledWith(expect.objectContaining({ theme: deps.themes[0] }));
   });
 
   // map.setStyle() drops every app layer; the theme controller redraws the route it is given

@@ -56,6 +56,12 @@ props/`class`/`colors` first.
   asking.
 - Third-party CSS (`maplibre-gl`, `swiper`) is imported once in `App.css` — see
   `harness/performance.md`. Global typography is in `src/assets/styles/typography.css`.
+- `src/assets/styles/maplibre.css` styles what MapLibre puts on the map (popups, markers,
+  attribution) — global by nature, so not in a component's `<style>`. Imported in `App.css`
+  right after `maplibre-gl`'s CSS: the selectors match MapLibre's, the order makes ours win.
+  The popup surface is one variable, `--map-popup-surface`, redefined under `.dark`. Global
+  `@keyframes` there get a specific name (`user-location-pulse`): a plain `pulse` would
+  replace Tailwind's `animate-pulse`.
 
 ## Dark mode
 

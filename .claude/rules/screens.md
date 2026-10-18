@@ -40,11 +40,26 @@ A new screen: add its component to `src/Routes.js`, give it this same `$effect` 
   into supporting modules rather than one giant component:
   - `MapBuilder.svelte.js` — wires `mapPointsBuilder.js` (historical) and
     `customPointsBuilder.js` (user markers) together.
-  - `MapLifecycle.svelte.js`, `MapTheme.svelte.js` — map instance creation/teardown and
-    light/dark style switching (`services/mapStyle.js`).
+  - `MapSession.svelte.js` — `createMapSession()`: builds the map and everything on it, in
+    order (tiles, style, map, builders, saved points, navigation, theme controller), and is the
+    one place it's all released. `Map.svelte` calls `start()` on mount and `dispose()` on
+    unmount; leaving mid-load is handled inside (a checkpoint after every wait). A new resource
+    on the map is created in `start()` and released in its `release()`, nowhere else. The
+    tiles load while the style is built; saved points go on the map at once and their covers
+    follow (`showPreview()`, also used by the editor after a save).
+  - `MapLifecycle.svelte.js`, `MapTheme.svelte.js` — the steps the session uses: map instance,
+    tiles protocol and their cleanup; light/dark style switching (`services/mapStyle.js`).
+    `getCurrentMapTheme()`/`buildMapStyle()` build the first style before any controller
+    exists; the theme controller is created once, with the map.
+  - `MapCustomPointsEditor.svelte.js` — custom-point editing: the edit-mode tap, save and
+    delete, keeping the map and the points state in step (see
+    `.claude/rules/custom-markers-subsystem.md`). Owns the `MapEditMode.svelte.js` controller.
+  - `MapClickRouter.js` — `routeMapClick()`: which mode takes a map tap (ready GPS
+    navigation, then point-to-point navigation, then the edit mode). A new map mode that
+    takes taps gets its place in this priority here.
   - `MapEditMode.svelte.js` — the marker-editing mode's own small state (tap coordinates,
     which point is being edited, dialog open/closed) via `createEditModeController()`, a
-    `.svelte.js` factory, not a singleton — one controller per `Map.svelte` instance.
+    `.svelte.js` factory, not a singleton — one controller per map screen, held by the editor.
   - `MapNavigation.svelte.js` / `MapNavigationGPS.svelte.js` — turn-by-turn routing and GPS
     tracking UI glue; see `.claude/rules/navigation-subsystem.md` for the actual engine.
   - `MapLoadTracker.js` — tracks MapLibre source-loading progress for the loading screen.

@@ -164,8 +164,8 @@ src/
   `inMemoryPmtilesSource.js` serves the map archive from RAM
   (`.claude/rules/map-data-pipeline.md`).
 - `views/` — one folder per screen, wired in `Routes.js`. `views/Map/` is the one screen big
-  enough to be split into supporting modules (builder wiring, lifecycle, theme, navigation,
-  edit mode, load progress) — see `.claude/rules/screens.md`.
+  enough to be split into supporting modules (the map session, builder wiring, lifecycle,
+  theme, navigation, edit mode, load progress) — see `.claude/rules/screens.md`.
 - `locales/` — `collections.js` is the language picker's code → name list. See
   `.claude/rules/i18n.md`.
 - `assets/` vs. root `public/` — `assets/` is for files imported from code; static files that

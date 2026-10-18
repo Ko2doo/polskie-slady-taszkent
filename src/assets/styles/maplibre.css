@@ -1,0 +1,106 @@
+/*
+ * App styles for what MapLibre and the map screen put on the map: the attribution control,
+ * the marker popups, the navigation and user-location markers. All of it is global by nature —
+ * MapLibre creates these elements outside any component — so it lives here, imported once in
+ * App.css right after maplibre-gl's own CSS (same specificity, so the order makes ours win).
+ */
+
+/* The popup surface, one variable for the box and its tip in both themes */
+:root {
+  --map-popup-surface: var(--color-ios-light-surface);
+}
+
+.dark {
+  --map-popup-surface: var(--color-ios-dark-surface-1-tint);
+}
+
+/* Attribution below the navbar */
+.maplibregl-ctrl-top-left {
+  top: 62px;
+  z-index: 10;
+}
+
+.maplibregl-popup {
+  min-width: 220px;
+}
+
+.maplibregl-popup-content {
+  padding: 0;
+  background: var(--map-popup-surface);
+  border-radius: var(--radius-3xl);
+}
+
+.map-content-wrapper {
+  padding: 12px 12px 22px 12px;
+}
+
+/* The tip is a CSS triangle: the border facing the popup carries its color */
+.maplibregl-popup-anchor-top .maplibregl-popup-tip,
+.maplibregl-popup-anchor-top-left .maplibregl-popup-tip,
+.maplibregl-popup-anchor-top-right .maplibregl-popup-tip {
+  border-bottom-color: var(--map-popup-surface);
+}
+
+.maplibregl-popup-anchor-bottom .maplibregl-popup-tip,
+.maplibregl-popup-anchor-bottom-left .maplibregl-popup-tip,
+.maplibregl-popup-anchor-bottom-right .maplibregl-popup-tip {
+  border-top-color: var(--map-popup-surface);
+}
+
+.maplibregl-popup-anchor-left .maplibregl-popup-tip {
+  border-right-color: var(--map-popup-surface);
+}
+
+.maplibregl-popup-anchor-right .maplibregl-popup-tip {
+  border-left-color: var(--map-popup-surface);
+}
+
+/* Navigation markers */
+.navigation-marker {
+  cursor: pointer;
+  user-select: none;
+}
+
+/* User location marker: a dot with a pulsing ring */
+.user-location-marker {
+  width: 40px;
+  height: 40px;
+  position: relative;
+}
+
+.user-dot {
+  width: 16px;
+  height: 16px;
+  background: #4285f4;
+  border: 3px solid white;
+  border-radius: 50%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.pulse-ring {
+  width: 40px;
+  height: 40px;
+  border: 2px solid #4285f4;
+  border-radius: 50%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation: user-location-pulse 2s ease-out infinite;
+  opacity: 0.6;
+}
+
+@keyframes user-location-pulse {
+  0% {
+    transform: translate(-50%, -50%) scale(0.5);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1.2);
+    opacity: 0;
+  }
+}

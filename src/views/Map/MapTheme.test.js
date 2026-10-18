@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { buildBaseMapStyle } from '@/services/mapStyle';
 import { errorToast } from '@/store/ui/errorToast';
 import { MAP_BOUNDS, PMTILES_KEY } from '@/views/Map/MapConstants';
-import { createThemeController } from '@/views/Map/MapTheme.svelte.js';
+import { buildMapStyle, createThemeController, getCurrentMapTheme } from '@/views/Map/MapTheme.svelte.js';
 
 // The theme manager is driven by the test: `theme.switchTo(isDark)` is the user toggling dark mode
 const theme = vi.hoisted(() => ({ isDark: false, listeners: new Set() }));
@@ -81,9 +81,43 @@ describe('init', () => {
     expect(createController().init()).toBe('dark');
     expect(map.setStyle).not.toHaveBeenCalled();
   });
+});
 
-  it('builds the style for a theme with the local tiles and the app language', async () => {
-    await createController().buildStyleForTheme('dark');
+// The first style is built before the controller exists; the app theme can change in between
+// (the system switched to dark while the map loaded)
+describe('init with the theme the style was built with', () => {
+  it('applies a theme that changed meanwhile', async () => {
+    theme.isDark = true;
+
+    createController().init('light');
+    await settle();
+
+    expect(map.setStyle).toHaveBeenCalledWith(
+      expect.objectContaining({ builtFor: expect.objectContaining({ theme: 'dark' }) }),
+    );
+  });
+
+  it('leaves the map alone when the theme is still the same', async () => {
+    theme.isDark = true;
+
+    createController().init('dark');
+    await settle();
+
+    expect(map.setStyle).not.toHaveBeenCalled();
+  });
+});
+
+describe('before the map exists', () => {
+  it('getCurrentMapTheme reads the app theme', () => {
+    theme.isDark = true;
+    expect(getCurrentMapTheme()).toBe('dark');
+
+    theme.isDark = false;
+    expect(getCurrentMapTheme()).toBe('light');
+  });
+
+  it('buildMapStyle builds the style for a theme with the local tiles and the given language', async () => {
+    await buildMapStyle('dark', 'pl');
 
     expect(buildBaseMapStyle).toHaveBeenCalledWith({
       origin: window.location.origin,
@@ -92,6 +126,15 @@ describe('init', () => {
       lang: 'pl',
       fontstack: 'Roboto Regular',
     });
+  });
+
+  it('a theme switch builds the style in the app language', async () => {
+    createController().init();
+
+    switchTo(true);
+    await Promise.resolve();
+
+    expect(buildBaseMapStyle).toHaveBeenLastCalledWith(expect.objectContaining({ theme: 'dark', lang: 'pl' }));
   });
 });
 

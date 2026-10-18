@@ -76,8 +76,8 @@ The harness lives in two places:
 - Merge gate for PRs (and for any step reported as done): the checklist in
   `.github/pull_request_template.md`, imported below; enforced in part by
   `.github/workflows/ci.yml`. See `harness/git-workflow.md` → "Merge gate".
-- Legacy zones: a handful of older files (`Map.svelte`, `MapNavigationGPS`, `MapTheme`,
-  `LangSwitcher`, …) don't follow the harness — don't copy patterns from them; the list and the
+- Legacy zones: a handful of older files (`MapNavigationGPS`, `MapTheme`, `LangSwitcher`,
+  `errorToast`) don't follow the harness — don't copy patterns from them; the list and the
   reference implementations to copy from instead are in `harness/code-style.md` →
   "Leave old code alone".
 - Tests: `npm test` (Vitest). Every area with logic is covered; known bugs are pinned with
