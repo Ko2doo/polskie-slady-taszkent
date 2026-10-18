@@ -23,7 +23,7 @@ import metadata as M
 APP_ID = "6782352124"
 BUNDLE_ID = "com.github.polskiesladytaszkent"
 VERSION_STRING = "1.2.0"
-BUILD_NUMBER = "7"  # CURRENT_PROJECT_VERSION of the uploaded build
+BUILD_NUMBER = "8"  # CURRENT_PROJECT_VERSION of the uploaded build
 PRIMARY_LOCALE = "pl"
 SCREENSHOT_DISPLAY_TYPE = "APP_IPHONE_67"  # 6.9"/6.7" iPhone set (accepts 1320x2868)
 SCREENSHOT_DIR = os.path.join(os.path.dirname(__file__), "screenshots", "ios-6.9")
