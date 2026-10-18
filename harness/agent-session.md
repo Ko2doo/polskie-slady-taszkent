@@ -21,8 +21,8 @@ picture of what was already decided. So:
    left.
 4. **Handover.** When stopping because of the threshold, end with a short handover for the
    next session: the step in progress, files touched, what was verified, what's next. The
-   harness itself (and `BUGS.md`, the coverage table in `harness/testing.md`) must already be
-   up to date — a fresh session starts from those, not from this conversation.
+   harness itself (and `BUGS.md`) must already be up to date — a fresh session starts from
+   those, not from this conversation.
 
 ## How the agent knows the usage
 
@@ -40,13 +40,14 @@ estimate from that baseline.
 
 Every tool result (a shell command's output, a file read) lands in the agent's own context in
 full — it is not output for the human's terminal, and it is never freed for the rest of the
-session. Unfiltered output is the main way a session fills up: in the session that wrote the
-test suite, raw command output took ~22% of the window. So, every time:
+session. Unfiltered output is the main way a session fills up — a fifth of the window is
+easily spent on raw command output. So, every time:
 
-- **Read files by range, not whole.** Use the file-read tool with `offset`/`limit`, or
-  `sed -n 'a,bp'`, for the part you need; find that part first with `grep -n`. `cat` only a
-  file that is genuinely short (a few dozen lines). Don't re-read a file that is already in
-  context and unchanged.
+- **Read files by range, not whole.** Use the file-read tool with `offset`/`limit` for the
+  part you need; find that part first with `grep -n`. Prefer it over `sed -n 'a,bp'`: a Read
+  is what loads the area's path-scoped rules from `.claude/rules/`, a `sed` range may not.
+  `cat` only a file that is genuinely short (a few dozen lines). Don't re-read a file that is
+  already in context and unchanged.
 - **Filter command output to what answers the question.** Test runs: `npm test 2>&1 | grep -E
   "Test Files|Tests |×|Error"` (summary + failures), not the full reporter output; to see a
   failure, `grep -A` around the one assertion. Builds: `| grep -iE "error|warn|built in"`.

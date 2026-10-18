@@ -35,6 +35,7 @@ import { Capacitor } from '@capacitor/core';
 import { ERROR_CODES } from '@/lib/errors/errorCodes';
 import { checkLocationPermission, requestLocationPermission, mapGeolocationError } from './locationPermission';
 import { createLogger, IS_DEBUG } from '@/utils/debugMode';
+import { MAP_BOUNDS } from '@/data/mapArea';
 
 const gpsTrackerLogger = createLogger('GPSTracker');
 
@@ -59,28 +60,15 @@ const MIN_DISTANCE_UPDATE = 5;
 // Avoids scanning the entire route on every update
 const ROUTE_SEARCH_WINDOW = 50;
 
-// Map bounds for Tashkent (to check if user is within map area)
-const MAP_BOUNDS = {
-  minLon: 69.1038931009432,
-  minLat: 41.144224013212,
-  maxLon: 69.5436061519978,
-  maxLat: 41.4359965669526,
-};
-
 /**
  * Check if coordinates are within map bounds
  * @param {number} lat - Latitude
  * @param {number} lon - Longitude
  * @returns {boolean} - true if within bounds
  */
-/*prettier-ignore*/
 function isWithinMapBounds(lat, lon) {
-  return (
-    lon >= MAP_BOUNDS.minLon &&
-    lon <= MAP_BOUNDS.maxLon &&
-    lat >= MAP_BOUNDS.minLat &&
-    lat <= MAP_BOUNDS.maxLat
-  );
+  const [[west, south], [east, north]] = MAP_BOUNDS;
+  return lon >= west && lon <= east && lat >= south && lat <= north;
 }
 
 /**

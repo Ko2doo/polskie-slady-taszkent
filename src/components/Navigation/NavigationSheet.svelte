@@ -1,13 +1,13 @@
 <script>
-  import { Sheet, Toolbar, ToolbarPane, Block, Link, Button, Dialog, DialogButton, Progressbar } from "konsta/svelte";
+  import { Sheet, Toolbar, ToolbarPane, Block, Link, Dialog, DialogButton, Progressbar } from "konsta/svelte";
   import { createToggle } from "@/lib/state/createToggler.svelte";
 
   // Icons
   import Close from "@/lib/icons/Close.svelte";
   import ModeSelection from "./NavigationModeSelection.svelte";
-  import NavigationInstruction from "./NavigationInstruction.svelte";
-  import RouteInfo from "./NavigationRouteInfo.svelte";
-  import NavigationArrivalMsg from "./NavigationArrivalMsg.svelte";
+  import NavigationInstruction from "@/components/Navigation/RouteStatus/NavigationInstruction.svelte";
+  import RouteInfo from "@/components/Navigation/RouteStatus/NavigationRouteInfo.svelte";
+  import NavigationArrivalMsg from "@/components/Navigation/RouteStatus/NavigationArrivalMsg.svelte";
 
   let {
     i18n, // Point-to-Point mode
@@ -100,7 +100,7 @@
   <Block nested class="mt-2 mb-4">
     <!-- Mode Selection Buttons -->
     {#if !isAnyModeActive}
-      <ModeSelection {i18n} {isAnyModeActive} {onToggle} {navigationLoading} {onGPSToggle} {gpsLoading} />
+      <ModeSelection {i18n} {onToggle} {navigationLoading} {onGPSToggle} {gpsLoading} />
     {/if}
 
     <!-- Info Panel -->

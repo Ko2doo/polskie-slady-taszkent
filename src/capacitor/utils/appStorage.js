@@ -16,7 +16,7 @@ const capStorageLogger = createLogger('Storage');
  * Never throws: Preferences hold UI settings, a broken storage must not crash a screen. A caller
  * that must know whether the value was really saved (a "done once" flag) checks the result.
  *
- * @param {string} key
+ * @param {string} key - Preferences key, e.g. 'app.onboarding.completed'
  * @param {unknown} value - anything JSON can represent
  * @returns {Promise<boolean>} true if saved, false if serializing or writing failed
  * @example
@@ -33,10 +33,18 @@ export async function setStorage(key, value) {
   }
 }
 
+/**
+ * Reads a value saved by setStorage. Never throws, for the same reason setStorage doesn't.
+ *
+ * A value that isn't valid JSON (written as raw text by older versions) comes back as that text.
+ *
+ * @param {string} key - Preferences key, e.g. 'app.onboarding.completed'
+ * @param {*} [fallback=null] - returned when nothing is stored or reading fails
+ * @returns {Promise<*>} the stored value, or `fallback`
+ */
 export async function getStorage(key, fallback = null) {
   try {
     const { value } = await Preferences.get({ key });
-    // return value ?? fallback;
 
     if (value === null || value === undefined) {
       return fallback;
@@ -53,6 +61,11 @@ export async function getStorage(key, fallback = null) {
   }
 }
 
+/**
+ * Removes a stored value. Never throws: a failure is only logged.
+ * @param {string} key - Preferences key, e.g. 'app.onboarding.completed'
+ * @returns {Promise<void>}
+ */
 export async function removeStorageItem(key) {
   try {
     await Preferences.remove({ key });

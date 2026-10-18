@@ -3,7 +3,7 @@ import { execFileSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { parseTree, readTreeBlock } from '@/test/harnessTree';
 
-// harness/repository-layout.md describes the repo root as a tree; this keeps that tree from
+// .claude/rules/repository-layout.md describes the repo root as a tree; this keeps that tree from
 // silently going stale. It asks git for the working tree minus ignored files: ignored local
 // folders (node_modules/, dist/, coverage/) don't count, but a new file counts before it is
 // committed — the tree is updated in the same change that adds it.
@@ -41,8 +41,8 @@ function nameOf(path) {
   return path.slice(path.lastIndexOf('/') + 1);
 }
 
-describe('the repo root tree in harness/repository-layout.md', () => {
-  const entries = parseTree(readTreeBlock('harness/repository-layout.md', '## The tree'));
+describe('the repo root tree in .claude/rules/repository-layout.md', () => {
+  const entries = parseTree(readTreeBlock('.claude/rules/repository-layout.md', '## The tree'));
   const childrenOf = (dir, isDirectory) =>
     entries
       .filter((entry) => entry.isDirectory === isDirectory && parentOf(entry.path) === dir)

@@ -72,6 +72,8 @@ export default {
   },
   toasts: {
     exitApp: 'Naciśnij „Wstecz” jeszcze raz, aby wyjść',
+    errorScope: 'Moduł: {{scope}}',
+    errorCode: 'Kod: {{code}}',
   },
   dialogue: {
     hello: 'Halo, Świat!',
@@ -187,6 +189,32 @@ export default {
       hint: 'Dostosuj wygląd aplikacji. Tryb automatyczny podąża za motywem systemowym.',
       darkMode: 'Ciemny motyw',
       followSystem: 'Zgodnie z systemem',
+    },
+    customPoints: {
+      title: 'Moje znaczniki',
+      hint: 'Zapisz swoje znaczniki do pliku lub przenieś je z innego urządzenia. Zdjęcia zostają na tym urządzeniu i nie trafiają do pliku.',
+      export: 'Eksport',
+      import: 'Import',
+      shareTitle: 'Moje znaczniki — Polskie Ślady',
+      shareDialogTitle: 'Zapisz lub wyślij plik znaczników',
+      nothingToExport: 'Nie ma jeszcze znaczników do eksportu.',
+      progress: {
+        exporting: 'Przygotowujemy plik znaczników…',
+        checking: 'Sprawdzamy plik…',
+        importing: 'Importujemy znaczniki…',
+      },
+      importDialog: {
+        title: 'Import znaczników',
+        willAdd: 'Zostanie dodanych: {{count}}',
+        willUpdate: 'Zostanie zaktualizowanych: {{count}}',
+        unchanged: 'Bez zmian: {{count}}',
+        photosKept: 'Zdjęcia i okładki zaktualizowanych znaczników zostaną zachowane.',
+        confirm: 'Importuj',
+        cancel: 'Anuluj',
+      },
+      nothingNew: 'W pliku nie ma nowych ani zaktualizowanych znaczników.',
+      importDone: 'Import zakończony: dodano {{added}}, zaktualizowano {{updated}}, bez zmian {{unchanged}}.',
+      importSkipped: 'Pominięto uszkodzone wpisy: {{skipped}}.',
     },
     permissions: {
       title: 'Uprawnienia',

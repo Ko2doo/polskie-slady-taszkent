@@ -83,7 +83,6 @@ export const navigationHistoryPostHook = (route) => {
   if (!path) return true;
 
   navigationHistory.update((state) => {
-    // if (!path) return state;
     const stack = state.stack ?? [];
     const last = stack[stack.length - 1] ?? null;
 

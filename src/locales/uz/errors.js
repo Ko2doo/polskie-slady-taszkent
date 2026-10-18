@@ -3,6 +3,7 @@ export default {
   articleNotFound: 'Maqola topilmadi!',
   notFound: 'Hech narsa topilmadi',
   toastBtn: 'Yopish',
+  unknownError: 'Noma’lum xato',
   settingsSaveFailed: 'Sozlamalarni saqlab bo‘lmadi. Qayta urinib ko‘ring.',
   locationPermissionRequestFailed: 'Joylashuvga ruxsat so‘rab bo‘lmadi',
   gpsInitFailed: 'GPS ishga tushirilmadi',
@@ -11,7 +12,7 @@ export default {
   gpsWaitingForSignal: 'GPS signali kutilmoqda…',
   gpsPermissionDenied: 'GPS ruxsati berilmagan. Ilova sozlamalarida ruxsat bering.',
   gpsOutOfBounds: 'Siz xarita hududidan tashqaridasiz. Oflayn navigatsiya mavjud emas.',
-  gpsOutOfBoundsNavigation: 'Navigatsiya imkonsiz - siz xarita hududidan tashqaridasiz',
+  gpsOutOfBoundsNavigation: 'Navigatsiya imkonsiz — siz xarita hududidan tashqaridasiz',
   navigationInitFailed: 'Navigatsiya ishga tushirilmadi',
   navigationCalculateRouteFailed: "Yo'nalish hisoblanmadi",
   navigationRouteNotFound: "Yo'nalish topilmadi",
@@ -29,6 +30,14 @@ export default {
   customPointsPhotoDenied: 'Kamera yoki galereyaga ruxsat yo‘q. Qurilma sozlamalarida ruxsat bering.',
   customPointsPhotoFailed: 'Suratni qo‘shib bo‘lmadi. Qayta urinib ko‘ring.',
   customPointsDeleteFailed: 'Belgini o‘chirib bo‘lmadi. Qayta urinib ko‘ring.',
+  customPointsExportFailed: 'Belgilar faylini tayyorlab bo‘lmadi. Qayta urinib ko‘ring.',
+  customPointsImportNotPoints: 'Bu Polskie Ślady belgilar fayli emas.',
+  customPointsImportDamaged: 'Belgilar fayli shikastlangan: hech narsa import qilinmadi.',
+  customPointsImportNewerVersion:
+    'Fayl ilovaning yangiroq versiyasida yaratilgan. Ilovani yangilang va qayta import qiling.',
+  customPointsImportTooLarge: 'Fayl import qilish uchun juda katta.',
+  customPointsImportTooManyPoints: 'Faylda belgilar juda ko‘p: ko‘pi bilan {{max}} tasini import qilish mumkin.',
+  customPointsImportUnreadable: 'Faylni o‘qib bo‘lmadi. Uni qayta tanlab ko‘ring.',
 
   // Capacitor geolocation API error
   OS_PLUG_GLOC_0002: 'Joylashuvni olishga urinishda xatolik yuz berdi.',

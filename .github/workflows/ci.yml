@@ -1,4 +1,6 @@
-# Merge gate, automated part: the whole test suite and a clean build (see CONTRIBUTING.md).
+# Merge gate, automated part: lint, formatting, the whole test suite and a clean build (see
+# CONTRIBUTING.md). `npm run build` re-runs lint + format:check through `prebuild` — a few seconds,
+# kept so a local build is checked the same way; the explicit steps fail fast with a clear name.
 name: CI
 
 on:
@@ -17,5 +19,7 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
+      - run: npm run lint
+      - run: npm run format:check
       - run: npm test
       - run: npm run build

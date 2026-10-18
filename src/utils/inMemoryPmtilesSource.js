@@ -9,7 +9,6 @@
  * file once, store it in RAM, and answer all tile requests from
  * that in-memory buffer.
  */
-
 export class InMemoryPMTilesSource {
   /**
    * @param {string} key

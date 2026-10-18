@@ -26,6 +26,7 @@
 
 /* MapLibre Map */
 @import 'maplibre-gl/dist/maplibre-gl.css';
+@import './assets/styles/maplibre.css';
 
 /* Swiper (photo slider / fullscreen viewer) */
 @import 'swiper/css';

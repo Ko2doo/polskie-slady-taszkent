@@ -55,6 +55,22 @@ describe('Settings', () => {
     expect(target.querySelectorAll('input[type="checkbox"]').length).toBeGreaterThan(0);
   });
 
+  it('the markers block comes right after the theme, the permissions stay the last section', () => {
+    const titles = [
+      'ui:settings:translations:title',
+      'ui:settings:appearance:title',
+      'ui:settings:customPoints:title',
+      'ui:settings:permissions:title',
+    ];
+    const text = target.textContent;
+    const positions = titles.map((title) => text.indexOf(title));
+
+    expect(positions.every((position) => position >= 0)).toBe(true);
+    expect([...positions].sort((a, b) => a - b)).toEqual(positions);
+    // Nothing after the permissions section but its own hint and button
+    expect(text.slice(positions[3])).not.toMatch(/ui:settings:(?!permissions)/);
+  });
+
   it('the permissions button opens the system settings of the app', () => {
     const button = [...target.querySelectorAll('button')].find(
       (item) => item.textContent.trim() === 'ui:buttons:openSettings',
@@ -84,9 +100,8 @@ describe('Settings', () => {
     unmount(back);
   });
 
-  // BUG-2: the back link is an icon without a text or an aria-label, so a screen reader
-  // announces nothing (see BUGS.md). Remove `.fails` once fixed.
-  it.fails('the back link has an accessible name', () => {
+  // The back link is an icon only: without an aria-label a screen reader announces nothing
+  it('the back link has an accessible name', () => {
     const host = document.createElement('div');
     const back = mount(RenderSnippet, { target: host, props: { snippet: navbarState.leftSnippet } });
     flushSync();

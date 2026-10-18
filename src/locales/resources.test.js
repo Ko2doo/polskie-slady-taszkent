@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import resources from '@/locales/resources';
 
-// harness/i18n.md: every locale has the same keys as ru (the primary language), with the same
+// .claude/rules/i18n.md: every locale has the same keys as ru (the primary language), with the same
 // {{placeholders}} and the same inline HTML markup. A key missing in one locale silently falls
 // back to English at runtime, so nothing else would catch it.
 const REFERENCE_LANGUAGE = 'ru';
@@ -115,8 +115,6 @@ describe('compareNamespace', () => {
   });
 
   it('reports a value of a different type', () => {
-    expect(compareNamespace(flatten({ a: 1 }), flatten({ a: 'one' }))).toEqual([
-      'type: a is string, expected number',
-    ]);
+    expect(compareNamespace(flatten({ a: 1 }), flatten({ a: 'one' }))).toEqual(['type: a is string, expected number']);
   });
 });

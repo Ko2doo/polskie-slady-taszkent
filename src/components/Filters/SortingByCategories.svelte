@@ -19,7 +19,7 @@
   } = $props();
 
   // Local state
-  let allId = "all";
+  const allId = "all";
   let selectedId = $state(allId); // currently selected category id
   let categoryIds = $state([]); // available category ids (excluding "all")
   let lastEmitted = $state(""); // last value sent to parent (prevents duplicate emits)
@@ -29,6 +29,8 @@
 
   // Build unique, sorted category list from items
   function getCategoryIds(list) {
+    // A throw-away collection for the sort below, not state: nothing reactive reads it
+    // eslint-disable-next-line svelte/prefer-svelte-reactivity
     const s = new Set();
 
     for (const it of list) {

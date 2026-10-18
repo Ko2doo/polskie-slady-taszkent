@@ -3,6 +3,7 @@ export default {
   articleNotFound: 'Article not found!',
   notFound: 'Nothing found',
   toastBtn: 'Close',
+  unknownError: 'Unknown error',
   settingsSaveFailed: 'Failed to save settings. Please try again.',
   locationPermissionRequestFailed: 'Failed to request location permission',
   gpsInitFailed: 'Failed to initialize GPS',
@@ -10,8 +11,8 @@ export default {
   gpsPositionNotAvailable: 'GPS position not available',
   gpsWaitingForSignal: 'Waiting for GPS signal…',
   gpsPermissionDenied: 'GPS permission denied. Please allow access in app settings.',
-  gpsOutOfBounds: 'You are outside the map area. Offline navigation unavailable.',
-  gpsOutOfBoundsNavigation: 'Navigation impossible - you are outside the map',
+  gpsOutOfBounds: 'You are outside the map area. Offline navigation is unavailable.',
+  gpsOutOfBoundsNavigation: 'Navigation is unavailable — you are outside the map area',
   navigationInitFailed: 'Failed to initialize navigation',
   navigationCalculateRouteFailed: 'Failed to calculate route',
   navigationRouteNotFound: 'Route not found',
@@ -29,6 +30,14 @@ export default {
   customPointsPhotoDenied: 'No access to the camera or the gallery. Please allow it in the device settings.',
   customPointsPhotoFailed: 'Could not add the photo. Please try again.',
   customPointsDeleteFailed: 'Could not delete the marker. Please try again.',
+  customPointsExportFailed: 'Could not prepare the markers file. Please try again.',
+  customPointsImportNotPoints: 'This is not a Polskie Ślady markers file.',
+  customPointsImportDamaged: 'The markers file is damaged: nothing was imported.',
+  customPointsImportNewerVersion:
+    'The file was made by a newer version of the app. Update the app and import it again.',
+  customPointsImportTooLarge: 'The file is too large to import.',
+  customPointsImportTooManyPoints: 'The file has too many markers: at most {{max}} can be imported.',
+  customPointsImportUnreadable: 'Could not read the file. Please try picking it again.',
 
   // Capacitor geolocation API error
   OS_PLUG_GLOC_0002: 'There was en error trying to obtain the location.',
@@ -37,7 +46,7 @@ export default {
   OS_PLUG_GLOC_0005: 'The "watchPosition" input parameters aren\'\t valid.',
   OS_PLUG_GLOC_0006: 'The "clearWatch" input parameters aren\'\t valid.',
   OS_PLUG_GLOC_0007: 'Location services are not enabled.',
-  OS_PLUG_GLOC_0008: 'Application\'\s use of location services was restricted.', // prettier-ignore
+  OS_PLUG_GLOC_0008: "Application's use of location services was restricted.",
   OS_PLUG_GLOC_0009: 'Request to enable location was denied.',
   OS_PLUG_GLOC_0010: 'Could not obtain location in time. Try with a higher timeout.',
   OS_PLUG_GLOC_0011: 'Timeout needs to be a positive value.',

@@ -72,6 +72,8 @@ export default {
   },
   toasts: {
     exitApp: 'Chiqish uchun yana bir marta Orqaga bosing',
+    errorScope: 'Modul: {{scope}}',
+    errorCode: 'Kod: {{code}}',
   },
   dialogue: {
     hello: 'Salom, Dunyo!',
@@ -189,6 +191,32 @@ export default {
       hint: "Ilova ko'\rinishini sozlang. Avtomatik rejim tizim mavzusiga amal qiladi.",
       darkMode: 'Qorong‘i mavzu',
       followSystem: 'Tizimga ergashish',
+    },
+    customPoints: {
+      title: 'Mening belgilarim',
+      hint: 'Belgilaringizni faylga saqlang yoki boshqa qurilmadan ko‘chirib o‘tkazing. Rasmlar shu qurilmada qoladi va faylga kirmaydi.',
+      export: 'Eksport',
+      import: 'Import',
+      shareTitle: 'Mening belgilarim — Polskie Ślady',
+      shareDialogTitle: 'Belgilar faylini saqlash yoki yuborish',
+      nothingToExport: 'Eksport uchun hali belgilar yo‘q.',
+      progress: {
+        exporting: 'Belgilar fayli tayyorlanmoqda…',
+        checking: 'Fayl tekshirilmoqda…',
+        importing: 'Belgilar import qilinmoqda…',
+      },
+      importDialog: {
+        title: 'Belgilarni import qilish',
+        willAdd: 'Qo‘shiladi: {{count}}',
+        willUpdate: 'Yangilanadi: {{count}}',
+        unchanged: 'O‘zgarishsiz: {{count}}',
+        photosKept: 'Yangilangan belgilarning rasmlari va muqovalari saqlanib qoladi.',
+        confirm: 'Import qilish',
+        cancel: 'Bekor qilish',
+      },
+      nothingNew: 'Faylda yangi yoki yangilangan belgilar yo‘q.',
+      importDone: 'Import yakunlandi: qo‘shildi {{added}}, yangilandi {{updated}}, o‘zgarishsiz {{unchanged}}.',
+      importSkipped: 'Shikastlangan yozuvlar o‘tkazib yuborildi: {{skipped}}.',
     },
     permissions: {
       title: 'Ruxsatlar',

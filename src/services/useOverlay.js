@@ -1,30 +1,19 @@
-// -------------------------------------------------------------
-// useOverlay - helper for automatic overlay lifecycle management.
-//
-// Purpose:
-// - Automatically register/unregister overlays in overlayController
-// - Reduce boilerplate in components (modals, sheets, popups, etc.)
-//
-// Usage:
-//   const { open, close } = useOverlay(() => opened = false);
-//
-//   function openModal() {
-//     opened = true;
-//     open();
-//   }
-//
-//   function closeModal() {
-//     close();
-//   }
-//
-// Guarantees:
-// - Overlay is always removed from stack when closed
-// - Safe to call open() multiple times
-// - Safe to call close() multiple times
-// -------------------------------------------------------------
-
 import { overlayController } from '@/store/ui/overlayController';
 
+/**
+ * Registers an overlay with the back-button overlay stack (overlayController) while it's open,
+ * so Android back closes it. Safe to call open() and close() more than once; closing always
+ * removes the overlay from the stack.
+ * @param {() => void} onClose - called when back closes the overlay
+ * @returns {{ open: () => void, close: () => void }} register / unregister the overlay
+ * @example
+ * const { open, close } = useOverlay(() => (opened = false));
+ *
+ * function openModal() {
+ *   opened = true;
+ *   open();
+ * }
+ */
 export function useOverlay(onClose) {
   let overlayId = null;
 

@@ -71,7 +71,9 @@ export default {
     enableGPSManually: 'Откройте настройки устройства > Приложения > Polskie Slady > Разрешения > Местоположение',
   },
   toasts: {
-    exitApp: 'Нажмите назад ещё раз что-бы выйти',
+    exitApp: 'Нажмите назад ещё раз чтобы выйти',
+    errorScope: 'Модуль: {{scope}}',
+    errorCode: 'Код: {{code}}',
   },
   dialogue: {
     hello: 'Привет, Мир!',
@@ -188,6 +190,32 @@ export default {
       hint: 'Настройте внешний вид приложения. Автоматический режим следует за системной темой.',
       darkMode: 'Тёмная тема',
       followSystem: 'Следовать системе',
+    },
+    customPoints: {
+      title: 'Мои метки',
+      hint: 'Сохраните свои метки в файл или перенесите их с другого устройства. Фото остаются на этом устройстве и в файл не попадают.',
+      export: 'Экспорт',
+      import: 'Импорт',
+      shareTitle: 'Мои метки — Polskie Ślady',
+      shareDialogTitle: 'Сохранить или отправить файл меток',
+      nothingToExport: 'Пока нет меток для экспорта.',
+      progress: {
+        exporting: 'Готовим файл меток…',
+        checking: 'Проверяем файл…',
+        importing: 'Импортируем метки…',
+      },
+      importDialog: {
+        title: 'Импорт меток',
+        willAdd: 'Будет добавлено: {{count}}',
+        willUpdate: 'Будет обновлено: {{count}}',
+        unchanged: 'Без изменений: {{count}}',
+        photosKept: 'Фото и обложки обновлённых меток сохранятся.',
+        confirm: 'Импортировать',
+        cancel: 'Отмена',
+      },
+      nothingNew: 'В файле нет новых или обновлённых меток.',
+      importDone: 'Импорт завершён: добавлено {{added}}, обновлено {{updated}}, без изменений {{unchanged}}.',
+      importSkipped: 'Пропущено повреждённых записей: {{skipped}}.',
     },
     permissions: {
       title: 'Разрешения',

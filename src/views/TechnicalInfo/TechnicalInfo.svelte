@@ -3,10 +3,9 @@
   import { fly } from "svelte/transition";
 
   import { withNavbar } from "@/lib/state/navbar.svelte";
-  import { hideTabbar } from "@/lib/state/bottomTabbarNav.svelte";
+  import { hideTabbar, QUICK_TABBAR_SLIDE } from "@/lib/state/bottomTabbarNav.svelte";
 
   // Icons
-  import Close from "@/lib/icons/Close.svelte";
 
   import { routerBack } from "@/services/navigationHistoryHook";
 
@@ -26,7 +25,7 @@
   });
 
   // No tab bar on this screen; the request is released when the screen goes away
-  $effect(() => hideTabbar({ duration: 120, delay: 40 }));
+  $effect(() => hideTabbar(QUICK_TABBAR_SLIDE));
 
   function handleBack() {
     routerBack("/more");
@@ -34,7 +33,7 @@
 </script>
 
 {#snippet BackButton()}
-  <NavbarBackLink onClick={handleBack} />
+  <NavbarBackLink onClick={handleBack} aria-label={$i18n.t("ui:buttons:back")} />
 {/snippet}
 
 <section class="about-view flex flex-col" in:fly={{ duration: 120, x: 20 }}>
@@ -50,7 +49,7 @@
 
           {#if info && "links" in info}
             <ul class="block w-full text-[16px]">
-              {#each info.links as link}
+              {#each info.links as link, index (index)}
                 <li class="list-item list-none pb-[2px] text-stone-700 dark:text-stone-200">
                   <span>{link.title}:</span>
                   <a href={link.href} target="_blank" class="text-blue-500 font-bold">{link.label}</a>
@@ -58,7 +57,7 @@
               {/each}
             </ul>
           {:else if Array.isArray(itemData.description)}
-            {#each itemData.description as item}
+            {#each itemData.description as item, index (index)}
               <p class="text-[16px] font-normal text-stone-700 dark:text-stone-200">
                 {item}
               </p>

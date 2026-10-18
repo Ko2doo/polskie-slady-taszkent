@@ -261,41 +261,6 @@ export async function openAppSettings() {
 }
 
 /**
- * Checks if location services are enabled on device
- * (not to be confused with app permissions!)
- *
- * @returns {Promise<boolean>} - true if services are enabled
- *
- * @example
- * const enabled = await isLocationServicesEnabled();
- * if (!enabled) {
- *   alert('Please enable GPS in device settings');
- * }
- */
-export async function isLocationServicesEnabled() {
-  try {
-    // Try to get position with short timeout
-    await Geolocation.getCurrentPosition({
-      timeout: 1000,
-      enableHighAccuracy: false,
-    });
-
-    return true;
-  } catch (error) {
-    // Analyze error
-    const errorCode = mapGeolocationError(error);
-
-    // If services are disabled
-    if (errorCode === ERROR_CODES.OS_PLUG_GLOC_0007 || errorCode === ERROR_CODES.OS_PLUG_GLOC_0017) {
-      return false;
-    }
-
-    // Timeout or other errors - assume services are enabled
-    return true;
-  }
-}
-
-/**
  * Opens location settings on device
  *
  * @returns {Promise<boolean>}
@@ -377,49 +342,4 @@ export function mapGeolocationError(error) {
   }
 
   return ERROR_CODES.OS_PLUG_GLOC_0002; // Generic error
-}
-
-/**
- * Full geolocation readiness check
- * Checks both permissions and services
- *
- * @returns {Promise<Object>}
- *
- * @example
- * const readiness = await checkLocationReadiness();
- * if (readiness.ready) {
- *   // Can use geolocation
- * } else {
- *   IS_DEBUG && locationPermissionLogger.log('Issue:', readiness.issue);
- * }
- */
-export async function checkLocationReadiness() {
-  const permission = await checkLocationPermission();
-
-  if (!permission.isGranted) {
-    return {
-      ready: false,
-      issue: 'permission',
-      permission,
-      servicesEnabled: null,
-    };
-  }
-
-  const servicesEnabled = await isLocationServicesEnabled();
-
-  if (!servicesEnabled) {
-    return {
-      ready: false,
-      issue: 'services',
-      permission,
-      servicesEnabled: false,
-    };
-  }
-
-  return {
-    ready: true,
-    issue: null,
-    permission,
-    servicesEnabled: true,
-  };
 }

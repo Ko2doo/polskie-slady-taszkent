@@ -11,6 +11,7 @@ import {
   sanitizePoint,
   parseFile,
   buildStorageFile,
+  buildExportFile,
 } from '@/services/customPointsFormat';
 
 const ID = '3f2504e0-4f89-41d3-9a0c-0305e82c3301';
@@ -363,5 +364,80 @@ describe('buildStorageFile', () => {
     const result = parseFile(buildStorageFile(points, { revision: 5, now: NOW }), { kind: 'storage', now: NOW });
 
     expect(result).toEqual({ ok: true, points, skipped: 0, revision: 5 });
+  });
+});
+
+describe('buildExportFile', () => {
+  const EXPORT_ID = 'c56a4180-65aa-42ec-a945-5fd21dec0538';
+  const withPhoto = () =>
+    makePoint({ id: OTHER_ID, preview: 'local preview', photos: [buildPhotoPath(OTHER_ID, PHOTO_ID)] });
+  const shared = ({ id, title, description, coords, createdAt, updatedAt }) => ({
+    id,
+    title,
+    description,
+    coords,
+    createdAt,
+    updatedAt,
+  });
+
+  it('writes the export envelope: no revision, no savedAt', () => {
+    const data = JSON.parse(buildExportFile([makePoint()], { now: NOW, exportId: EXPORT_ID }));
+
+    expect(data).toEqual({
+      format: FORMAT,
+      schemaVersion: SCHEMA_VERSION,
+      appVersion: __APP_VERSION__,
+      exportId: EXPORT_ID,
+      exportedAt: NOW,
+      checksum: computeChecksum([shared(makePoint())]),
+      points: [shared(makePoint())],
+    });
+  });
+
+  it('never exports local fields (preview, photos) or unknown ones', () => {
+    const data = JSON.parse(buildExportFile([{ ...withPhoto(), secret: 'x' }], { now: NOW, exportId: EXPORT_ID }));
+
+    expect(Object.keys(data.points[0]).sort()).toEqual([
+      'coords',
+      'createdAt',
+      'description',
+      'id',
+      'title',
+      'updatedAt',
+    ]);
+  });
+
+  it('gives every export its own id and the current time by default', () => {
+    const first = JSON.parse(buildExportFile([]));
+    const second = JSON.parse(buildExportFile([]));
+
+    expect(first.exportId).not.toBe(second.exportId);
+    expect(first.exportedAt).toBeTypeOf('number');
+  });
+
+  it('does not change the points it is given', () => {
+    const point = withPhoto();
+    buildExportFile([point], { now: NOW, exportId: EXPORT_ID });
+
+    expect(point).toEqual(withPhoto());
+  });
+
+  it('round-trips through parseFile as an import, local fields empty', () => {
+    const points = [makePoint(), withPhoto()];
+
+    const result = parseFile(buildExportFile(points, { now: NOW, exportId: EXPORT_ID }), { kind: 'import', now: NOW });
+
+    expect(result).toEqual({
+      ok: true,
+      points: points.map((point) => ({ ...point, preview: '', photos: [] })),
+      skipped: 0,
+      revision: null,
+    });
+  });
+
+  it('an empty export is a valid, empty import', () => {
+    const result = parseFile(buildExportFile([], { now: NOW, exportId: EXPORT_ID }), { kind: 'import', now: NOW });
+
+    expect(result).toEqual({ ok: true, points: [], skipped: 0, revision: null });
   });
 });

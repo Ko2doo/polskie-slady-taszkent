@@ -8,27 +8,24 @@ const APP_FIRST_LAUNCH_KEY = 'app.onboarding.completed';
 export const APP_FIRST_LAUNCH_STORAGE_VAL = writable(null);
 
 /**
- * Initializes first app launch state
- * - If onboarding not completed > show dialog
- * - If already completed > hide
- * - Supports migration from old key
+ * Initializes the first-launch state: the onboarding is shown unless the stored flag is exactly
+ * `true`. Any other value — nothing stored, `false`, or something unexpected written by another
+ * version or by hand — shows it, so the user can never end up with no onboarding and no
+ * completed flag.
+ * @returns {Promise<void>}
  */
 export async function initFirstLaunch() {
   // getStorage never throws: an unreadable storage returns null, so the onboarding is shown
-  const isOnboardingCompleted = await getStorage(APP_FIRST_LAUNCH_KEY);
+  const isOnboardingCompleted = (await getStorage(APP_FIRST_LAUNCH_KEY)) === true;
 
-  // First launch - onboarding not completed
-  if (isOnboardingCompleted === undefined || isOnboardingCompleted === null || isOnboardingCompleted === false) {
-    APP_FIRST_LAUNCH_STORAGE_VAL.set(true); // Show window
-    IS_DEBUG && appInitLogger.log('🎉 First start detected - showing welcome dialog');
-    return;
-  }
+  APP_FIRST_LAUNCH_STORAGE_VAL.set(!isOnboardingCompleted);
 
-  // Onboarding already completed
-  if (isOnboardingCompleted === true) {
-    APP_FIRST_LAUNCH_STORAGE_VAL.set(false); // Hide window
-    IS_DEBUG && appInitLogger.log('✅ Onboarding already completed - hiding welcome dialog');
-  }
+  IS_DEBUG &&
+    appInitLogger.log(
+      isOnboardingCompleted
+        ? '✅ Onboarding already completed - hiding welcome dialog'
+        : '🎉 First start detected - showing welcome dialog',
+    );
 }
 
 /**

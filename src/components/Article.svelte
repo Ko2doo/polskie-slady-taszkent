@@ -4,7 +4,6 @@
    */
   import { Popup, Page, Navbar, NavbarBackLink, Block, Button } from "konsta/svelte";
 
-
   import { articlesMeta } from "@/data/articles";
   import { articlePopupState } from "@/lib/state/article.svelte";
   import { customPointsState } from "@/lib/state/customPointsState.svelte";
@@ -13,7 +12,7 @@
   import { goto } from "@mateothegreat/svelte5-router";
 
   import ArrowRightIcon from "@/lib/icons/ArrowRightIcon.svelte";
-  import PhotoSlider from "./CustomPoints/PhotoSlider.svelte";
+  import PhotoSlider from "@/components/CustomPoints/Photos/PhotoSlider.svelte";
 
   let { i18n } = $props();
 
@@ -72,7 +71,7 @@
   <Page>
     <Navbar>
       {#snippet left()}
-        <NavbarBackLink onClick={articlePopupState.close} />
+        <NavbarBackLink onClick={articlePopupState.close} aria-label={$i18n.t("ui:buttons:back")} />
       {/snippet}
     </Navbar>
 
@@ -98,6 +97,7 @@
 
         <p class="text-neutral-800 dark:text-neutral-300" class:whitespace-pre-line={!article.isHtml}>
           {#if article.isHtml}
+            <!-- eslint-disable-next-line svelte/no-at-html-tags -- isHtml: our own translation markup, never user text -->
             {@html article.text}
           {:else}
             {article.text}

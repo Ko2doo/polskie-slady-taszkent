@@ -16,8 +16,8 @@ const { empty } = vi.hoisted(() => ({
 }));
 vi.mock('@/AppSplash.svelte', empty);
 vi.mock('@/components/BottomTabbarNav.svelte', empty);
-vi.mock('@/components/ErrorHandlerToast.svelte', empty);
-vi.mock('@/components/ExitToast.svelte', empty);
+vi.mock('@/components/Toasts/ErrorHandlerToast.svelte', empty);
+vi.mock('@/components/Toasts/ExitToast.svelte', empty);
 vi.mock('@/components/Article.svelte', empty);
 vi.mock('@/views/OnboardingWizard/OnboardingWizard.svelte', empty);
 // The router stand-in reads the scroll context the shell provides to every screen

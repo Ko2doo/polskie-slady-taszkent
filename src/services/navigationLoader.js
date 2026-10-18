@@ -20,7 +20,7 @@ let loadingPromise = null;
 
 // Route cache — Map preserves insertion order, which we exploit for LRU
 const routeCache = new Map();
-const MAX_CACHE_SIZE = 50;
+export const MAX_CACHE_SIZE = 50;
 
 /**
  * Generate a cache key from coordinates, rounded to 5 decimal places (~1 meter precision).
@@ -85,25 +85,6 @@ export function cacheRoute(fromLon, fromLat, toLon, toLat, route) {
 }
 
 /**
- * Clear route cache
- */
-export function clearRouteCache() {
-  const size = routeCache.size;
-  routeCache.clear();
-  IS_DEBUG && navLoaderLogger.log(`Cache cleared (${size} entries removed)`);
-}
-
-/**
- * Get cache statistics (size only — keys are internal implementation detail)
- */
-export function getCacheStats() {
-  return {
-    size: routeCache.size,
-    maxSize: MAX_CACHE_SIZE,
-  };
-}
-
-/**
  * Initialize navigation engine
  */
 export async function initNavigation() {
@@ -159,13 +140,6 @@ export function getNavigationEngine() {
     throw new Error('Navigation engine not initialized. Call initNavigation() first.');
   }
   return navigationEngine;
-}
-
-/**
- * Check if navigation is ready
- */
-export function isNavigationReady() {
-  return navigationEngine !== null;
 }
 
 /**

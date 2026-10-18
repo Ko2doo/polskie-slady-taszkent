@@ -60,4 +60,15 @@ describe('About', () => {
     expect(bottomTabbarState.isVisible).toBe(false);
     unmount(back);
   });
+
+  it('the back link has an accessible name', async () => {
+    await render();
+    const host = document.createElement('div');
+    const back = mount(RenderSnippet, { target: host, props: { snippet: navbarState.leftSnippet } });
+    flushSync();
+
+    // An icon-only link: without an aria-label a screen reader announces nothing
+    expect(host.querySelector('a').getAttribute('aria-label')).toBe('Back');
+    unmount(back);
+  });
 });

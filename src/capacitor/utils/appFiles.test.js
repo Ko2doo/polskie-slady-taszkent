@@ -4,6 +4,7 @@ import { ERROR_CODES } from '@/lib/errors/errorCodes';
 import {
   readTextFile,
   writeTextFile,
+  writeShareableTextFile,
   dataFilesDriver,
   listDirectory,
   ensureDirectory,
@@ -92,6 +93,23 @@ describe('readTextFile / writeTextFile', () => {
     Filesystem.writeFile.mockResolvedValueOnce({});
 
     expect(await writeTextFile(`${dir}/x.txt`, 'x')).toBe(`${dir}/x.txt`);
+  });
+});
+
+describe('writeShareableTextFile', () => {
+  it('writes to the cache directory and returns its uri', async () => {
+    const uri = await writeShareableTextFile('exports/points.json', '{"a":1}');
+
+    expect(uri).toBeTruthy();
+    expect(Filesystem.writeFile).toHaveBeenLastCalledWith(expect.objectContaining({ directory: Directory.Cache }));
+    expect(await readTextFile('exports/points.json', Directory.Cache)).toBe('{"a":1}');
+    expect(await readTextFile('exports/points.json')).toBeNull();
+  });
+
+  it('a failed write returns null', async () => {
+    Filesystem.writeFile.mockRejectedValueOnce(new Error('No space left'));
+
+    expect(await writeShareableTextFile('exports/points.json', 'x')).toBeNull();
   });
 });
 

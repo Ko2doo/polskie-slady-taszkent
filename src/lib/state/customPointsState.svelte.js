@@ -1,6 +1,7 @@
-import { App } from '@capacitor/app';
+import { onAppBackground } from '@/capacitor/services/appLifecycle';
 import { dataFilesDriver } from '@/capacitor/utils/appFiles';
-import { LIMITS, sanitizePhotos } from '@/services/customPointsFormat';
+import { LIMITS, buildExportFile, parseFile, sanitizePhotos } from '@/services/customPointsFormat';
+import { mergeImportedPoints } from '@/services/customPointsMerge';
 import { deletePointPhotos, reconcilePhotos } from '@/services/customPointsPhotos';
 import { createCustomPointsStorage } from '@/services/customPointsStorage';
 import { createLogger, IS_DEBUG } from '@/utils/debugMode';
@@ -66,6 +67,22 @@ async function cleanUpPhotos() {
     // Nothing is deleted or changed if the folder could not be listed
     IS_DEBUG && customPointsStateLogger.error('Failed to check the photos:', error);
   }
+}
+
+/**
+ * Parse an import file and merge it with the current points — nothing is changed yet
+ * @param {string} text - The file content
+ * @returns {{ ok: true, skipped: number, merged: ReturnType<typeof mergeImportedPoints> }
+ *   | { ok: false, reason: string }} the merge to apply, or why the file is refused
+ */
+function analyzeImport(text) {
+  const parsed = parseFile(text, { kind: 'import' });
+  if (!parsed.ok) {
+    IS_DEBUG && customPointsStateLogger.warn('Import refused:', parsed.reason);
+    return { ok: false, reason: parsed.reason };
+  }
+
+  return { ok: true, skipped: parsed.skipped, merged: mergeImportedPoints($state.snapshot(points), parsed.points) };
 }
 
 async function hydrate() {
@@ -233,6 +250,69 @@ export const customPointsState = {
   flush() {
     return storage.flush();
   },
+
+  /**
+   * The export file of every point (customPointsFormat.buildExportFile: shared fields only).
+   * Waits for the saved points, so an export right after the start doesn't come out empty.
+   * @returns {Promise<{ text: string, count: number }>} the file content and how many points it holds
+   */
+  async exportFile() {
+    await customPointsState.ready;
+
+    const snapshot = $state.snapshot(points);
+    return { text: buildExportFile(snapshot), count: snapshot.length };
+  },
+
+  /**
+   * What an import of this file would do, without doing it — for the "N will be added, M updated"
+   * confirmation. Same counts and refusals as importFile.
+   * @param {string} text - The file content
+   * @returns {Promise<{ ok: true, added: number, updated: number, unchanged: number, skipped: number }
+   *   | { ok: false, reason: string }>} see importFile
+   */
+  async previewImport(text) {
+    await customPointsState.ready;
+
+    const analysis = analyzeImport(text);
+    if (!analysis.ok) return analysis;
+
+    const { added, updated, unchanged } = analysis.merged;
+    return { ok: true, added, updated, unchanged, skipped: analysis.skipped };
+  },
+
+  /**
+   * Import an export file: validated as untrusted input, merged by id (the fresher `updatedAt`
+   * wins, local photos stay, nothing is deleted — customPointsMerge.js) and saved at once.
+   * Merged against the points as they are now, so a preview made earlier can't go stale.
+   * @param {string} text - The file content
+   * @returns {Promise<{ ok: true, added: number, updated: number, unchanged: number, skipped: number }
+   *   | { ok: false, reason: string }>} the counts (`skipped` — broken entries in the file), or why
+   *   the file was refused (parseFile's reason: tooLarge | invalidJson | unknownFormat | invalidFile
+   *   | unsupportedVersion | tooManyPoints | checksumMismatch)
+   */
+  async importFile(text) {
+    await customPointsState.ready;
+
+    const analysis = analyzeImport(text);
+    if (!analysis.ok) return analysis;
+
+    const { points: merged, added, updated, unchanged } = analysis.merged;
+    const { skipped } = analysis;
+
+    if (added + updated > 0) {
+      points.splice(0, points.length, ...merged);
+      persist();
+      // An import is one big change the user just asked for: saved now, not after the debounce
+      await storage.flush();
+    }
+
+    IS_DEBUG &&
+      customPointsStateLogger.log(
+        `Imported: +${added}, updated ${updated}, unchanged ${unchanged}, skipped ${skipped}`,
+      );
+
+    return { ok: true, added, updated, unchanged, skipped };
+  },
 };
 
 let isPersistenceBound = false;
@@ -247,9 +327,6 @@ export function initCustomPointsPersistence() {
 
   isPersistenceBound = true;
 
-  App.addListener('appStateChange', ({ isActive }) => {
-    if (!isActive) {
-      customPointsState.flush();
-    }
-  });
+  // App-lifetime listener: never removed
+  onAppBackground(() => customPointsState.flush());
 }

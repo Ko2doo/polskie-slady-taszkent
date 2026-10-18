@@ -3,6 +3,7 @@ export default {
   articleNotFound: 'Artykuł nie został znaleziony!',
   notFound: 'Nic nie znaleziono',
   toastBtn: 'Zamknij',
+  unknownError: 'Nieznany błąd',
   settingsSaveFailed: 'Nie udało się zapisać ustawień. Spróbuj ponownie.',
   locationPermissionRequestFailed: 'Nie udało się poprosić o dostęp do lokalizacji',
   gpsInitFailed: 'Nie udało się zainicjować GPS',
@@ -11,7 +12,7 @@ export default {
   gpsWaitingForSignal: 'Czekamy na sygnał GPS…',
   gpsPermissionDenied: 'Odmowa dostępu do GPS. Zezwól na dostęp w ustawieniach aplikacji.',
   gpsOutOfBounds: 'Jesteś poza obszarem mapy. Nawigacja offline niedostępna.',
-  gpsOutOfBoundsNavigation: 'Nawigacja niemożliwa - jesteś poza obszarem mapy',
+  gpsOutOfBoundsNavigation: 'Nawigacja niemożliwa — jesteś poza obszarem mapy',
   navigationInitFailed: 'Nie udało się zainicjować nawigacji',
   navigationCalculateRouteFailed: 'Nie udało się obliczyć trasy',
   navigationRouteNotFound: 'Nie znaleziono trasy',
@@ -29,6 +30,14 @@ export default {
   customPointsPhotoDenied: 'Brak dostępu do aparatu lub galerii. Zezwól na to w ustawieniach urządzenia.',
   customPointsPhotoFailed: 'Nie udało się dodać zdjęcia. Spróbuj ponownie.',
   customPointsDeleteFailed: 'Nie udało się usunąć znacznika. Spróbuj ponownie.',
+  customPointsExportFailed: 'Nie udało się przygotować pliku znaczników. Spróbuj ponownie.',
+  customPointsImportNotPoints: 'To nie jest plik znaczników Polskie Ślady.',
+  customPointsImportDamaged: 'Plik znaczników jest uszkodzony: nic nie zostało zaimportowane.',
+  customPointsImportNewerVersion:
+    'Plik został utworzony przez nowszą wersję aplikacji. Zaktualizuj aplikację i zaimportuj go ponownie.',
+  customPointsImportTooLarge: 'Plik jest za duży, aby go zaimportować.',
+  customPointsImportTooManyPoints: 'Plik zawiera zbyt wiele znaczników: można zaimportować najwyżej {{max}}.',
+  customPointsImportUnreadable: 'Nie udało się odczytać pliku. Spróbuj wybrać go ponownie.',
 
   // Capacitor geolocation API error
   OS_PLUG_GLOC_0002: 'Wystąpił błąd podczas próby uzyskania lokalizacji.',
