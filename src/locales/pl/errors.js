@@ -30,6 +30,14 @@ export default {
   customPointsPhotoDenied: 'Brak dostępu do aparatu lub galerii. Zezwól na to w ustawieniach urządzenia.',
   customPointsPhotoFailed: 'Nie udało się dodać zdjęcia. Spróbuj ponownie.',
   customPointsDeleteFailed: 'Nie udało się usunąć znacznika. Spróbuj ponownie.',
+  customPointsExportFailed: 'Nie udało się przygotować pliku znaczników. Spróbuj ponownie.',
+  customPointsImportNotPoints: 'To nie jest plik znaczników Polskie Ślady.',
+  customPointsImportDamaged: 'Plik znaczników jest uszkodzony: nic nie zostało zaimportowane.',
+  customPointsImportNewerVersion:
+    'Plik został utworzony przez nowszą wersję aplikacji. Zaktualizuj aplikację i zaimportuj go ponownie.',
+  customPointsImportTooLarge: 'Plik jest za duży, aby go zaimportować.',
+  customPointsImportTooManyPoints: 'Plik zawiera zbyt wiele znaczników: można zaimportować najwyżej {{max}}.',
+  customPointsImportUnreadable: 'Nie udało się odczytać pliku. Spróbuj wybrać go ponownie.',
 
   // Capacitor geolocation API error
   OS_PLUG_GLOC_0002: 'Wystąpił błąd podczas próby uzyskania lokalizacji.',

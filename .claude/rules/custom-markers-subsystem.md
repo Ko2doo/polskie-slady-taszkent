@@ -2,6 +2,7 @@
 paths:
   - "src/services/customPoints*"
   - "src/services/mapPopupHtml.js"
+  - "src/capacitor/services/share.js"
   - "src/components/CustomPoints/**"
   - "src/components/Article.svelte"
   - "src/lib/state/customPoints*"
@@ -25,10 +26,38 @@ photo-related.
 ## Format and storage
 
 - **Format** (`services/customPointsFormat.js`): one JSON shape for on-device storage and
-  for future import/export, versioned (`schemaVersion`), checksummed with CRC32
+  for export/import files, versioned (`schemaVersion`), checksummed with CRC32
   (`utils/crc32.js` — corruption detection, not a security feature). `LIMITS` caps
   title/description/photo count; limits apply to user input and imported files, **never**
   silently to a point already on disk (a lowered limit must never delete existing data).
+  `buildStorageFile()` writes a storage slot; `buildExportFile()` an export — only the shared
+  fields (no preview, no photos, no revision), with its own `exportId`/`exportedAt`;
+  `parseFile(text, { kind: 'import' })` reads one back as untrusted input.
+- **Merge on import** (`services/customPointsMerge.js`): `mergeImportedPoints(existing,
+  imported)` — the same id is the same point, the fresher `updatedAt` wins (an equal one keeps
+  the device's point), an updated point keeps its local photos, preview and `createdAt`, new
+  points are appended, nothing is ever deleted. Pure; returns the list and the
+  added/updated/unchanged counts.
+- **Export and import** — the points state does the data part: `customPointsState.exportFile()`
+  (waits for the saved points), `customPointsState.previewImport(text)` (the same parse and merge,
+  nothing saved — the counts for the confirmation) and `customPointsState.importFile(text)`
+  (parse as untrusted, merge against the points as they are now, save at once; a file that
+  changes nothing saves nothing). Both return the added/updated/unchanged counts plus `skipped`
+  broken entries, or `{ ok: false, reason }`. `services/customPointsTransfer.js` moves
+  the file: `deliverExportFile(text, ...)` writes it to the cache directory and opens the share
+  sheet (`capacitor/services/share.js`; a closed sheet is `'cancelled'`, not an error; a browser
+  download in the web build), `readImportFile(file)` reads the file picked with
+  `<input type="file">` (refused unread when far over the size limit). The two never call each
+  other: `components/CustomPoints/CustomPointsTransfer.svelte` (the "My markers" block of
+  Settings) wires them — the export and import buttons, a hidden `<input type="file">`, a
+  spinner naming the running step (exporting / checking / importing; each step yields a
+  macrotask first so it paints before a big file blocks the thread). An import is two steps:
+  the picked file is previewed, then `CustomPointsImportDialog.svelte` (presentational; an
+  overlay toggle, so Android back cancels, released when Settings unmounts) shows what would be
+  added and updated, and only its confirm imports. A file with nothing new says so instead of
+  asking. The summary is an info toast, a refusal an error toast with its reason
+  (`POINTS_IMPORT_REFUSED`, `POINTS_EXPORT_FAILED` in `lib/errors/errorCodes.js`). A closed
+  share sheet or file chooser says nothing.
 - **Storage** (`services/customPointsStorage.js`): two alternating JSON files (slot A/B); a
   write always targets the slot *other than* the last successful one, so a crash mid-write
   never corrupts previously-saved data. Loading picks the valid slot with the higher

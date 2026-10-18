@@ -114,9 +114,12 @@ A new screen: add its component to `src/Routes.js`, give it this same `$effect` 
 - **`/more` → `More`** (`views/More/More.svelte`). A simple menu linking to Settings, About,
   Technical Info — uses `goto()` from the router directly rather than the back-button-aware
   history hook, since these are forward navigations, not "back."
-- **`/settings` → `Settings`** (`views/Settings/Settings.svelte`). Language, dark mode,
-  and the app's OS-level permission settings (via `openAppSettings()` from
-  `capacitor/services/locationPermission.js`).
+- **`/settings` → `Settings`** (`views/Settings/Settings.svelte`). One `Block` of sections
+  split by dividers, in this order: language, appearance (dark mode), the user's markers —
+  export/import (`components/CustomPoints/CustomPointsTransfer.svelte`) — and the app's OS-level
+  permission settings (via `openAppSettings()` from `capacitor/services/locationPermission.js`).
+  **The permissions section is always the last one**: a new section goes before it
+  (`Settings.test.js` checks the order).
 - **`/about` → `About`** (`views/About/About.svelte`). App info, sourced from a translated
   `about:fullInfo` object (`returnObjects: true`), not from `data/about.js` (that file feeds
   Technical Info instead — don't confuse the two).

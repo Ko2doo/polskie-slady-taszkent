@@ -27,7 +27,7 @@
  */
 
 import { crc32Hex } from '@/utils/crc32';
-import { isId } from '@/utils/uuid';
+import { createId, isId } from '@/utils/uuid';
 
 export const FORMAT = 'psl.custom-points';
 export const SCHEMA_VERSION = 1;
@@ -274,5 +274,47 @@ export function buildStorageFile(points, { revision, now }) {
     savedAt: now,
     checksum: computeChecksum(points),
     points,
+  });
+}
+
+/**
+ * The shared part of a point, the part that leaves the device: preview and photos are local
+ * files that mean nothing on another phone
+ * @param {Object} point - A point with all fields
+ * @returns {{ id: string, title: string, description: string, coords: { lng: number, lat: number },
+ *   createdAt: number, updatedAt: number }} the point as an export file carries it
+ */
+function toSharedPoint(point) {
+  const { id, title, description, coords, createdAt, updatedAt } = point;
+  return { id, title, description, coords: { lng: coords.lng, lat: coords.lat }, createdAt, updatedAt };
+}
+
+/**
+ * Serialize points for an export file — what the user shares to move their points to another
+ * device or keep a copy. Only the shared fields go out (no preview, no photos, no storage
+ * revision); `parseFile(text, { kind: 'import' })` reads it back.
+ *
+ * @param {Array<Object>} points - The points to export (all fields; the local ones are dropped)
+ * @param {Object} [options] - Envelope values, injectable for tests
+ * @param {number} [options.now] - Current unix time in ms (`exportedAt`)
+ * @param {string} [options.exportId] - Unique id of this export (a UUID)
+ * @returns {string} - File content
+ *
+ * @example
+ * const text = buildExportFile(customPointsState.points);
+ * // ...share it; on another device:
+ * const result = parseFile(text, { kind: 'import' }); // { ok: true, points, skipped }
+ */
+export function buildExportFile(points, { now = Date.now(), exportId = createId() } = {}) {
+  const sharedPoints = points.map(toSharedPoint);
+
+  return JSON.stringify({
+    format: FORMAT,
+    schemaVersion: SCHEMA_VERSION,
+    appVersion: getAppVersion(),
+    exportId,
+    exportedAt: now,
+    checksum: computeChecksum(sharedPoints),
+    points: sharedPoints,
   });
 }

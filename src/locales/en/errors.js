@@ -30,6 +30,14 @@ export default {
   customPointsPhotoDenied: 'No access to the camera or the gallery. Please allow it in the device settings.',
   customPointsPhotoFailed: 'Could not add the photo. Please try again.',
   customPointsDeleteFailed: 'Could not delete the marker. Please try again.',
+  customPointsExportFailed: 'Could not prepare the markers file. Please try again.',
+  customPointsImportNotPoints: 'This is not a Polskie Ślady markers file.',
+  customPointsImportDamaged: 'The markers file is damaged: nothing was imported.',
+  customPointsImportNewerVersion:
+    'The file was made by a newer version of the app. Update the app and import it again.',
+  customPointsImportTooLarge: 'The file is too large to import.',
+  customPointsImportTooManyPoints: 'The file has too many markers: at most {{max}} can be imported.',
+  customPointsImportUnreadable: 'Could not read the file. Please try picking it again.',
 
   // Capacitor geolocation API error
   OS_PLUG_GLOC_0002: 'There was en error trying to obtain the location.',

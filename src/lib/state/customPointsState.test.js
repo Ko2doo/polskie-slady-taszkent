@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { LIMITS } from '@/services/customPointsFormat';
+import { LIMITS, buildExportFile } from '@/services/customPointsFormat';
 import { createId } from '@/utils/uuid';
 
 // The storage, the photo files and the app lifecycle are recorders: this state only decides what to
@@ -383,5 +383,126 @@ describe('flush and initCustomPointsPersistence', () => {
     module.initCustomPointsPersistence();
 
     expect(deps.onAppBackground).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('export and import', () => {
+  it('exports every point, shared fields only', async () => {
+    const withPhoto = storedPoint({ title: 'With photo' });
+    withPhoto.photos = [photoOf(withPhoto.id)];
+    withPhoto.preview = 'local preview';
+    await load({ status: 'ok', points: [storedPoint(), withPhoto] });
+
+    const { text, count } = await state.exportFile();
+    const data = JSON.parse(text);
+
+    expect(count).toBe(2);
+    expect(data.points.map((point) => point.id)).toEqual(state.points.map((point) => point.id));
+    expect(data.points[1]).not.toHaveProperty('photos');
+    expect(data.points[1]).not.toHaveProperty('preview');
+  });
+
+  it('an export waits for the saved points', async () => {
+    let finishLoading;
+    deps.load = vi.fn(() => new Promise((resolve) => (finishLoading = resolve)));
+    vi.resetModules();
+    module = await import('@/lib/state/customPointsState.svelte.js');
+    state = module.customPointsState;
+
+    const exporting = state.exportFile();
+    finishLoading({ status: 'ok', points: [storedPoint()] });
+
+    expect((await exporting).count).toBe(1);
+  });
+
+  it('imports new points, updates older ones, keeps local photos, and saves at once', async () => {
+    const kept = storedPoint({ title: 'Device', updatedAt: 1000 });
+    kept.photos = [photoOf(kept.id)];
+    await load({ status: 'ok', points: [kept] });
+
+    const fresher = { ...kept, title: 'From the file', updatedAt: 2000 };
+    const added = storedPoint({ title: 'New one' });
+    const result = await state.importFile(buildExportFile([fresher, added]));
+
+    expect(result).toEqual({ ok: true, added: 1, updated: 1, unchanged: 0, skipped: 0 });
+    expect(state.points.map((point) => point.title)).toEqual(['From the file', 'New one']);
+    expect(state.points[0].photos).toEqual(kept.photos);
+    expect(lastSaved()).toHaveLength(2);
+    expect(deps.flush).toHaveBeenCalledTimes(1);
+  });
+
+  it('a preview counts what an import would do and changes nothing', async () => {
+    const kept = storedPoint({ title: 'Device', updatedAt: 1000 });
+    const older = storedPoint({ title: 'Newer here', updatedAt: 9000 });
+    await load({ status: 'ok', points: [kept, older] });
+
+    const text = buildExportFile([
+      { ...kept, title: 'From the file', updatedAt: 2000 },
+      { ...older, title: 'Older there', updatedAt: 1 },
+      storedPoint({ title: 'New one' }),
+      storedPoint({ title: '' }),
+    ]);
+    const preview = await state.previewImport(text);
+
+    expect(preview).toEqual({ ok: true, added: 1, updated: 1, unchanged: 1, skipped: 1 });
+    expect(state.points.map((point) => point.title)).toEqual(['Device', 'Newer here']);
+    expect(deps.schedule).not.toHaveBeenCalled();
+    expect(deps.flush).not.toHaveBeenCalled();
+
+    // The import itself does what the preview said
+    expect(await state.importFile(text)).toEqual(preview);
+  });
+
+  it('a preview refuses a bad file like the import does', async () => {
+    await load({ status: 'ok' });
+
+    expect(await state.previewImport('not json')).toEqual({ ok: false, reason: 'invalidJson' });
+  });
+
+  it('an import that changes nothing saves nothing', async () => {
+    const point = storedPoint({ updatedAt: 5000 });
+    await load({ status: 'ok', points: [point] });
+
+    const result = await state.importFile(buildExportFile([{ ...point, title: 'Older', updatedAt: 4000 }]));
+
+    expect(result).toEqual({ ok: true, added: 0, updated: 0, unchanged: 1, skipped: 0 });
+    expect(state.points[0].title).toBe(point.title);
+    expect(deps.schedule).not.toHaveBeenCalled();
+    expect(deps.flush).not.toHaveBeenCalled();
+  });
+
+  it('counts broken entries of the file as skipped', async () => {
+    await load({ status: 'ok' });
+    const text = buildExportFile([storedPoint({ title: 'Good' }), storedPoint({ title: '' })]);
+
+    const result = await state.importFile(text);
+
+    expect(result).toMatchObject({ ok: true, added: 1, skipped: 1 });
+  });
+
+  it.each([
+    ['not JSON at all', 'not json', 'invalidJson'],
+    ['another format', JSON.stringify({ format: 'something', points: [] }), 'unknownFormat'],
+  ])('refuses %s and changes nothing', async (_name, text, reason) => {
+    await load({ status: 'ok', points: [storedPoint()] });
+
+    const result = await state.importFile(text);
+
+    expect(result).toEqual({ ok: false, reason });
+    expect(state.points).toHaveLength(1);
+    expect(deps.schedule).not.toHaveBeenCalled();
+  });
+
+  it('a file edited by hand after the export is refused as a whole', async () => {
+    await load({ status: 'ok' });
+    const outside = storedPoint();
+    const text = JSON.stringify({
+      ...JSON.parse(buildExportFile([outside])),
+    }).replace('"createdAt"', `"photos":["${photoOf(outside.id)}"],"preview":"x","createdAt"`);
+
+    const result = await state.importFile(text);
+
+    // Smuggled-in local fields break the checksum (local fields themselves: customPointsFormat.test.js)
+    expect(result).toEqual({ ok: false, reason: 'checksumMismatch' });
   });
 });

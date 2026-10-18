@@ -105,6 +105,20 @@ describe('PhotoSlider', () => {
     expect(viewer()).toBeNull();
   });
 
+  // Leaving with the viewer open some other way than back (a link, the popup closed under it)
+  it('unmounted with the viewer open, it leaves nothing on the back-button stack', () => {
+    render({ photos: PHOTOS });
+    target.querySelector('.swiper-slide button').click();
+    flushSync();
+    expect(get(overlayState).stack).toHaveLength(1);
+
+    unmount(component);
+    component = null;
+
+    expect(get(overlayState).stack).toHaveLength(0);
+    expect(overlayController.tryClose()).toBe(false);
+  });
+
   it('a single photo opens the viewer too, without dots', () => {
     render({ photos: ['photos/a/1.jpg'] });
 
