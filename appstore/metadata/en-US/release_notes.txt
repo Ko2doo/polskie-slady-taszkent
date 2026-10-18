@@ -1,1 +1,1 @@
-Faster map rendering, refreshed onboarding, new map popup buttons. Critical security updates and minor fixes.
+Your own markers on the map with a name, description and up to 4 photos (they stay on your device). Faster map rendering, refreshed onboarding, new map popup buttons, critical security updates and many smaller fixes.

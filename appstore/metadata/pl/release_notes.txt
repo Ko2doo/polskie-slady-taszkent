@@ -1,1 +1,1 @@
-Szybsze renderowanie mapy, odświeżony samouczek, nowe przyciski w okienkach mapy. Krytyczne aktualizacje bezpieczeństwa i drobne poprawki.
+Własne znaczniki na mapie z nazwą, opisem i do 4 zdjęć (zostają na urządzeniu). Szybsze renderowanie mapy, odświeżony samouczek, nowe przyciski w okienkach mapy, krytyczne aktualizacje bezpieczeństwa i wiele drobnych poprawek.

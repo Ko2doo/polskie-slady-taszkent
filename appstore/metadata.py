@@ -29,6 +29,7 @@ VERSION_LOC = {
             "• Detailed articles with photos and historical background\n"
             "• Find your location and get guided to nearby heritage sites\n"
             "• Open any place directly in Google Maps\n"
+            "• Your own markers on the map with notes and photos\n"
             "• Four languages: Polish, Russian, English and Uzbek\n"
             "• Light and dark themes\n"
             "• Free and open source — no tracking, no ads, no accounts\n\n"
@@ -43,9 +44,10 @@ VERSION_LOC = {
             "offline map with GPS navigation around the city — no internet required."
         ),
         "whatsNew": (
-            "Faster map rendering, a refreshed onboarding with correct language selection on "
-            "tablets, a new button design in map popups and a single-row navigation mode bar. "
-            "Critical security updates for all key libraries and other minor fixes."
+            "Your own markers on the map: tap the map in editing mode to add a place with a name, "
+            "a description and up to 4 photos from the camera or gallery. Photos stay on your device. "
+            "Also: faster map rendering, a refreshed onboarding, new map popup buttons, "
+            "critical security updates and many smaller fixes."
         ),
     },
     "pl": {
@@ -61,6 +63,7 @@ VERSION_LOC = {
             "• Szczegółowe artykuły ze zdjęciami i tłem historycznym\n"
             "• Lokalizacja użytkownika i prowadzenie do pobliskich miejsc\n"
             "• Otwieranie miejsca w Mapach Google\n"
+            "• Własne znaczniki na mapie z notatkami i zdjęciami\n"
             "• Cztery języki: polski, rosyjski, angielski i uzbecki\n"
             "• Tryb jasny i ciemny\n"
             "• Darmowa, otwartoźródłowa — bez śledzenia, reklam i kont\n\n"
@@ -75,9 +78,10 @@ VERSION_LOC = {
             "nawigacją GPS po mieście — bez internetu."
         ),
         "whatsNew": (
-            "Szybsze renderowanie mapy, odświeżony samouczek z poprawnym wyborem języka na "
-            "tabletach, nowy wygląd przycisków w okienkach mapy i pasek trybów nawigacji w jednym "
-            "rzędzie. Krytyczne aktualizacje bezpieczeństwa kluczowych bibliotek i drobne poprawki."
+            "Własne znaczniki na mapie: w trybie edycji dotknij mapy, aby dodać miejsce z nazwą, "
+            "opisem i maksymalnie 4 zdjęciami z aparatu lub galerii. Zdjęcia zostają na urządzeniu. "
+            "Poza tym: szybsze renderowanie mapy, odświeżony samouczek, nowe przyciski w okienkach "
+            "mapy, krytyczne aktualizacje bezpieczeństwa i wiele drobnych poprawek."
         ),
     },
     "ru": {
@@ -95,6 +99,7 @@ VERSION_LOC = {
             "• Подробные статьи с фотографиями и исторической справкой\n"
             "• Определение местоположения и маршрут к ближайшим местам\n"
             "• Открытие любого места в Google Картах\n"
+            "• Свои метки на карте с заметками и фото\n"
             "• Четыре языка: польский, русский, английский и узбекский\n"
             "• Светлая и тёмная темы\n"
             "• Бесплатное приложение с открытым кодом — без слежки, рекламы и аккаунтов\n\n"
@@ -109,9 +114,10 @@ VERSION_LOC = {
             "GPS-навигацией по городу — без интернета."
         ),
         "whatsNew": (
-            "Карта отрисовывается быстрее, обновлён онбординг: выбор языка корректно работает на "
-            "планшетах. Новый дизайн кнопок во всплывающих окнах карты, режимы навигации в один ряд. "
-            "Критические обновления безопасности всех ключевых библиотек и мелкие исправления."
+            "Свои метки на карте: в режиме редактирования коснитесь карты, чтобы добавить место с "
+            "названием, описанием и до 4 фото с камеры или из галереи. Фото хранятся только на "
+            "устройстве. А также: более быстрая отрисовка карты, обновлённый онбординг, новые кнопки "
+            "во всплывающих окнах, критические обновления безопасности и много мелких исправлений."
         ),
     },
 }
