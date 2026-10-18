@@ -9,24 +9,20 @@
 
   import { resolvePageKeyFromRouteResult } from "@/utils/routerUtils";
   import { withNavbar } from "@/lib/state/navbar.svelte";
-  import { hideTabbar } from "@/lib/state/bottomTabbarNav.svelte";
+  import { hideTabbar, QUICK_TABBAR_SLIDE } from "@/lib/state/bottomTabbarNav.svelte";
 
   import { openAppSettings } from "@/capacitor/services/locationPermission";
 
   import { routerBack } from "@/services/navigationHistoryHook";
 
-  import DarkModeToggler from "@/components/DarkModeToggler.svelte";
-  import LangSwitcher from "@/components/LangSwitcher.svelte";
+  import DarkModeToggler from "@/components/Preferences/DarkModeToggler.svelte";
+  import LangSwitcher from "@/components/Preferences/LangSwitcher.svelte";
 
   // router props
   let { route, i18n } = $props();
 
-  // Inspector check console in browser
-  // $inspect(route);
-
   $effect(() => {
     const result = route?.result;
-    // console.log(result);
 
     // get "pageKey" from route path
     //    "/about" -> "about"
@@ -48,7 +44,7 @@
   });
 
   // No tab bar on this screen; the request is released when the screen goes away
-  $effect(() => hideTabbar({ duration: 120, delay: 40 }));
+  $effect(() => hideTabbar(QUICK_TABBAR_SLIDE));
 
   function handleBack() {
     routerBack("/more");
@@ -56,7 +52,7 @@
 </script>
 
 {#snippet BackButton()}
-  <NavbarBackLink onClick={handleBack} />
+  <NavbarBackLink onClick={handleBack} aria-label={$i18n.t("ui:buttons:back")} />
 {/snippet}
 
 <section class="settings-view relative z-60 flex flex-col" in:fly={{ duration: 120, x: 20 }}>

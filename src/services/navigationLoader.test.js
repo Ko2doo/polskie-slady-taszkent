@@ -37,7 +37,6 @@ describe('initNavigation', () => {
 
     expect(fetch).toHaveBeenCalledWith('/map/navigation-graph-optimized.json');
     expect(Object.keys(engine.nodes)).toEqual(['A', 'B', 'C']);
-    expect(loader.isNavigationReady()).toBe(true);
     expect(loader.getNavigationEngine()).toBe(engine);
   });
 
@@ -54,7 +53,7 @@ describe('initNavigation', () => {
     fetch.mockResolvedValueOnce({ ok: false, status: 404 });
 
     await expect(loader.initNavigation()).rejects.toThrow('Failed to load navigation graph: 404');
-    expect(loader.isNavigationReady()).toBe(false);
+    expect(() => loader.getNavigationEngine()).toThrow('Navigation engine not initialized');
 
     await expect(loader.initNavigation()).resolves.toBeTruthy();
     expect(fetch).toHaveBeenCalledTimes(2);
@@ -77,13 +76,12 @@ describe('initNavigation', () => {
     fetch.mockRejectedValueOnce(new TypeError('Failed to fetch'));
 
     await expect(loader.initNavigation()).rejects.toThrow('Failed to fetch');
-    expect(loader.isNavigationReady()).toBe(false);
+    expect(() => loader.getNavigationEngine()).toThrow('Navigation engine not initialized');
   });
 });
 
-describe('getNavigationEngine / isNavigationReady before init', () => {
-  it('is not ready and throws on access', () => {
-    expect(loader.isNavigationReady()).toBe(false);
+describe('getNavigationEngine before init', () => {
+  it('throws on access', () => {
     expect(() => loader.getNavigationEngine()).toThrow('Navigation engine not initialized');
   });
 });
@@ -103,7 +101,7 @@ describe('findRoute', () => {
     expect(first.success).toBe(true);
     expect(second).toBe(first);
     expect(search).toHaveBeenCalledTimes(1);
-    expect(loader.getCacheStats().size).toBe(1);
+    expect(loader.findCachedRoute(...FROM, ...TO)).toBe(first);
   });
 
   // The graph has one-way edges, so the way back is searched, then cached for that direction
@@ -147,7 +145,7 @@ describe('findRoute', () => {
     loader.findRoute(...FROM, ...farAway);
 
     expect(search).toHaveBeenCalledTimes(2);
-    expect(loader.getCacheStats().size).toBe(0);
+    expect(loader.findCachedRoute(...FROM, ...farAway)).toBeNull();
   });
 });
 
@@ -165,11 +163,10 @@ describe('route cache', () => {
     expect(loader.findCachedRoute(1, 2, 3, 5)).toBeNull();
   });
 
-  it('caching the same direction again replaces it without growing', () => {
+  it('caching the same direction again replaces it', () => {
     loader.cacheRoute(1, 2, 3, 4, route(1));
     loader.cacheRoute(1, 2, 3, 4, route(2));
 
-    expect(loader.getCacheStats().size).toBe(1);
     expect(loader.findCachedRoute(1, 2, 3, 4)).toEqual(route(2));
   });
 
@@ -177,13 +174,12 @@ describe('route cache', () => {
     loader.cacheRoute(1, 2, 3, 4, route(1));
     loader.cacheRoute(3, 4, 1, 2, route(2));
 
-    expect(loader.getCacheStats().size).toBe(2);
     expect(loader.findCachedRoute(1, 2, 3, 4)).toEqual(route(1));
     expect(loader.findCachedRoute(3, 4, 1, 2)).toEqual(route(2));
   });
 
   it('evicts the least recently used route when full', () => {
-    const { maxSize } = loader.getCacheStats();
+    const maxSize = loader.MAX_CACHE_SIZE;
 
     for (let index = 0; index < maxSize; index += 1) {
       loader.cacheRoute(0, 0, ...destination(index), route(index));
@@ -193,14 +189,16 @@ describe('route cache', () => {
     loader.findCachedRoute(0, 0, ...destination(0));
     loader.cacheRoute(0, 0, ...destination(maxSize), route(maxSize));
 
-    expect(loader.getCacheStats().size).toBe(maxSize);
     expect(loader.findCachedRoute(0, 0, ...destination(0))).toEqual(route(0));
     expect(loader.findCachedRoute(0, 0, ...destination(1))).toBeNull();
-    expect(loader.findCachedRoute(0, 0, ...destination(maxSize))).toEqual(route(maxSize));
+    // Only the one least recently used route left: every other one is still there
+    for (let index = 2; index <= maxSize; index += 1) {
+      expect(loader.findCachedRoute(0, 0, ...destination(index))).toEqual(route(index));
+    }
   });
 
   it('re-caching an existing route makes it the most recent', () => {
-    const { maxSize } = loader.getCacheStats();
+    const maxSize = loader.MAX_CACHE_SIZE;
 
     for (let index = 0; index < maxSize; index += 1) {
       loader.cacheRoute(0, 0, ...destination(index), route(index));
@@ -211,14 +209,5 @@ describe('route cache', () => {
 
     expect(loader.findCachedRoute(0, 0, ...destination(0))).toEqual(route(0));
     expect(loader.findCachedRoute(0, 0, ...destination(1))).toBeNull();
-  });
-
-  it('clearRouteCache empties it', () => {
-    loader.cacheRoute(1, 2, 3, 4, route(1));
-
-    loader.clearRouteCache();
-
-    expect(loader.getCacheStats().size).toBe(0);
-    expect(loader.findCachedRoute(1, 2, 3, 4)).toBeNull();
   });
 });

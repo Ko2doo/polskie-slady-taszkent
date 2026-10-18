@@ -72,6 +72,8 @@ export default {
   },
   toasts: {
     exitApp: 'Chiqish uchun yana bir marta Orqaga bosing',
+    errorScope: 'Modul: {{scope}}',
+    errorCode: 'Kod: {{code}}',
   },
   dialogue: {
     hello: 'Salom, Dunyo!',

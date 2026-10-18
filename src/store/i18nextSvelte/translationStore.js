@@ -1,3 +1,5 @@
+import { writable } from 'svelte/store';
+
 /**
  * This is a i18next translation store class
  *
@@ -5,12 +7,6 @@
  *
  * This script uses the original svelte-i18next code, but is rewritten in js insead of ts.
  */
-
-import { writable } from 'svelte/store';
-
-// The global store loading
-// export const isLoading = writable(true);
-
 export class I18NextTranslationStore {
   // Constructor
   constructor(i18n) {

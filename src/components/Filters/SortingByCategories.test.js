@@ -35,8 +35,6 @@ const settle = async () => {
   await new Promise((resolve) => setTimeout(resolve, 0));
   flushSync();
 };
-const labels = () =>
-  [...target.querySelectorAll('.list-item-title, [class*="item-title"]')].map((el) => el.textContent.trim());
 const radios = () => [...target.querySelectorAll('input[type="radio"]')];
 
 function choose(index) {

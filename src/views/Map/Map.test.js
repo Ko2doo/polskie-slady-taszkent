@@ -14,7 +14,7 @@ import Map from '@/views/Map/Map.svelte';
 // screen wires them together. `deps` holds what each factory created, for the assertions.
 const deps = vi.hoisted(() => ({ themes: [] }));
 
-vi.mock('@/views/Map/MapLifecycle.svelte.js', () => ({
+vi.mock('@/views/Map/Session/MapLifecycle.svelte.js', () => ({
   initializePMTiles: vi.fn(() => deps.pmtiles()),
   initializeMap: vi.fn(({ container }) => {
     const handlers = {};
@@ -31,7 +31,7 @@ vi.mock('@/views/Map/MapLifecycle.svelte.js', () => ({
   resolveTargetCoords: () => null,
 }));
 
-vi.mock('@/views/Map/MapBuilder.svelte.js', () => ({
+vi.mock('@/views/Map/Points/MapBuilder.svelte.js', () => ({
   createMapPointsBuilder: vi.fn((options) => {
     deps.builderOptions = options;
     deps.builder = {
@@ -59,12 +59,14 @@ vi.mock('@/views/Map/MapBuilder.svelte.js', () => ({
   }),
 }));
 
-vi.mock('@/views/Map/MapTheme.svelte.js', () => ({
+vi.mock('@/views/Map/Session/MapTheme.svelte.js', () => ({
+  INITIAL_STYLE_VERSION: 0,
+  getCurrentMapTheme: () => 'light',
+  buildMapStyle: vi.fn(async () => ({})),
   createThemeController: vi.fn((options) => {
     const theme = {
       options,
       init: vi.fn(() => 'light'),
-      buildStyleForTheme: vi.fn(async () => ({})),
       dispose: vi.fn(),
       styleVersion: 0,
     };
@@ -73,7 +75,7 @@ vi.mock('@/views/Map/MapTheme.svelte.js', () => ({
   }),
 }));
 
-vi.mock('@/views/Map/MapNavigation.svelte.js', () => ({
+vi.mock('@/views/Map/Navigation/MapNavigation.svelte.js', () => ({
   // A class instance, not a plain object: Svelte's $state would deep-copy a plain object into a
   // proxy, and the test could no longer flip the mode flags the screen reads
   createNavigationController: vi.fn(() => {
@@ -88,7 +90,7 @@ vi.mock('@/views/Map/MapNavigation.svelte.js', () => ({
   }),
 }));
 
-vi.mock('@/views/Map/MapNavigationGPS.svelte.js', () => ({
+vi.mock('@/views/Map/Navigation/GPS/MapNavigationGPS.svelte.js', () => ({
   createGPSNavigationController: vi.fn(() => {
     deps.gps = new (class {
       gpsMode = false;
@@ -100,12 +102,12 @@ vi.mock('@/views/Map/MapNavigationGPS.svelte.js', () => ({
   }),
 }));
 
-vi.mock('@/views/Map/MapLoadTracker.js', () => ({
+vi.mock('@/views/Map/Session/MapLoadTracker.js', () => ({
   createMapLoadTracker: vi.fn(() => (deps.tracker = { markSourcesAdded: vi.fn() })),
 }));
 
 // The preview tracker (MapPreview.test.js covers the real one) records what the screen gives back
-vi.mock('@/views/Map/MapPreview.js', () => ({
+vi.mock('@/views/Map/Points/MapPreview.js', () => ({
   createPreviewTracker: vi.fn(() => {
     deps.previews = {
       resolve: vi.fn(async (point) => (point.photos?.length ? 'blob:cover' : '')),
@@ -168,8 +170,13 @@ vi.mock('@/services/customPointsPhotos', () => ({
 
 vi.mock('@/store/ui/errorToast', () => ({ errorToast: { error: vi.fn(), warn: vi.fn(), info: vi.fn() } }));
 
-import { cleanupMap, initializeMap, initializePMTiles, setupMapHandlers } from '@/views/Map/MapLifecycle.svelte.js';
-import { createThemeController } from '@/views/Map/MapTheme.svelte.js';
+import {
+  cleanupMap,
+  initializeMap,
+  initializePMTiles,
+  setupMapHandlers,
+} from '@/views/Map/Session/MapLifecycle.svelte.js';
+import { createThemeController } from '@/views/Map/Session/MapTheme.svelte.js';
 import { customPointsState } from '@/lib/state/customPointsState.svelte.js';
 
 let target;
@@ -253,7 +260,7 @@ describe('start', () => {
     expect(deps.tracker.markSourcesAdded).toHaveBeenCalled();
   });
 
-  it('puts the saved custom points on the map, with their cover as preview', async () => {
+  it('puts the saved custom points on the map at once, their cover follows as preview', async () => {
     customPointsState.points.push(
       { id: 'a', coords: { lng: 1, lat: 2 }, title: 'A', photos: ['photos/a/1.jpg'] },
       { id: 'b', coords: { lng: 3, lat: 4 }, title: 'B', photos: [] },
@@ -265,7 +272,7 @@ describe('start', () => {
       id: 'a',
       coords: { lng: 1, lat: 2 },
       title: 'A',
-      preview: 'blob:cover',
+      preview: '',
     });
     expect(deps.customBuilder.addPoint).toHaveBeenCalledWith({
       id: 'b',
@@ -273,6 +280,7 @@ describe('start', () => {
       title: 'B',
       preview: '',
     });
+    expect(deps.customBuilder.updatePoint).toHaveBeenCalledWith({ id: 'a', title: 'A', preview: 'blob:cover' });
   });
 
   it('a failed start tells the user', async () => {
@@ -305,7 +313,7 @@ describe('start', () => {
     await settle();
 
     expect(initializeMap).not.toHaveBeenCalled();
-    expect(cleanupMap).toHaveBeenLastCalledWith(expect.objectContaining({ protocol }));
+    expect(cleanupMap).toHaveBeenCalledWith(expect.objectContaining({ protocol }));
   });
 
   // The map exists by then, so onDestroy releases it; what must not happen is the rest of onMount
@@ -324,37 +332,23 @@ describe('start', () => {
 
       expect(cleanupMap).toHaveBeenCalledWith(expect.objectContaining({ map: deps.map, builder: deps.builder }));
       expect(deps.map.on).not.toHaveBeenCalledWith('load', expect.any(Function));
-      expect(deps.themes).toHaveLength(1);
+      expect(deps.themes).toHaveLength(0);
     } finally {
       customPointsState.ready = ready;
     }
   });
 
-  // The first, map-less controller (step 2) only picks the initial style; it is replaced later
-  it('no theme controller is left subscribed', async () => {
+  // The first style is built without a controller; the one that follows the theme is created
+  // once, with the map, so no subscription exists without a map to restyle
+  it('creates one theme controller, with the map, and hands it to the cleanup', async () => {
     await render();
 
-    const replaced = deps.themes.slice(0, -1);
-    expect(replaced.length).toBeGreaterThan(0);
-    expect(replaced.every((theme) => theme.dispose.mock.calls.length > 0)).toBe(true);
-    expect(deps.themes.at(-1).dispose).not.toHaveBeenCalled();
-  });
+    expect(deps.themes).toHaveLength(1);
+    expect(deps.themes[0].options.map).toBe(deps.map);
 
-  // map.setStyle() drops every app layer; the theme controller redraws the route it is given
-  it('a theme switch redraws the GPS route as well as the manual one', async () => {
-    await render();
-    const { getCurrentRoute } = deps.themes.at(-1).options;
-    const manualRoute = { type: 'Feature', manual: true };
-    const gpsRoute = { type: 'Feature', gps: true };
+    leave();
 
-    expect(getCurrentRoute()).toBeFalsy();
-
-    deps.gps.currentRoute = gpsRoute;
-    expect(getCurrentRoute()).toBe(gpsRoute);
-
-    deps.gps.currentRoute = null;
-    deps.navigation.currentRoute = manualRoute;
-    expect(getCurrentRoute()).toBe(manualRoute);
+    expect(cleanupMap).toHaveBeenLastCalledWith(expect.objectContaining({ theme: deps.themes[0] }));
   });
 });
 

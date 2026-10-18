@@ -62,10 +62,10 @@ describe('initFirstLaunch', () => {
   });
 });
 
-// BUG-1: a stored value other than true/false/null (e.g. written by another version) leaves the
-// state null, so the onboarding is never shown (see BUGS.md). Remove `.fails` once fixed.
+// A stored value other than true/false/null (e.g. written by another version) must not leave the
+// user with no onboarding and no completed flag
 describe('an unexpected stored value', () => {
-  it.fails('shows the onboarding', async () => {
+  it('shows the onboarding', async () => {
     await Preferences.set({ key: KEY, value: '"yes"' });
 
     await firstLaunch.initFirstLaunch();

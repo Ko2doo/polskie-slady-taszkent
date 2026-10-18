@@ -71,7 +71,9 @@ export default {
     enableGPSManually: 'Откройте настройки устройства > Приложения > Polskie Slady > Разрешения > Местоположение',
   },
   toasts: {
-    exitApp: 'Нажмите назад ещё раз что-бы выйти',
+    exitApp: 'Нажмите назад ещё раз чтобы выйти',
+    errorScope: 'Модуль: {{scope}}',
+    errorCode: 'Код: {{code}}',
   },
   dialogue: {
     hello: 'Привет, Мир!',

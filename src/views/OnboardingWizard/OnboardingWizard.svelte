@@ -1,5 +1,5 @@
 <script>
-  import { Popup, Navbar, Block, Button, Page } from "konsta/svelte";
+  import { Navbar, Block, Button, Page } from "konsta/svelte";
   import { fly } from "svelte/transition";
 
   // Use permission service
@@ -8,9 +8,9 @@
   import { ERROR_CODES } from "@/lib/errors/errorCodes";
 
   import { createToggle } from "@/lib/state/createToggler.svelte";
-  import { hideTabbar } from "@/lib/state/bottomTabbarNav.svelte";
-  import LangSwitcher from "@/components/LangSwitcher.svelte";
-  import DarkModeToggler from "@/components/DarkModeToggler.svelte";
+  import { hideTabbar, QUICK_TABBAR_SLIDE } from "@/lib/state/bottomTabbarNav.svelte";
+  import LangSwitcher from "@/components/Preferences/LangSwitcher.svelte";
+  import DarkModeToggler from "@/components/Preferences/DarkModeToggler.svelte";
 
   import TranslateIcon from "@/lib/icons/TranslateIcon.svelte";
   import PaletteIcon from "@/lib/icons/PaletteIcon.svelte";
@@ -26,7 +26,7 @@
 
   // No tab bar under the wizard; it comes back as soon as the wizard closes
   $effect(() => {
-    if (welcomeDialogToggler.value) return hideTabbar({ duration: 120, delay: 40 });
+    if (welcomeDialogToggler.value) return hideTabbar(QUICK_TABBAR_SLIDE);
   });
 
   let activeStep = $state(1);
@@ -45,7 +45,7 @@
     isRequestingPermission = true;
 
     try {
-      const result = await requestLocationPermission({
+      await requestLocationPermission({
         onSuccess: async () => {
           IS_DEBUG && onboardingLogger.log("Location permission granted");
           // Complete onboarding immediately

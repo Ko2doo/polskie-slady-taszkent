@@ -3,5 +3,29 @@
     "DISABLE_TELEMETRY": "1",
     "DISABLE_ERROR_REPORTING": "1",
     "DISABLE_FEEDBACK_COMMAND": "1"
+  },
+  "permissions": {
+    "deny": [
+      "Bash(git commit *)",
+      "Bash(git -C * commit *)",
+      "Bash(git push *)",
+      "Bash(git -C * push *)",
+      "Bash(git reset --hard *)",
+      "Bash(git clean *)",
+      "Bash(git stash *)",
+      "Bash(git checkout *)",
+      "Bash(git switch *)",
+      "Bash(git branch -d *)",
+      "Bash(git branch -D *)",
+      "Bash(git merge *)",
+      "Bash(git rebase *)",
+      "Bash(git tag *)",
+      "Bash(npm run release *)",
+      "Bash(node scripts/release.mjs *)",
+      "Bash(python appstore/*)",
+      "Bash(python3 appstore/*)",
+      "Bash(sudo *)",
+      "Bash(rm -rf *)"
+    ]
   }
 }

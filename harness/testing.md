@@ -2,12 +2,9 @@
 
 ## Coverage
 
-Every area of `src/` that has logic is covered (Vitest + jsdom + fake-indexeddb, see "Stack"
-below) — services, state, stores, Capacitor wrappers, components, screens and the app shell.
-What is deliberately left out is listed under "What gets tested" below. Known bugs found while
-building the suite are pinned with `it.fails` and logged in `BUGS.md` (see "Bug log"). So: a
-change to existing code is expected to keep the suite green, and new code arrives with its tests
-(see "What a change needs").
+Every area of `src/` that has logic is covered (Vitest + jsdom + fake-indexeddb) — services,
+state, stores, Capacitor wrappers, components, screens and the app shell.
+What is deliberately left out is listed under "What gets tested" below.
 
 ## What gets tested (and what doesn't)
 
@@ -27,18 +24,34 @@ Bugs found while writing tests are tracked in `BUGS.md` at the repo root so they
 between sessions. It is **not** imported into `CLAUDE.md` — read it only when the task is
 about bugs (or before adding to it, to avoid duplicates).
 
-1. **Found a bug while testing:** pin it with `it.fails` (see "Layout and config" below),
-   leave the code alone, and append an entry to `BUGS.md`: next free `BUG-N` id, title,
-   status `open`, **Where** (file:line), **What** (what breaks and when), **Test** (test
-   file + test name, or "none" if there's no behavior to test), **Fix** (the minimal fix).
-   Create the file from the existing header if it doesn't exist.
+1. **Found a bug while testing:** don't fix it silently (bug fixes need a go-ahead,
+   `harness/git-workflow.md`). Write the test for the *correct* behavior as `it.fails(...)`
+   with a `// BUG: ...` comment saying what's wrong and "remove `.fails` once fixed" — once
+   fixed, it turns red by itself, the reminder to drop `.fails`; check it really flips by
+   applying the fix temporarily. Report it to the human and append an entry to `BUGS.md`:
+   next free `BUG-N` id, title, status `open`, **Where** (file:line), **What** (what breaks
+   and when), **Test** (test file + test name, or "none" if there's no behavior to test),
+   **Fix** (the minimal fix). If the file doesn't exist, create it with this header:
+   ```markdown
+   # Known bugs
+
+   Working log of bugs found while covering the project with tests. Lifecycle and rules:
+   `harness/testing.md` → "Bug log". Temporary: deleted once every entry is fixed and the fix
+   summary has been handed over for the commit.
+
+   Status: `open` (pinned by an `it.fails` test, code untouched) → `fixed` (code fixed, `.fails`
+   removed, suite green, a **Fixed:** line saying what changed — the source for the final commit
+   message).
+   ```
+   and add its line to the root tree in `.claude/rules/repository-layout.md`
+   (`├── BUGS.md  # temporary bug log (harness/testing.md → "Bug log")`).
 2. **Asked to fix the bugs** (that request is the go-ahead bug fixes otherwise need): for
    each entry — apply the fix, remove `.fails` (or add the missing test), run the full
    suite, set the status to `fixed` and add a **Fixed:** line (date + what actually changed,
    one or two lines) — the wrap-up commit message is assembled from those lines.
 3. **Asked to wrap up:** produce the commit message for the fixes (format in
    `harness/git-workflow.md`, `FIX:` prefix, one bullet per `BUG-N`), hand it over, then
-   delete `BUGS.md` (and its line in the root tree of `harness/repository-layout.md`) — only
+   delete `BUGS.md` (and its line in the root tree of `.claude/rules/repository-layout.md`) — only
    once every entry is `fixed`; otherwise list what's still open and keep the file.
 
 ## The non-negotiable rule
@@ -62,94 +75,10 @@ place.
   in `coverage/` (git-ignored). Icons (`lib/icons/`) and translation files (`locales/`) are
   excluded from the numbers — there's no logic in them to test.
 
-## Layout and config
+## Writing tests
 
-- Tests live **next to the code they test**: `src/utils/crc32.js` →
-  `src/utils/crc32.test.js`. Only `src/**/*.test.js` is collected. A test that uses runes itself
-  (`$effect.root`, `$state`) is named `*.svelte.test.js` so Svelte compiles it
-  (`bottomTabbarNav.svelte.test.js`).
-  Two tests are about the harness itself: `src/architectureTree.test.js` checks the `src/`
-  tree in `harness/architecture.md` against the real directories, `src/repositoryTree.test.js`
-  checks the repo-root tree in `harness/repository-layout.md` against the working tree minus
-  git-ignored files (so a temporary file left in the root fails it too). Both
-  read the trees through `src/test/harnessTree.js` (`readTreeBlock`, `parseTree`).
-- `vitest.config.js` merges `vite.config.js`, so tests get the same `@` alias, Svelte plugin
-  and `__APP_VERSION__`/`__APP_NAME__` globals as the app. It also adds the `browser`
-  resolve condition **only under Vitest** — without it `svelte` resolves to its server
-  build and `mount()` throws `lifecycle_function_unavailable`.
-- `src/test/setup.js` runs before every test file (currently: `fake-indexeddb/auto`).
-  Shared test helpers (plugin call recorders, i18n stubs, fixtures) go in `src/test/` too,
-  never into app code. Never import anything from `src/test/` in app code.
-  `src/test/mapRecorders.js` holds the MapLibre recorders for the map-screen modules and the
-  builders — `Marker`/`Popup`/`LngLatBounds`, a style recorder (sources, layers, images, layer
-  taps, `resetStyle()` for a theme switch), `stubImageLoading()` (jsdom never loads images),
-  `routeResult` — reuse it there.
-  For component tests: `src/test/i18nStub.js` (`$i18n.t` returning the key, plus the
-  interpolation values as JSON) and `src/test/reactiveProps.svelte.js` (reactive props, to
-  change a prop of a mounted component the way a parent would). Konsta components mount fine in
-  jsdom without an `<App>` wrapper; a Konsta `Dialog`/`Sheet`/`Actions` renders its content even
-  while closed, so query by text/aria-label rather than by visibility. `src/test/setup.js` stubs
-  `Element.prototype.animate` (Svelte transitions need it, jsdom has none).
-  `src/test/RenderSnippet.svelte` renders a snippet a screen hands to the navbar/panel profile,
-  so its buttons can be clicked. A controller mock that a component stores in `$state` must be a
-  class instance: `$state` deep-copies a plain object into a proxy, and the test's later changes
-  to the mock would not reach the component.
-  `src/test/EmptyComponent.svelte` stands in for a heavy child (`vi.mock(path, () => ({ default:
-  EmptyComponent }))`) when a test is about the parent's own wiring; `src/test/ContextProbe.svelte`
-  reads a context value so a test can check what a parent provides. `src/test/realI18n.js` is an
-  i18n store on the real locale files (`fallbackLng: false`) — use it for components that render
-  translation structures (`returnObjects: true`), so a missing entry in one language fails the
-  test (see `About.test.js`, `TechnicalInfo.test.js`). Note that Svelte renders `undefined` as an
-  empty string: assert that the expected text is there, not that "undefined" is absent.
-- `restoreMocks`, `unstubGlobals` and `unstubEnvs` are on: `vi.spyOn`/`vi.stubGlobal`/
-  `vi.stubEnv` are undone after every test automatically — don't add manual cleanup for
-  those. To test both branches of `IS_DEBUG` (or anything else read from `import.meta.env`
-  at module load), `vi.stubEnv(...)`, then `vi.resetModules()` and a dynamic `import()` —
-  see `utils/debugMode.test.js`.
-- Browser APIs jsdom lacks (`createImageBitmap`, canvas drawing/encoding, layout) are
-  replaced with call recorders via `vi.stubGlobal` / `vi.spyOn(HTMLCanvasElement.prototype,
-  ...)` — see `utils/imageResize.test.js`. A third-party module that needs real layout
-  (Swiper, MapLibre) is replaced with `vi.mock(...)` recording its constructor calls — see
-  `utils/swiperAction.test.js`.
-- **A bug found while writing tests is pinned, not silently fixed.** Write the test for the
-  *correct* behavior as `it.fails(...)` with a `// BUG: ...` comment saying what's wrong and
-  "remove `.fails` once fixed", report it to the human, and leave the code alone until the
-  human says to fix it (bug fixes need a go-ahead — see `harness/git-workflow.md`), and
-  log it in `BUGS.md` (see "Bug log" above). Once fixed, `it.fails` turns red by itself — that's the reminder to
-  drop `.fails`. Check that the `it.fails` test really flips by applying the fix temporarily.
-- Components that read `$i18n` need an `i18n` prop with the store contract; a minimal stub
-  is `{ subscribe: (fn) => { fn({ t: (k) => k }); return () => {}; } }` (returns the key, so
-  assertions can check which key is rendered).
-- A Capacitor plugin export is a Proxy: `vi.spyOn(Filesystem, ...)` fails. To make it
-  observable, `vi.mock` the package and wrap each method in a `vi.fn` that calls the real
-  web implementation by default; a test then overrides one call with
-  `mockRejectedValueOnce(...)` to simulate a native-only error code — see
-  `capacitor/utils/appFiles.test.js`. Use the `...Once` variants: `restoreMocks` doesn't
-  reset a `vi.fn` created inside `vi.mock`.
-- Services with an injected dependency (`createCustomPointsStorage({ driver })`) are tested
-  with an in-memory recorder of that dependency (every call recorded, failures injectable
-  per path) plus one integration test against the real implementation — see
-  `services/customPointsStorage.test.js`.
-- Module-level singletons (`customPointsState`, `articlePopupState`, `themeManager`,
-  `errorToast`) keep state between tests in the same file. Reset them in `beforeEach`, or
-  use `vi.resetModules()` + a dynamic `import()` to get a fresh instance. IndexedDB from
-  fake-indexeddb is also shared within a file — clean up what a test writes.
-
-## Stack
-
-- **Vitest** + **jsdom**, with **fake-indexeddb** loaded in the test setup so the real
-  Capacitor Filesystem web implementation (which uses IndexedDB under the hood) runs
-  against something real rather than being mocked away. Prefer testing against the real
-  web implementation of a Capacitor plugin where practical — it catches real bugs (wrong
-  option names, wrong directory, encoding issues) that a hand-rolled mock would hide.
-- Mock a native plugin only where the real web implementation can't exercise what you need
-  (actual native-only behavior, like confirming a bridge call isn't made a second time, or
-  simulating a platform-specific error code) — and when you do, mock it as a recorder of
-  every call made, not just a stub that returns a canned value, so a test can assert on
-  *what* was called and how many times, not just the end result.
-- A Svelte component test mounts the real component (`mount`/`unmount`/`flushSync` from
-  `svelte`) and drives it through its actual DOM, not through calling internal functions
-  directly — assert on what's rendered and what happens when the user interacts with it.
+Test layout, config, shared helpers and mocking patterns: `.claude/rules/testing-details.md`
+(loaded automatically when a test file or `src/test/` is opened).
 
 ## What a change needs
 
@@ -177,8 +106,6 @@ integrity (the two-slot storage, the file format's checksum/limits) or resource 
 
 ## Before calling a feature done
 
-1. Run the full existing test suite — nothing that passed before should now fail.
-2. New code has tests covering it per the rules above.
-3. For anything you're not fully confident about, do the mutate-and-confirm self-check.
-4. The project builds cleanly (`vite build` or the project's equivalent) with no new
-   warnings introduced.
+The merge gate (`harness/git-workflow.md` → "Merge gate") — whole suite green, clean build,
+new code tested per the rules above — plus the mutate-and-confirm self-check for anything
+you're not fully confident about.

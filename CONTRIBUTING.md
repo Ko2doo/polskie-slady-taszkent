@@ -3,7 +3,7 @@
 Thanks for wanting to help. This app is small, offline-first and runs on weak phones, so
 the bar for merging is about not breaking what already works.
 
-The detailed rules live in [`harness/`](harness/) — they're written for the project's AI
+The detailed rules live in [`harness/`](harness/) and [`.claude/rules/`](.claude/rules/) — they're written for the project's AI
 agent, but they are the project's real engineering rules and apply to everyone. This file is
 the short version plus the merge gate.
 
@@ -66,7 +66,7 @@ Either way:
 - If `features` moved on while you worked, bring it in before asking for the merge:
   `git fetch upstream` (or `origin`), then `git merge upstream/features` into your branch.
 - CI (`test-and-build`) must be green; fix it on your branch and push — the PR updates.
-- Working with an AI agent (Claude Code reads [`CLAUDE.md`](CLAUDE.md) and `harness/`;
+- Working with an AI agent (Claude Code reads [`CLAUDE.md`](CLAUDE.md), `harness/` and `.claude/rules/`;
   other agents get pointed there by [`AGENTS.md`](AGENTS.md)): the agent writes code on your
   branch and tells you the git commands; creating the branch, committing, pushing and
   opening the PR are yours.
@@ -79,16 +79,18 @@ checklist.
 
 1. **The whole test suite passes** — `npm test`. Not just the new tests: everything that
    was green before must still be green.
-2. **The project builds cleanly** — `npm run build`, with no new warnings.
+2. **The project builds cleanly** — `npm run build`, with no new warnings. The build first
+   runs `npm run lint` (no errors) and `npm run format:check` (`npm run format` fixes it),
+   so unformatted or lint-failing code doesn't build anywhere — locally or in CI.
 3. **New code is tested.** New logic has tests for the normal path, the edge cases that
    matter and the failure path; a bug fix has a test that fails without the fix. See
    [`harness/testing.md`](harness/testing.md).
 4. **Architecture rules are followed** — files are where
    [`harness/architecture.md`](harness/architecture.md) says they go, state follows
-   [`harness/state-management.md`](harness/state-management.md), UI uses Konsta first and
-   Tailwind second ([`harness/styling.md`](harness/styling.md)).
+   [`.claude/rules/state-management.md`](.claude/rules/state-management.md), UI uses Konsta first and
+   Tailwind second ([`.claude/rules/styling.md`](.claude/rules/styling.md)).
 5. **Code style is followed** — [`harness/code-style.md`](harness/code-style.md) and
-   [`harness/svelte-rules.md`](harness/svelte-rules.md): Svelte 5 runes, JSDoc on exported
+   [`.claude/rules/svelte-rules.md`](.claude/rules/svelte-rules.md): Svelte 5 runes, JSDoc on exported
    functions, the project logger instead of `console.*`, no dead code, no magic numbers
    (named constants instead), Prettier formatting. One function does one job; extend an
    existing one (an optional parameter that keeps the old behavior) rather than copy it.
@@ -96,15 +98,15 @@ checklist.
    classes (`mapPointsBuilder`, `customPointsBuilder`, ...), from which only logic shared
    between builders is extracted.
 6. **All four languages are complete.** Every new user-visible string exists in `ru`, `en`,
-   `pl` and `uz` with the same placeholders ([`harness/i18n.md`](harness/i18n.md)).
+   `pl` and `uz` with the same placeholders ([`.claude/rules/i18n.md`](.claude/rules/i18n.md)).
 7. **No unapproved dependencies.** A new package in `package.json` needs the maintainer's
-   explicit OK first ([`harness/dependencies.md`](harness/dependencies.md)).
+   explicit OK first ([`.claude/rules/dependencies.md`](.claude/rules/dependencies.md)).
 8. **Nothing changes what [`PRIVACY.md`](PRIVACY.md) promises.** The app collects no data
    and works offline; a change that sends anything off the device doesn't get merged
    without a deliberate decision and an updated privacy policy.
 9. **The harness is up to date.** If the change alters architecture, adds a directory,
-   subsystem, script or config file, the matching `harness/*.md` file is updated in the
-   same PR ([`harness/maintaining-this-harness.md`](harness/maintaining-this-harness.md)).
+   subsystem, script or config file, the matching harness file is updated in the
+   same PR ([`.claude/rules/maintaining-this-harness.md`](.claude/rules/maintaining-this-harness.md)).
 
 ## Repository setup (for admins)
 
@@ -204,6 +206,75 @@ maintainer builds the same tag in Xcode. Go back with `git checkout features`.
 - **`tag` says the tag already exists** — the release was already tagged, or the PR
   hasn't been merged yet (so `origin/master` still has the previous version).
 
+## Claude Code privacy settings
+
+Based on `code.claude.com/docs/en/data-usage` and `code.claude.com/docs/en/env-vars` —
+Claude Code's own settings can change; if something here looks off, check those pages.
+
+### Two different switches — don't confuse them
+
+Anthropic's own docs call this out explicitly: **telemetry** and **model-training data use**
+are two separate, independently-controlled things. Turning off telemetry does **not** stop
+your code/conversations from being used to train future models, and there is no project-level
+setting that controls training use — it lives entirely in your Claude account.
+
+### 1. Telemetry (operational metrics and error reports) — a project setting
+
+Already configured in `.claude/settings.json` at the repo root (which also holds the agent's
+permission deny list, see `harness/git-workflow.md`):
+
+```json
+{
+  "env": {
+    "DISABLE_TELEMETRY": "1",
+    "DISABLE_ERROR_REPORTING": "1",
+    "DISABLE_FEEDBACK_COMMAND": "1"
+  }
+}
+```
+
+- `DISABLE_TELEMETRY=1` — opts out of usage metrics (latency, reliability, usage patterns).
+  These never include code, file paths, or prompts even when telemetry is on, but turn it
+  off anyway for this project.
+- `DISABLE_ERROR_REPORTING=1` — opts out of sending Claude Code's own crash/error reports
+  (stack traces from Claude Code's internals, not from this project's code).
+- `DISABLE_FEEDBACK_COMMAND=1` — disables `/feedback`, `/bug`, and `/share`, which otherwise
+  send a copy of the conversation (including code) to Anthropic when explicitly invoked.
+
+**Deliberately not set:** `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC`. It disables telemetry
+too, but it also turns off feature-flag evaluation as a side effect, which can silently
+break unrelated Claude Code functionality (Remote Control, Channels). The three variables
+above cover the actual privacy goal without that trade-off. If Claude Code ever surfaces a
+"How is Claude doing this session?" survey or a follow-up offering to upload the session
+transcript, decline it (or choose "Don't ask again") — nothing is uploaded unless that
+follow-up is explicitly accepted, but accepting it does send the transcript, so just say no.
+
+This is checked into the repo (not a personal local settings file) so it applies for
+anyone working on this project, not just one machine — it's a project-level decision, not a
+personal preference.
+
+### 2. Model training opt-out — an account setting, not a project one
+
+This is the one that actually controls whether this project's code can be used to train
+future Claude models. It is **not** configurable from inside the repo or from Claude Code's
+own settings files at all — it's a toggle on the Claude account itself:
+
+**claude.ai → Settings → Privacy → "Help improve Claude"**, or directly at
+`claude.ai/settings/data-privacy-controls`. Turn it off there, once, on whichever account
+Claude Code is signed in with.
+
+Two things worth knowing about what that toggle actually does, per Anthropic's own data-usage
+docs (true for Free/Pro/Max accounts, which is the relevant case for an individual
+developer's own account — Team/Enterprise/API accounts already default to not training on
+code unless separately opted in):
+
+- **On**: conversations/code may be used to improve future models; data is retained 5 years.
+- **Off**: data is not used for training; retention drops to 30 days instead.
+
+This is a one-time setting, not something the agent can act on or verify from inside a
+session — if it matters for this project, it needs to be turned off in the account settings
+directly, and this file is just the reminder of where that lives.
+
 ## Running things locally
 
 ```bash
@@ -211,6 +282,8 @@ npm install
 npm test               # whole suite once
 npm run test:watch     # while developing
 npm run test:coverage  # suite + coverage report in coverage/
+npm run lint           # ESLint (npm run lint:fix applies the safe fixes)
+npm run format         # Prettier; npm run format:check only reports
 npm run build
 ```
 

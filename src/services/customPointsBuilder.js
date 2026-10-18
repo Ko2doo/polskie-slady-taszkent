@@ -71,6 +71,10 @@ import { createPopupHTML } from './mapPopupHtml';
 
 const customPointsLogger = createLogger('CustomPointsBuilder');
 
+/**
+ * Renders user-created markers on a MapLibre map — purpose, lifecycle and the full usage
+ * example are in the module header above.
+ */
 export class CustomPointsBuilder {
   /**
    * Private constructor - use CustomPointsBuilder.create() instead
@@ -257,7 +261,7 @@ export class CustomPointsBuilder {
     this._releaseImages();
 
     // Load icon images
-    let loadedIcons = [];
+    let loadedIcons;
 
     try {
       const iconPromises = icons.map((icon) => this._loadIcon(icon));

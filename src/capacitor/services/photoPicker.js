@@ -32,6 +32,16 @@ const PHOTO_OPTIONS = {
 const CANCEL_CODES = [ERROR_CODES.OS_PLUG_CAMR_0006, ERROR_CODES.OS_PLUG_CAMR_0020];
 const DENIED_CODES = [ERROR_CODES.OS_PLUG_CAMR_0003, ERROR_CODES.OS_PLUG_CAMR_0005];
 
+/**
+ * A photo pick that went wrong in a way the caller must tell the user about. A cancel by the
+ * user is not one of them — it isn't an error.
+ * @example
+ * try {
+ *   await pickPhoto('camera');
+ * } catch (error) {
+ *   if (error instanceof PhotoPickerError && error.kind === 'denied') showPermissionHint();
+ * }
+ */
 export class PhotoPickerError extends Error {
   /**
    * @param {'denied'|'failed'} kind - What went wrong

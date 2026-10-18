@@ -51,6 +51,7 @@
       <img src={appLogo} alt={$i18n.t("ui:more:logoAlt")} class="size-24" />
 
       <p class="mt-4 text-base text-center">
+        <!-- eslint-disable-next-line svelte/no-at-html-tags -- markup from our own locale files -->
         {@html $i18n.t("about:shortInfo")}
       </p>
     </article>

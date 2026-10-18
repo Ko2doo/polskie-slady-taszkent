@@ -18,13 +18,21 @@
   **Extensible when it's actually needed:** when a new call site needs the same job done
   slightly differently, extend the existing function instead of writing a near-copy — an
   optional parameter (or options-object field) whose default keeps the old behavior, so
-  every existing caller works unchanged. `customPointsState.add()` growing an optional `id`
-  is the reference case (see `harness/svelte-rules.md`). Once the "extension" would make it
-  a *different* job (a mode flag switching between two behaviors), it's a new function
-  instead. A function that was extended gets a test for the new parameter **and** keeps
-  its existing tests green — that's the proof the old behavior didn't move.
-- **Reuse what's in `lib/state/` and `utils/` before writing something new.** A needed
-  toggle, overlay, or formatting helper may already exist and just not be wired up yet.
+  every existing caller works unchanged — `customPointsState.add()`'s optional `id` (a
+  point's id created up front for its photo folder) is the reference case. Once the
+  "extension" would make it a *different* job (a mode flag switching between two
+  behaviors), it's a new function instead. A function that was extended gets a test for
+  the new parameter **and** keeps its existing tests green — that's the proof the old
+  behavior didn't move.
+- **Reuse what's in `lib/state/`, `services/` and `utils/` before writing something new.**
+  A needed toggle, overlay or formatting helper may already exist and just not be wired up
+  where it's needed — wire it up (`PhotoSlider` uses `createToggleOverlay` rather than a
+  hand-rolled `$effect`). Real duplication — the *same* logic in two places, not
+  similar-looking code with different behavior — gets extracted into a shared module, only
+  the genuinely identical parts (the builders' case: "Builder classes" below). Sharing must
+  not make the call site more complicated than the problem: a config object, a mode flag
+  and three branches for a case used in one place means a small function of its own
+  instead.
 - **No dead code left "just in case".** A commented-out block, an unused export, an unused
   import, a file nothing imports — remove it in the same change that makes it dead, not
   "later." Exception: a commented-out `console.log`/`console.error` left for local debugging
@@ -45,7 +53,8 @@
   and so on instead of one giant `Map.svelte`. A long function gets broken into named
   helpers. Don't split for the sake of it: a 30-line module that does one thing is fine
   as is, and a split that forces the reader to jump across five files to follow one flow
-  made things worse, not better.
+  made things worse, not better. Once a screen or component folder holds more than 4
+  modules, they go into subdirectories — `harness/architecture.md` → "When a folder grows".
 - **Builder classes are the exception** (`services/mapPointsBuilder.js`,
   `services/customPointsBuilder.js`, and any future builder of that kind). They stay
   whole: their methods share the builder's internal state and its fluent
@@ -88,14 +97,23 @@ distance, a size, a storage key, an event name — gets a named constant:
 - A caught error that's silently swallowed without at least a debug-log line is a bug —
   even if falling back to a default is the right user-facing behavior, log why.
 
-## Quoting and formatting
+## Linting and formatting
 
-- `.prettierrc` sets `semi: true` and nothing about quote style, so Prettier's default
-  (double quotes) applies. In practice: `.js` service/util files in this project use
-  **single** quotes by established convention; `.svelte` files (both markup and the
-  `<script>` block) use **double** quotes. Match whichever convention the file you're
-  editing already uses — don't mix within one file, and don't "fix" a whole file's quote
-  style as a side effect of an unrelated change.
+- **ESLint** (`eslint.config.js`, `npm run lint`) enforces the parts of this file a tool can
+  check: no `console.*` outside `utils/debugMode.js`, no unused variables/imports/parameters
+  (`_name` marks a parameter kept for its position), `const` where nothing reassigns, JSDoc
+  on every exported function and class, plus the recommended Svelte 5 and Vitest rules.
+  JSDoc *contents* (`@param`/`@returns` and their descriptions) are warnings.
+- **Prettier** (`.prettierrc`, `npm run format` / `npm run format:check`) owns formatting:
+  semicolons, **single** quotes in `.js`, **double** quotes in `.svelte` (markup and
+  `<script>`), and the 120-character width from `.editorconfig`. Markdown, `public/`,
+  `scripts/`, `appstore/` and native projects are excluded (`.prettierignore`).
+- `npm run lint` has no errors and `npm run format:check` passes — `npm run build` runs both
+  first (`prebuild`) and CI runs them too, so neither can be skipped. Warnings (JSDoc
+  contents) don't fail anything; don't add new ones in code you write.
+  Silence a rule only on the line that needs it, with the reason:
+  `// eslint-disable-next-line svelte/no-at-html-tags -- markup from our own locale files`.
+  Existing violations in code you're not otherwise touching aren't a drive-by job.
 - Keep lines at or under 120 characters. Where a single string/attribute pushes a line over
   that, wrap the way the codebase already does it: for a JS object value that's too long,
   put the key on one line and the value indented on the next; for a long `class="..."`
@@ -131,24 +149,18 @@ Konsta's `Popup` transform forcing `PhotoViewer` to use a portal.
 
 ## Leave old code alone: legacy zones
 
-The code base has two layers. The newer one (custom markers, storage, photos, the builders,
-`createUIProfile`) follows this harness; an older layer predates it and doesn't. "Write code
-that reads like the surrounding code" is the right default **only for formatting and naming**
-(quote style, indentation, comment density) — in a legacy file, *patterns* still come from the
-harness and the reference implementations below, never from the file's own neighbours.
+A legacy zone is a file that predates this harness and doesn't follow it. **There is none at the
+moment** — every file in `src/` follows the harness. "Write code that reads like the surrounding
+code" is the right default **only for formatting and naming** (quote style, indentation, comment
+density); *patterns* always come from the harness and the reference implementations below.
 
 ### The legacy zones
 
-Don't copy a pattern from these files into new code. Each line says what's wrong there, so you
-know what *not* to repeat; the `BUG-N` ids are in `BUGS.md` while it exists.
+Empty. A file found not to follow the harness gets a row here — the file and what *not* to copy
+from it — so nobody copies it while it waits:
 
 | File | Don't copy |
 | --- | --- |
-| `views/Map/Map.svelte` | fat async `onMount` glue wiring modules through closures, a throw-away theme controller created just to pick the first style |
-| `views/Map/MapNavigationGPS.svelte.js` | one 700+-line module mixing GPS tracking, routing, map markers and toasts |
-| `views/Map/MapTheme.svelte.js` | commented-out code left in `init`/`reapplyOverlays`; restores overlays by calling into every builder/controller directly |
-| `components/LangSwitcher.svelte` | reads the deprecated global `event` (`window.event`) instead of the handler's own argument; commented-out `console.log`s |
-| `store/ui/errorToast.js` | English fallback texts in `normalizeError` (`'Unknown error'`), a 400-line store mixing queueing, dedup and rate limiting — *use* it as the one error channel; just don't copy its internals |
 
 ### Where to copy patterns from instead
 
@@ -157,15 +169,17 @@ know what *not* to repeat; the `BUG-N` ids are in `BUGS.md` while it exists.
 - Reactive state: `lib/state/createUIProfile.svelte.js` and its three specializations,
   `photoSession.svelte.js`, `createToggleOverlay.js` as used by `PhotoSlider.svelte`.
 - Resource lifecycle (urls, listeners released, ref-counting): `customPointsPhotos.js`,
-  `PhotoSlider.svelte` / `PhotoViewer.svelte`.
+  `PhotoSlider.svelte` / `PhotoViewer.svelte`; an async start that can be cancelled midway
+  (a checkpoint after every wait, one idempotent `release()`):
+  `views/Map/Session/MapSession.svelte.js`, `views/Map/Navigation/GPS/MapGPSTracking.svelte.js`.
+- A controller wiring small focused parts together (state of its own only for what it
+  decides): `views/Map/Navigation/GPS/MapNavigationGPS.svelte.js`.
 - Builders: `services/mapPointsBuilder.js`, `customPointsBuilder.js`.
 
 ### What touching a legacy file means
 
-- Agreed strategy (2026-10-17): bug fixes from `BUGS.md` first, then **every file in the
-  table is brought up to the harness** in separate, explicitly-scoped refactoring steps —
-  the most fragile places first (`Map.svelte`'s mount/teardown, the navigation ↔ theme
-  wiring, `MapNavigationGPS`). The goal is an empty table.
+- A listed file is brought up to the harness in separate, explicitly-scoped refactoring steps
+  (an open bug in `BUGS.md` for it, if any, first) — the most fragile places first.
 - Until then, a change in a legacy file stays scoped to its task: fix the bug or add the
   feature with harness-conforming code, and don't rewrite the surrounding old code as a
   drive-by (see the non-regression rule in `harness/testing.md`).

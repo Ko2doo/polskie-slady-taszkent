@@ -33,8 +33,7 @@ synchronous decode, or a few hundred KB to the initial bundle is not small on a 
 - Anything that creates a resource tied to the DOM or the bridge (a Blob url, an event
   listener, an observer, a native plugin listener) must be released when it's no longer
   needed — in a Svelte `$effect`'s cleanup function, or explicitly on delete. A cache that
-  only ever grows for the lifetime of the app (the `errorToast` rate-limit map before it was
-  fixed, the web Blob-url cache before it was reference-counted) is a bug, not a convenience.
+  only ever grows for the lifetime of the app is a bug, not a convenience.
 - When the *same* resource can legitimately be in use by more than one consumer at once (the
   same photo shown as a thumbnail and, simultaneously, fullscreen in the viewer), a plain
   "release on unmount" is wrong — it will break the other consumer. Reference-count it, the
@@ -54,13 +53,15 @@ synchronous decode, or a few hundred KB to the initial bundle is not small on a 
 ## Reactivity
 
 - Don't let bookkeeping that has nothing to do with what's rendered live inside a reactive
-  store — it will trigger wasted re-renders of whatever's subscribed to that store (see the
-  `errorToast.js` rate-limiter fix: moved out of the Svelte store into a plain closure
-  variable).
+  store — it will trigger wasted re-renders of whatever's subscribed to that store
+  (`errorToast.js` keeps its rate limit in `utils/rateLimiter.js`, a plain closure, for this).
 - Prefer resolving data (a photo url, a preview) in the background without blocking the
   thing that depends on it from rendering — show a placeholder, swap in the real content
   once it resolves, rather than awaiting it before the parent can render at all. See
-  `resolvePreview()` / `refreshPreview()` in `MapPreview.js` and `Map.svelte`.
+  `resolvePreview()` in `MapPreview.js` and `showPreview()` in `MapSession.svelte.js`: the saved
+  points go on the map at once, each cover follows as it resolves.
+- Independent startup work runs side by side, not one after another — the map tiles load
+  while the style is built (`MapSession.svelte.js`).
 
 ## Before shipping a feature, ask yourself
 

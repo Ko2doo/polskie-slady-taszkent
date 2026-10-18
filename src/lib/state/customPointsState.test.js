@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { LIMITS } from '@/services/customPointsFormat';
 import { createId } from '@/utils/uuid';
 
-// The storage, the photo files and the App plugin are recorders: this state only decides what to
+// The storage, the photo files and the app lifecycle are recorders: this state only decides what to
 // keep and when to save. The real storage is covered by customPointsStorage.test.js, the files by
 // customPointsPhotos.test.js. Each test sets the recorders' behavior through `deps`.
 const deps = vi.hoisted(() => ({}));
@@ -24,8 +24,8 @@ vi.mock('@/services/customPointsPhotos', () => ({
   reconcilePhotos: (...args) => deps.reconcilePhotos(...args),
 }));
 
-vi.mock('@capacitor/app', () => ({
-  App: { addListener: (...args) => deps.addListener(...args) },
+vi.mock('@/capacitor/services/appLifecycle', () => ({
+  onAppBackground: (...args) => deps.onAppBackground(...args),
 }));
 
 const photoOf = (pointId) => `photos/${pointId}/${createId()}.jpg`;
@@ -72,7 +72,7 @@ beforeEach(() => {
   deps.flush = vi.fn(async () => {});
   deps.deletePointPhotos = vi.fn(async () => {});
   deps.reconcilePhotos = vi.fn(async () => ({ removedOrphans: 0, pointsWithoutFolder: [] }));
-  deps.addListener = vi.fn();
+  deps.onAppBackground = vi.fn();
 });
 
 describe('hydration', () => {
@@ -371,14 +371,10 @@ describe('flush and initCustomPointsPersistence', () => {
 
   it('saves at once when the app goes to the background', () => {
     module.initCustomPointsPersistence();
-    const [event, listener] = deps.addListener.mock.lastCall;
+    const [goingToBackground] = deps.onAppBackground.mock.lastCall;
 
-    expect(event).toBe('appStateChange');
-
-    listener({ isActive: true });
     expect(deps.flush).not.toHaveBeenCalled();
-
-    listener({ isActive: false });
+    goingToBackground();
     expect(deps.flush).toHaveBeenCalledTimes(1);
   });
 
@@ -386,6 +382,6 @@ describe('flush and initCustomPointsPersistence', () => {
     module.initCustomPointsPersistence();
     module.initCustomPointsPersistence();
 
-    expect(deps.addListener).toHaveBeenCalledTimes(1);
+    expect(deps.onAppBackground).toHaveBeenCalledTimes(1);
   });
 });

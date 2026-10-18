@@ -22,8 +22,6 @@
     onResults = null,
   } = $props();
 
-  let inputEl = $state(null);
-
   $effect(() => {
     if (shouldFocus === true) {
       const element = document.getElementById("searchbarInput");

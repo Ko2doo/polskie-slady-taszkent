@@ -84,9 +84,8 @@ describe('Settings', () => {
     unmount(back);
   });
 
-  // BUG-2: the back link is an icon without a text or an aria-label, so a screen reader
-  // announces nothing (see BUGS.md). Remove `.fails` once fixed.
-  it.fails('the back link has an accessible name', () => {
+  // The back link is an icon only: without an aria-label a screen reader announces nothing
+  it('the back link has an accessible name', () => {
     const host = document.createElement('div');
     const back = mount(RenderSnippet, { target: host, props: { snippet: navbarState.leftSnippet } });
     flushSync();

@@ -13,11 +13,11 @@ import { createUIProfile } from './createUIProfile.svelte';
  *
  * @example
  * // A screen without the tab bar: the effect's cleanup releases the request on unmount
- * $effect(() => hideTabbar({ duration: 120, delay: 40 }));
+ * $effect(() => hideTabbar(QUICK_TABBAR_SLIDE));
  *
  * // Hidden only while a condition holds (the map's edit mode)
  * $effect(() => {
- *   if (isEditMode) return hideTabbar({ duration: 120, delay: 40 });
+ *   if (isEditMode) return hideTabbar(QUICK_TABBAR_SLIDE);
  * });
  */
 
@@ -25,6 +25,15 @@ import { createUIProfile } from './createUIProfile.svelte';
 const DEFAULT_ANIMATION = {
   duration: 400, // ms
   delay: 350, // ms
+};
+
+/**
+ * The quick slide for a screen or mode the user opens themselves (Settings, About, the map's edit
+ * mode): the tab bar gets out of the way at once instead of the slow app-start animation.
+ */
+export const QUICK_TABBAR_SLIDE = {
+  duration: 120, // ms
+  delay: 40, // ms
 };
 
 function createTabbarState() {

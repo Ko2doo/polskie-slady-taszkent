@@ -69,13 +69,8 @@ describe('isId', () => {
   it('rejects path traversal, HTML and whitespace around a valid id', () => {
     const id = '3f2504e0-4f89-41d3-9a0c-0305e82c3301';
 
-    [
-      `../${id}`,
-      `${id}/../../etc`,
-      `${id}"><img src=x onerror=alert(1)>`,
-      ` ${id}`,
-      `${id}\n`,
-      `${id}${id}`,
-    ].forEach((value) => expect(isId(value)).toBe(false));
+    [`../${id}`, `${id}/../../etc`, `${id}"><img src=x onerror=alert(1)>`, ` ${id}`, `${id}\n`, `${id}${id}`].forEach(
+      (value) => expect(isId(value)).toBe(false),
+    );
   });
 });

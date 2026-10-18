@@ -3,7 +3,7 @@
   import GPSIcon from "@/lib/icons/GPSIcon.svelte";
   import RulerIcon from "@/lib/icons/RulerIcon.svelte";
 
-  let { i18n, isAnyModeActive, onToggle, onGPSToggle } = $props();
+  let { i18n, onToggle, onGPSToggle } = $props();
 </script>
 
 <section class="navigation-mode-selector">

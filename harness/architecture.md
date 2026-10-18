@@ -16,7 +16,7 @@ things that are default-correct in a typical production web app simply don't app
 - "Production-grade" here means: survives a crashed app mid-write, survives a full disk,
   doesn't corrupt data, works fully offline, and is light on a weak phone — **not** "scales
   to many users" or "handles concurrent writers." See `customPointsStorage.js`'s two-slot
-  design (`harness/custom-markers-subsystem.md`) for what that actually looks like here.
+  design (`.claude/rules/custom-markers-subsystem.md`) for what that actually looks like here.
 
 ## Platforms: Android first
 
@@ -35,14 +35,14 @@ releases are done by a separate contributor (see `README.md` → Maintainers). I
 
 ## Stack
 
-Svelte 5 (runes — see `harness/svelte-rules.md`), Vite, Konsta UI (iOS theme) + Tailwind 4
-(see `harness/styling.md`), MapLibre GL JS (tiles via PMTiles/@protomaps/basemaps, see
-`harness/map-data-pipeline.md`), Capacitor, i18next (four locales — see `harness/i18n.md`).
+Svelte 5 (runes — see `.claude/rules/svelte-rules.md`), Vite, Konsta UI (iOS theme) + Tailwind 4
+(see `.claude/rules/styling.md`), MapLibre GL JS (tiles via PMTiles/@protomaps/basemaps, see
+`.claude/rules/map-data-pipeline.md`), Capacitor, i18next (four locales — see `.claude/rules/i18n.md`).
 Tests: Vitest/jsdom/fake-indexeddb (see `harness/testing.md` for current status). Treat exact
 versions as whatever `package.json` says.
 
 This file maps `src/`. Everything outside it — native projects, build config, data scripts,
-store tooling — is mapped in `harness/repository-layout.md`.
+store tooling — is mapped in `.claude/rules/repository-layout.md`.
 
 ## The app shell
 
@@ -59,7 +59,7 @@ would ever hide it.
 the onboarding wizard, the article popup, and app-wide init (`initFirstLaunch`,
 `initBackButtonHandler`, `initCustomPointsPersistence`). Routing is
 `@mateothegreat/svelte5-router`, configured in `src/Routes.js` (one `{ path, component }`
-entry per screen — see `harness/screens.md` for what each screen actually does).
+entry per screen — see `.claude/rules/screens.md` for what each screen actually does).
 `src/utils/routerUtils.js` maps a raw route path to a short "page key" string
 (`resolvePageKeyFromRouteResult`), used for localization and navbar logic.
 
@@ -88,9 +88,13 @@ src/
 │   ├── services/
 │   └── utils/
 ├── components/                 # reusable components; shared ones at the top level
-│   ├── CustomPoints/           #   user-marker editor, photos, slider, viewer
+│   ├── CustomPoints/           #   user-marker intro and editor dialogs
+│   │   └── Photos/             #     photo thumb, slider, fullscreen viewer
 │   ├── Filters/                #   Handbook layout/category, map marker filter
-│   └── Navigation/             #   turn-by-turn sheet and its parts
+│   ├── Navigation/             #   turn-by-turn sheet, mode picker, stop dialog
+│   │   └── RouteStatus/        #     what the sheet shows on the way: instruction, info, arrival
+│   ├── Preferences/            #   language and dark-mode switches (Settings, onboarding)
+│   └── Toasts/                 #   the error toast and the "press back to exit" toast
 ├── data/                       # static content: articles, technical-info meta
 ├── lib/
 │   ├── errors/                 # errorCodes.js — the only home of native error-code literals
@@ -108,7 +112,11 @@ src/
 └── views/                      # one folder per screen
     ├── About/
     ├── Handbook/
-    ├── Map/                    #   split into supporting modules, see screens.md
+    ├── Map/                    #   split by concern, see screens.md
+    │   ├── Navigation/         #     point-to-point routing, user marker, route fit
+    │   │   └── GPS/            #       GPS navigation controller and its messages
+    │   ├── Points/             #     points on the map, covers, the marker editor
+    │   └── Session/            #     map start/release, tiles, theme, load progress
     ├── More/
     ├── OnboardingWizard/
     ├── Settings/
@@ -123,15 +131,19 @@ src/
   and error-code translation live, so the rest of the app only ever sees a clean function.
   Storage of small values/preferences goes through `utils/appStorage.js`
   (`setStorage`/`getStorage`); location permission through
-  `services/locationPermission.js` — reuse those, don't call the plugin again.
-- `components/` — grouped by feature area once there's more than one related component.
+  `services/locationPermission.js`; the app going to the background through
+  `services/appLifecycle.js` (`onAppBackground`) — reuse those, don't call the plugin again.
+- `components/` — grouped by feature area once there's more than one related component; a
+  folder past 4 modules gets subdirectories ("When a folder grows" below).
   A component used by more than one feature area goes at the top level, not duplicated into
   each area's folder (`Article.svelte` — the one article/marker popup, universal across
-  historical and custom points — is the example). `ErrorHandlerToast.svelte` /
+  historical and custom points — is the example); a group of such shared components gets a
+  folder named after what they are (`Toasts/`, `Preferences/`). `ErrorHandlerToast.svelte` /
   `ExitToast.svelte` render the `errorToast` / `toastController` stores respectively.
 - `data/` — static content only, no logic. Article ids look like `l01`..`l13`, `photos`
   paths are relative to `public/`. `about.js` feeds Technical Info, not About (see
-  `harness/screens.md`).
+  `.claude/rules/screens.md`). `mapArea.js` is the area the offline map covers
+  (`MAP_BOUNDS`) — the one definition the map screen and GPS tracking both read.
 - `lib/errors/errorCodes.js` — the **only** place a literal native-plugin error-code string
   is allowed. A new plugin's error code gets added here first (with a comment citing the
   plugin's own docs), imported from there — never `error.code === 'OS-PLUG-XXXX-0000'`
@@ -147,27 +159,29 @@ src/
 - `lib/icons/` — check for an existing icon before adding a new one; an icon that stays
   unused is a fine thing to remove later, not to keep "just in case."
 - `lib/theme/` — a plain-JS singleton with its own `subscribe`, not runes. See
-  `harness/styling.md`.
-- `lib/state/` — see `harness/state-management.md` — the single most important directory to
+  `.claude/rules/styling.md`.
+- `lib/state/` — see `.claude/rules/state-management.md` — the single most important directory to
   understand before writing new state.
-- `services/` — the custom-markers subsystem (`harness/custom-markers-subsystem.md`), the
-  navigation subsystem (`harness/navigation-subsystem.md`), the map builders and popup/style
+- `services/` — the custom-markers subsystem (`.claude/rules/custom-markers-subsystem.md`), the
+  navigation subsystem (`.claude/rules/navigation-subsystem.md`), the map builders and popup/style
   building, the back-button overlay primitive `useOverlay.js`, and the router-history hook.
   Trap: `services/toastController.js` is a single-purpose "press back again to exit"
   countdown toast — despite the similar name, not the same system as `store/ui/errorToast.js`.
 - `store/` — `ui/errorToast.js` is the single user-facing error/warning/info channel (use
-  it, don't invent a new one); `ui/overlayController.js` is the back-button overlay stack
-  (LIFO); `i18nextSvelte/` genuinely needs the store contract; `appStartInitialize.js`
-  tracks first launch. No new `writable` stores — see `harness/svelte-rules.md`.
+  it, don't invent a new one), its input normalized by `ui/toastInput.js`;
+  `ui/overlayController.js` is the back-button overlay stack (LIFO); `i18nextSvelte/` genuinely needs the store contract; `appStartInitialize.js`
+  tracks first launch. No new `writable` stores — see `.claude/rules/svelte-rules.md`.
 - `utils/` — small, dependency-free, pure functions. If it needs Svelte runes, it belongs in
   `lib/state/` instead. `debugMode.js` is the logger (`harness/code-style.md`),
-  `inMemoryPmtilesSource.js` serves the map archive from RAM
-  (`harness/map-data-pipeline.md`).
+  `inMemoryPmtilesSource.js` serves the map archive from RAM, `rateLimiter.js` counts
+  repeats per time window (the error toast's limit)
+  (`.claude/rules/map-data-pipeline.md`).
 - `views/` — one folder per screen, wired in `Routes.js`. `views/Map/` is the one screen big
-  enough to be split into supporting modules (builder wiring, lifecycle, theme, navigation,
-  edit mode, load progress) — see `harness/screens.md`.
+  enough to be split into supporting modules, grouped by concern into `Session/`, `Points/`
+  and `Navigation/` — see `.claude/rules/screens.md`. A screen folder past 4 modules gets
+  subdirectories ("When a folder grows" below).
 - `locales/` — `collections.js` is the language picker's code → name list. See
-  `harness/i18n.md`.
+  `.claude/rules/i18n.md`.
 - `assets/` vs. root `public/` — `assets/` is for files imported from code; static files that
   must keep a fixed url (map data, previews, fonts) go in the root `public/` instead.
 - `test/` — shared test helpers and `setup.js`; test files themselves sit next to the code
@@ -179,12 +193,12 @@ src/
    if it's screen-level.
 2. Holds reactive state meant to be shared or to outlive one component, using
    `$state`/`$derived`/`$effect`? → `lib/state/`, suffix `.svelte.js`. See
-   `harness/state-management.md` for the function-vs-singleton-vs-class decision.
+   `.claude/rules/state-management.md` for the function-vs-singleton-vs-class decision.
 3. Wraps exactly one native Capacitor plugin? → `capacitor/services/` or `capacitor/utils/`.
 4. Business logic with no UI and no direct native-plugin call (file format, storage, popup
    building, pathfinding, validation)? → `services/`.
 5. Small, pure, dependency-free helper with no Svelte reactivity involved? → `utils/`.
-   A new translation string → `locales/` (all four languages, see `harness/i18n.md`). A new
+   A new translation string → `locales/` (all four languages, see `.claude/rules/i18n.md`). A new
    static asset with a fixed url (map data, image referenced by path) → root `public/`; an
    asset imported from code → `src/assets/`.
 6. A test → `<same folder>/<file>.test.js` next to the code; a helper shared by tests →
@@ -192,21 +206,49 @@ src/
 7. Needs a literal native error-code string? → the string goes in `lib/errors/errorCodes.js`
    first, always.
 
-## Subsystem deep dives
-- `harness/repository-layout.md` — everything at the repo root outside `src/`: native
-  projects, build config, `scripts/`, store tooling, what's generated vs. hand-maintained.
-- `harness/styling.md` — Konsta UI first, Tailwind second; theme tokens; dark mode.
-- `harness/map-data-pipeline.md` — offline map tiles, style, glyphs/sprites, and the
-  navigation-graph build pipeline.
+### When a folder grows: more than 4 modules → subdirectories
 
-- `harness/screens.md` — every route, the shared navbar/tabbar/panel pattern every screen
+Applies to every screen folder (`views/<Screen>/`) and to `components/` — its top level and
+every `components/<Area>/` — at any depth, so a subdirectory that grows past the limit is
+split the same way.
+
+- **The limit: 4 modules per folder.** A module is a source file directly in the folder —
+  `.svelte`, `.js`, `.svelte.js`. Tests don't count: a test always sits next to its module and
+  moves with it. The 5th module is the moment to group, in that same change — not "later".
+- **Group by what the files are about**, one subdirectory per concern, and name it after its
+  contents: Navigation, GPS, Photos, Toasts. Never a catch-all name (helpers, utils, misc,
+  common, parts) — if no honest name fits, the grouping is wrong.
+  Subdirectories are PascalCase, like `views/` and `components/` themselves.
+- **What stays at the folder's root:** its entry point (the screen component, the area's main
+  component) and whatever spans several groups (the screen's constants, `MapClickRouter.js`
+  for the map's modes) — within the same limit of 4.
+- **A move is not a rename.** Files keep their names (the `Map…` prefix included — it keeps
+  them unique and greppable); no `index.js` re-export files. Imports inside one folder are
+  relative (`./<Module>`), across folders they go through the @ alias (`@/<path>`).
+- **Same change, all of it:** the tree above (`src/architectureTree.test.js` fails
+  otherwise), paths in the area's `.claude/rules/` file and its `paths:` globs, the
+  `vi.mock(...)` paths in tests that mock a moved module.
+
+## Subsystem deep dives
+
+Path-scoped (`.claude/rules/`, loaded when a file of the area is opened):
+
+- `.claude/rules/repository-layout.md` — everything at the repo root outside `src/`: native
+  projects, build config, `scripts/`, store tooling, what's generated vs. hand-maintained.
+- `.claude/rules/styling.md` — Konsta UI first, Tailwind second; theme tokens; dark mode.
+- `.claude/rules/map-data-pipeline.md` — offline map tiles, style, glyphs/sprites, and the
+  navigation-graph build pipeline.
+- `.claude/rules/screens.md` — every route, the shared navbar/tabbar/panel pattern every screen
   follows, and `views/Map/`'s internal split.
-- `harness/state-management.md` — every `lib/state/` module, the `createUIProfile` base
+- `.claude/rules/state-management.md` — every `lib/state/` module, the `createUIProfile` base
   pattern, and how `store/ui/` relates to it.
-- `harness/navigation-subsystem.md` — the A* pedestrian-routing engine, route caching, GPS
+- `.claude/rules/navigation-subsystem.md` — the A* pedestrian-routing engine, route caching, GPS
   tracking, and the turn-by-turn UI.
-- `harness/custom-markers-subsystem.md` — the user-markers feature: file format, storage,
+- `.claude/rules/custom-markers-subsystem.md` — the user-markers feature: file format, storage,
   photos, the editor dialog, the slider/viewer.
+- `.claude/rules/svelte-rules.md`, `.claude/rules/i18n.md`, `.claude/rules/dependencies.md`,
+  `.claude/rules/testing-details.md`, `.claude/rules/maintaining-this-harness.md` — runes and
+  stores, translations, adding a package, test helpers and mocking, keeping the harness current.
 
 ## Error handling
 
@@ -216,6 +258,8 @@ Geolocation codes are normalized through a mapper function, `mapGeolocationError
 web's numeric codes and, as a last resort, the error message all become one of the
 underscored `ERROR_CODES.OS_PLUG_GLOC_*` (prefix `GEOLOCATION_CODE_PREFIX`) — only codes
 `ERROR_CODES` knows, since each needs a translation in `errors.js`; Filesystem/Camera codes are stored as the literal string the plugin returns, compared
-directly. `store/ui/errorToast.js` is the single user-facing channel: dedup, queueing, rate
-limiting, with rate-limit bookkeeping kept out of the reactive store on purpose (see
-`harness/performance.md`).
+directly. `store/ui/errorToast.js` is the single user-facing channel: dedup and queueing in
+the store, rate limiting in `utils/rateLimiter.js` — kept out of the reactive store on purpose
+(see `harness/performance.md`). `store/ui/toastInput.js` turns any input (a string, an Error, a
+plugin's error object) into the stored text, kind and meta; it adds no text of its own — an
+error with nothing usable in it is shown as the translated `errors:unknownError`.

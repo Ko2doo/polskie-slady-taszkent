@@ -126,4 +126,11 @@ describe('Article', () => {
 
     expect(articlePopupState.isOpen).toBe(false);
   });
+
+  it('the back link has an accessible name', () => {
+    open(CUSTOM_ID);
+
+    // An icon-only link: without an aria-label a screen reader announces nothing
+    expect(document.body.querySelector('.navbar a, a').getAttribute('aria-label')).toBe('ui:buttons:back');
+  });
 });

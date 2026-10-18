@@ -383,7 +383,7 @@ describe('findRoute', () => {
 });
 
 // The graph's JSON shape is a contract between scripts/navigationGraph/ and this engine
-// (harness/map-data-pipeline.md): the shipped file must load and route between real places.
+// (.claude/rules/map-data-pipeline.md): the shipped file must load and route between real places.
 describe('the shipped navigation graph', () => {
   const graph = JSON.parse(readFileSync('public/map/navigation-graph-optimized.json', 'utf8'));
   const engine = new NavigationEngine(graph);

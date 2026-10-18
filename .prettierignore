@@ -1,13 +1,21 @@
-# Node.js modules
+# Dependencies, build output, coverage
 node_modules/
-
-# Build output
-public/
 dist/
 build/
+coverage/
 
-# Files to ignore
+# Static and generated data: large generated JSON lives in public/
+public/
 package-lock.json
+CHANGELOG.md
 
-# android folder
+# Native projects
 android/
+ios/
+
+# Hands-off unless asked (.claude/rules/repository-layout.md)
+scripts/
+appstore/
+
+# Markdown is wrapped by hand; Prettier would rewrite emphasis and tables in the harness docs
+*.md
