@@ -1,5 +1,21 @@
 # Changelog
 
+## v1.2.0-rc.3 — 2026-10-18
+
+### 🆕 Updates
+- Export and import custom markers from Settings
+- Split GPS navigation, group screen folders, close the legacy zones
+- Move map content restore after a theme switch from MapTheme to MapSession
+- Split the map screen into session, editor and click router; faster map start
+- Split the harness into always-loaded and path-scoped rules, add ESLint + Prettier
+- Document the contributor PR flow for humans and agents
+
+### 🐛 Fixes
+- Export and import custom markers from Settings
+- Split GPS navigation, group screen folders, close the legacy zones
+- Split the map screen into session, editor and click router; faster map start
+- Fix the onboarding flag, back-link accessible names and leftover commented code
+
 ## v1.2.0-rc.2 — 2026-10-17
 
 ### 🆕 Updates
