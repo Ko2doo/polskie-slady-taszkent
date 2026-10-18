@@ -29,6 +29,7 @@ const NOT_FILES = new Set([
   'feature/', // contributor branch prefixes, harness/git-workflow.md
   'fix/',
   'public/map/styles/', // the output folder of an unused script, documented as missing
+  'BUGS.md', // the bug log, created only while a bug is open (harness/testing.md → "Bug log")
 ]);
 
 function isGitIgnored(path) {

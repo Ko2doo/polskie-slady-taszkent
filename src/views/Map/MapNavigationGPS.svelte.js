@@ -17,7 +17,6 @@ import { initNavigation, findRoute } from '@/services/navigationLoader';
 import { errorToast } from '@/store/ui/errorToast';
 import { ERROR_CODES, GEOLOCATION_CODE_PREFIX } from '@/lib/errors/errorCodes';
 import { ROUTE_FIT_PADDING } from './MapConstants';
-// import { openAppSettings, openLocationSettings } from '@/capacitor/services/locationPermission';
 import { createLogger, IS_DEBUG } from '@/utils/debugMode';
 
 const navigationGPSLogger = createLogger('GPSNavigation');

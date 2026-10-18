@@ -87,10 +87,6 @@ export function createThemeController({
     // Restore navigation markers
     navigation.restoreMarkers();
 
-    // Re-attach click handler
-    // map.off('click', navigation.handleMapClick);
-    // map.on('click', navigation.handleMapClick);
-
     IS_DEBUG && mapThemeLogger.log('Overlays restored');
   }
 
@@ -154,8 +150,6 @@ export function createThemeController({
    */
   function init() {
     // Get initial theme
-    // const isDark = themeManager.getState().isDark;
-    // uiThemeStyle = isDark ? 'dark' : 'light';
     uiThemeStyle = themeManager.getState().isDark ? 'dark' : 'light';
 
     // Subscribe to theme changes

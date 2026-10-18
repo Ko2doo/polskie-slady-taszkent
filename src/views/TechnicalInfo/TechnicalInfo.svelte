@@ -33,7 +33,7 @@
 </script>
 
 {#snippet BackButton()}
-  <NavbarBackLink onClick={handleBack} />
+  <NavbarBackLink onClick={handleBack} aria-label={$i18n.t("ui:buttons:back")} />
 {/snippet}
 
 <section class="about-view flex flex-col" in:fly={{ duration: 120, x: 20 }}>

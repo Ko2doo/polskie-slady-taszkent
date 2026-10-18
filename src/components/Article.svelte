@@ -71,7 +71,7 @@
   <Page>
     <Navbar>
       {#snippet left()}
-        <NavbarBackLink onClick={articlePopupState.close} />
+        <NavbarBackLink onClick={articlePopupState.close} aria-label={$i18n.t("ui:buttons:back")} />
       {/snippet}
     </Navbar>
 

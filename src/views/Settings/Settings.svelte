@@ -21,9 +21,6 @@
   // router props
   let { route, i18n } = $props();
 
-  // Inspector check console in browser
-  // $inspect(route);
-
   $effect(() => {
     const result = route?.result;
     // console.log(result);
@@ -56,7 +53,7 @@
 </script>
 
 {#snippet BackButton()}
-  <NavbarBackLink onClick={handleBack} />
+  <NavbarBackLink onClick={handleBack} aria-label={$i18n.t("ui:buttons:back")} />
 {/snippet}
 
 <section class="settings-view relative z-60 flex flex-col" in:fly={{ duration: 120, x: 20 }}>

@@ -31,8 +31,20 @@ about bugs (or before adding to it, to avoid duplicates).
    applying the fix temporarily. Report it to the human and append an entry to `BUGS.md`:
    next free `BUG-N` id, title, status `open`, **Where** (file:line), **What** (what breaks
    and when), **Test** (test file + test name, or "none" if there's no behavior to test),
-   **Fix** (the minimal fix).
-   Create the file from the existing header if it doesn't exist.
+   **Fix** (the minimal fix). If the file doesn't exist, create it with this header:
+   ```markdown
+   # Known bugs
+
+   Working log of bugs found while covering the project with tests. Lifecycle and rules:
+   `harness/testing.md` → "Bug log". Temporary: deleted once every entry is fixed and the fix
+   summary has been handed over for the commit.
+
+   Status: `open` (pinned by an `it.fails` test, code untouched) → `fixed` (code fixed, `.fails`
+   removed, suite green, a **Fixed:** line saying what changed — the source for the final commit
+   message).
+   ```
+   and add its line to the root tree in `.claude/rules/repository-layout.md`
+   (`├── BUGS.md  # temporary bug log (harness/testing.md → "Bug log")`).
 2. **Asked to fix the bugs** (that request is the go-ahead bug fixes otherwise need): for
    each entry — apply the fix, remove `.fails` (or add the missing test), run the full
    suite, set the status to `fixed` and add a **Fixed:** line (date + what actually changed,

@@ -157,13 +157,13 @@ harness and the reference implementations below, never from the file's own neigh
 ### The legacy zones
 
 Don't copy a pattern from these files into new code. Each line says what's wrong there, so you
-know what *not* to repeat; the `BUG-N` ids are in `BUGS.md` while it exists.
+know what *not* to repeat.
 
 | File | Don't copy |
 | --- | --- |
 | `views/Map/Map.svelte` | fat async `onMount` glue wiring modules through closures, a throw-away theme controller created just to pick the first style |
 | `views/Map/MapNavigationGPS.svelte.js` | one 700+-line module mixing GPS tracking, routing, map markers and toasts |
-| `views/Map/MapTheme.svelte.js` | commented-out code left in `init`/`reapplyOverlays`; restores overlays by calling into every builder/controller directly |
+| `views/Map/MapTheme.svelte.js` | restores overlays by calling into every builder/controller directly |
 | `components/LangSwitcher.svelte` | reads the deprecated global `event` (`window.event`) instead of the handler's own argument; commented-out `console.log`s |
 | `store/ui/errorToast.js` | English fallback texts in `normalizeError` (`'Unknown error'`), a 400-line store mixing queueing, dedup and rate limiting — *use* it as the one error channel; just don't copy its internals |
 
@@ -179,8 +179,8 @@ know what *not* to repeat; the `BUG-N` ids are in `BUGS.md` while it exists.
 
 ### What touching a legacy file means
 
-- Agreed strategy (2026-10-17): bug fixes from `BUGS.md` first, then **every file in the
-  table is brought up to the harness** in separate, explicitly-scoped refactoring steps —
+- Agreed strategy (2026-10-17): **every file in the table is brought up to the harness** in
+  separate, explicitly-scoped refactoring steps (an open bug in `BUGS.md`, if any, first) —
   the most fragile places first (`Map.svelte`'s mount/teardown, the navigation ↔ theme
   wiring, `MapNavigationGPS`). The goal is an empty table.
 - Until then, a change in a legacy file stays scoped to its task: fix the bug or add the
