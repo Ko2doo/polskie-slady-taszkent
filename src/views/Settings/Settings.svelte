@@ -56,7 +56,7 @@
   <NavbarBackLink onClick={handleBack} aria-label={$i18n.t("ui:buttons:back")} />
 {/snippet}
 
-<section class="settings-view relative z-60 flex flex-col" in:fly={{ duration: 120, x: 20 }}>
+<section class="settings-view flex flex-col" in:fly={{ duration: 120, x: 20 }}>
   <Block strong inset>
     <!-- Language section -->
     <BlockTitle medium class="justify-baseline">

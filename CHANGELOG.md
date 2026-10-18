@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.2.0-rc.4 — 2026-10-18
+
+### 🐛 Fixes
+- Fixed visual bug in settings view.
+
 ## v1.2.0-rc.3 — 2026-10-18
 
 ### 🆕 Updates
