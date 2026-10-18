@@ -22,6 +22,9 @@
   const viewer = createToggleOverlay();
   let viewerIndex = $state(0);
 
+  // Unmounted with the viewer open (the popup closed under it, a link): leave nothing on the stack
+  $effect(() => () => viewer.close());
+
   function openViewer(index) {
     viewerIndex = index;
     viewer.open();

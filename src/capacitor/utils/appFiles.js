@@ -72,6 +72,18 @@ export async function writeTextFile(path, text, directory = Directory.Data) {
 }
 
 /**
+ * Write a UTF-8 text file another app may read — a file handed to the system share sheet. It goes
+ * to Directory.Cache: shared with other apps through the app's FileProvider (cache-path in
+ * android/app/src/main/res/xml/file_paths.xml), and the system may clear it whenever it needs space.
+ * @param {string} path - Path inside the cache directory (a file of the same path is replaced)
+ * @param {string} text - File content
+ * @returns {Promise<string|null>} - file:// uri, null if writing failed
+ */
+export function writeShareableTextFile(path, text) {
+  return writeTextFile(path, text, Directory.Cache);
+}
+
+/**
  * Driver for services that store data in files (see customPointsStorage)
  */
 export const dataFilesDriver = {

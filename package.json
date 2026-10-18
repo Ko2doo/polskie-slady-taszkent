@@ -1,7 +1,7 @@
 {
   "name": "polskie-slady-taszkent",
   "private": true,
-  "version": "1.2.0-rc.2",
+  "version": "1.2.0-rc.3",
   "type": "module",
   "scripts": {
     "dev": "vite --host",
@@ -70,6 +70,7 @@
     "@capacitor/geolocation": "^8.2.3",
     "@capacitor/ios": "^8.5.2",
     "@capacitor/preferences": "^8.0.1",
+    "@capacitor/share": "^8.0.3",
     "@capacitor/splash-screen": "^8.0.2",
     "@mateothegreat/svelte5-router": "^2.16.19",
     "@protomaps/basemaps": "^5.7.2",

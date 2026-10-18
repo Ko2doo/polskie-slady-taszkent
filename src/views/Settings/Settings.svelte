@@ -17,6 +17,7 @@
 
   import DarkModeToggler from "@/components/Preferences/DarkModeToggler.svelte";
   import LangSwitcher from "@/components/Preferences/LangSwitcher.svelte";
+  import CustomPointsTransfer from "@/components/CustomPoints/CustomPointsTransfer.svelte";
 
   // router props
   let { route, i18n } = $props();
@@ -101,7 +102,13 @@
     <!-- Divider -->
     <div class="border-t border-gray-400 dark:border-gray-700 my-2"></div>
 
-    <!-- Permission section -->
+    <!-- Custom points export/import section -->
+    <CustomPointsTransfer {i18n} />
+
+    <!-- Divider -->
+    <div class="border-t border-gray-400 dark:border-gray-700 my-2"></div>
+
+    <!-- Permission section: always the last one -->
     <BlockTitle medium class="justify-baseline">
       <LockIcon className="size-8" strokeColor="currentColor" />
 

@@ -12,6 +12,10 @@ export const ERROR_CODES = {
   GPS_OUT_OF_BOUNDS: 'GPS_OUT_OF_BOUNDS',
   GPS_OUT_OF_BOUNDS_NAVIGATION: 'GPS_OUT_OF_BOUNDS_NAVIGATION',
 
+  // Custom points export/import (components/CustomPoints/CustomPointsTransfer.svelte)
+  POINTS_EXPORT_FAILED: 'POINTS_EXPORT_FAILED',
+  POINTS_IMPORT_REFUSED: 'POINTS_IMPORT_REFUSED', // the file was not imported; the text says why
+
   // Map
   MAP_THEME_FAILED: 'MAP_THEME_FAILED',
   MAP_INIT_FAILED: 'MAP_INIT_FAILED',

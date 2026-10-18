@@ -56,13 +56,17 @@ a `reset` closure; the tab bar's equivalent is `hideTabbar`) specifically so a s
   reference usage: the component that decides to open something owns the toggle; the thing
   being opened (`PhotoViewer.svelte`) stays presentational, driven by plain props, not by
   owning its own open state.
+  The owner also closes it on unmount — `$effect(() => () => viewer.close())` — or a screen left
+  with the overlay open some other way than back (a link, a parent closed under it) leaves a dead
+  entry on the back-button stack: the toggle itself has no component lifecycle to do it.
 - When the open state isn't a toggle the overlay owns — it lives in shared state, or arrives
   as an `opened` prop — register with `overlayController` directly, tied to that state:
   `panel.svelte.js` syncs on every change of `isOpen` (including the `withPanel` reset when a
   screen unmounts); `CustomPointsMapEditorDialog.svelte` registers in an `$effect` on `opened`
   whose cleanup unregisters, so leaving the screen with it open leaves nothing on the stack.
   What's on the stack today: the side panel, the marker editor (its back = cancel, inner
-  menu/question first), the article popup (`article.svelte.js`), the photo viewer. Deliberately
+  menu/question first), the article popup (`article.svelte.js`), the photo viewer, the markers
+  import confirmation (`CustomPointsTransfer.svelte`). Deliberately
   not: the onboarding wizard and `NavigationSheet`.
 - The onboarding wizard deliberately uses plain `createToggle()`, not
   `createToggleOverlay` — it should *not* be dismissible by the back button mid-flow. Don't

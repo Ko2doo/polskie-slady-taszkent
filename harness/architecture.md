@@ -132,7 +132,9 @@ src/
   Storage of small values/preferences goes through `utils/appStorage.js`
   (`setStorage`/`getStorage`); location permission through
   `services/locationPermission.js`; the app going to the background through
-  `services/appLifecycle.js` (`onAppBackground`) — reuse those, don't call the plugin again.
+  `services/appLifecycle.js` (`onAppBackground`); handing a file to another app through
+  `services/share.js` (`shareFile`, the system share sheet) — reuse those, don't call the
+  plugin again.
 - `components/` — grouped by feature area once there's more than one related component; a
   folder past 4 modules gets subdirectories ("When a folder grows" below).
   A component used by more than one feature area goes at the top level, not duplicated into
@@ -174,7 +176,8 @@ src/
 - `utils/` — small, dependency-free, pure functions. If it needs Svelte runes, it belongs in
   `lib/state/` instead. `debugMode.js` is the logger (`harness/code-style.md`),
   `inMemoryPmtilesSource.js` serves the map archive from RAM, `rateLimiter.js` counts
-  repeats per time window (the error toast's limit)
+  repeats per time window (the error toast's limit), `downloadTextFile.js` saves a file through
+  the browser (web/dev build only — a device uses the share sheet)
   (`.claude/rules/map-data-pipeline.md`).
 - `views/` — one folder per screen, wired in `Routes.js`. `views/Map/` is the one screen big
   enough to be split into supporting modules, grouped by concern into `Session/`, `Points/`

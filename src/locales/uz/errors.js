@@ -30,6 +30,14 @@ export default {
   customPointsPhotoDenied: 'Kamera yoki galereyaga ruxsat yo‘q. Qurilma sozlamalarida ruxsat bering.',
   customPointsPhotoFailed: 'Suratni qo‘shib bo‘lmadi. Qayta urinib ko‘ring.',
   customPointsDeleteFailed: 'Belgini o‘chirib bo‘lmadi. Qayta urinib ko‘ring.',
+  customPointsExportFailed: 'Belgilar faylini tayyorlab bo‘lmadi. Qayta urinib ko‘ring.',
+  customPointsImportNotPoints: 'Bu Polskie Ślady belgilar fayli emas.',
+  customPointsImportDamaged: 'Belgilar fayli shikastlangan: hech narsa import qilinmadi.',
+  customPointsImportNewerVersion:
+    'Fayl ilovaning yangiroq versiyasida yaratilgan. Ilovani yangilang va qayta import qiling.',
+  customPointsImportTooLarge: 'Fayl import qilish uchun juda katta.',
+  customPointsImportTooManyPoints: 'Faylda belgilar juda ko‘p: ko‘pi bilan {{max}} tasini import qilish mumkin.',
+  customPointsImportUnreadable: 'Faylni o‘qib bo‘lmadi. Uni qayta tanlab ko‘ring.',
 
   // Capacitor geolocation API error
   OS_PLUG_GLOC_0002: 'Joylashuvni olishga urinishda xatolik yuz berdi.',

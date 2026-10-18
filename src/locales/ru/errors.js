@@ -29,6 +29,13 @@ export default {
   customPointsPhotoDenied: 'Нет доступа к камере или галерее. Разрешите его в настройках устройства.',
   customPointsPhotoFailed: 'Не удалось добавить фото. Попробуйте ещё раз.',
   customPointsDeleteFailed: 'Не удалось удалить метку. Попробуйте ещё раз.',
+  customPointsExportFailed: 'Не удалось подготовить файл меток. Попробуйте ещё раз.',
+  customPointsImportNotPoints: 'Это не файл меток Polskie Ślady.',
+  customPointsImportDamaged: 'Файл меток повреждён: метки не импортированы.',
+  customPointsImportNewerVersion: 'Файл создан более новой версией приложения. Обновите приложение и повторите импорт.',
+  customPointsImportTooLarge: 'Файл слишком большой для импорта.',
+  customPointsImportTooManyPoints: 'В файле слишком много меток: можно импортировать не более {{max}}.',
+  customPointsImportUnreadable: 'Не удалось прочитать файл. Попробуйте выбрать его ещё раз.',
 
   // Capacitor geolocation API error
   OS_PLUG_GLOC_0002: 'Произошла ошибка при попытке получить местоположение.',
