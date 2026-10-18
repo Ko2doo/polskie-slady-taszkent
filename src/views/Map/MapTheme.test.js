@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { buildBaseMapStyle } from '@/services/mapStyle';
 import { errorToast } from '@/store/ui/errorToast';
-import { MAP_BOUNDS, PMTILES_KEY } from '@/views/Map/MapConstants';
+import { PMTILES_KEY } from '@/views/Map/MapConstants';
 import { buildMapStyle, createThemeController, getCurrentMapTheme } from '@/views/Map/MapTheme.svelte.js';
 
 // The theme manager is driven by the test: `theme.switchTo(isDark)` is the user toggling dark mode
@@ -40,18 +40,10 @@ function createMap() {
 }
 
 let map;
-let builder;
-let customPointsBuilder;
-let navigation;
+let onStyleRestored;
 
 function createController() {
-  return createThemeController({
-    map,
-    builder,
-    customPointsBuilder,
-    navigation,
-    i18n: { language: 'pl', t: (k) => k },
-  });
+  return createThemeController({ map, i18n: { language: 'pl', t: (k) => k }, onStyleRestored });
 }
 
 // Let the async style build finish
@@ -64,14 +56,7 @@ beforeEach(() => {
   errorToast.error.mockClear();
 
   map = createMap();
-  builder = {
-    setStyleVersion: vi.fn(),
-    addCityBoundaryLayer: vi.fn(),
-    addMarkers: vi.fn(),
-    addNavigationRoute: vi.fn(),
-  };
-  customPointsBuilder = { setStyleVersion: vi.fn(), init: vi.fn() };
-  navigation = { currentRoute: null, restoreMarkers: vi.fn() };
+  onStyleRestored = vi.fn();
 });
 
 describe('init', () => {
@@ -150,44 +135,18 @@ describe('a theme switch', () => {
     expect(map.setStyle).toHaveBeenCalledWith({ builtFor: expect.objectContaining({ theme: 'dark' }) });
   });
 
-  // The new style has none of the app's own sources and layers: everything is put back
-  it('once the style is loaded, restores the bounds, markers, custom points, route and nav markers', async () => {
-    navigation.currentRoute = { type: 'Feature' };
+  // The new style has none of the app's own content: its owner is told to put it back
+  it('once the style is loaded, tells the owner to restore the map content, with the new version', async () => {
     const controller = createController();
     controller.init();
     switchTo(true);
     await settle();
 
+    expect(onStyleRestored).not.toHaveBeenCalled();
     map.fireIdle();
 
-    expect(builder.setStyleVersion).toHaveBeenCalledWith(controller.styleVersion);
-    expect(customPointsBuilder.setStyleVersion).toHaveBeenCalledWith(controller.styleVersion);
-    expect(map.setMaxBounds).toHaveBeenCalledWith(MAP_BOUNDS);
-    expect(builder.addCityBoundaryLayer).toHaveBeenCalled();
-    expect(builder.addMarkers).toHaveBeenCalled();
-    expect(customPointsBuilder.init).toHaveBeenCalled();
-    expect(builder.addNavigationRoute).toHaveBeenCalledWith(navigation.currentRoute);
-    expect(navigation.restoreMarkers).toHaveBeenCalled();
-  });
-
-  it('restores the route given by getCurrentRoute instead of the manual one', async () => {
-    const gpsRoute = { type: 'Feature', gps: true };
-    navigation.currentRoute = null;
-    const controller = createThemeController({
-      map,
-      builder,
-      customPointsBuilder,
-      navigation,
-      getCurrentRoute: () => gpsRoute,
-      i18n: { language: 'pl', t: (k) => k },
-    });
-    controller.init();
-    switchTo(true);
-    await settle();
-
-    map.fireIdle();
-
-    expect(builder.addNavigationRoute).toHaveBeenCalledWith(gpsRoute);
+    expect(onStyleRestored).toHaveBeenCalledWith(controller.styleVersion);
+    expect(controller.styleVersion).toBe(1);
   });
 
   it('restores once, not on every later idle', async () => {
@@ -199,7 +158,7 @@ describe('a theme switch', () => {
     map.fireIdle();
     map.fireIdle();
 
-    expect(builder.addMarkers).toHaveBeenCalledTimes(1);
+    expect(onStyleRestored).toHaveBeenCalledTimes(1);
   });
 
   it('switching to the same theme does nothing', async () => {
@@ -211,7 +170,7 @@ describe('a theme switch', () => {
     expect(map.setStyle).not.toHaveBeenCalled();
   });
 
-  it('two quick switches: only the last style restores the overlays', async () => {
+  it('two quick switches: only the last style restores the map content', async () => {
     const controller = createController();
     controller.init();
     switchTo(true);
@@ -221,8 +180,8 @@ describe('a theme switch', () => {
 
     map.fireIdle();
 
-    expect(builder.addMarkers).toHaveBeenCalledTimes(1);
-    expect(builder.setStyleVersion).toHaveBeenCalledWith(2);
+    expect(onStyleRestored).toHaveBeenCalledTimes(1);
+    expect(onStyleRestored).toHaveBeenCalledWith(2);
   });
 
   it('two quick switches leave no idle listener behind', async () => {

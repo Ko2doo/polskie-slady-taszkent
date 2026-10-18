@@ -44,13 +44,16 @@ A new screen: add its component to `src/Routes.js`, give it this same `$effect` 
     order (tiles, style, map, builders, saved points, navigation, theme controller), and is the
     one place it's all released. `Map.svelte` calls `start()` on mount and `dispose()` on
     unmount; leaving mid-load is handled inside (a checkpoint after every wait). A new resource
-    on the map is created in `start()` and released in its `release()`, nowhere else. The
+    on the map is created in `start()`, released in `release()` and put back after a theme
+    switch in `restoreAfterStyleChange()` — all three in this file, nowhere else. The
     tiles load while the style is built; saved points go on the map at once and their covers
     follow (`showPreview()`, also used by the editor after a save).
   - `MapLifecycle.svelte.js`, `MapTheme.svelte.js` — the steps the session uses: map instance,
     tiles protocol and their cleanup; light/dark style switching (`services/mapStyle.js`).
     `getCurrentMapTheme()`/`buildMapStyle()` build the first style before any controller
-    exists; the theme controller is created once, with the map.
+    exists; the theme controller is created once, with the map. It knows nothing about what's
+    on the map: once a new style has loaded it calls `onStyleRestored(version)`, and the
+    session's `restoreAfterStyleChange()` puts every source, layer and image back.
   - `MapCustomPointsEditor.svelte.js` — custom-point editing: the edit-mode tap, save and
     delete, keeping the map and the points state in step (see
     `.claude/rules/custom-markers-subsystem.md`). Owns the `MapEditMode.svelte.js` controller.

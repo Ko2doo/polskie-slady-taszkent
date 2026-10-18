@@ -162,7 +162,6 @@ know what *not* to repeat.
 | File | Don't copy |
 | --- | --- |
 | `views/Map/MapNavigationGPS.svelte.js` | one 700+-line module mixing GPS tracking, routing, map markers and toasts |
-| `views/Map/MapTheme.svelte.js` | restores overlays by calling into every builder/controller directly |
 | `components/LangSwitcher.svelte` | reads the deprecated global `event` (`window.event`) instead of the handler's own argument; commented-out `console.log`s |
 | `store/ui/errorToast.js` | English fallback texts in `normalizeError` (`'Unknown error'`), a 400-line store mixing queueing, dedup and rate limiting — *use* it as the one error channel; just don't copy its internals |
 
@@ -181,8 +180,7 @@ know what *not* to repeat.
 
 - Agreed strategy (2026-10-17): **every file in the table is brought up to the harness** in
   separate, explicitly-scoped refactoring steps (an open bug in `BUGS.md`, if any, first) —
-  the most fragile places first (the navigation ↔ theme wiring, `MapNavigationGPS`). The
-  goal is an empty table.
+  the most fragile places first (`MapNavigationGPS`). The goal is an empty table.
 - Until then, a change in a legacy file stays scoped to its task: fix the bug or add the
   feature with harness-conforming code, and don't rewrite the surrounding old code as a
   drive-by (see the non-regression rule in `harness/testing.md`).

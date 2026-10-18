@@ -345,23 +345,6 @@ describe('start', () => {
 
     expect(cleanupMap).toHaveBeenLastCalledWith(expect.objectContaining({ theme: deps.themes[0] }));
   });
-
-  // map.setStyle() drops every app layer; the theme controller redraws the route it is given
-  it('a theme switch redraws the GPS route as well as the manual one', async () => {
-    await render();
-    const { getCurrentRoute } = deps.themes.at(-1).options;
-    const manualRoute = { type: 'Feature', manual: true };
-    const gpsRoute = { type: 'Feature', gps: true };
-
-    expect(getCurrentRoute()).toBeFalsy();
-
-    deps.gps.currentRoute = gpsRoute;
-    expect(getCurrentRoute()).toBe(gpsRoute);
-
-    deps.gps.currentRoute = null;
-    deps.navigation.currentRoute = manualRoute;
-    expect(getCurrentRoute()).toBe(manualRoute);
-  });
 });
 
 describe('map clicks', () => {

@@ -17,6 +17,7 @@ vi.mock('@/views/Map/MapLifecycle.svelte.js', () => ({
     deps.map = {
       on: vi.fn((event, handler) => (handlers[event] ??= []).push(handler)),
       off: vi.fn(),
+      setMaxBounds: vi.fn(() => deps.calls.push('map.setMaxBounds')),
       fire: (event) => (handlers[event] ?? []).forEach((handler) => handler()),
     };
     return deps.map;
@@ -36,10 +37,25 @@ vi.mock('@/views/Map/MapTheme.svelte.js', () => ({
 }));
 
 vi.mock('@/views/Map/MapBuilder.svelte.js', () => ({
-  createMapPointsBuilder: vi.fn((options) => (deps.calls.push('builder'), (deps.builder = { options }))),
+  createMapPointsBuilder: vi.fn((options) => {
+    deps.calls.push('builder');
+    return (deps.builder = {
+      options,
+      setStyleVersion: vi.fn((version) => deps.calls.push(`builder.setStyleVersion:${version}`)),
+      addCityBoundaryLayer: vi.fn(() => deps.calls.push('builder.addCityBoundaryLayer')),
+      addMarkers: vi.fn(() => deps.calls.push('builder.addMarkers')),
+      addNavigationRoute: vi.fn(),
+    });
+  }),
   createCustomPointsBuilder: vi.fn((options) => {
     deps.calls.push('customBuilder');
-    return (deps.customBuilder = { options, addPoint: vi.fn(), updatePoint: vi.fn() });
+    return (deps.customBuilder = {
+      options,
+      addPoint: vi.fn(),
+      updatePoint: vi.fn(),
+      setStyleVersion: vi.fn((version) => deps.calls.push(`customBuilder.setStyleVersion:${version}`)),
+      init: vi.fn(() => deps.calls.push('customBuilder.init')),
+    });
   }),
 }));
 
@@ -50,6 +66,7 @@ vi.mock('@/views/Map/MapNavigation.svelte.js', () => ({
     deps.calls.push('navigation');
     return (deps.navigation = new (class {
       currentRoute = null;
+      restoreMarkers = vi.fn(() => deps.calls.push('navigation.restoreMarkers'));
     })());
   }),
 }));
@@ -88,6 +105,7 @@ vi.mock('@/store/ui/errorToast', () => ({ errorToast: { error: vi.fn() } }));
 import { cleanupMap, initializeMap, initializePMTiles, setupMapHandlers } from '@/views/Map/MapLifecycle.svelte.js';
 import { buildMapStyle } from '@/views/Map/MapTheme.svelte.js';
 import { createMapSession } from '@/views/Map/MapSession.svelte.js';
+import { MAP_BOUNDS } from '@/views/Map/MapConstants';
 
 const i18n = { language: 'pl', t: (key) => key };
 const container = {};
@@ -165,15 +183,11 @@ describe('start', () => {
     expect(cleanupMap).toHaveBeenCalledWith(expect.objectContaining({ protocol: deps.protocol }));
   });
 
-  it('the theme controller redraws whichever route is active', async () => {
-    const session = createSession();
-    await session.start(container);
-    const route = { gps: true };
+  it('starts the theme controller from the theme the style was built with', async () => {
+    await createSession().start(container);
 
-    deps.gps.currentRoute = route;
-
-    expect(deps.theme.options.getCurrentRoute()).toBe(route);
-    // With the theme the style was built with, so a change during the load is applied
+    // So a theme change during the load is applied
+    expect(deps.theme.options.map).toBe(deps.map);
     expect(deps.theme.init).toHaveBeenCalledWith('dark');
   });
 
@@ -234,6 +248,62 @@ describe('saved points', () => {
 
     await vi.waitFor(() => expect(deps.previews.release).toHaveBeenCalledWith('a'));
     expect(customBuilder.updatePoint).not.toHaveBeenCalled();
+  });
+});
+
+// map.setStyle() drops every source, layer and image the app added: the session puts them back
+describe('after a theme switch', () => {
+  const restoreStyle = (version) => deps.theme.options.onStyleRestored(version);
+
+  it('restores everything in the order it was first added, tagged with the new style version', async () => {
+    await createSession().start(container);
+    deps.calls = [];
+
+    restoreStyle(3);
+
+    expect(deps.calls).toEqual([
+      'builder.setStyleVersion:3',
+      'customBuilder.setStyleVersion:3',
+      'map.setMaxBounds',
+      'builder.addCityBoundaryLayer',
+      'builder.addMarkers',
+      'customBuilder.init',
+      'navigation.restoreMarkers',
+    ]);
+    expect(deps.map.setMaxBounds).toHaveBeenCalledWith(MAP_BOUNDS);
+  });
+
+  it('redraws the manual route, or the GPS one — one route layer serves both', async () => {
+    await createSession().start(container);
+    const manualRoute = { manual: true };
+    const gpsRoute = { gps: true };
+
+    deps.gps.currentRoute = gpsRoute;
+    restoreStyle(1);
+    expect(deps.builder.addNavigationRoute).toHaveBeenLastCalledWith(gpsRoute);
+
+    deps.navigation.currentRoute = manualRoute;
+    restoreStyle(2);
+    expect(deps.builder.addNavigationRoute).toHaveBeenLastCalledWith(manualRoute);
+  });
+
+  it('draws no route when neither navigation has one', async () => {
+    await createSession().start(container);
+
+    restoreStyle(1);
+
+    expect(deps.builder.addNavigationRoute).not.toHaveBeenCalled();
+  });
+
+  it('does nothing once the session is disposed', async () => {
+    const session = createSession();
+    await session.start(container);
+    session.dispose();
+    deps.calls = [];
+
+    restoreStyle(1);
+
+    expect(deps.calls).toEqual([]);
   });
 });
 

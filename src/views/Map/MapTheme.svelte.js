@@ -4,20 +4,20 @@
  * Manages map theme (light/dark) switching:
  * - Subscribes to global theme manager
  * - Rebuilds map style when theme changes
- * - Restores overlays (markers, routes, boundaries) after style change
+ * - Tells its owner when the new style is loaded, so the app's own map content can be put back
  */
 
 import { buildBaseMapStyle } from '@/services/mapStyle';
 import { errorToast } from '@/store/ui/errorToast';
 import { ERROR_CODES } from '@/lib/errors/errorCodes';
 import { getThemeManager } from '@/lib/theme/themeManager';
-import { PMTILES_KEY, MAP_BOUNDS } from './MapConstants';
+import { PMTILES_KEY } from './MapConstants';
 import { createLogger, IS_DEBUG } from '@/utils/debugMode';
 
 const mapThemeLogger = createLogger('MapTheme');
 
-// The version of the first style; every theme switch counts up from it. The builders are created
-// with it before the theme controller exists (the controller needs the builders)
+// The version of the first style; every theme switch counts up from it. The builders are tagged
+// with it when they're created, before any theme controller exists
 export const INITIAL_STYLE_VERSION = 0;
 
 /**
@@ -50,62 +50,32 @@ export async function buildMapStyle(theme, lang) {
 }
 
 /**
- * Create theme controller
+ * Follows the app's light/dark theme and switches the map style with it.
  *
- * @param {Object} params - Configuration parameters
- * @param {maplibreGL.Map} params.map - MapLibre map instance
- * @param {MapPointsBuilder} params.builder - MapPointsBuilder instance
- * @param {CustomPointsBuilder} params.customPointsBuilder - CustomPointsBuilder instance
- * @param {Object} params.navigation - Navigation controller
- * @param {() => Object|null} [params.getCurrentRoute] - The route to redraw after a style switch
- *   (`map.setStyle()` drops every app layer). Defaults to the manual navigation's route; the map
- *   screen passes one that also covers GPS navigation, which this controller doesn't know.
- * @param {Object} params.i18n - i18n store
- * @returns {Object} - Theme controller API
+ * `map.setStyle()` drops every source, layer and image the app added on top of the base style.
+ * Putting them back is not this controller's job — it doesn't know what's on the map: once the
+ * new style has loaded it calls `onStyleRestored(version)`, and the owner of the map's content
+ * (MapSession.svelte.js) restores it. Only the latest switch calls back: a quick second switch
+ * makes the first one's style outdated before it loads.
+ *
+ * @param {Object} params - what the controller works with
+ * @param {Object} params.map - the MapLibre map
+ * @param {Object} params.i18n - the i18next instance, for the style's label language and errors
+ * @param {(styleVersion: number) => void} params.onStyleRestored - the new style is loaded; put
+ *   the app's own map content back, tagged with this version
+ * @returns {{ readonly currentTheme: 'light'|'dark', readonly styleVersion: number,
+ *   init: (builtWith?: 'light'|'dark') => 'light'|'dark', applyTheme: (theme: 'light'|'dark') => Promise<void>,
+ *   dispose: () => void }} the controller; `currentTheme` and `styleVersion` are reactive
+ * @example
+ * const theme = createThemeController({ map, i18n, onStyleRestored: (version) => restoreOverlays(version) });
+ * theme.init(initialTheme); // the theme the first style was built with
  */
-export function createThemeController({
-  map,
-  builder,
-  customPointsBuilder,
-  navigation,
-  getCurrentRoute = () => navigation?.currentRoute,
-  i18n,
-}) {
+export function createThemeController({ map, i18n, onStyleRestored }) {
   const themeManager = getThemeManager();
 
   let uiThemeStyle = $state('light');
   let styleVersion = $state(INITIAL_STYLE_VERSION);
   let unsubscribeTheme = null;
-
-  /**
-   * Reapply all map overlays after style change
-   * @private
-   */
-  function reapplyOverlays(currentRoute) {
-    if (!map || !builder) return;
-
-    // Restore map bounds
-    map.setMaxBounds(MAP_BOUNDS);
-
-    // Restore layers
-    builder.addCityBoundaryLayer();
-    builder.addMarkers();
-
-    // Restore user-created points (they are kept in the builder memory)
-    if (customPointsBuilder) {
-      customPointsBuilder.init();
-    }
-
-    // Restore navigation route if exists
-    if (currentRoute) {
-      builder.addNavigationRoute(currentRoute);
-    }
-
-    // Restore navigation markers
-    navigation.restoreMarkers();
-
-    IS_DEBUG && mapThemeLogger.log('Overlays restored');
-  }
 
   /**
    * Apply theme to map
@@ -138,15 +108,8 @@ export function createThemeController({
           return;
         }
 
-        // Update builder style version
-        builder.setStyleVersion(myVersion);
-
-        if (customPointsBuilder) {
-          customPointsBuilder.setStyleVersion(myVersion);
-        }
-
-        // Restore all overlays
-        reapplyOverlays(getCurrentRoute());
+        onStyleRestored(myVersion);
+        IS_DEBUG && mapThemeLogger.log('Style loaded, map content restored');
       };
 
       map.on('idle', onIdle);

@@ -11,6 +11,7 @@ import { createGPSNavigationController } from './MapNavigationGPS.svelte.js';
 import { buildMapStyle, createThemeController, getCurrentMapTheme, INITIAL_STYLE_VERSION } from './MapTheme.svelte.js';
 import { createMapLoadTracker } from './MapLoadTracker.js';
 import { createPreviewTracker } from './MapPreview.js';
+import { MAP_BOUNDS } from './MapConstants.js';
 
 const sessionLogger = createLogger('MapSession');
 
@@ -117,16 +118,32 @@ export function createMapSession({ i18n, isPopupEnabled, getTargetCoords, onMapC
     navigation = createNavigationController({ map, builder, i18n });
     gpsNavigation = createGPSNavigationController({ map, builder, i18n });
 
-    theme = createThemeController({
-      map,
-      builder,
-      customPointsBuilder,
-      navigation,
-      // GPS navigation draws its route through the same builder, so it must survive a theme switch too
-      getCurrentRoute: () => navigation?.currentRoute ?? gpsNavigation?.currentRoute,
-      i18n,
-    });
+    theme = createThemeController({ map, i18n, onStyleRestored: restoreAfterStyleChange });
     theme.init(initialTheme);
+  }
+
+  // A theme switch replaced the style, and with it every source, layer and image added below:
+  // put it all back in the order it was first added. Whatever start() adds to the map is restored
+  // here too, or it disappears on the first theme switch
+  function restoreAfterStyleChange(styleVersion) {
+    if (!map) return;
+
+    builder.setStyleVersion(styleVersion);
+    customPointsBuilder.setStyleVersion(styleVersion);
+
+    map.setMaxBounds(MAP_BOUNDS);
+    builder.addCityBoundaryLayer();
+    builder.addMarkers();
+    // The custom points are kept in the builder's memory
+    customPointsBuilder.init();
+
+    // One route layer serves both navigations; at most one of them has a route
+    const route = navigation?.currentRoute ?? gpsNavigation?.currentRoute;
+    if (route) builder.addNavigationRoute(route);
+
+    navigation.restoreMarkers();
+
+    IS_DEBUG && sessionLogger.log('Map content restored after a style change');
   }
 
   function attachWhenLoaded(tracker) {
