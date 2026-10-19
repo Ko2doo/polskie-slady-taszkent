@@ -134,7 +134,7 @@ mid-flow) and `NavigationSheet`.
 
 | Module | What it holds |
 | --- | --- |
-| `customPointsState.svelte.js` | User markers, see [Custom markers](custom-markers.md) |
+| `customPointsState.svelte.js` | User markers, see [Custom markers](05-custom-markers.md) |
 | `photoSession.svelte.js` | Photos of one open form |
 | `article.svelte.js` — `articlePopupState` | The open article: `id`, `isOpen`, `open(id)`, `close()`. One popup for the whole app |
 | `mapMarkerFilter.svelte.js` — `mapMarkerFilter` | The `all / custom / historical` marker filter, stored in Preferences |

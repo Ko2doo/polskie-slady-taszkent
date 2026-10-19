@@ -134,7 +134,7 @@ function openModal() {
 
 | Модуль | Что хранит |
 | --- | --- |
-| `customPointsState.svelte.js` | Пользовательские метки, см. [Пользовательские метки](custom-markers.md) |
+| `customPointsState.svelte.js` | Пользовательские метки, см. [Пользовательские метки](05-custom-markers.md) |
 | `photoSession.svelte.js` | Фото одной открытой формы |
 | `article.svelte.js` — `articlePopupState` | Открытая статья: `id`, `isOpen`, `open(id)`, `close()`. Один попап на всё приложение |
 | `mapMarkerFilter.svelte.js` — `mapMarkerFilter` | Фильтр меток `all / custom / historical`, хранится в Preferences |

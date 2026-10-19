@@ -9,7 +9,7 @@ on a failure. ESLint forbids importing `@capacitor/*` (except `@capacitor/core`)
 | --- | --- | --- |
 | `capacitor/backButton.js` | `@capacitor/app` | `initBackButtonHandler()` — the hardware Back button, Android only |
 | `capacitor/services/appLifecycle.js` | `@capacitor/app` | `onAppBackground(callback)` — the app going to the background |
-| `capacitor/services/gpsTracker.js` | `@capacitor/geolocation` | `createGPSTracker()`, see [Navigation](navigation.md) |
+| `capacitor/services/gpsTracker.js` | `@capacitor/geolocation` | `createGPSTracker()`, see [Navigation](06-navigation.md) |
 | `capacitor/services/locationPermission.js` | `@capacitor/geolocation`, `capacitor-native-settings` | Location permission, opening settings, `mapGeolocationError` |
 | `capacitor/services/photoPicker.js` | `@capacitor/camera` | `takePhoto()`, `chooseFromGallery(limit)` |
 | `capacitor/services/share.js` | `@capacitor/share` | `shareFile({ uri, title, dialogTitle })` — the system share sheet |

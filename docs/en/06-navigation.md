@@ -73,7 +73,7 @@ if (result.success) fitMapToRoute(map, result.route);
 **Known issue.** The graph is a ~28 MB JSON. It's parsed on the main thread into objects with
 string keys (`"n0"`), and `findRoute` runs synchronously. On a weak phone that's a long freeze
 and a big heap. The planned fix: a binary graph on typed arrays, with parsing and A\* in a Web
-Worker. It changes the graph format and the build scripts ([Map data](map-data.md)), so it's a
+Worker. It changes the graph format and the build scripts ([Map data](10-map-data.md)), so it's a
 separate task that starts with a heap snapshot on a device.
 
 ## GPS tracker (`capacitor/services/gpsTracker.js`)

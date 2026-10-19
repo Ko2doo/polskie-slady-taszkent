@@ -9,7 +9,7 @@
 | --- | --- | --- |
 | `capacitor/backButton.js` | `@capacitor/app` | `initBackButtonHandler()` — аппаратная кнопка «Назад», только Android |
 | `capacitor/services/appLifecycle.js` | `@capacitor/app` | `onAppBackground(callback)` — уход приложения в фон |
-| `capacitor/services/gpsTracker.js` | `@capacitor/geolocation` | `createGPSTracker()`, см. [Навигация](navigation.md) |
+| `capacitor/services/gpsTracker.js` | `@capacitor/geolocation` | `createGPSTracker()`, см. [Навигация](06-navigation.md) |
 | `capacitor/services/locationPermission.js` | `@capacitor/geolocation`, `capacitor-native-settings` | Разрешение на геолокацию, переход в настройки, `mapGeolocationError` |
 | `capacitor/services/photoPicker.js` | `@capacitor/camera` | `takePhoto()`, `chooseFromGallery(limit)` |
 | `capacitor/services/share.js` | `@capacitor/share` | `shareFile({ uri, title, dialogTitle })` — системное меню «Поделиться» |

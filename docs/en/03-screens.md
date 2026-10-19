@@ -4,7 +4,7 @@
 
 | Path | Component | Tab bar | What it does |
 | --- | --- | --- | --- |
-| `/` | `views/Map/Map.svelte` | yes | The map: historical places, user markers, navigation. See [Map screen](map-screen.md) |
+| `/` | `views/Map/Map.svelte` | yes | The map: historical places, user markers, navigation. See [Map screen](04-map-screen.md) |
 | `/handbook` | `views/Handbook/Handbook.svelte` | yes | List of places: grid/list, category filter, search |
 | `/more` | `views/More/More.svelte` | yes | Menu: Settings, About, Technical info |
 | `/settings` | `views/Settings/Settings.svelte` | no | Language, theme, marker export/import, OS permissions |

@@ -38,7 +38,7 @@ A failure in any step doesn't stop the startup: the default value is used.
   (`components/Article.svelte`).
 - Shows marker storage problems (`customPointsState.takeNotices()`) as toasts.
 
-Routes: `src/Routes.js`, library `@mateothegreat/svelte5-router`. More in [Screens](screens.md).
+Routes: `src/Routes.js`, library `@mateothegreat/svelte5-router`. More in [Screens](03-screens.md).
 
 ## `src/` directories
 
@@ -49,7 +49,7 @@ Routes: `src/Routes.js`, library `@mateothegreat/svelte5-router`. More in [Scree
 | `data/` | Static content: articles, metadata | No logic |
 | `lib/errors/` | `errorCodes.js` | The only place for error-code strings |
 | `lib/icons/` | SVG icons as components | Check for an existing one before adding |
-| `lib/state/` | Reactive state on runes (`*.svelte.js`) | See [State](state.md) |
+| `lib/state/` | Reactive state on runes (`*.svelte.js`) | See [State](07-state.md) |
 | `lib/theme/` | `themeManager.js` — light/dark theme | A plain-JS singleton |
 | `locales/` | Translations `ru`, `en`, `pl`, `uz` | The same keys in all four |
 | `services/` | Business logic without UI and without direct plugin calls | File format, storage, A\*, map builders |
@@ -136,4 +136,4 @@ The app targets weak Android phones:
   released in an `$effect` cleanup or by an explicit `release()`/`dispose()`.
 - Heavy things are loaded lazily. Third-party CSS is imported once, in `src/App.css`.
 - The `.pmtiles` archive is held in memory whole. This is deliberate: Capacitor's local server
-  doesn't support Range requests. More in [Map data](map-data.md).
+  doesn't support Range requests. More in [Map data](10-map-data.md).

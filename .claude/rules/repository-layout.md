@@ -196,7 +196,8 @@ mention it; don't touch it.
 
 - `docs/ru/` (primary) and `docs/en/` — documentation for people working without an agent:
   what each module does, what it's connected to, how to use it, with real examples. Not agent
-  rules: those stay in `harness/` and `.claude/rules/`. How they're kept current:
+  rules: those stay in `harness/` and `.claude/rules/`. Files are numbered in reading order,
+  `00-README.md` is the index. How they're kept current:
   `.claude/rules/maintaining-this-harness.md` → "Developer docs".
 
 ## Agent / editor config

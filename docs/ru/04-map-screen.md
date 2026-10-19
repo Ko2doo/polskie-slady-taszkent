@@ -9,7 +9,7 @@ views/Map/
 ├── MapConstants.js         константы экрана: пути к данным, вид, конфиги слоёв
 ├── Session/                карта от запуска до освобождения
 ├── Points/                 точки на карте и их редактирование
-└── Navigation/             маршруты и GPS (подробно в navigation.md)
+└── Navigation/             маршруты и GPS (подробно в 06-navigation.md)
 ```
 
 ## Сессия карты (`Session/`)
@@ -181,7 +181,7 @@ previews.releaseAll();
 
 ### `MapCustomPointsEditor.svelte.js` — `createCustomPointsEditor({ session, i18n })`
 
-Логика редактирования меток на карте. Описана в [Пользовательские метки](custom-markers.md#редактор-на-карте).
+Логика редактирования меток на карте. Описана в [Пользовательские метки](05-custom-markers.md#редактор-на-карте).
 
 ### `MapEditMode.svelte.js` — `createEditModeController()`
 

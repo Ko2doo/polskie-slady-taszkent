@@ -90,8 +90,8 @@ Core technologies used in the project:
 ## Documentation
 
 Developer documentation — what each module does, what it's connected to and how to use it,
-with real examples — lives in [`docs/`](docs/): [Русский](docs/ru/README.md) (primary) and
-[English](docs/en/README.md). It's written for people working on the code by hand; you don't
+with real examples — lives in [`docs/`](docs/): [Русский](docs/ru/00-README.md) (primary) and
+[English](docs/en/00-README.md). It's written for people working on the code by hand; you don't
 need an AI agent to use it.
 
 ## How this project is developed

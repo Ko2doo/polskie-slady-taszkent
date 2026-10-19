@@ -74,7 +74,11 @@ restate one as a rule (they may describe the same code). Keep them current like 
   `@example` is the first source), never invented keys, fields or signatures.
 - Technical and short: what it does, what it's connected to, how to use it. No narrative.
 - A path in `inline code` must exist, as in the harness (`src/harnessPaths.test.js` covers
-  `docs/` too); a new docs page gets a row in the table of contents of both `README.md`s.
+  `docs/` too); a new docs page gets a row in the table of contents of both `00-README.md`s.
+- Pages are named `NN-<name>.md`, numbered in reading order: `00-README.md` is the index, the
+  rest follow the order of its table of contents. A new page takes its place in that order —
+  the next free number at the end, or renumbering the pages after it (links included) when it
+  belongs in the middle.
 
 ## A new subsystem gets its own file, every time
 

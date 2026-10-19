@@ -10,7 +10,7 @@ views/Map/
 ├── MapConstants.js         screen constants: data paths, view, layer configs
 ├── Session/                the map from start to release
 ├── Points/                 points on the map and editing them
-└── Navigation/             routes and GPS (details in navigation.md)
+└── Navigation/             routes and GPS (details in 06-navigation.md)
 ```
 
 ## Map session (`Session/`)
@@ -182,7 +182,7 @@ previews.releaseAll();
 
 ### `MapCustomPointsEditor.svelte.js` — `createCustomPointsEditor({ session, i18n })`
 
-The marker-editing logic on the map. Described in [Custom markers](custom-markers.md#the-editor-on-the-map).
+The marker-editing logic on the map. Described in [Custom markers](05-custom-markers.md#the-editor-on-the-map).
 
 ### `MapEditMode.svelte.js` — `createEditModeController()`
 
