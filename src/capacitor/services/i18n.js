@@ -8,7 +8,7 @@
  * - Language persists across app restarts
  *
  * Usage:
- * import { i18nStores } from '@/services/i18n';
+ * import { i18nStores } from '@/capacitor/services/i18n';
  * const { i18n } = i18nStores;
  *
  * // In template:

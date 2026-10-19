@@ -18,4 +18,5 @@
 - [ ] No new dependency, or it was approved by the maintainer
 - [ ] Nothing contradicts `PRIVACY.md` (no data leaves the device)
 - [ ] Harness (`harness/`, `.claude/rules/`) updated if architecture, directories, scripts or configs changed
+- [ ] Developer docs (`docs/ru` and `docs/en`, same examples) updated if a module's behavior or usage changed
 - [ ] PR targets `features`, not `master`

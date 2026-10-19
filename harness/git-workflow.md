@@ -50,8 +50,11 @@
 
 ## What the agent never does
 
-`.claude/settings.json` denies most of these at the permission level; the rule holds for any
-form the deny list doesn't catch.
+`.claude/settings.json` denies most of these at the permission level — every `git` command
+that can drop the human's uncommitted work or touch branches (`reset --hard`, `clean`,
+`stash`, `restore`, `rm`, `checkout`, `switch`, `branch`, `worktree`, `merge`, `rebase`,
+`tag`), plain and as `git -C <dir> …`; read the current branch with `git status` instead. The
+rule holds for any form the deny list doesn't catch.
 
 - `git commit`, `git push` (any branch, any remote), force-push or any history rewrite.
 - Create, switch to, merge or delete a branch, or touch `master` at all — it gives the human

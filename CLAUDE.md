@@ -23,13 +23,10 @@ The harness lives in two places:
 
 ## The rules that override everything else
 
-1. **Work on `features` or on a contributor branch made from it. Never `master`.** An admin
-   (the lead developer) works on `features` directly, one step at a time. Anyone else works
-   on their own `feature/<name>` / `fix/<name>` branch made from `features` and opens a PR
-   into `features` — they can't push to `features`. Never start work on `master`; if the
-   current branch is `master`, or is `features` for someone who isn't an admin, stop and say
-   so, giving the human the command to switch or to create their branch — the agent itself
-   never creates or switches branches, and never pushes. See `harness/git-workflow.md`.
+1. **Work on `features` (admin) or a `feature/<name>` / `fix/<name>` branch made from it
+   (everyone else). Never `master`.** On the wrong branch, stop and give the human the
+   command — the agent never creates or switches branches, and never pushes. See
+   `harness/git-workflow.md` → "Which branch".
 2. **No patches, no commits: write changes straight into the working tree.** The human
    reviews with `git diff` and commits themselves. Never run `git commit`, never `git push`,
    never run a release/publish script (`.claude/settings.json` denies these too). New
@@ -60,34 +57,31 @@ The harness lives in two places:
    past ~400 lines gets split. See `.claude/rules/maintaining-this-harness.md`. An
    out-of-date harness file is a bug in the change that altered the code it describes, not a
    separate follow-up task.
-8. **Mind the session's context budget.** Past ~80% context usage: warn the human, and don't
-   start a new task — warn and stop instead, unless told to go ahead anyway. Applies to
-   every kind of task. Keep tool output small (read files by range, filter command output with
-   `grep`/`tail`) — it all stays in the context. See `harness/agent-session.md`.
+8. **Mind the session's context budget.** Past ~80%: warn, and don't start a new task unless
+   told to. Keep tool output small. See `harness/agent-session.md`.
 
 ## Quick orientation
 
-- Stack: Svelte 5 (runes), Vite, Konsta UI (preferred) + Tailwind 4 (for what Konsta
-  doesn't cover — see `.claude/rules/styling.md`), MapLibre GL JS + PMTiles, Capacitor, i18next.
+- Stack: Svelte 5 (runes), Vite, Konsta UI + Tailwind 4, MapLibre GL JS + PMTiles,
+  Capacitor, i18next — `harness/architecture.md` → "Stack".
 - `src/` is where almost all work happens, but the repo root matters too (native projects,
   data scripts, store tooling, release script) — see `.claude/rules/repository-layout.md`.
 - `scripts/` and `appstore/` are hands-off unless explicitly asked — don't edit, "clean up"
   or run anything there (`.claude/rules/repository-layout.md`).
 - Merge gate for PRs (and for any step reported as done): the checklist in
-  `.github/pull_request_template.md`, imported below; enforced in part by
+  `.github/pull_request_template.md`, imported above; enforced in part by
   `.github/workflows/ci.yml`. See `harness/git-workflow.md` → "Merge gate".
 - Legacy zones: none at the moment — every file follows the harness. Code found not to follow
   it is listed, with the reference implementations to copy from instead, in
   `harness/code-style.md` → "Leave old code alone".
 - Tests: `npm test` (Vitest). Every area with logic is covered; known bugs are pinned with
   `it.fails` and logged in `BUGS.md` — see `harness/testing.md`.
-- **Offline app, single local user, no backend.** A lot of standard production-app
-  machinery simply doesn't apply here — see the "Operating context" section of
-  `harness/architecture.md` before reaching for a pattern built for a multi-user,
-  server-backed app.
-- Hybrid app (Android + iOS via Capacitor), **Android first**: the lead developer builds
-  and tests on Android; iOS releases are handled by a separate contributor. Assume phones can
-  be slow and storage can be tight. `harness/performance.md` is not optional reading.
+- **Offline app, single local user, no backend** — `harness/architecture.md` →
+  "Operating context". **Android first**, iOS by a separate contributor; phones can be slow
+  — `harness/architecture.md` → "Platforms", `harness/performance.md`.
 - Four languages: `ru` (default), `en`, `pl`, `uz`. Every user-visible string ships in all
   four in the same change — see `.claude/rules/i18n.md`.
 - The harness describes the code as it is now, not how it got there — history lives in git.
+- Developer docs for humans: `docs/ru/` (primary) + `docs/en/` (same files and examples). A
+  change to a module's behavior or API updates its page in both — see
+  `.claude/rules/maintaining-this-harness.md` → "Developer docs".

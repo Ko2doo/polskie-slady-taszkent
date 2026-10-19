@@ -56,6 +56,8 @@ yes.** This applies even to a tiny, obviously-safe-looking package. The flow:
    **yes / no / later** answer before writing any code that imports it.
    - **Yes** → install it yourself (`npm i <pkg>@<version>`, or `npm i -D` for dev-only
      tooling) — that updates `package.json` and the lockfile — and continue the feature.
+     `.claude/settings.json` puts `npm i`/`install`/`uninstall`/`update` on its `ask` list, so
+     the human confirms the exact command once more.
      For this project this overrides the global "don't touch `package.json`, don't run
      installs" rule from the user's `~/.claude/CLAUDE.md`; it applies only after an
      explicit yes for that specific package.

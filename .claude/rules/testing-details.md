@@ -16,14 +16,16 @@ file is *how*.
   `src/utils/crc32.test.js`. Only `src/**/*.test.js` is collected. A test that uses runes itself
   (`$effect.root`, `$state`) is named `*.svelte.test.js` so Svelte compiles it
   (`bottomTabbarNav.svelte.test.js`).
-  Three tests are about the harness itself: `src/architectureTree.test.js` checks the `src/`
+  Four tests are about the harness and the docs: `src/architectureTree.test.js` checks the `src/`
   tree in `harness/architecture.md` against the real directories, `src/repositoryTree.test.js`
   checks the repo-root tree in `.claude/rules/repository-layout.md` against the working tree minus
   git-ignored files (so a temporary file left in the root fails it too) — both read the trees
   through `src/test/harnessTree.js` (`readTreeBlock`, `parseTree`) — and
   `src/harnessPaths.test.js` checks that every path the agent docs name exists, that every
   `.claude/rules/` file has a `paths:` list whose globs each match a file, and that every
-  `harness/` file is `@`-imported by `CLAUDE.md`.
+  `harness/` file is `@`-imported by `CLAUDE.md`; `src/docsParity.test.js` checks that
+  `docs/en/` has the same files as `docs/ru/`, with the same heading levels, the same code in
+  every tagged example (comments stripped) and the same number of untagged blocks.
 - `vitest.config.js` merges `vite.config.js`, so tests get the same `@` alias, Svelte plugin
   and `__APP_VERSION__`/`__APP_NAME__` globals as the app. It also adds the `browser`
   resolve condition **only under Vitest** — without it `svelte` resolves to its server

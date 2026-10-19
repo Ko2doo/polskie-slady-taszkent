@@ -19,7 +19,6 @@
   $effect(() => {
     const dispose = withNavbar({
       title: appName,
-      showSidePanel: false,
       leftSnippet: false,
     });
 

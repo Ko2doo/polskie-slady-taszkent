@@ -2,9 +2,9 @@
 
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Node](https://img.shields.io/badge/node-%3E=24-brightgreen)
-![Svelte](https://img.shields.io/badge/Svelte-5.56-orange)
+![Svelte](https://img.shields.io/badge/Svelte-5.57-orange)
 ![Capacitor](https://img.shields.io/badge/Capacitor-8-blue)
-![MapLibre](https://img.shields.io/badge/MapLibre%20GL-5.x-3b82f6)
+![MapLibre](https://img.shields.io/badge/MapLibre%20GL-6.x-3b82f6)
 ![Made with Svelte](https://img.shields.io/badge/Made%20with-Svelte-ff3e00)
 ![HybridApp](https://img.shields.io/badge/Hybrid%20App-Capacitor-119eff)
 
@@ -37,8 +37,39 @@ The app is now released and available on both platforms:
 - 📚 Reference guide about Polish historical figures and places
 - 🗺 Offline map with GPS navigation
 - 📍 Historical routes across Tashkent
+- 📌 Your own markers on the map — title, description, photos
+- 🔄 Export and import of your markers — move them to another device or share them
 - 🌍 Multilingual interface
 - 📱 Works offline without internet connection
+
+## What's new in v1.2.0
+
+**Custom markers** (since v1.2.0-rc.1)
+
+- Turn on the edit mode on the map and tap a free spot to add a marker: title,
+  description (up to 10,000 characters) and up to 4 photos from the camera or gallery.
+  Tap your marker to view, edit or delete it; photos open in a slider and a fullscreen
+  viewer with zoom.
+- A marker filter on the map: all markers, only yours, or only the historical places.
+- Markers are stored on the device only, in two alternating files, so an app crash in the
+  middle of a save never loses what was saved before.
+
+**Export and import** (Settings → My markers)
+
+- **Export** writes your markers into one file and opens the system share sheet — send it
+  to a messenger, e-mail or cloud drive, or save it to the phone.
+- **Import** reads such a file on any device with the app. Before anything is saved the app
+  shows how many markers would be added and updated; the same marker is recognized by its
+  id, the newer version wins, and nothing already on the device is ever deleted.
+- The file carries titles, descriptions and coordinates — **not photos**. It is
+  checksummed and validated on import; a damaged or foreign file is refused with a reason.
+
+**Faster map screen**
+
+- The map screen was refactored into small modules (session, points, navigation, GPS)
+  with a cancellable start: leaving the screen mid-load releases everything cleanly.
+- Faster start: offline tiles load while the map style is being built, your markers appear
+  on the map at once and their cover photos follow as they load.
 
 ## Technologies
 
@@ -55,6 +86,13 @@ Core technologies used in the project:
 - **MapLibre GL** -- map rendering
 - **PMTiles + Protomaps** -- offline vector map tiles
 - **i18next** -- internationalization
+
+## Documentation
+
+Developer documentation — what each module does, what it's connected to and how to use it,
+with real examples — lives in [`docs/`](docs/): [Русский](docs/ru/README.md) (primary) and
+[English](docs/en/README.md). It's written for people working on the code by hand; you don't
+need an AI agent to use it.
 
 ## How this project is developed
 
@@ -84,7 +122,7 @@ clean, and nothing reaches the app stores without a human review.
 ### Requirements
 
 - **Node.js v24 or later**
-- **npm v10 or later**
+- **npm v11 or later**
 - **Java Runtime:** `java-21-openjdk`
 - **Android SDK** (for Android builds)
 

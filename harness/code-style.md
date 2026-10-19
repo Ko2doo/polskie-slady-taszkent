@@ -53,8 +53,8 @@
   and so on instead of one giant `Map.svelte`. A long function gets broken into named
   helpers. Don't split for the sake of it: a 30-line module that does one thing is fine
   as is, and a split that forces the reader to jump across five files to follow one flow
-  made things worse, not better. Once a screen or component folder holds more than 4
-  modules, they go into subdirectories — `harness/architecture.md` → "When a folder grows".
+  made things worse, not better. A screen or component folder whose modules fall into
+  separate concerns gets subdirectories — `harness/architecture.md` → "When a folder grows".
 - **Builder classes are the exception** (`services/mapPointsBuilder.js`,
   `services/customPointsBuilder.js`, and any future builder of that kind). They stay
   whole: their methods share the builder's internal state and its fluent
@@ -102,7 +102,10 @@ distance, a size, a storage key, an event name — gets a named constant:
 - **ESLint** (`eslint.config.js`, `npm run lint`) enforces the parts of this file a tool can
   check: no `console.*` outside `utils/debugMode.js`, no unused variables/imports/parameters
   (`_name` marks a parameter kept for its position), `const` where nothing reassigns, JSDoc
-  on every exported function and class, plus the recommended Svelte 5 and Vitest rules.
+  on every exported function and class, import boundaries (a native plugin only from
+  `src/capacitor/`, no new `writable`/`readable`/`derived` — the rules' homes are
+  `harness/architecture.md` and `.claude/rules/svelte-rules.md`, the exceptions are listed in
+  the config), plus the recommended Svelte 5 and Vitest rules.
   JSDoc *contents* (`@param`/`@returns` and their descriptions) are warnings.
 - **Prettier** (`.prettierrc`, `npm run format` / `npm run format:check`) owns formatting:
   semicolons, **single** quotes in `.js`, **double** quotes in `.svelte` (markup and

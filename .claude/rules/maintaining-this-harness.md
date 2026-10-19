@@ -8,6 +8,8 @@ paths:
   - "src/architectureTree.test.js"
   - "src/repositoryTree.test.js"
   - "src/harnessPaths.test.js"
+  - "src/docsParity.test.js"
+  - "docs/**"
   - "src/test/harnessTree.js"
 ---
 
@@ -51,6 +53,29 @@ of slowly going stale.
   `CONTRIBUTING.md` against the working tree; write paths in full enough to be found, and
   use `<placeholders>` for hypothetical ones.
 
+## Developer docs (`docs/`) — for humans, kept in step with the code
+
+`docs/ru/` (primary) and `docs/en/` are the module reference for people who work without an
+agent: what a module does, what it's connected to, how to call it, with real examples. They
+are **not** agent rules — a rule lives in `harness/` or `.claude/rules/`, and the docs never
+restate one as a rule (they may describe the same code). Keep them current like the harness:
+
+- A change to what a module does or how it's used (its exported API, its behavior, a new
+  module, a removed one) updates the page that describes it in **both** `docs/ru/` and
+  `docs/en/` in the same change. A stale docs page is a bug in that change.
+- `ru` is written first; `en` is its translation with the **same** files, the same heading
+  structure and the same code in every example — only the prose and the code comments are
+  translated (comments in the document's language). Literals in example code stay the same
+  in both (neutral values, or a string quoted from a named locale file). An untagged fenced
+  block is a diagram or a file tree — its text is translated. `src/docsParity.test.js` checks
+  the file set, the heading levels, the tagged examples' code with comments stripped and the
+  number of untagged blocks.
+- Examples are real: copied from or checked against the code (the module's JSDoc
+  `@example` is the first source), never invented keys, fields or signatures.
+- Technical and short: what it does, what it's connected to, how to use it. No narrative.
+- A path in `inline code` must exist, as in the harness (`src/harnessPaths.test.js` covers
+  `docs/` too); a new docs page gets a row in the table of contents of both `README.md`s.
+
 ## A new subsystem gets its own file, every time
 
 When a new feature is big enough to need its own architecture write-up (a new `services/`
@@ -59,6 +84,7 @@ module plus supporting state/components, not just one new file in an existing ar
 1. Write `.claude/rules/<name>-subsystem.md` — same depth and shape as the existing
    subsystem files (what it's for, where the pieces live, how they fit together, what
    decisions a future change needs to respect), with a `paths:` list covering all its files.
+   Its developer docs page goes to `docs/ru/` and `docs/en/` ("Developer docs" above).
 2. Add a one-line entry for it to the "Subsystem deep dives" list in
    `harness/architecture.md`.
 3. If it introduces a new top-level directory or meaningfully changes what goes where,

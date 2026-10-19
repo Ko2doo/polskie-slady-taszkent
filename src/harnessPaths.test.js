@@ -3,8 +3,9 @@ import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import { matchesGlob } from 'node:path';
 
-// The agent docs (CLAUDE.md, harness/, .claude/rules/, AGENTS.md, CONTRIBUTING.md) name files by
-// path in `inline code`; a renamed or deleted file must not leave them pointing at nothing. The
+// The agent docs (CLAUDE.md, harness/, .claude/rules/, AGENTS.md, CONTRIBUTING.md) and the developer
+// docs (docs/) name files by path in `inline code`; a renamed or deleted file must not leave them
+// pointing at nothing. The
 // directory trees are checked separately (architectureTree/repositoryTree tests) — this covers the
 // prose. A path counts as present if some file in the working tree (minus git-ignored ones) is or
 // ends with it, if it's a package file under node_modules/, or if it's git-ignored (generated).
@@ -14,7 +15,7 @@ const trackedFiles = execFileSync('git', ['ls-files', '-z', '--cached', '--other
   .split('\0')
   .filter((path) => path && existsSync(path));
 
-const DOC_FILE = /^(CLAUDE\.md|AGENTS\.md|CONTRIBUTING\.md|harness\/.+\.md|\.claude\/rules\/.+\.md)$/;
+const DOC_FILE = /^(CLAUDE\.md|AGENTS\.md|CONTRIBUTING\.md|harness\/.+\.md|\.claude\/rules\/.+\.md|docs\/.+\.md)$/;
 const FENCED_BLOCK = /```[\s\S]*?```/g;
 const INLINE_CODE = /`([^`\n]+)`/g;
 // Something shaped like a path: a directory (`trailing/`) or a file with a known extension.
@@ -30,6 +31,10 @@ const NOT_FILES = new Set([
   'fix/',
   'public/map/styles/', // the output folder of an unused script, documented as missing
   'BUGS.md', // the bug log, created only while a bug is open (harness/testing.md → "Bug log")
+  // Files the app itself writes on the device, named in docs/custom-markers.md
+  'custom-points/slot-a.json',
+  'custom-points/slot-b.json',
+  'polskie-slady-points-2026-10-18.json', // an export's file name, exportFileName()
 ]);
 
 function isGitIgnored(path) {

@@ -23,6 +23,33 @@ const EXPORTED_FUNCTIONS_AND_CLASSES = {
 // Compile-time globals defined in vite.config.js
 const BUILD_GLOBALS = { __APP_VERSION__: 'readonly', __APP_NAME__: 'readonly' };
 
+// Import boundaries (harness/architecture.md → "Rules per directory", .claude/rules/svelte-rules.md).
+// App code only: tests import plugins and stores freely to drive their mocks.
+const APP_FILES = ['src/**/*.js', 'src/**/*.svelte'];
+// A native plugin is called through its wrapper in src/capacitor/ only; @capacitor/core
+// (Capacitor.getPlatform()) is not a plugin and is fine anywhere
+const NATIVE_PLUGIN_IMPORTS = {
+  group: ['@capacitor/*', '!@capacitor/core', 'capacitor-native-settings'],
+  message: 'Call native plugins through a wrapper in src/capacitor/ (harness/architecture.md).',
+};
+// No new classic stores: runes instead. Reading an existing store with get() stays allowed
+const STORE_FACTORY_IMPORTS = {
+  name: 'svelte/store',
+  importNames: ['writable', 'readable', 'derived'],
+  message: 'No new classic stores — use runes (.claude/rules/svelte-rules.md).',
+};
+// Boots the app before any wrapper is needed: App.getInfo() and the splash screen
+const NATIVE_PLUGIN_EXCEPTIONS = ['src/main.js'];
+// The pre-runes stores listed in .claude/rules/svelte-rules.md — kept as they are, not rewritten
+const STORE_FACTORY_EXCEPTIONS = [
+  'src/store/ui/errorToast.js',
+  'src/store/ui/overlayController.js',
+  'src/store/appStartInitialize.js',
+  'src/store/i18nextSvelte/translationStore.js',
+  'src/services/toastController.js',
+  'src/services/navigationHistoryHook.js',
+];
+
 export default defineConfig([
   // Dependencies, generated, native or hands-off (harness: .claude/rules/repository-layout.md);
   // ESLint skips node_modules/ on its own — listed anyway so the intent is visible
@@ -81,6 +108,29 @@ export default defineConfig([
       // `let { a, b = $bindable() } = $props()` is the idiom; the Svelte variant knows the runes
       'prefer-const': 'off',
       'svelte/prefer-const': 'error',
+    },
+  },
+
+  // Import boundaries. ESLint doesn't merge one rule's options across blocks, so each block
+  // states the full set that applies to its files
+  {
+    files: APP_FILES,
+    ignores: [...TEST_FILES, 'src/capacitor/**', ...NATIVE_PLUGIN_EXCEPTIONS, ...STORE_FACTORY_EXCEPTIONS],
+    rules: {
+      'no-restricted-imports': ['error', { paths: [STORE_FACTORY_IMPORTS], patterns: [NATIVE_PLUGIN_IMPORTS] }],
+    },
+  },
+  {
+    files: ['src/capacitor/**', ...NATIVE_PLUGIN_EXCEPTIONS],
+    ignores: TEST_FILES,
+    rules: {
+      'no-restricted-imports': ['error', { paths: [STORE_FACTORY_IMPORTS] }],
+    },
+  },
+  {
+    files: STORE_FACTORY_EXCEPTIONS,
+    rules: {
+      'no-restricted-imports': ['error', { patterns: [NATIVE_PLUGIN_IMPORTS] }],
     },
   },
 

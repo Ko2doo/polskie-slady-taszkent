@@ -107,6 +107,9 @@ checklist.
 9. **The harness is up to date.** If the change alters architecture, adds a directory,
    subsystem, script or config file, the matching harness file is updated in the
    same PR ([`.claude/rules/maintaining-this-harness.md`](.claude/rules/maintaining-this-harness.md)).
+10. **The developer docs are up to date.** A change to what a module does or how it's used
+    updates its page in [`docs/ru`](docs/ru/README.md) and [`docs/en`](docs/en/README.md) in
+    the same PR — both versions, same examples (`src/docsParity.test.js` checks the structure).
 
 ## Repository setup (for admins)
 

@@ -28,11 +28,13 @@
  *   const builder = MapPointsBuilder.create()
  *     .withMap(map)
  *     .withData(articlesMeta)
+ *     .withStyleVersion(styleVersion)
  *     .withI18n({
  *       title: (item) => i18n.t(`articles:${item.id}:title`),
  *       popupLink: () => i18n.t('ui:buttons:readMore'),
  *     })
- *     .withRouter((id) => goto(`/articles/${id}`))
+ *     .withPopup((id) => articlePopupState.open(id))
+ *     .withPopupGuard(() => !isEditing)
  *     .withMarkers({
  *       icon: { name: 'article', url: '/map/icons/pointIcon.png' },
  *       // ... other marker config

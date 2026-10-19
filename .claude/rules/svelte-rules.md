@@ -41,7 +41,10 @@ only reason to reach for a store in new code is genuine store-contract interop �
 
 Pre-runes store code that works stays as it is: `store/ui/errorToast.js`,
 `store/ui/overlayController.js`, `services/toastController.js`, `capacitor/backButton.js`,
-`services/navigationHistoryHook.js`, `store/appStartInitialize.js`. Rewriting them to runes
+`services/navigationHistoryHook.js`, `store/appStartInitialize.js`,
+`store/i18nextSvelte/translationStore.js` — ESLint rejects `writable`/`readable`/`derived`
+anywhere else (`eslint.config.js` → `STORE_FACTORY_EXCEPTIONS`; `capacitor/backButton.js`
+only reads a store with `get`, which stays allowed). Rewriting them to runes
 to "modernize" is churn with real regression risk (`harness/testing.md`). A small, obviously
 right improvement while already touching one for another reason is fine; a drive-by full
 rewrite is not, unless asked.
