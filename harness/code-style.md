@@ -100,7 +100,7 @@ distance, a size, a storage key, an event name — gets a named constant:
 ## Linting and formatting
 
 - **ESLint** (`eslint.config.js`, `npm run lint`) enforces the parts of this file a tool can
-  check: no `console.*` outside `utils/debugMode.js`, no unused variables/imports/parameters
+  check: no `console.*` in `src/` outside `utils/debugMode.js`, no unused variables/imports/parameters
   (`_name` marks a parameter kept for its position), `const` where nothing reassigns, JSDoc
   on every exported function and class, import boundaries (a native plugin only from
   `src/capacitor/`, no new `writable`/`readable`/`derived` — the rules' homes are
@@ -111,6 +111,8 @@ distance, a size, a storage key, an event name — gets a named constant:
   semicolons, **single** quotes in `.js`, **double** quotes in `.svelte` (markup and
   `<script>`), and the 120-character width from `.editorconfig`. Markdown, `public/`,
   `scripts/`, `appstore/` and native projects are excluded (`.prettierignore`).
+- The `postedit.mjs` hook runs Prettier and ESLint on every `src/` file the agent edits and
+  reports errors back, so style problems surface at the edit, not at CI.
 - `npm run lint` has no errors and `npm run format:check` passes — `npm run build` runs both
   first (`prebuild`) and CI runs them too, so neither can be skipped. Warnings (JSDoc
   contents) don't fail anything; don't add new ones in code you write.

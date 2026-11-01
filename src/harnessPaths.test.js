@@ -5,9 +5,7 @@ import { matchesGlob } from 'node:path';
 
 // The agent docs (CLAUDE.md, harness/, .claude/rules/, AGENTS.md, CONTRIBUTING.md) and the developer
 // docs (docs/) name files by path in `inline code`; a renamed or deleted file must not leave them
-// pointing at nothing. The
-// directory trees are checked separately (architectureTree/repositoryTree tests) — this covers the
-// prose. A path counts as present if some file in the working tree (minus git-ignored ones) is or
+// pointing at nothing. A path counts as present if some file in the working tree (minus git-ignored ones) is or
 // ends with it, if it's a package file under node_modules/, or if it's git-ignored (generated).
 const trackedFiles = execFileSync('git', ['ls-files', '-z', '--cached', '--others', '--exclude-standard'], {
   encoding: 'utf8',

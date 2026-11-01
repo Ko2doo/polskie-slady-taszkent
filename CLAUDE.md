@@ -57,8 +57,8 @@ The harness lives in two places:
    past ~400 lines gets split. See `.claude/rules/maintaining-this-harness.md`. An
    out-of-date harness file is a bug in the change that altered the code it describes, not a
    separate follow-up task.
-8. **Mind the session's context budget.** Past ~80%: warn, and don't start a new task unless
-   told to. Keep tool output small. See `harness/agent-session.md`.
+8. **Mind the session's context budget.** A hook enforces the limit (600k tokens); keep tool
+   output small. See `harness/agent-session.md`.
 
 ## Quick orientation
 
@@ -66,7 +66,7 @@ The harness lives in two places:
   Capacitor, i18next — `harness/architecture.md` → "Stack".
 - `src/` is where almost all work happens, but the repo root matters too (native projects,
   data scripts, store tooling, release script) — see `.claude/rules/repository-layout.md`.
-- `scripts/` and `appstore/` are hands-off unless explicitly asked — don't edit, "clean up"
+- `scripts/`, `appstore/` and `Design/` are hands-off unless explicitly asked — don't edit, "clean up"
   or run anything there (`.claude/rules/repository-layout.md`).
 - Merge gate for PRs (and for any step reported as done): the checklist in
   `.github/pull_request_template.md`, imported above; enforced in part by

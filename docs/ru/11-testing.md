@@ -129,7 +129,7 @@ unmount(component);
 | `src/locales/resources.test.js` | Паритет ключей, подстановок и HTML-тегов во всех локалях |
 | `src/lib/errors/errorCodes.test.js` | Нет литералов кодов ошибок в обход `ERROR_CODES` |
 | `src/docsParity.test.js` | `docs/ru` и `docs/en`: одинаковые файлы, структура заголовков, код примеров |
-| `src/architectureTree.test.js`, `src/repositoryTree.test.js`, `src/harnessPaths.test.js` | Правила для агента и документация совпадают с реальным деревом файлов |
+| `src/harnessPaths.test.js` | Каждый путь, названный в правилах для агента и документации, существует |
 
 ## Линтер и форматирование
 

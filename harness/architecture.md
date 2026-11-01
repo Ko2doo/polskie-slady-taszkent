@@ -69,9 +69,8 @@ entry per screen — see `.claude/rules/screens.md` for what each screen actuall
 
 Every directory of `src/`, plus the entry-point files at its root — individual files inside
 the directories are deliberately not listed (they change often; the subsystem files below
-describe them where it matters). `src/architectureTree.test.js` checks this tree against the
-real `src/`: a directory added, removed or renamed without updating it fails the suite.
-A `{a,b}` group stands for sibling directories with the same role.
+describe them where it matters). A directory added, removed or renamed updates this tree in the
+same change (the `Stop` hook reminds about new modules). A `{a,b}` group stands for sibling directories with the same role.
 
 ```
 src/
@@ -232,8 +231,7 @@ every `components/<Area>/` — at any depth.
 - **A move is not a rename.** Files keep their names (the `Map…` prefix included — it keeps
   them unique and greppable); no `index.js` re-export files. Imports inside one folder are
   relative (`./<Module>`), across folders they go through the @ alias (`@/<path>`).
-- **Same change, all of it:** the tree above (`src/architectureTree.test.js` fails
-  otherwise), paths in the area's `.claude/rules/` file and its `paths:` globs, the
+- **Same change, all of it:** the tree above, paths in the area's `.claude/rules/` file and its `paths:` globs, the
   `vi.mock(...)` paths in tests that mock a moved module.
 
 ## Subsystem deep dives

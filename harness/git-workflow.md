@@ -9,7 +9,7 @@
     pushes). With write access the branch lives in this repository; without it, in their
     fork. `CONTRIBUTING.md` → "Opening a pull request" has both, command by command.
 
-  Check the current branch before starting. On `master` — stop. On `features` while the
+  Check the current branch before starting (the `guard.mjs` hook denies edits on `master`). On `master` — stop. On `features` while the
   human says they aren't an admin (or can't push / need a PR) — stop and give them the
   command to create their branch (`git checkout -b feature/<name> origin/features`, or
   `upstream/features` from a fork). When unsure who the human is, ask once.

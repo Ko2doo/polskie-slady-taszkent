@@ -5,12 +5,11 @@ paths:
   - "CONTRIBUTING.md"
   - "harness/**"
   - ".claude/rules/**"
-  - "src/architectureTree.test.js"
-  - "src/repositoryTree.test.js"
+  - ".claude/hooks/**"
+  - ".claude/settings.json"
   - "src/harnessPaths.test.js"
   - "src/docsParity.test.js"
   - "docs/**"
-  - "src/test/harnessTree.js"
 ---
 
 # Maintaining this harness
@@ -111,22 +110,36 @@ navigability, not cutting content — and gets its own, narrower `paths:`. Delet
 original file, and for `harness/` replace its `@` line in `CLAUDE.md` with one line per new
 file. Update the "Subsystem deep dives" list in `harness/architecture.md`.
 
-## Keeping `architecture.md` itself honest
+## Keeping the trees honest
 
 `harness/architecture.md`'s directory-layout section and "deciding where a new file goes"
-list describe **100% of `src/`**, not just the parts covered by a subsystem file. If a
-change adds a new top-level directory, a new kind of file, or changes what belongs where,
-update `architecture.md` in that same change.
+list describe **100% of `src/`**, not just the parts covered by a subsystem file. The tree
+at the top of that section lists every directory of `src/` and the entry-point files at its
+root — nothing else: no individual files, a one-line `# comment` per new directory and, if it
+brings rules of its own, a bullet under "Rules per directory". A change that adds, renames or
+removes a directory (or a new kind of file) updates `architecture.md` in that same change.
+The repo-root tree in `.claude/rules/repository-layout.md` lists the root entries the agent
+needs to know about. No test compares either tree with the disk; the `Stop` hook is the safety
+net (see "Hooks").
 
-The tree at the top of that section lists every directory of `src/` and the entry-point
-files at its root — nothing else. `src/architectureTree.test.js` compares it with the real
-`src/`, so a new, renamed or removed directory (or a new root file) fails the suite until
-the tree is updated; add a one-line `# comment` for a new directory and, if it brings rules
-of its own, a bullet under "Rules per directory". Don't add individual files inside
-directories to the tree — that's what the prose and the subsystem files are for.
+## Hooks (`.claude/hooks/`, wired in `.claude/settings.json`)
 
-The repo root works the same way: the tree at the top of `.claude/rules/repository-layout.md`
-lists every root entry git doesn't ignore, and `src/repositoryTree.test.js` checks it against
-the working tree (`git ls-files --cached --others --exclude-standard`) — a new root file or
-directory, committed or not (or a new subdirectory of one the tree expands), needs its line
-there, plus a prose entry further down that file if it has rules of its own.
+What can be enforced mechanically is a hook, not a paragraph of prose — don't restate these
+as rules elsewhere, link here. All are Node scripts without dependencies; `lib.mjs` holds the
+shared helpers.
+
+- `guard.mjs` (PreToolUse, Edit/Write): denies edits on `master`; asks before touching
+  `scripts/`, `appstore/`, `Design/`, `package.json` and `package-lock.json`.
+- `postedit.mjs` (PostToolUse, Edit/Write): runs `prettier --write` and `eslint --quiet` on a
+  touched `src/**/*.{js,svelte}` file and reports lint errors back.
+- `context.mjs` (UserPromptSubmit + Stop): past 600k tokens of context (read from the
+  transcript's last usage) it asks once for a handover note and refuses new prompts; `--force`
+  in a prompt lets one through. The limit is `LIMIT_TOKENS` in the script.
+- `stop.mjs` (Stop): a new non-test `src/` file that starts a new directory, or lands in
+  `services/`, `capacitor/`, `lib/state/` or `views/`, and has no doc page (`harness/`,
+  `.claude/rules/`, `docs/`) written after it is reported once per session — a new component in
+  an existing area is not; then the tests related to the changed `src/` files
+  (`vitest related`) must pass.
+
+A new hook is pipe-tested with a synthetic stdin payload before it is wired in; keep the
+scripts under ESLint (`NODE_FILES` in `eslint.config.js`) and Prettier.

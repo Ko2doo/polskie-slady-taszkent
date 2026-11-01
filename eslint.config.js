@@ -12,7 +12,7 @@ import svelteConfig from './svelte.config.js';
 
 const SVELTE_FILES = ['**/*.svelte', '**/*.svelte.js', '**/*.svelte.test.js'];
 const TEST_FILES = ['src/**/*.test.js', 'src/test/**'];
-const NODE_FILES = ['*.config.js'];
+const NODE_FILES = ['*.config.js', '.claude/hooks/*.mjs'];
 // `export function f`, `export class C`, `export const f = () => …` — the exported unit itself,
 // not every function nested in an exported object
 const EXPORTED_FUNCTIONS_AND_CLASSES = {
@@ -63,7 +63,7 @@ export default defineConfig([
     'scripts/',
     'appstore/',
     'resources/',
-    'Banners/',
+    'Design/',
   ]),
 
   js.configs.recommended,
@@ -75,8 +75,6 @@ export default defineConfig([
       globals: { ...globals.browser, ...BUILD_GLOBALS },
     },
     rules: {
-      // Logging: the project logger only (utils/debugMode.js), never console.* directly
-      'no-console': 'error',
       // No dead code: unused variables, imports and parameters (a leading `_` marks a parameter
       // that must exist for its position)
       'no-unused-vars': ['error', { argsIgnorePattern: '^_', ignoreRestSiblings: true }],
@@ -131,6 +129,15 @@ export default defineConfig([
     files: STORE_FACTORY_EXCEPTIONS,
     rules: {
       'no-restricted-imports': ['error', { patterns: [NATIVE_PLUGIN_IMPORTS] }],
+    },
+  },
+
+  {
+    // Logging: the project logger only (utils/debugMode.js), never console.* directly. Tooling
+    // outside src/ (config, hooks, scripts) is not app code and may print
+    files: ['src/**'],
+    rules: {
+      'no-console': 'error',
     },
   },
 

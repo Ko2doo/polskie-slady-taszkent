@@ -126,7 +126,7 @@ doesn't, it isn't checking that property.
 | `src/locales/resources.test.js` | Parity of keys, placeholders and HTML tags across all locales |
 | `src/lib/errors/errorCodes.test.js` | No error-code literals bypassing `ERROR_CODES` |
 | `src/docsParity.test.js` | `docs/ru` and `docs/en`: the same files, heading structure, example code |
-| `src/architectureTree.test.js`, `src/repositoryTree.test.js`, `src/harnessPaths.test.js` | The agent rules and the docs match the real file tree |
+| `src/harnessPaths.test.js` | Every path named in the agent rules and the docs exists |
 
 ## Linter and formatting
 
