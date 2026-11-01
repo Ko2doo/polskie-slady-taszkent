@@ -5,10 +5,11 @@ paths:
   - "CONTRIBUTING.md"
   - "harness/**"
   - ".claude/rules/**"
-  - "src/architectureTree.test.js"
-  - "src/repositoryTree.test.js"
+  - ".claude/hooks/**"
+  - ".claude/settings.json"
   - "src/harnessPaths.test.js"
-  - "src/test/harnessTree.js"
+  - "src/docsParity.test.js"
+  - "docs/**"
 ---
 
 # Maintaining this harness
@@ -51,6 +52,33 @@ of slowly going stale.
   `CONTRIBUTING.md` against the working tree; write paths in full enough to be found, and
   use `<placeholders>` for hypothetical ones.
 
+## Developer docs (`docs/`) — for humans, kept in step with the code
+
+`docs/ru/` (primary) and `docs/en/` are the module reference for people who work without an
+agent: what a module does, what it's connected to, how to call it, with real examples. They
+are **not** agent rules — a rule lives in `harness/` or `.claude/rules/`, and the docs never
+restate one as a rule (they may describe the same code). Keep them current like the harness:
+
+- A change to what a module does or how it's used (its exported API, its behavior, a new
+  module, a removed one) updates the page that describes it in **both** `docs/ru/` and
+  `docs/en/` in the same change. A stale docs page is a bug in that change.
+- `ru` is written first; `en` is its translation with the **same** files, the same heading
+  structure and the same code in every example — only the prose and the code comments are
+  translated (comments in the document's language). Literals in example code stay the same
+  in both (neutral values, or a string quoted from a named locale file). An untagged fenced
+  block is a diagram or a file tree — its text is translated. `src/docsParity.test.js` checks
+  the file set, the heading levels, the tagged examples' code with comments stripped and the
+  number of untagged blocks.
+- Examples are real: copied from or checked against the code (the module's JSDoc
+  `@example` is the first source), never invented keys, fields or signatures.
+- Technical and short: what it does, what it's connected to, how to use it. No narrative.
+- A path in `inline code` must exist, as in the harness (`src/harnessPaths.test.js` covers
+  `docs/` too); a new docs page gets a row in the table of contents of both `00-README.md`s.
+- Pages are named `NN-<name>.md`, numbered in reading order: `00-README.md` is the index, the
+  rest follow the order of its table of contents. A new page takes its place in that order —
+  the next free number at the end, or renumbering the pages after it (links included) when it
+  belongs in the middle.
+
 ## A new subsystem gets its own file, every time
 
 When a new feature is big enough to need its own architecture write-up (a new `services/`
@@ -59,6 +87,7 @@ module plus supporting state/components, not just one new file in an existing ar
 1. Write `.claude/rules/<name>-subsystem.md` — same depth and shape as the existing
    subsystem files (what it's for, where the pieces live, how they fit together, what
    decisions a future change needs to respect), with a `paths:` list covering all its files.
+   Its developer docs page goes to `docs/ru/` and `docs/en/` ("Developer docs" above).
 2. Add a one-line entry for it to the "Subsystem deep dives" list in
    `harness/architecture.md`.
 3. If it introduces a new top-level directory or meaningfully changes what goes where,
@@ -81,22 +110,36 @@ navigability, not cutting content — and gets its own, narrower `paths:`. Delet
 original file, and for `harness/` replace its `@` line in `CLAUDE.md` with one line per new
 file. Update the "Subsystem deep dives" list in `harness/architecture.md`.
 
-## Keeping `architecture.md` itself honest
+## Keeping the trees honest
 
 `harness/architecture.md`'s directory-layout section and "deciding where a new file goes"
-list describe **100% of `src/`**, not just the parts covered by a subsystem file. If a
-change adds a new top-level directory, a new kind of file, or changes what belongs where,
-update `architecture.md` in that same change.
+list describe **100% of `src/`**, not just the parts covered by a subsystem file. The tree
+at the top of that section lists every directory of `src/` and the entry-point files at its
+root — nothing else: no individual files, a one-line `# comment` per new directory and, if it
+brings rules of its own, a bullet under "Rules per directory". A change that adds, renames or
+removes a directory (or a new kind of file) updates `architecture.md` in that same change.
+The repo-root tree in `.claude/rules/repository-layout.md` lists the root entries the agent
+needs to know about. No test compares either tree with the disk; the `Stop` hook is the safety
+net (see "Hooks").
 
-The tree at the top of that section lists every directory of `src/` and the entry-point
-files at its root — nothing else. `src/architectureTree.test.js` compares it with the real
-`src/`, so a new, renamed or removed directory (or a new root file) fails the suite until
-the tree is updated; add a one-line `# comment` for a new directory and, if it brings rules
-of its own, a bullet under "Rules per directory". Don't add individual files inside
-directories to the tree — that's what the prose and the subsystem files are for.
+## Hooks (`.claude/hooks/`, wired in `.claude/settings.json`)
 
-The repo root works the same way: the tree at the top of `.claude/rules/repository-layout.md`
-lists every root entry git doesn't ignore, and `src/repositoryTree.test.js` checks it against
-the working tree (`git ls-files --cached --others --exclude-standard`) — a new root file or
-directory, committed or not (or a new subdirectory of one the tree expands), needs its line
-there, plus a prose entry further down that file if it has rules of its own.
+What can be enforced mechanically is a hook, not a paragraph of prose — don't restate these
+as rules elsewhere, link here. All are Node scripts without dependencies; `lib.mjs` holds the
+shared helpers.
+
+- `guard.mjs` (PreToolUse, Edit/Write): denies edits on `master`; asks before touching
+  `scripts/`, `appstore/`, `Design/`, `package.json` and `package-lock.json`.
+- `postedit.mjs` (PostToolUse, Edit/Write): runs `prettier --write` and `eslint --quiet` on a
+  touched `src/**/*.{js,svelte}` file and reports lint errors back.
+- `context.mjs` (UserPromptSubmit + Stop): past 600k tokens of context (read from the
+  transcript's last usage) it asks once for a handover note and refuses new prompts; `--force`
+  in a prompt lets one through. The limit is `LIMIT_TOKENS` in the script.
+- `stop.mjs` (Stop): a new non-test `src/` file that starts a new directory, or lands in
+  `services/`, `capacitor/`, `lib/state/` or `views/`, and has no doc page (`harness/`,
+  `.claude/rules/`, `docs/`) written after it is reported once per session — a new component in
+  an existing area is not; then the tests related to the changed `src/` files
+  (`vitest related`) must pass.
+
+A new hook is pipe-tested with a synthetic stdin payload before it is wired in; keep the
+scripts under ESLint (`NODE_FILES` in `eslint.config.js`) and Prettier.

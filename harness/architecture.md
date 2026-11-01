@@ -69,9 +69,8 @@ entry per screen — see `.claude/rules/screens.md` for what each screen actuall
 
 Every directory of `src/`, plus the entry-point files at its root — individual files inside
 the directories are deliberately not listed (they change often; the subsystem files below
-describe them where it matters). `src/architectureTree.test.js` checks this tree against the
-real `src/`: a directory added, removed or renamed without updating it fails the suite.
-A `{a,b}` group stands for sibling directories with the same role.
+describe them where it matters). A directory added, removed or renamed updates this tree in the
+same change (the `Stop` hook reminds about new modules). A `{a,b}` group stands for sibling directories with the same role.
 
 ```
 src/
@@ -129,6 +128,8 @@ src/
   at its root, the rest in `services/`/`utils/`). **A new native capability gets a new file
   here**, not raw plugin calls scattered through components — this is where platform quirks
   and error-code translation live, so the rest of the app only ever sees a clean function.
+  ESLint enforces it: `@capacitor/*` (except `@capacitor/core`) is importable only here and
+  in `main.js`, which boots the app before any wrapper is needed.
   Storage of small values/preferences goes through `utils/appStorage.js`
   (`setStorage`/`getStorage`); location permission through
   `services/locationPermission.js`; the app going to the background through
@@ -136,7 +137,7 @@ src/
   `services/share.js` (`shareFile`, the system share sheet) — reuse those, don't call the
   plugin again.
 - `components/` — grouped by feature area once there's more than one related component; a
-  folder past 4 modules gets subdirectories ("When a folder grows" below).
+  folder that stops reading as one concern gets subdirectories ("When a folder grows" below).
   A component used by more than one feature area goes at the top level, not duplicated into
   each area's folder (`Article.svelte` — the one article/marker popup, universal across
   historical and custom points — is the example); a group of such shared components gets a
@@ -181,8 +182,8 @@ src/
   (`.claude/rules/map-data-pipeline.md`).
 - `views/` — one folder per screen, wired in `Routes.js`. `views/Map/` is the one screen big
   enough to be split into supporting modules, grouped by concern into `Session/`, `Points/`
-  and `Navigation/` — see `.claude/rules/screens.md`. A screen folder past 4 modules gets
-  subdirectories ("When a folder grows" below).
+  and `Navigation/` — see `.claude/rules/screens.md`. A screen folder that grows past one
+  concern gets subdirectories ("When a folder grows" below).
 - `locales/` — `collections.js` is the language picker's code → name list. See
   `.claude/rules/i18n.md`.
 - `assets/` vs. root `public/` — `assets/` is for files imported from code; static files that
@@ -209,27 +210,28 @@ src/
 7. Needs a literal native error-code string? → the string goes in `lib/errors/errorCodes.js`
    first, always.
 
-### When a folder grows: more than 4 modules → subdirectories
+### When a folder grows: group by concern into subdirectories
 
 Applies to every screen folder (`views/<Screen>/`) and to `components/` — its top level and
-every `components/<Area>/` — at any depth, so a subdirectory that grows past the limit is
-split the same way.
+every `components/<Area>/` — at any depth.
 
-- **The limit: 4 modules per folder.** A module is a source file directly in the folder —
-  `.svelte`, `.js`, `.svelte.js`. Tests don't count: a test always sits next to its module and
-  moves with it. The 5th module is the moment to group, in that same change — not "later".
+- **When: the folder no longer reads as one concern**, not at a fixed count. The sign is
+  that its modules (source files directly in it — `.svelte`, `.js`, `.svelte.js`; tests
+  don't count, they move with their module) fall into two or more groups you can name
+  honestly. As a rough guide that happens around 5–8 modules; a folder of 6 tightly related
+  files is fine as is, and 2 files is too few to split. When the grouping is obvious, do it
+  in the change that adds the module — not "later".
 - **Group by what the files are about**, one subdirectory per concern, and name it after its
   contents: Navigation, GPS, Photos, Toasts. Never a catch-all name (helpers, utils, misc,
   common, parts) — if no honest name fits, the grouping is wrong.
   Subdirectories are PascalCase, like `views/` and `components/` themselves.
 - **What stays at the folder's root:** its entry point (the screen component, the area's main
   component) and whatever spans several groups (the screen's constants, `MapClickRouter.js`
-  for the map's modes) — within the same limit of 4.
+  for the map's modes).
 - **A move is not a rename.** Files keep their names (the `Map…` prefix included — it keeps
   them unique and greppable); no `index.js` re-export files. Imports inside one folder are
   relative (`./<Module>`), across folders they go through the @ alias (`@/<path>`).
-- **Same change, all of it:** the tree above (`src/architectureTree.test.js` fails
-  otherwise), paths in the area's `.claude/rules/` file and its `paths:` globs, the
+- **Same change, all of it:** the tree above, paths in the area's `.claude/rules/` file and its `paths:` globs, the
   `vi.mock(...)` paths in tests that mock a moved module.
 
 ## Subsystem deep dives

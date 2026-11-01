@@ -27,6 +27,17 @@ they are to a place on the map, on foot.
   has one-way edges and the engine routes along them — with a bounded cache size and
   least-recently-used eviction). Don't call `NavigationEngine` directly from
   UI code; go through the loader so the graph is loaded once and routes are reused.
+- **Known cost, not yet addressed: memory and the main thread.** The graph ships as a ~28 MB
+  JSON (`public/map/navigation-graph-optimized.json`), parsed with `response.json()` on the
+  main thread into objects keyed by string ids (`"n0"`), plus string-keyed `adjacency` and
+  spatial-grid objects built in the constructor — several times the file size on the heap,
+  and a long freeze on a weak phone. `findRoute` (A\*) also runs synchronously on the main
+  thread. The direction when this gets fixed: a binary graph built by the pipeline (typed
+  arrays — coordinates, CSR adjacency, distances, numeric node indices), loaded with
+  `arrayBuffer()`, parsing and A\* in a Web Worker. It changes the graph contract and
+  `scripts/navigationGraph/` (`.claude/rules/map-data-pipeline.md`), so it's an explicitly
+  scoped task with the human's go-ahead — not a drive-by. Measure first (a heap snapshot
+  on a low-end device via `chrome://inspect`).
 
 ## GPS and permissions
 

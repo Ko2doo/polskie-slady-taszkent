@@ -27,7 +27,6 @@
 
     const dispose = withNavbar({
       title: title || pageKey,
-      showSidePanel: false,
       leftSnippet: BackButton,
     });
 

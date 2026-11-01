@@ -38,8 +38,8 @@ A new screen: add its component to `src/Routes.js`, give it this same `$effect` 
 
 - **`/` → `Map`** (`views/Map/Map.svelte`). The map screen, by far the largest — it's split
   into supporting modules, grouped by concern into subdirectories (`harness/architecture.md` →
-  "When a folder grows"). A new module goes into the group it belongs to; a group past 4
-  modules is split further, the way `Navigation/GPS/` is.
+  "When a folder grows"). A new module goes into the group it belongs to; a group that
+  splits into concerns of its own is split further, the way `Navigation/GPS/` is.
   - The root — what spans the groups:
     - `Map.svelte` — the screen: calls the session's `start()` on mount and `dispose()` on
       unmount, renders the navigation sheet and the editor dialog.

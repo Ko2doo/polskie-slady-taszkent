@@ -17,7 +17,6 @@
   $effect(() => {
     const dispose = withNavbar({
       title: $i18n.t(`ui:navbar:technicalInfo:title`),
-      showSidePanel: false,
       leftSnippet: BackButton,
     });
 

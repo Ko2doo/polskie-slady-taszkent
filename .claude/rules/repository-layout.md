@@ -7,7 +7,7 @@ paths:
   - "appstore/**"
   - "public/**"
   - "resources/**"
-  - "Banners/**"
+  - "Design/**"
   - ".github/**"
   - ".claude/settings.json"
   - ".vscode/**"
@@ -22,18 +22,15 @@ expected to touch it.
 
 ## The tree
 
-Every git-tracked entry at the repo root; a directory is expanded only where its
-subdirectories matter, and then **all** of its subdirectories are listed (files inside are
-listed only when they are a key entry point). `src/repositoryTree.test.js` checks this
-against the working tree minus git-ignored files (`git ls-files --cached --others
---exclude-standard`), so an added, renamed or removed root entry — or a subdirectory of an
-expanded directory — fails the suite until the tree is updated, committed or not. Ignored/generated entries
-(`node_modules/`, `dist/`, `coverage/`, …) are not in git and so not in the tree — see the
+The repo root, with the entries that matter to the agent; a directory is expanded only where its
+subdirectories matter. No test compares it with the disk — list a new root entry when the agent
+needs to know about it (the `Stop` hook reminds about new `src/` modules, not root entries).
+Ignored/generated entries (`node_modules/`, `dist/`, `coverage/`, …) are not in the tree — see the
 end of this file. `🚫` marks what the agent never runs or edits without an explicit request.
 
 ```
 ./
-├── .claude/                    # settings.json (telemetry, deny list); rules/: path-scoped harness
+├── .claude/                    # settings.json (telemetry, deny/ask lists, hooks); hooks/; rules/: path-scoped harness
 ├── .github/
 │   ├── workflows/              #   ci.yml: npm ci, lint, format:check, test, build
 │   └── pull_request_template.md
@@ -45,7 +42,10 @@ end of this file. `🚫` marks what the agent never runs or edits without an exp
 │   ├── asc.py
 │   ├── metadata.py
 │   └── submit.py               #   🚫 sends the app to Apple for review
-├── Banners/                    # store marketing images, not used by the app
+├── Design/                     # 🚫 store banners, flyers, QR codes (source images) — hands off, not used by the app
+├── docs/                       # developer docs for humans (not agent rules)
+│   ├── en/                     #   English: the same files and examples as ru/
+│   └── ru/                     #   Russian: the primary version
 ├── harness/                    # always-loaded harness, imported by CLAUDE.md
 ├── ios/                        # Capacitor iOS project (Xcode)
 ├── public/                     # static, copied as-is into dist/, served from /
@@ -167,7 +167,7 @@ mention it; don't touch it.
   plus `metadata/` text files and `screenshots/`. `appstore/metadata/review_information/` is
   git-ignored (reviewer contact PII). **Never run these scripts** — `submit.py submit` sends
   the app to Apple for review; this is the same class of action as a release.
-- `Banners/` — store marketing images (per language). Not used by the app.
+- `Design/` — marketing sources: store banners (`Banners/`, per language), flyers, QR codes. Not used by the app. **Hands off:** the agent doesn't edit, rename or clean up anything inside it unless asked (the `guard.mjs` hook asks first); its contents are deliberately not mapped here.
 - `PRIVACY.md` — the public privacy policy linked from the stores. It promises the app
   collects **no** data and that location never leaves the device. Any feature that would
   change that (a network call carrying user data, analytics, crash reporting) contradicts
@@ -189,15 +189,26 @@ mention it; don't touch it.
   setting (branch protection), not something in the repo.
 - `pull_request_template.md` — the merge-gate checklist every PR shows.
 
+## Developer docs (`docs/`)
+
+- `docs/ru/` (primary) and `docs/en/` — documentation for people working without an agent:
+  what each module does, what it's connected to, how to use it, with real examples. Not agent
+  rules: those stay in `harness/` and `.claude/rules/`. Files are numbered in reading order,
+  `00-README.md` is the index. How they're kept current:
+  `.claude/rules/maintaining-this-harness.md` → "Developer docs".
+
 ## Agent / editor config
 
 - `CLAUDE.md`, `harness/` (always loaded), `.claude/rules/` (path-scoped) — this harness,
   see `.claude/rules/maintaining-this-harness.md`. `AGENTS.md` — a short pointer to them for
   agents that look for that file instead of `CLAUDE.md` (Codex, Cursor and others); the
   rules themselves are never duplicated there.
+- `.claude/hooks/` — the Claude Code hooks wired in `settings.json`, see
+  `.claude/rules/maintaining-this-harness.md` → "Hooks".
 - `.claude/settings.json` — telemetry opt-outs (`CONTRIBUTING.md` → "Claude Code privacy
-  settings") and the permission deny list backing `harness/git-workflow.md` → "What the
-  agent never does".
+  settings"), the permission deny list backing `harness/git-workflow.md` → "What the
+  agent never does", and the `ask` list that makes every package install wait for the
+  human's confirmation (`.claude/rules/dependencies.md`).
 - `.vscode/extensions.json` (tracked), `.idea/` (ignored) — editor config, leave alone.
 
 ## Generated / ignored — never edit by hand
