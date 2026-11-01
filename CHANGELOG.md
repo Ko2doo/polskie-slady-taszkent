@@ -1,5 +1,17 @@
 # Changelog
 
+## v1.2.0 — 2026-11-01
+
+### 🆕 Updates
+- Move store banners to Design/, add flyers and QR codes
+- Enforce harness rules with Claude Code hooks, drop tree-sync tests
+- Update dependencies (Capacitor 8.6, maplibre-gl 6.16, i18next 26.6, Svelte 5.57, Vite 8.3)
+- Number developer docs pages in reading order
+- Add developer docs (ru/en), enforce harness rules with checks, update README
+
+### 🐛 Fixes
+- Add developer docs (ru/en), enforce harness rules with checks, update README
+
 ## v1.2.0-rc.4 — 2026-10-18
 
 ### 🐛 Fixes
